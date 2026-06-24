@@ -32,7 +32,6 @@ export default function DualityHero() {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
       isMobile.current = canvas.offsetWidth < 768;
-      // Centre split on resize
       currentXRef.current = 0.5;
       targetXRef.current = 0.5;
     };
@@ -58,8 +57,7 @@ export default function DualityHero() {
     };
     const onTouchStart = (e: TouchEvent) => {
       if (isMobile.current) return;
-      targetXRef.current =
-        e.touches[0].clientX / canvas.offsetWidth;
+      targetXRef.current = e.touches[0].clientX / canvas.offsetWidth;
     };
     const onTouchMove = (e: TouchEvent) => {
       if (isMobile.current) return;
@@ -101,13 +99,13 @@ export default function DualityHero() {
         points.push({ x: baseX + wave, y });
       }
 
-      // Soft glow behind curve
+      // Gold-tinted soft glow along curve (from brief spec)
       ctx.beginPath();
       ctx.moveTo(points[0].x, points[0].y);
       for (let i = 1; i < points.length; i++) {
         ctx.lineTo(points[i].x, points[i].y);
       }
-      ctx.strokeStyle = "rgba(255,255,255,0.06)";
+      ctx.strokeStyle = "rgba(184,134,11,0.15)";
       ctx.lineWidth = 22;
       ctx.stroke();
 
@@ -149,7 +147,7 @@ export default function DualityHero() {
       {/* ── Rational side (light) — full bleed base ── */}
       <div
         className="absolute inset-0 flex flex-col justify-center"
-        style={{ backgroundColor: "#f5f4f0", color: "#0a0a0a" }}
+        style={{ backgroundColor: "#f5f1eb", color: "#0a0a0a" }}
       >
         <div className="pl-[8vw] pr-[52%] flex flex-col gap-6">
           {/* COPY: rational label */}
@@ -178,14 +176,14 @@ export default function DualityHero() {
             className="max-w-sm leading-relaxed"
             style={{ fontFamily: "var(--font-sans)", fontSize: "1rem", color: "#0a0a0a", opacity: 0.7 }}
           >
-            A decade at the executive table. From founding my own brand to
-            Head of Product Design at Malaysia&apos;s first fintech unicorn,
-            TNG eWallet.
+            A decade at the executive table. From co-founding my own brand
+            to Head of Product Design and UX Research at TNG eWallet,
+            Malaysia&apos;s first fintech unicorn.
           </p>
-          {/* COPY: proof points */}
+          {/* COPY: proof points — update numbers if needed */}
           <div className="flex gap-8 pt-2">
             {[
-              ["10+", "years leading"],
+              ["15+", "years experience"],
               ["0→1", "products built"],
               ["22", "team peak"],
             ].map(([num, label]) => (
@@ -222,13 +220,13 @@ export default function DualityHero() {
       <div
         ref={intuitiveRef}
         className="absolute inset-0 flex flex-col justify-center"
-        style={{ backgroundColor: "#0a0a0a", color: "#f5f4f0", willChange: "clip-path" }}
+        style={{ backgroundColor: "#0a0a0a", color: "#f5f1eb", willChange: "clip-path" }}
       >
         <div className="pr-[8vw] pl-[52%] flex flex-col gap-6">
           {/* COPY: intuitive label */}
           <span
             className="text-xs tracking-[0.3em] uppercase"
-            style={{ fontFamily: "var(--font-sans)", color: "#f5f4f0", opacity: 0.4 }}
+            style={{ fontFamily: "var(--font-sans)", color: "#f5f1eb", opacity: 0.4 }}
           >
             Intuitive
           </span>
@@ -239,7 +237,7 @@ export default function DualityHero() {
               fontFamily: "var(--font-serif)",
               fontSize: "clamp(2.2rem, 4.5vw, 5rem)",
               fontWeight: 900,
-              color: "#f5f4f0",
+              color: "#f5f1eb",
             }}
           >
             Design shaped
@@ -249,7 +247,7 @@ export default function DualityHero() {
           {/* COPY: intuitive body */}
           <p
             className="max-w-sm leading-relaxed"
-            style={{ fontFamily: "var(--font-sans)", fontSize: "1rem", color: "#f5f4f0", opacity: 0.7 }}
+            style={{ fontFamily: "var(--font-sans)", fontSize: "1rem", color: "#f5f1eb", opacity: 0.7 }}
           >
             The best products are born from moments you can&apos;t put in a
             brief. A hunch. A conversation. A thing someone didn&apos;t say.
@@ -261,7 +259,7 @@ export default function DualityHero() {
               fontFamily: "var(--font-serif)",
               fontSize: "1.1rem",
               fontStyle: "italic",
-              color: "#c9a96e",
+              color: "#c9a84c",
             }}
           >
             &ldquo;Clarity in design. Grounded in purpose.&rdquo;
@@ -277,16 +275,14 @@ export default function DualityHero() {
       />
 
       {/* ── Anchor — name + title fixed at bottom centre ── */}
-      <div
-        className="absolute bottom-10 left-0 right-0 flex flex-col items-center gap-1 z-20 pointer-events-none"
-      >
+      <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center gap-1 z-20 pointer-events-none">
         {/* COPY: name + title */}
         <div
           style={{
             fontFamily: "var(--font-serif)",
             fontSize: "clamp(1rem, 1.8vw, 1.5rem)",
             fontWeight: 700,
-            color: "#f5f4f0",
+            color: "#f5f1eb",
             mixBlendMode: "difference",
           }}
         >
@@ -298,7 +294,7 @@ export default function DualityHero() {
             fontSize: "0.7rem",
             letterSpacing: "0.25em",
             textTransform: "uppercase",
-            color: "#f5f4f0",
+            color: "#f5f1eb",
             mixBlendMode: "difference",
           }}
         >
@@ -306,7 +302,7 @@ export default function DualityHero() {
         </div>
       </div>
 
-      {/* ── Drag hint ── */}
+      {/* ── Drag hint (desktop only) ── */}
       <div
         className="absolute bottom-10 right-8 z-20 pointer-events-none hidden md:block"
         style={{
@@ -314,7 +310,7 @@ export default function DualityHero() {
           fontSize: "0.65rem",
           letterSpacing: "0.2em",
           textTransform: "uppercase",
-          color: "#f5f4f0",
+          color: "#f5f1eb",
           mixBlendMode: "difference",
           opacity: 0.5,
         }}

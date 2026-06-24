@@ -30,7 +30,7 @@ export default function TestimonialsSection() {
   return (
     <section
       className="py-32 px-8 md:px-16 lg:px-24"
-      style={{ backgroundColor: "#0a0a0a", color: "#f5f4f0" }}
+      style={{ backgroundColor: "#0a0a0a", color: "#f5f1eb" }}
     >
       <div className="max-w-6xl mx-auto">
         <div className="mb-16 flex flex-col gap-4">

@@ -3,7 +3,7 @@ export default function ContactSection() {
     <section
       id="contact"
       className="py-32 px-8 md:px-16 lg:px-24"
-      style={{ backgroundColor: "#f5f4f0", color: "#0a0a0a" }}
+      style={{ backgroundColor: "#f5f1eb", color: "#0a0a0a" }}
     >
       <div className="max-w-6xl mx-auto">
         <div className="mb-16 flex flex-col gap-4">
@@ -33,7 +33,7 @@ export default function ContactSection() {
           <div className="p-12 flex flex-col gap-6" style={{ borderRight: "1px solid #0a0a0a" }}>
             <div
               className="text-xs tracking-[0.2em] uppercase"
-              style={{ fontFamily: "var(--font-sans)", color: "#c9a96e" }}
+              style={{ fontFamily: "var(--font-sans)", color: "#b8860b" }}
             >
               Roles &amp; Consulting
             </div>
@@ -58,12 +58,12 @@ export default function ContactSection() {
             </p>
             {/* COPY: update email address */}
             <a
-              href="mailto:hello@tiffany-c.com"
+              href="mailto:designmatters.tiff@gmail.com"
               className="inline-block mt-2 px-8 py-4 text-sm tracking-wider uppercase transition-opacity hover:opacity-70"
               style={{
                 fontFamily: "var(--font-sans)",
                 backgroundColor: "#0a0a0a",
-                color: "#f5f4f0",
+                color: "#f5f1eb",
               }}
             >
               Get in touch
@@ -74,7 +74,7 @@ export default function ContactSection() {
           <div className="p-12 flex flex-col gap-6">
             <div
               className="text-xs tracking-[0.2em] uppercase"
-              style={{ fontFamily: "var(--font-sans)", color: "#c9a96e" }}
+              style={{ fontFamily: "var(--font-sans)", color: "#b8860b" }}
             >
               Coaching &amp; Speaking
             </div>
@@ -99,7 +99,7 @@ export default function ContactSection() {
             </p>
             {/* COPY: update email address */}
             <a
-              href="mailto:hello@tiffany-c.com"
+              href="mailto:designmatters.tiff@gmail.com"
               className="inline-block mt-2 px-8 py-4 text-sm tracking-wider uppercase border transition-opacity hover:opacity-60"
               style={{
                 fontFamily: "var(--font-sans)",
@@ -126,7 +126,7 @@ export default function ContactSection() {
           </a>
           {/* COPY: update email address */}
           <a
-            href="mailto:hello@tiffany-c.com"
+            href="mailto:designmatters.tiff@gmail.com"
             className="text-sm tracking-wider uppercase transition-opacity hover:opacity-50"
             style={{ fontFamily: "var(--font-sans)", color: "#0a0a0a" }}
           >

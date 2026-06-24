@@ -3,7 +3,7 @@ export default function CoachingSection() {
     <section
       id="coaching"
       className="py-32 px-8 md:px-16 lg:px-24"
-      style={{ backgroundColor: "#0a0a0a", color: "#f5f4f0" }}
+      style={{ backgroundColor: "#0a0a0a", color: "#f5f1eb" }}
     >
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
         {/* Left — header */}
@@ -14,6 +14,7 @@ export default function CoachingSection() {
           >
             Coaching &amp; Mentorship
           </span>
+          {/* COPY: coaching headline */}
           <h2
             style={{
               fontFamily: "var(--font-serif)",
@@ -26,7 +27,7 @@ export default function CoachingSection() {
             <br />
             leadership.
           </h2>
-          {/* COPY: coaching intro — update with Tiffany's own words */}
+          {/* COPY: coaching intro */}
           <p
             className="leading-relaxed max-w-sm"
             style={{ fontFamily: "var(--font-sans)", fontSize: "1rem", opacity: 0.7 }}
@@ -35,18 +36,34 @@ export default function CoachingSection() {
             responsibility, more influence, more clarity about where you&apos;re
             headed — let&apos;s talk.
           </p>
-          <a
-            href="#contact"
-            className="inline-block mt-4 px-8 py-4 text-sm tracking-wider uppercase transition-opacity hover:opacity-70"
-            style={{
-              fontFamily: "var(--font-sans)",
-              backgroundColor: "#c9a96e",
-              color: "#0a0a0a",
-            }}
-          >
-            {/* COPY: CTA text */}
-            Get in touch
-          </a>
+          <div className="flex flex-col gap-3 mt-4">
+            <a
+              href="#contact"
+              className="inline-block px-8 py-4 text-sm tracking-wider uppercase transition-opacity hover:opacity-70"
+              style={{
+                fontFamily: "var(--font-sans)",
+                backgroundColor: "#b8860b",
+                color: "#0a0a0a",
+              }}
+            >
+              {/* COPY: primary CTA */}
+              Get in touch
+            </a>
+            {/* ADPList mentor profile */}
+            <a
+              href="https://adplist.org/mentors/tiffany-c"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-8 py-4 text-sm tracking-wider uppercase border transition-opacity hover:opacity-70"
+              style={{
+                fontFamily: "var(--font-sans)",
+                borderColor: "rgba(245,241,235,0.3)",
+                color: "#f5f1eb",
+              }}
+            >
+              Book on ADPList
+            </a>
+          </div>
         </div>
 
         {/* Right — details */}
@@ -55,7 +72,7 @@ export default function CoachingSection() {
           <div className="flex flex-col gap-3">
             <div
               className="text-xs tracking-[0.2em] uppercase"
-              style={{ fontFamily: "var(--font-sans)", color: "#c9a96e" }}
+              style={{ fontFamily: "var(--font-sans)", color: "#b8860b" }}
             >
               Who it&apos;s for
             </div>
@@ -71,11 +88,11 @@ export default function CoachingSection() {
           <div className="flex flex-col gap-3">
             <div
               className="text-xs tracking-[0.2em] uppercase"
-              style={{ fontFamily: "var(--font-sans)", color: "#c9a96e" }}
+              style={{ fontFamily: "var(--font-sans)", color: "#b8860b" }}
             >
               What it involves
             </div>
-            {/* COPY: what coaching involves — update list items */}
+            {/* COPY: update list items as needed */}
             <ul
               className="flex flex-col gap-2"
               style={{ fontFamily: "var(--font-sans)", fontSize: "0.95rem", lineHeight: 1.8, opacity: 0.8 }}
@@ -85,11 +102,10 @@ export default function CoachingSection() {
                 "Portfolio and narrative review",
                 "Navigating the politics of leadership",
                 "Building credibility in rooms where design isn't yet valued",
-                "Career path clarity",
+                "Career path clarity and next-role strategy",
               ].map((item) => (
                 <li key={item} className="flex gap-3">
-                  <span style={{ color: "#c9a96e", flexShrink: 0 }}>—</span>
-                  {/* COPY: coaching item */}
+                  <span style={{ color: "#b8860b", flexShrink: 0 }}>—</span>
                   {item}
                 </li>
               ))}

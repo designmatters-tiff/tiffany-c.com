@@ -29,7 +29,7 @@ export default function RootLayout({
     <html lang="en" className={`${playfair.variable} ${inter.variable} h-full`}>
       <body
         className="min-h-full flex flex-col"
-        style={{ backgroundColor: "#f5f4f0", color: "#0a0a0a" }}
+        style={{ backgroundColor: "#f5f1eb", color: "#0a0a0a" }}
       >
         <Nav />
         {children}

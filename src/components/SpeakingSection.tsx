@@ -1,24 +1,53 @@
-const topics = [
+const pastTalks = [
   {
-    title: "Design Leadership",
-    // COPY: topic description
-    desc: "What it actually takes to lead a design team — beyond craft. How to build influence, manage up, and create the conditions for great work.",
+    year: "2026",
+    event: "UX Rotterdam",
+    location: "NL",
+    role: "Speaker",
+    // COPY: talk title
+    title: "The Human Cost of Human-Centred Design",
   },
   {
-    title: "Building Design Culture",
-    // COPY: topic description
-    desc: "How to build a design function that earns a seat at the table. From hiring and onboarding to DesignOps and measuring impact.",
+    year: "2025",
+    event: "UX Camp Melbourne",
+    location: "AU",
+    role: "Speaker",
+    // COPY: talk title
+    title: "404: System Burnout",
   },
   {
-    title: "Purpose-Driven Design",
-    // COPY: topic description
-    desc: "Design that goes beyond usability. How to bring genuine purpose into product work without losing commercial rigour.",
+    year: "2025",
+    event: "Ladies that UX Taipei",
+    location: "TW",
+    role: "Panelist",
+    // COPY: talk title
+    title: "Driving Organisational Change and Creating Meaningful Impact",
   },
   {
-    title: "Financial Empowerment Through Design",
-    // COPY: topic description
-    desc: "How design can improve financial literacy and resilience — drawing on fintech experience at consumer scale.",
+    year: "2025",
+    event: "FUSECON",
+    location: "MY",
+    role: "Panelist",
+    // COPY: talk title
+    title: "Mental Health: From Awareness to Action",
   },
+  {
+    year: "2023",
+    event: "Design Leadership KL",
+    location: "MY",
+    role: "Speaker",
+    // COPY: talk title
+    title: "Synergy for Sustainable Growth: Empowering UX Teams",
+  },
+];
+
+const futureTopics = [
+  "Design leadership",
+  "Building design culture",
+  "Purpose-driven design",
+  "AI-native design practice",
+  "Financial empowerment through design",
+  "Designer wellbeing and burnout",
 ];
 
 export default function SpeakingSection() {
@@ -26,7 +55,7 @@ export default function SpeakingSection() {
     <section
       id="speaking"
       className="py-32 px-8 md:px-16 lg:px-24"
-      style={{ backgroundColor: "#f5f4f0", color: "#0a0a0a" }}
+      style={{ backgroundColor: "#f5f1eb", color: "#0a0a0a" }}
     >
       <div className="max-w-6xl mx-auto">
         <div className="mb-16 flex flex-col gap-4">
@@ -36,7 +65,7 @@ export default function SpeakingSection() {
           >
             Speaking
           </span>
-          {/* COPY: speaking section headline */}
+          {/* COPY: speaking headline */}
           <h2
             style={{
               fontFamily: "var(--font-serif)",
@@ -49,63 +78,114 @@ export default function SpeakingSection() {
             <br />
             the conversation forward.
           </h2>
+          {/* COPY: speaking intro */}
           <p
             className="max-w-lg leading-relaxed mt-2"
             style={{ fontFamily: "var(--font-sans)", fontSize: "1rem", opacity: 0.7 }}
           >
-            {/* COPY: speaking intro */}
             Available for conferences, company events, and panel discussions.
-            Talks drawn from 10+ years at the intersection of design, business, and
-            people.
+            Talks drawn from 15+ years at the intersection of design, business, and people.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-px" style={{ border: "1px solid #0a0a0a" }}>
-          {topics.map((topic) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+          {/* Past talks */}
+          <div>
             <div
-              key={topic.title}
-              className="p-10 flex flex-col gap-4"
-              style={{ borderRight: "1px solid #0a0a0a", borderBottom: "1px solid #0a0a0a" }}
+              className="text-xs tracking-[0.2em] uppercase mb-8"
+              style={{ fontFamily: "var(--font-sans)", color: "#b8860b" }}
             >
-              <h3
-                style={{
-                  fontFamily: "var(--font-serif)",
-                  fontSize: "1.25rem",
-                  fontWeight: 700,
-                  color: "#0a0a0a",
-                }}
-              >
-                {/* COPY: topic title */}
-                {topic.title}
-              </h3>
-              <p
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "0.9rem",
-                  lineHeight: 1.75,
-                  opacity: 0.7,
-                }}
-              >
-                {/* COPY: topic description */}
-                {topic.desc}
-              </p>
+              Past talks
             </div>
-          ))}
-        </div>
+            <div className="flex flex-col" style={{ borderTop: "1px solid #0a0a0a" }}>
+              {pastTalks.map((talk) => (
+                <div
+                  key={talk.title}
+                  className="py-6 flex gap-6 items-start"
+                  style={{ borderBottom: "1px solid rgba(10,10,10,0.12)" }}
+                >
+                  <div
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "0.75rem",
+                      color: "#0a0a0a",
+                      opacity: 0.4,
+                      minWidth: "3rem",
+                      paddingTop: "2px",
+                    }}
+                  >
+                    {talk.year}
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    {/* COPY: talk title */}
+                    <div
+                      style={{
+                        fontFamily: "var(--font-serif)",
+                        fontSize: "1rem",
+                        fontWeight: 700,
+                        color: "#0a0a0a",
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      {talk.title}
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "0.75rem",
+                        opacity: 0.5,
+                      }}
+                    >
+                      {talk.role} · {talk.event} · {talk.location}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-        <div className="mt-12">
-          <a
-            href="#contact"
-            className="inline-block px-8 py-4 text-sm tracking-wider uppercase border transition-opacity hover:opacity-60"
-            style={{
-              fontFamily: "var(--font-sans)",
-              borderColor: "#0a0a0a",
-              color: "#0a0a0a",
-            }}
-          >
-            {/* COPY: CTA */}
-            Invite me to speak
-          </a>
+          {/* Available topics + CTA */}
+          <div className="flex flex-col gap-10">
+            <div>
+              <div
+                className="text-xs tracking-[0.2em] uppercase mb-6"
+                style={{ fontFamily: "var(--font-sans)", color: "#b8860b" }}
+              >
+                Available topics
+              </div>
+              {/* COPY: update topic list */}
+              <ul className="flex flex-col gap-2">
+                {futureTopics.map((topic) => (
+                  <li key={topic} className="flex gap-3 items-start">
+                    <span style={{ color: "#b8860b", flexShrink: 0 }}>—</span>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "0.95rem",
+                        lineHeight: 1.7,
+                        opacity: 0.75,
+                      }}
+                    >
+                      {topic}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <a
+              href="#contact"
+              className="inline-block px-8 py-4 text-sm tracking-wider uppercase border transition-opacity hover:opacity-60 self-start"
+              style={{
+                fontFamily: "var(--font-sans)",
+                borderColor: "#0a0a0a",
+                color: "#0a0a0a",
+              }}
+            >
+              {/* COPY: CTA */}
+              Invite me to speak
+            </a>
+          </div>
         </div>
       </div>
     </section>

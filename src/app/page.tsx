@@ -2,6 +2,7 @@ import DualityHero from "@/components/DualityHero";
 import WorkSection from "@/components/WorkSection";
 import CoachingSection from "@/components/CoachingSection";
 import SpeakingSection from "@/components/SpeakingSection";
+import AwardsSection from "@/components/AwardsSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import ContactSection from "@/components/ContactSection";
 
@@ -12,6 +13,7 @@ export default function Home() {
       <WorkSection />
       <CoachingSection />
       <SpeakingSection />
+      <AwardsSection />
       <TestimonialsSection />
       <ContactSection />
       <footer
@@ -25,8 +27,7 @@ export default function Home() {
           opacity: 0.6,
         }}
       >
-        {/* COPY: update year / name if needed */}
-        <span>© 2025 Tiffany C.</span>
+        <span>© 2026 Tiffany C.</span>
         <span>Melbourne, Australia</span>
       </footer>
     </main>
