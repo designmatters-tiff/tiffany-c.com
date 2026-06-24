@@ -370,7 +370,7 @@ const SECTIONS = [
     key: "work",    label: "Work",             page: "work" as Page,
     accent: "#8A6E2E",
     tagline: "Design Strategy & Leadership",
-    context: "Cotton On Group · TNG eWallet · Plus Xnergy",
+    context: "Fintech • eCommerce • Utility SaaS",
     items: ["AI + UX DesignOps", "Business Acumen", "Product & UX Methods", "People & Process"],
   },
   {
