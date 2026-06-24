@@ -936,28 +936,35 @@ function PageBottomNav({
 
   return (
     <>
-      {/* Desktop */}
-      <div className="hidden md:flex items-stretch h-16 overflow-x-auto scrollbar-hide"
+      {/* Desktop — same fluid flex-grow expand/collapse as the homepage nav */}
+      <div className="hidden md:flex items-stretch h-16 overflow-hidden"
         style={{ background: NAV_GRADIENT }}>
         <button
-          className="flex items-center gap-3 flex-shrink-0 px-6"
+          className="flex items-center gap-3 overflow-hidden"
           onMouseEnter={() => setHoveredNav("about")}
           onMouseLeave={() => setHoveredNav(null)}
           onClick={() => onNavigate("home")}
-          style={{ opacity: hoveredNav === "about" ? 1 : 0.52, transition: "opacity 0.25s", borderRight: "1px solid rgba(255,255,255,0.18)" }}>
+          style={{
+            flex: hoveredNav === "about" ? "3 1 0%" : "1 1 0%",
+            minWidth: 0, padding: "0 20px",
+            opacity: hoveredNav === "about" ? 1 : 0.52,
+            transition: "flex 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease",
+            borderRight: "1px solid rgba(255,255,255,0.18)",
+          }}>
           <HamburgerIcon />
-          <span className="font-['Museo',sans-serif] font-light text-[0.85rem] text-white whitespace-nowrap">Tiffany C.</span>
+          <span className="font-['Museo',sans-serif] font-light text-[0.85rem] text-white whitespace-nowrap overflow-hidden text-ellipsis">Tiffany C.</span>
         </button>
-        <div className="flex-1" />
         {NAV_ITEMS.map(item => (
           <button key={item.key}
             onMouseEnter={() => setHoveredNav(item.key)}
             onMouseLeave={() => setHoveredNav(null)}
             onClick={() => item.page && onNavigate(item.page)}
-            className="font-['Museo',sans-serif] font-light text-[0.85rem] whitespace-nowrap flex-shrink-0 px-6 text-white"
+            className="font-['Museo',sans-serif] font-light text-[0.85rem] whitespace-nowrap overflow-hidden text-ellipsis text-white"
             style={{
+              flex: activePage === item.page || hoveredNav === item.key ? "3 1 0%" : "1 1 0%",
+              minWidth: 0, padding: "0 20px",
               opacity: activePage === item.page || hoveredNav === item.key ? 1 : 0.52,
-              transition: "opacity 0.25s",
+              transition: "flex 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease",
               borderLeft: "1px solid rgba(255,255,255,0.18)",
             }}>
             {item.label}
@@ -1101,6 +1108,85 @@ const EVENT_ROW_STYLE: React.CSSProperties = {
   transition: "opacity 0.2s ease",
 };
 
+// ─── Speaking event accordion row ──────────────────────────────────
+// Title/topic always sit on top as plain text (never overlaid on the
+// photo). Expanding reveals the image + watch link below, in place —
+// no navigation away from the page. Rows with neither an image nor a
+// link render as a static (non-expandable) row.
+function SpeakingEventRow({
+  ev,
+  isFirst,
+  isDark,
+  fg,
+  sub,
+  brd,
+}: {
+  ev: typeof SPEAKING_EVENTS[number];
+  isFirst: boolean;
+  isDark: boolean;
+  fg: string;
+  sub: string;
+  brd: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const expandable = Boolean(ev.img || ev.link);
+
+  return (
+    <div style={{ borderTop: isFirst ? "none" : `1px solid ${brd}` }}>
+      <button
+        onClick={() => expandable && setOpen(v => !v)}
+        className="relative w-full flex items-start gap-3 text-left px-6 md:px-20 py-5 md:py-7 transition-colors duration-200"
+        style={{ cursor: expandable ? "pointer" : "default", background: "transparent" }}
+        onMouseEnter={e => expandable && (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)")}
+        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+      >
+        {expandable && (
+          <Plus
+            size={16}
+            strokeWidth={1}
+            style={{
+              color: GOLD,
+              flexShrink: 0,
+              marginTop: 6,
+              transform: open ? "rotate(45deg)" : "rotate(0deg)",
+              transition: "transform 0.3s ease",
+            }}
+          />
+        )}
+        <div className="flex-1 flex flex-col gap-1">
+          <span className="font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>{ev.year}</span>
+          <p className="font-['Avenir',sans-serif] font-medium" style={{ fontSize: "clamp(0.95rem, 1.6vw, 1.4rem)", color: fg }}>
+            {ev.role} @ {ev.event}, {ev.location}
+          </p>
+          <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub }}>{ev.topic}</p>
+        </div>
+      </button>
+
+      {expandable && (
+        <div className="overflow-hidden" style={{ maxHeight: open ? 640 : 0, opacity: open ? 1 : 0, transition: "max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease" }}>
+          <div className="px-6 md:px-20 pb-8">
+            {ev.img && (
+              <div className="relative w-full overflow-hidden" style={{ height: "clamp(220px, 40vw, 480px)", background: ev.dark ? "#030303" : "#f8f7f5" }}>
+                <img src={ev.img} alt={`${ev.event} — ${ev.topic}`}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  style={{ objectPosition: ev.dark ? "center 30%" : "center" }} />
+              </div>
+            )}
+            {ev.link && (
+              <a href={ev.link} target="_blank" rel="noopener noreferrer"
+                className="link-underline inline-flex items-center gap-2 mt-5 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
+                style={{ color: GOLD }}>
+                Watch on YouTube
+                <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AwardsSpeakingPage({
   onNavigate,
   onEventClick,
@@ -1139,8 +1225,9 @@ function AwardsSpeakingPage({
       <div className="group" style={EVENT_ROW_STYLE} onClick={() => onEventClick("women-digital")}>
         <div className="relative w-full overflow-hidden" style={{ height: "clamp(300px, 60vw, 700px)" }}>
           <img src={awardsWomenDigital} alt="Tiffany Chew at Women in Digital Awards 2025"
-            className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]" />
-          <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.2)" }} />
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+            style={{ objectPosition: "center 12%" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.25) 40%, rgba(0,0,0,0.15) 70%)" }} />
           <div className="absolute bottom-6 md:bottom-8 left-6 md:left-20">
             <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] text-white/70 mb-1">2025 · National Awards · Australia</p>
             <h2 className="font-['Museo',sans-serif] font-light text-white" style={{ fontSize: "clamp(1.25rem, 2.5vw, 2.25rem)" }}>
@@ -1162,43 +1249,7 @@ function AwardsSpeakingPage({
           <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em]" style={{ color: GOLD }}>Speaking</p>
         </div>
         {SPEAKING_EVENTS.map((ev, i) => (
-          <div key={ev.key} className="group" style={EVENT_ROW_STYLE}
-            onClick={() => onEventClick(ev.key)}>
-            {ev.img ? (
-              <div className="relative w-full overflow-hidden" style={{ background: ev.dark ? "#030303" : "#f8f7f5" }}>
-                <div className="relative" style={{ height: "clamp(260px, 50vw, 620px)" }}>
-                  <img src={ev.img} alt={`${ev.event} — ${ev.topic}`}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                    style={{ objectPosition: ev.dark ? "center 30%" : "center" }} />
-                  <div className="absolute inset-0" style={{ background: ev.dark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.15)" }} />
-                  <div className="absolute bottom-6 left-6 md:left-20">
-                    <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] text-white/70 mb-1">{ev.caption}</p>
-                    <h3 className="font-['Museo',sans-serif] font-light text-white" style={{ fontSize: "clamp(1.1rem, 2.2vw, 2rem)" }}>
-                      {ev.role} @ {ev.event}
-                    </h3>
-                    <p className="font-['Avenir',sans-serif] font-light text-white/75 text-sm mt-1" style={{ maxWidth: 480 }}>{ev.topic}</p>
-                  </div>
-                  <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <span className="font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-widest text-white/90 bg-black/30 rounded-full px-3 py-1.5">
-                      View →
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="relative flex flex-col gap-1 px-6 md:px-20 py-5 md:py-7 transition-colors duration-200"
-                style={{ borderTop: i === 0 ? "none" : `1px solid ${brd}`, background: "transparent" }}
-                onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)")}
-                onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
-                <span className="font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>{ev.year}</span>
-                <p className="font-['Avenir',sans-serif] font-medium group-hover:underline" style={{ fontSize: "clamp(0.95rem, 1.6vw, 1.4rem)", color: fg }}>
-                  {ev.role} @ {ev.event}, {ev.location}
-                </p>
-                <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub }}>{ev.topic}</p>
-                <span className="absolute top-5 md:top-7 right-6 md:right-20 font-['Avenir',sans-serif] font-light text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ color: GOLD }}>→</span>
-              </div>
-            )}
-          </div>
+          <SpeakingEventRow key={ev.key} ev={ev} isFirst={i === 0} isDark={isDark} fg={fg} sub={sub} brd={brd} />
         ))}
       </div>
 
