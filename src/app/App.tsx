@@ -652,7 +652,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 </motion.p>
 
                 <motion.h2 className="font-['Museo',sans-serif] font-light"
-                  style={{ fontSize: "clamp(1.9rem, 5vw, 4.5rem)", lineHeight: 1.05, maxWidth: "16ch", color: isDark ? "white" : INK }}
+                  style={{ fontSize: "48px", lineHeight: 1.05, maxWidth: "16ch", color: GOLD }}
                   initial={false}
                   animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }}
                   transition={{ duration: 0.55, delay: 0.06 }}>
