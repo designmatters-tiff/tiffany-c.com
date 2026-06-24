@@ -679,7 +679,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       <nav className="absolute z-30 hidden md:flex items-stretch h-16 overflow-hidden"
         style={{
           bottom: "5%", left: "5%", right: "5%",
-          borderRadius: 40,
+          borderRadius: 28,
           background: NAV_GRADIENT,
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}>
@@ -726,7 +726,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       <nav className="absolute z-30 md:hidden flex items-center h-14 px-5 overflow-hidden"
         style={{
           bottom: "5%", left: "5%", right: "5%",
-          borderRadius: 40,
+          borderRadius: 28,
           background: NAV_GRADIENT,
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}>
@@ -970,7 +970,13 @@ function WorkPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       {/* Top decorative image */}
       <div className="relative w-full" style={{ height: "22vh", maxHeight: 280 }}>
         <img src={workVectorImg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute top-[12%] left-[3%] z-10"><LogoMark size={27} /></div>
+        <button
+          onClick={() => onNavigate("home")}
+          aria-label="Back to homepage"
+          className="absolute top-6 left-6 z-10 cursor-pointer"
+        >
+          <LogoMark size={14} />
+        </button>
       </div>
 
       {/* Content — single column on mobile, two columns on desktop */}
@@ -1036,7 +1042,7 @@ function WorkPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       </div>
 
       <div className="sticky z-30 overflow-hidden"
-        style={{ bottom: "3%", margin: "0 5%", borderRadius: 40, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+        style={{ bottom: "3%", margin: "0 5%", borderRadius: 28, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
         <PageBottomNav activePage="work" onNavigate={onNavigate} />
       </div>
     </div>
@@ -1077,7 +1083,13 @@ function AwardsSpeakingPage({
       {/* Top decorative image */}
       <div className="relative w-full" style={{ height: "22vh", maxHeight: 280 }}>
         <img src={workVectorImg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute top-[12%] left-[3%] z-10"><LogoMark size={27} /></div>
+        <button
+          onClick={() => onNavigate("home")}
+          aria-label="Back to homepage"
+          className="absolute top-6 left-6 z-10 cursor-pointer"
+        >
+          <LogoMark size={14} />
+        </button>
       </div>
 
       {/* Page heading */}
@@ -1158,7 +1170,7 @@ function AwardsSpeakingPage({
 
       <div style={{ height: "calc(64px + 8vh)" }} />
       <div className="sticky z-30 overflow-hidden"
-        style={{ bottom: "3%", margin: "0 5%", borderRadius: 40, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+        style={{ bottom: "3%", margin: "0 5%", borderRadius: 28, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
         <PageBottomNav activePage="awards" onNavigate={onNavigate} />
       </div>
     </div>
@@ -1250,11 +1262,18 @@ function SpeakingDetailPage({
     <div className="relative w-full" style={{ minHeight: "100vh", background: bg }}>
 
       {/* Back bar */}
-      <div className="flex items-center gap-4 px-6 md:px-20 pt-8 pb-6"
+      <div className="relative flex items-center gap-4 px-6 md:px-20 pt-8 pb-6"
         style={{ borderBottom: `1px solid ${ev.dark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"}` }}>
         <button
+          onClick={() => onNavigate("home")}
+          aria-label="Back to homepage"
+          className="absolute top-6 left-6 z-10 cursor-pointer"
+        >
+          <LogoMark size={14} color={(ev.dark || globalDark) ? "white" : GOLD} />
+        </button>
+        <button
           onClick={onBack}
-          className="link-underline flex items-center gap-2 font-['Raleway',sans-serif] font-light text-sm uppercase tracking-widest"
+          className="link-underline flex items-center gap-2 font-['Raleway',sans-serif] font-light text-sm uppercase tracking-widest ml-auto"
           style={{ color: GOLD }}>
           ← Awards &amp; Speaking
         </button>
@@ -1345,7 +1364,7 @@ function SpeakingDetailPage({
 
       <div style={{ height: "calc(64px + 8vh)" }} />
       <div className="sticky z-30 overflow-hidden"
-        style={{ bottom: "3%", margin: "0 5%", borderRadius: 40, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+        style={{ bottom: "3%", margin: "0 5%", borderRadius: 28, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
         <PageBottomNav activePage="awards" onNavigate={onNavigate} />
       </div>
     </div>
