@@ -9,6 +9,7 @@ import awardsWomenDigital from "@/imports/AwardsSpeaking/ef53a4ecb58e306876fea64
 import awardsFinalistCard from "@/imports/AwardsSpeaking/b794f860238911a59491cf1b672e2a3713a2e7ba.png";
 import awardsFuseCon from "@/imports/AwardsSpeaking/46e693ed4c467192678144ec5d057e938998f54c.png";
 import awardsTaipei from "@/imports/AwardsSpeaking/0a742a94d7dbd9ac0981d738a8d8a3dd3c69297d.png";
+import awardsRotterdam from "@/imports/AwardsSpeaking/ux-rotterdam.jpeg";
 
 // ─── Logo paths ───────────────────────────────────────────────────
 const T_PATH =
@@ -1077,7 +1078,7 @@ function WorkPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 // ─── Awards & Speaking page ────────────────────────────────────────
 
 const SPEAKING_EVENTS = [
-  { key: "rotterdam", year: "2026", role: "Speaker",  event: "UX Rotterdam",                  location: "Rotterdam, NL", topic: "The Human Cost of Human-Centred-Design",                           link: null,                                               img: null,          caption: null,             dark: false },
+  { key: "rotterdam", year: "2026", role: "Speaker",  event: "UX Rotterdam",                  location: "Rotterdam, NL", topic: "The Human Cost of Human-Centred-Design",                           link: null,                                               img: awardsRotterdam, caption: "2026 @ Rotterdam, NL", dark: true },
   { key: "ux-camp",   year: "2025", role: "Speaker",  event: "UX Camp Melbourne",             location: "Melbourne, AU", topic: "404: System Burnout — An error message to my UX career",            link: "https://youtu.be/hJIJB3di6T4?si=a1XcoU3eV6f0bVvE",  img: null,          caption: null,             dark: false },
   { key: "taipei",    year: "2025", role: "Panelist", event: "Ladies that UX Taipei",         location: "Taipei, TW",    topic: "Driving Organisational Change and Creating Meaningful Impact",     link: null,                                               img: awardsTaipei,  caption: "2025 @ Taipei, TW",  dark: false },
   { key: "fusecon",   year: "2025", role: "Panelist", event: "FUSECON 2025",                  location: "Malaysia",      topic: "Mental Health: From Awareness to Action",                          link: null,                                               img: awardsFuseCon, caption: "FUSECON 2025, MY",    dark: true  },
@@ -1226,10 +1227,10 @@ const SPEAKING_DETAIL: Record<string, {
     dark: false, finalistLink: "https://womenindigital.org/women-in-digital-awards/women-in-digital-awards-2025-finalists/",
   },
   "rotterdam": {
-    pageLabel: "Speaker @ UX Rotterdam, NL",
+    pageLabel: "2026 @ Rotterdam, NL",
     year: "2026", role: "Speaker", event: "UX Rotterdam", location: "Rotterdam, NL",
     topic: "The Human Cost of Human-Centred-Design",
-    heroImg: null, additionalImg: null, link: null, dark: false, finalistLink: null,
+    heroImg: awardsRotterdam, additionalImg: null, link: null, dark: true, finalistLink: null,
   },
   "ux-camp": {
     pageLabel: "Speaker @ UX Camp Melbourne, AU",
@@ -1316,6 +1317,8 @@ function SpeakingDetailPage({
               objectPosition: ev.dark ? "right center" : "center top",
               // FuseCon Figma is right-aligned portrait — match that
               ...(eventKey === "fusecon" ? { objectPosition: "right center", width: "44%", left: "auto", right: 0 } : {}),
+              // Rotterdam is a wide stage shot — keep it centered, not right-cropped
+              ...(eventKey === "rotterdam" ? { objectPosition: "center 35%" } : {}),
             }}
           />
           {ev.dark && <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.25)" }} />}
