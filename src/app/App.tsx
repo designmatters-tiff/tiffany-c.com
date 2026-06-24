@@ -569,10 +569,10 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             <LogoMark size={52} />
             <div className="flex-1 flex items-center">
               <p className="font-['Avenir',sans-serif] font-light leading-snug"
-                style={{ fontSize: "clamp(1.35rem, 5.5vw, 1.9rem)", color: fg, maxWidth: "24ch" }}>
-                Tiffany shapes design functions and leads teams that build
-                experiences that work for people and profit — with the
-                planet in mind.
+                style={{ fontSize: "clamp(1.35rem, 5.5vw, 1.9rem)", color: fg, maxWidth: "92%" }}>
+                Tiffany shapes design functions and leads<br />
+                teams that build experiences that work for<br />
+                people and profit — with the planet in mind.
               </p>
             </div>
             <div className="flex flex-col items-start gap-1 pb-2">
@@ -597,10 +597,10 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             </div>
             <div className="absolute inset-0 flex items-center px-20">
               <p className="font-['Avenir',sans-serif] font-light leading-snug"
-                style={{ fontSize: "clamp(1.5rem, 2.6vw, 2.25rem)", color: fg, maxWidth: "26ch" }}>
-                Tiffany shapes design functions and leads teams that build
-                experiences that work for people and profit — with the
-                planet in mind.
+                style={{ fontSize: "clamp(1.5rem, 2.6vw, 2.25rem)", color: fg, maxWidth: "60%" }}>
+                Tiffany shapes design functions and leads teams<br />
+                that build experiences that work for people and<br />
+                profit — with the planet in mind.
               </p>
             </div>
             <div className="absolute" style={{ bottom: "calc(64px + 5vh + 40px)", left: "7%", right: "7%", height: 1, background: "rgba(178,147,59,0.25)" }} />
