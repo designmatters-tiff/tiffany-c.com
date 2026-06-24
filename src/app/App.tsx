@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { motion } from "motion/react";
-import { Linkedin, X, Sun, Moon } from "lucide-react";
+import { Linkedin, X, Sun, Moon, ExternalLink } from "lucide-react";
 
 import workVectorImg from "@/imports/Work/de262c33781bad1f71ecf3f1af344f0a34fcb830.png";
 import workScreenshot from "@/imports/Work/20b286508ef46dd3c3d46807441d1c8751314568.png";
@@ -260,7 +260,7 @@ function SpeakingInquiryRow({ accent, itemColor, borderColor }: {
     <div>
       {/* Row trigger */}
       <button
-        className="w-full flex items-center justify-between py-4 md:py-[18px]"
+        className="w-full flex items-center justify-between py-4 md:py-[18px] cursor-pointer"
         onClick={() => setOpen(v => !v)}
       >
         <span className="link-underline font-['Raleway',sans-serif] font-light text-base md:text-lg text-left"
@@ -628,19 +628,21 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                         }}>
                           {isLinkedin ? (
                             <a href="https://www.linkedin.com/in/tiffany-c/" target="_blank" rel="noopener noreferrer"
-                              className="flex items-center gap-3 py-4 md:py-[18px]" onClick={e => e.stopPropagation()}>
+                              className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
                               <Linkedin size={16} style={{ color: section.accent, flexShrink: 0 }} />
                               <span className="link-underline font-['Raleway',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>LinkedIn</span>
+                              <ExternalLink size={13} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
                             </a>
                           ) : item === "designmatters.tiff@gmail.com" ? (
                             <a href="mailto:designmatters.tiff@gmail.com"
-                              className="flex items-center py-4 md:py-[18px]" onClick={e => e.stopPropagation()}>
+                              className="w-full flex items-center py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
                               <span className="link-underline font-['Raleway',sans-serif] font-light text-sm md:text-lg" style={{ color: itemColor }}>{item}</span>
                             </a>
                           ) : (item === "1:1 Calls" || item === "Priority DM" || item === "Package (1-1 Coaching Service)") ? (
                             <a href="https://topmate.io/tffnyc" target="_blank" rel="noopener noreferrer"
-                              className="flex items-center py-4 md:py-[18px]" onClick={e => e.stopPropagation()}>
+                              className="w-full flex items-center gap-2 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
                               <span className="link-underline font-['Raleway',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
+                              <ExternalLink size={13} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
                             </a>
                           ) : item === "Speaking Inquiry" ? (
                             <SpeakingInquiryRow
@@ -1310,9 +1312,10 @@ function SpeakingDetailPage({
             <p className="font-['Raleway',sans-serif] font-light text-xs uppercase tracking-widest mb-4"
               style={{ color: subColor }}>Watch the talk</p>
             <a href={ev.link} target="_blank" rel="noopener noreferrer"
-              className="link-underline font-['Raleway',sans-serif] font-medium text-sm uppercase tracking-[0.15em]"
+              className="link-underline inline-flex items-center gap-2 font-['Raleway',sans-serif] font-medium text-sm uppercase tracking-[0.15em] cursor-pointer"
               style={{ color: GOLD }}>
-              Watch on YouTube →
+              Watch on YouTube
+              <ExternalLink size={13} style={{ opacity: 0.7, flexShrink: 0 }} />
             </a>
           </div>
         )}
@@ -1320,9 +1323,10 @@ function SpeakingDetailPage({
         {/* Finalist link */}
         {ev.finalistLink && (
           <a href={ev.finalistLink} target="_blank" rel="noopener noreferrer"
-            className="link-underline inline-flex items-center gap-2 mt-6 font-['Raleway',sans-serif] font-medium text-xs uppercase tracking-[0.15em]"
+            className="link-underline inline-flex items-center gap-2 mt-6 font-['Raleway',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
             style={{ color: GOLD }}>
-            View official finalists page →
+            View official finalists page
+            <ExternalLink size={13} style={{ opacity: 0.7, flexShrink: 0 }} />
           </a>
         )}
       </div>
