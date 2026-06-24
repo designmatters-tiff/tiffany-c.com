@@ -7,6 +7,7 @@ import noiseGrad1 from "@/imports/Home/7e24109bcd9a8ce8e2da86d2a7818871291daeb7.
 import awardsWomenDigital from "@/imports/AwardsSpeaking/WID-tiff2025.png";
 import awardsFinalistCard from "@/imports/AwardsSpeaking/WID-2.png";
 import awardsFuseCon from "@/imports/AwardsSpeaking/Fusecon2025.png";
+import awardsFuseConPanelist from "@/imports/AwardsSpeaking/FuseCon_panelist.jpg";
 import awardsTaipei from "@/imports/AwardsSpeaking/LTUX Taipei.png";
 import awardsRotterdam from "@/imports/AwardsSpeaking/ux-rotterdam.jpeg";
 
@@ -1085,17 +1086,11 @@ const SPEAKING_EVENTS = [
   { key: "rotterdam", year: "2026", role: "Speaker",  event: "UX Rotterdam",                  location: "Rotterdam, NL", topic: "The Human Cost of Human-Centred-Design",                           link: null,                                               img: awardsRotterdam, caption: "2026 @ Rotterdam, NL", dark: true },
   { key: "ux-camp",   year: "2025", role: "Speaker",  event: "UX Camp Melbourne",             location: "Melbourne, AU", topic: "404: System Burnout — An error message to my UX career",            link: "https://youtu.be/hJIJB3di6T4?si=a1XcoU3eV6f0bVvE",  img: null,          caption: null,             dark: false },
   { key: "taipei",    year: "2025", role: "Panelist", event: "Ladies that UX Taipei",         location: "Taipei, TW",    topic: "Driving Organisational Change and Creating Meaningful Impact",     link: null,                                               img: awardsTaipei,  caption: "2025 @ Taipei, TW",  dark: false },
-  { key: "fusecon",   year: "2025", role: "Panelist", event: "FUSECON 2025",                  location: "Malaysia",      topic: "Mental Health: From Awareness to Action",                          link: null,                                               img: awardsFuseCon, caption: "FUSECON 2025, MY",    dark: true  },
+  { key: "fusecon",   year: "2025", role: "Panelist", event: "FUSECON 2025",                  location: "Malaysia",      topic: "Mental Health: From Awareness to Action",                          link: null,                                               img: awardsFuseCon, img2: awardsFuseConPanelist, caption: "FUSECON 2025, MY",    dark: true  },
   { key: "fusecon-2024", year: "2024", role: "Panelist", event: "FUSECON 2024",               location: "Malaysia",      topic: "UX in Malaysia & beyond",                                          link: null,                                               img: null,          caption: null,             dark: false },
   { key: "figma-kl",  year: "2024", role: "Panelist", event: "Friends of Figma KL × adplist", location: "KL, MY",        topic: "The Journey to Senior Designer: Skills, Insights and Experiences", link: null,                                               img: null,          caption: null,             dark: false },
   { key: "design-kl", year: "2023", role: "Speaker",  event: "Design Leadership Kuala Lumpur",location: "KL, MY",        topic: "Synergy for Sustainable Growth: Empowering UX Team",               link: null,                                               img: null,          caption: null,             dark: false },
 ];
-
-// Shared hover-lift style for clickable event rows
-const EVENT_ROW_STYLE: React.CSSProperties = {
-  cursor: "pointer",
-  transition: "opacity 0.2s ease",
-};
 
 // ─── Speaking event accordion row ──────────────────────────────────
 // Title/topic always sit on top as plain text (never overlaid on the
@@ -1152,13 +1147,25 @@ function SpeakingEventRow({
       </button>
 
       {expandable && (
-        <div className="overflow-hidden" style={{ maxHeight: open ? 640 : 0, opacity: open ? 1 : 0, transition: "max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease" }}>
+        <div className="overflow-hidden" style={{ maxHeight: open ? 760 : 0, opacity: open ? 1 : 0, transition: "max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease" }}>
           <div className="px-6 md:px-20 pb-8">
-            {ev.img && (
+            {ev.img && ev.img2 ? (
+              // Two images side by side (stacked on mobile) — portrait shots
+              // use object-contain so they fit the row height instead of
+              // being cropped/zoomed into.
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="relative w-full md:w-2/5 h-[280px] md:h-[420px] overflow-hidden flex-shrink-0" style={{ background: ev.dark ? "#030303" : "#f0ede8" }}>
+                  <img src={ev.img} alt={`${ev.event} — ${ev.topic}`} className="absolute inset-0 w-full h-full object-contain" />
+                </div>
+                <div className="relative w-full md:w-3/5 h-[220px] md:h-[420px] overflow-hidden" style={{ background: ev.dark ? "#030303" : "#f0ede8" }}>
+                  <img src={ev.img2} alt={`${ev.event} panel discussion`} className="absolute inset-0 w-full h-full object-contain" />
+                </div>
+              </div>
+            ) : ev.img && (
               <div className="relative w-full overflow-hidden" style={{ height: "clamp(220px, 40vw, 480px)", background: ev.dark ? "#030303" : "#f8f7f5" }}>
                 <img src={ev.img} alt={`${ev.event} — ${ev.topic}`}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  style={{ objectPosition: ev.dark ? "center 30%" : "center" }} />
+                  className={ev.portrait ? "absolute inset-0 w-full h-full object-contain" : "absolute inset-0 w-full h-full object-cover"}
+                  style={ev.portrait ? undefined : { objectPosition: ev.dark ? "center 30%" : "center" }} />
               </div>
             )}
             {ev.link && (
@@ -1172,6 +1179,72 @@ function SpeakingEventRow({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Women in Digital accordion row ────────────────────────────────
+// Default-collapsed, same header pattern as SpeakingEventRow. Expanded
+// panel layers the finalist-list graphic on top of the portrait photo
+// (matches the Figma composition) — portrait fits the row's height via
+// object-contain rather than being cropped/zoomed.
+function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; sub: string }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="relative w-full flex items-start gap-3 text-left px-6 md:px-20 py-5 md:py-7 transition-colors duration-200"
+        style={{ cursor: "pointer", background: "transparent" }}
+        onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)")}
+        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+      >
+        <Plus
+          size={16}
+          strokeWidth={1}
+          style={{
+            color: GOLD,
+            flexShrink: 0,
+            marginTop: 6,
+            transform: open ? "rotate(45deg)" : "rotate(0deg)",
+            transition: "transform 0.3s ease",
+          }}
+        />
+        <div className="flex-1 flex flex-col gap-1">
+          <span className="font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>2025 · National Awards · Australia</span>
+          <p className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.5rem)", color: fg }}>
+            UX Leader of the Year — Finalist
+          </p>
+          <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub }}>Women in Digital National Awards</p>
+        </div>
+      </button>
+
+      <div className="overflow-hidden" style={{ maxHeight: open ? 820 : 0, opacity: open ? 1 : 0, transition: "max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease" }}>
+        <div className="px-6 md:px-20 pb-8">
+          <div className="relative w-full" style={{ height: "clamp(320px, 55vw, 620px)" }}>
+            {/* Base layer: portrait photo, fit to height — not cropped/zoomed */}
+            <img src={awardsWomenDigital} alt="Tiffany Chew at Women in Digital Awards 2025"
+              className="absolute inset-0 w-full h-full object-contain" style={{ background: "#0a0a0a", zIndex: 1 }} />
+            {/* Overlay layer: finalist-list card, floated on top per Figma layout */}
+            <div className="absolute left-1/2"
+              style={{
+                bottom: "5%", transform: "translateX(-50%)",
+                width: "min(90%, 460px)", zIndex: 2,
+                background: "white", borderRadius: 16, padding: 8,
+                boxShadow: "0 12px 36px rgba(0,0,0,0.3)",
+              }}>
+              <img src={awardsFinalistCard} alt="The 2025 UX Leader of the Year Finalists" className="w-full" style={{ borderRadius: 10, display: "block" }} />
+            </div>
+          </div>
+          <a href="https://womenindigital.org/women-in-digital-awards/women-in-digital-awards-2025-finalists/" target="_blank" rel="noopener noreferrer"
+            className="link-underline inline-flex items-center gap-2 mt-5 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
+            style={{ color: GOLD }}>
+            View official finalists page
+            <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1206,27 +1279,8 @@ function AwardsSpeakingPage({
         </h1>
       </div>
 
-      {/* Women in Digital — clickable */}
-      <div className="group" style={EVENT_ROW_STYLE} onClick={() => onEventClick("women-digital")}>
-        <div className="relative w-full overflow-hidden" style={{ height: "clamp(300px, 60vw, 700px)" }}>
-          <img src={awardsWomenDigital} alt="Tiffany Chew at Women in Digital Awards 2025"
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-            style={{ objectPosition: "center 12%" }} />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.25) 40%, rgba(0,0,0,0.15) 70%)" }} />
-          <div className="absolute bottom-6 md:bottom-8 left-6 md:left-20">
-            <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] text-white/70 mb-1">2025 · National Awards · Australia</p>
-            <h2 className="font-['Museo',sans-serif] font-light text-white" style={{ fontSize: "clamp(1.25rem, 2.5vw, 2.25rem)" }}>
-              UX Leader of the Year — Finalist
-            </h2>
-            <p className="font-['Avenir',sans-serif] font-light text-white/80 text-sm mt-1">Women in Digital National Awards</p>
-          </div>
-          <div className="absolute top-6 right-6 md:top-8 md:right-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-widest text-white/90 bg-black/30 rounded-full px-3 py-1.5">
-              View →
-            </span>
-          </div>
-        </div>
-      </div>
+      {/* Women in Digital — default-collapsed accordion, matches SpeakingEventRow */}
+      <WomenInDigitalRow isDark={isDark} fg={fg} sub={sub} />
 
       {/* Speaking events */}
       <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
