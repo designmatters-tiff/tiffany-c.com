@@ -577,8 +577,8 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               <p className="font-['Avenir',sans-serif] font-light leading-relaxed mt-5"
                 style={{ fontSize: "1.05rem", color: fgSub, opacity: 0.85 }}>
                 Building products that work for people, profit, and planet —
-                from TNG eWallet (Malaysia's First Fintech Unicorn) to Cotton On Group's
-                9-country eCommerce platform.
+                from First Malaysia Fintech Unicorn TNG eWallet to Cotton On
+                Group's Global Multi-brand eCommerce platform.
               </p>
             </div>
             <div className="flex flex-col items-start gap-1 pb-2">
@@ -609,8 +609,8 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               <p className="font-['Avenir',sans-serif] font-light leading-relaxed mt-6"
                 style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.75rem)", color: fgSub, opacity: 0.85 }}>
                 Building products that work for people, profit, and planet —
-                from First Malaysia Fintech Unicorn TNG eWallet to Cotton On Group's
-                9-country eCommerce platform.
+                from First Malaysia Fintech Unicorn TNG eWallet to Cotton On
+                Group's Global Multi-brand eCommerce platform.
               </p>
             </div>
             <div className="absolute" style={{ bottom: "calc(64px + 5vh + 40px)", left: "7%", right: "7%", height: 1, background: "rgba(178,147,59,0.25)" }} />
@@ -751,8 +751,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               }}>
               <span className="flex items-center gap-3 min-w-0">
                 {i === 0 && <HamburgerIcon color="white" />}
-                <span className="font-['Avenir',sans-serif] font-medium text-[1.05rem] tracking-wide whitespace-nowrap overflow-hidden text-ellipsis text-white"
-                  style={{ fontWeight: active ? 600 : 500 }}>
+                <span className="font-['Museo',sans-serif] font-light text-[0.85rem] whitespace-nowrap overflow-hidden text-ellipsis text-white">
                   {s.label}
                 </span>
               </span>
@@ -780,13 +779,13 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           className="flex items-center gap-3"
           aria-label="Open navigation">
           <HamburgerIcon color="white" />
-          <span className="font-['Avenir',sans-serif] font-medium text-base text-white">
+          <span className="font-['Museo',sans-serif] font-light text-sm text-white">
             Tiffany C.
           </span>
         </button>
         <div className="flex-1" />
         {activeIdx > 0 && (
-          <span className="font-['Avenir',sans-serif] font-light text-sm text-white/75">
+          <span className="font-['Museo',sans-serif] font-light text-sm text-white/75">
             {currentSection.label}
           </span>
         )}
@@ -958,7 +957,7 @@ function PageBottomNav({
           onClick={() => onNavigate("home")}
           style={{ opacity: hoveredNav === "about" ? 1 : 0.52, transition: "opacity 0.25s", borderRight: "1px solid rgba(255,255,255,0.18)" }}>
           <HamburgerIcon />
-          <span className="font-['Avenir',sans-serif] font-medium text-[1.05rem] text-white whitespace-nowrap">Tiffany C.</span>
+          <span className="font-['Museo',sans-serif] font-light text-[0.85rem] text-white whitespace-nowrap">Tiffany C.</span>
         </button>
         <div className="flex-1" />
         {NAV_ITEMS.map(item => (
@@ -966,9 +965,8 @@ function PageBottomNav({
             onMouseEnter={() => setHoveredNav(item.key)}
             onMouseLeave={() => setHoveredNav(null)}
             onClick={() => item.page && onNavigate(item.page)}
-            className="font-['Avenir',sans-serif] font-medium text-[1.05rem] whitespace-nowrap flex-shrink-0 px-6 text-white"
+            className="font-['Museo',sans-serif] font-light text-[0.85rem] whitespace-nowrap flex-shrink-0 px-6 text-white"
             style={{
-              fontWeight: activePage === item.page ? 600 : 500,
               opacity: activePage === item.page || hoveredNav === item.key ? 1 : 0.52,
               transition: "opacity 0.25s",
               borderLeft: "1px solid rgba(255,255,255,0.18)",
