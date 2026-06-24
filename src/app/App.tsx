@@ -568,7 +568,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           <div className="md:hidden absolute inset-0 flex flex-col px-6 pt-14"
             style={{ paddingBottom: "calc(64px + 8vh + 24px)" }}>
             <LogoMark size={52} />
-            <div className="flex-1 flex items-center justify-center text-center">
+            <div className="flex-1 flex items-center">
               <p className="font-['Museo',sans-serif] font-light leading-snug"
                 style={{ fontSize: "clamp(1.6rem, 6vw, 2.5rem)", color: fg, maxWidth: "22ch" }}>
                 Tiffany shapes design functions and leads teams that build
@@ -595,8 +595,8 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             <div className="absolute" style={{ top: "11%", left: "7%" }}>
               <LogoMark size={70} />
             </div>
-            <div className="absolute inset-0 flex items-center justify-center px-20">
-              <p className="font-['Museo',sans-serif] font-light leading-snug text-center"
+            <div className="absolute inset-0 flex items-center px-20">
+              <p className="font-['Museo',sans-serif] font-light leading-snug"
                 style={{ fontSize: "clamp(2rem, 5vw, 4rem)", color: fg, maxWidth: "20ch" }}>
                 Tiffany shapes design functions and leads teams that build
                 experiences for people, profit, and planet
