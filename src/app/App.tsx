@@ -494,7 +494,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const currentSection = SECTIONS[activeIdx];
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-[#f8f7f5]">
+    <div className="relative w-screen h-screen overflow-hidden" style={{ background: isDark ? "transparent" : "#f8f7f5" }}>
 
       {/* ── Horizontal scroll track ── */}
       <div
