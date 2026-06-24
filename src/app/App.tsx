@@ -513,12 +513,13 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
         {/* ── Section 0: Tiffany C. ── */}
         <section
           className="flex-shrink-0 relative overflow-hidden"
-          style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", background: pageBg }}
+          style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", background: isDark ? "transparent" : pageBg }}
         >
-          {isDark
-            ? <AnimatedGradientBg />
-            : <img src={noiseGrad1} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover pointer-events-none" style={{ opacity: 0.04, mixBlendMode: "multiply" }} />
-          }
+          {/* Dark mode: the animated gradient lives at the App root so it stays
+              continuous across page navigation — only content here, no bg fill. */}
+          {!isDark && (
+            <img src={noiseGrad1} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover pointer-events-none" style={{ opacity: 0.04, mixBlendMode: "multiply" }} />
+          )}
 
           {/* Mobile layout */}
           <div className="md:hidden absolute inset-0 flex flex-col px-6 pt-14"
@@ -589,7 +590,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           return (
             <section key={section.key}
               className="flex-shrink-0 relative flex flex-col"
-              style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", background: pageBg }}>
+              style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", background: isDark ? "transparent" : pageBg }}>
 
               <div className="absolute inset-0 pointer-events-none"
                 style={{ opacity: isActive ? 1 : 0, transition: "opacity 0.6s ease",
@@ -961,7 +962,7 @@ function PageBottomNav({
 
 function WorkPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
-  const bg = isDark ? "#1c1c1c" : "#f8f7f5";
+  const bg = isDark ? "transparent" : "#f8f7f5";
   const fg = isDark ? "white" : INK;
   const sub = isDark ? "rgba(255,255,255,0.55)" : DIM;
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
@@ -1074,7 +1075,7 @@ function AwardsSpeakingPage({
   onEventClick: (key: string) => void;
 }) {
   const isDark = useContext(DarkModeCtx);
-  const bg = isDark ? "#1c1c1c" : "#f8f7f5";
+  const bg = isDark ? "transparent" : "#f8f7f5";
   const fg = isDark ? "white" : INK;
   const sub = isDark ? "rgba(255,255,255,0.55)" : DIM;
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
@@ -1254,7 +1255,7 @@ function SpeakingDetailPage({
   if (!ev) return null;
 
   // Event-specific dark (fusecon) overrides global light mode
-  const bg = ev.dark ? "#030303" : (globalDark ? "#1c1c1c" : "#f8f7f5");
+  const bg = ev.dark ? "#030303" : (globalDark ? "transparent" : "#f8f7f5");
   const textColor = (ev.dark || globalDark) ? "white" : INK;
   const subColor = (ev.dark || globalDark) ? "rgba(255,255,255,0.55)" : DIM;
 
@@ -1393,8 +1394,16 @@ export default function App() {
   return (
     <DarkModeCtx.Provider value={isDark}>
     <div className="relative w-screen h-screen overflow-hidden" style={{ background: isDark ? "#181410" : "#f8f7f5" }}>
+      {/* Persistent background — mounted once at the App root so its drift
+          animation never resets on page navigation. Only the content above
+          it (motion.div below) transitions between pages. */}
+      {isDark && (
+        <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+          <AnimatedGradientBg />
+        </div>
+      )}
       <DarkModeToggle isDark={isDark} onToggle={() => setIsDark(d => !d)} />
-      <motion.div key={motionKey} className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.45 }}>
+      <motion.div key={motionKey} className="absolute inset-0" style={{ zIndex: 1 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.45 }}>
         {page === "home"     && <HomePage onNavigate={setPage} />}
         {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={setPage} /></div>}
         {page === "awards"   && <div className="absolute inset-0 overflow-y-auto"><AwardsSpeakingPage onNavigate={setPage} onEventClick={navigateToEvent} /></div>}
