@@ -433,8 +433,7 @@ const AUTO_DURATION = 5000;
 export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
   const pageBg  = isDark ? "#181410" : "#f8f7f5";
-  const fg      = isDark ? GOLD_BRIGHT : INK;
-  const fgSub   = isDark ? `rgba(255,255,255,0.72)` : INK;
+  const fg      = isDark ? GOLD : INK;
   const dimCol  = isDark ? "rgba(255,255,255,0.38)" : DIM;
   const border  = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
 
@@ -569,16 +568,11 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           <div className="md:hidden absolute inset-0 flex flex-col px-6 pt-14"
             style={{ paddingBottom: "calc(64px + 8vh + 24px)" }}>
             <LogoMark size={52} />
-            <div className="mt-8 flex-1">
+            <div className="flex-1 flex items-center justify-center text-center">
               <p className="font-['Museo',sans-serif] font-light leading-snug"
-                style={{ fontSize: "1.65rem", color: fg }}>
-                A product &amp; design leader who connects strategy to craft.
-              </p>
-              <p className="font-['Avenir',sans-serif] font-light leading-relaxed mt-5"
-                style={{ fontSize: "1.05rem", color: fgSub, opacity: 0.85 }}>
-                Building products that work for people, profit, and planet —
-                from First Malaysia Fintech Unicorn TNG eWallet to Cotton On
-                Group's Global Multi-brand eCommerce platform.
+                style={{ fontSize: "clamp(1.6rem, 6vw, 2.5rem)", color: fg, maxWidth: "22ch" }}>
+                Tiffany shapes design functions and leads teams that build
+                experiences for people, profit, and planet
               </p>
             </div>
             <div className="flex flex-col items-start gap-1 pb-2">
@@ -601,16 +595,11 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             <div className="absolute" style={{ top: "11%", left: "7%" }}>
               <LogoMark size={70} />
             </div>
-            <div className="absolute" style={{ top: "17%", left: "23%", right: "6%", maxWidth: 660 }}>
-              <p className="font-['Museo',sans-serif] font-light leading-snug"
-                style={{ fontSize: "clamp(1.5rem, 2.5vw, 2.25rem)", color: fg }}>
-                A product &amp; design leader who connects strategy to craft.
-              </p>
-              <p className="font-['Avenir',sans-serif] font-light leading-relaxed mt-6"
-                style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.75rem)", color: fgSub, opacity: 0.85 }}>
-                Building products that work for people, profit, and planet —
-                from First Malaysia Fintech Unicorn TNG eWallet to Cotton On
-                Group's Global Multi-brand eCommerce platform.
+            <div className="absolute inset-0 flex items-center justify-center px-20">
+              <p className="font-['Museo',sans-serif] font-light leading-snug text-center"
+                style={{ fontSize: "clamp(2rem, 5vw, 4rem)", color: fg, maxWidth: "20ch" }}>
+                Tiffany shapes design functions and leads teams that build
+                experiences for people, profit, and planet
               </p>
             </div>
             <div className="absolute" style={{ bottom: "calc(64px + 5vh + 40px)", left: "7%", right: "7%", height: 1, background: "rgba(178,147,59,0.25)" }} />
@@ -904,7 +893,7 @@ function ExpertiseCard({ card }: { card: typeof EXPERTISE_CARDS[0] }) {
             style={{ color: card.accent, flexShrink: 0, transform: open ? "rotate(45deg)" : "rotate(0deg)", transition: "transform 0.3s" }}
           />
           <h3 className="font-['Museo',sans-serif] font-light"
-            style={{ fontSize: "clamp(1.1rem, 2.2vw, 2.1rem)", color: isDark ? "white" : INK }}>
+            style={{ fontSize: "clamp(1.1rem, 2.2vw, 2.1rem)", color: isDark ? GOLD : INK }}>
             {card.title}
           </h3>
         </div>
@@ -1006,7 +995,7 @@ function PageBottomNav({
 function WorkPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
   const bg = isDark ? "transparent" : "#f8f7f5";
-  const fg = isDark ? "white" : INK;
+  const fg = isDark ? GOLD : INK;
   const sub = isDark ? "rgba(255,255,255,0.55)" : DIM;
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   return (
@@ -1017,7 +1006,7 @@ function WorkPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
         <button
           onClick={() => onNavigate("home")}
           aria-label="Back to homepage"
-          className="absolute top-6 left-6 z-10 cursor-pointer"
+          className="fixed top-16 right-5 z-[59] cursor-pointer"
         >
           <LogoMark size={14} />
         </button>
@@ -1119,7 +1108,7 @@ function AwardsSpeakingPage({
 }) {
   const isDark = useContext(DarkModeCtx);
   const bg = isDark ? "transparent" : "#f8f7f5";
-  const fg = isDark ? "white" : INK;
+  const fg = isDark ? GOLD : INK;
   const sub = isDark ? "rgba(255,255,255,0.55)" : DIM;
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   return (
@@ -1130,7 +1119,7 @@ function AwardsSpeakingPage({
         <button
           onClick={() => onNavigate("home")}
           aria-label="Back to homepage"
-          className="absolute top-6 left-6 z-10 cursor-pointer"
+          className="fixed top-16 right-5 z-[59] cursor-pointer"
         >
           <LogoMark size={14} />
         </button>
@@ -1299,7 +1288,7 @@ function SpeakingDetailPage({
 
   // Event-specific dark (fusecon) overrides global light mode
   const bg = ev.dark ? "#030303" : (globalDark ? "transparent" : "#f8f7f5");
-  const textColor = (ev.dark || globalDark) ? "white" : INK;
+  const textColor = (ev.dark || globalDark) ? GOLD : INK;
   const subColor = (ev.dark || globalDark) ? "rgba(255,255,255,0.55)" : DIM;
 
   return (
@@ -1311,7 +1300,7 @@ function SpeakingDetailPage({
         <button
           onClick={() => onNavigate("home")}
           aria-label="Back to homepage"
-          className="absolute top-6 left-6 z-10 cursor-pointer"
+          className="fixed top-16 right-5 z-[59] cursor-pointer"
         >
           <LogoMark size={14} color={(ev.dark || globalDark) ? "white" : GOLD} />
         </button>
