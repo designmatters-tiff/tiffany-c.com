@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback, createContext, useContext } f
 import { motion } from "motion/react";
 import { Linkedin, X, ExternalLink, Plus } from "lucide-react";
 
-import workVectorImg from "@/imports/Work/de262c33781bad1f71ecf3f1af344f0a34fcb830.png";
 import workScreenshot from "@/imports/Work/20b286508ef46dd3c3d46807441d1c8751314568.png";
 import noiseGrad1 from "@/imports/Home/7e24109bcd9a8ce8e2da86d2a7818871291daeb7.png";
 import awardsWomenDigital from "@/imports/AwardsSpeaking/WID-tiff2025.png";
@@ -1007,36 +1006,24 @@ function WorkPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   return (
     <div className="relative w-full" style={{ minHeight: "100vh", background: bg }}>
-      {/* Top decorative image */}
-      <div className="relative w-full" style={{ height: "22vh", maxHeight: 280 }}>
-        <img src={workVectorImg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <button
-          onClick={() => onNavigate("home")}
-          aria-label="Back to homepage"
-          className="fixed top-16 right-5 z-[59] cursor-pointer"
-        >
-          <LogoMark size={14} />
-        </button>
-      </div>
+      <button
+        onClick={() => onNavigate("home")}
+        aria-label="Back to homepage"
+        className="fixed top-16 right-5 z-[59] cursor-pointer"
+      >
+        <LogoMark size={14} />
+      </button>
 
       {/* Content — single column on mobile, two columns on desktop */}
-      <div className="flex flex-col md:flex-row">
-        {/* Sidebar */}
-        <div className="md:flex-shrink-0 flex flex-col pt-8 md:pt-12 px-5 md:pl-10 md:pr-8 pb-6 md:pb-12"
-          style={{
-            width: "100%",
-            maxWidth: "100%",
-            borderBottom: "1px solid rgba(0,0,0,0.08)",
-            // desktop overrides below
-          }}>
-          {/* On desktop this renders as a sidebar; we use CSS to constrain it */}
-          <div className="md:hidden">
-            <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] mb-3" style={{ color: GOLD }}>Expertise</p>
-            <div className="flex flex-wrap gap-x-4 gap-y-1">
-              {["AI + UX DesignOps", "Business Acumen", "Product & UX Methods", "People & Process"].map(s => (
-                <span key={s} className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: INK }}>{s}</span>
-              ))}
-            </div>
+      <div className="flex flex-col md:flex-row pt-10 md:pt-14">
+        {/* Sidebar — mobile only (desktop sidebar is the block below) */}
+        <div className="md:hidden flex flex-col pt-8 px-5 pb-6"
+          style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
+          <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] mb-3" style={{ color: GOLD }}>Expertise</p>
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            {["AI + UX DesignOps", "Business Acumen", "Product & UX Methods", "People & Process"].map(s => (
+              <span key={s} className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: INK }}>{s}</span>
+            ))}
           </div>
         </div>
 
@@ -1201,17 +1188,13 @@ function AwardsSpeakingPage({
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   return (
     <div className="relative w-full" style={{ minHeight: "100vh", background: bg }}>
-      {/* Top decorative image */}
-      <div className="relative w-full" style={{ height: "22vh", maxHeight: 280 }}>
-        <img src={workVectorImg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <button
-          onClick={() => onNavigate("home")}
-          aria-label="Back to homepage"
-          className="fixed top-16 right-5 z-[59] cursor-pointer"
-        >
-          <LogoMark size={14} />
-        </button>
-      </div>
+      <button
+        onClick={() => onNavigate("home")}
+        aria-label="Back to homepage"
+        className="fixed top-16 right-5 z-[59] cursor-pointer"
+      >
+        <LogoMark size={14} />
+      </button>
 
       {/* Page heading */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
