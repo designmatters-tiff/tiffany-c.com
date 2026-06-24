@@ -366,11 +366,12 @@ const SECTIONS = [
     key: "coaching", label: "Coaching",        page: null,
     accent: "#5070A0",
     tagline: "UX Career Coaching",
-    context: "1:1 · Priority DM · Packages",
+    context: "1:1 · Priority DM · Packages · ADPList",
     items: [
       "1:1 Calls",
       "Priority DM",
       "Package (1-1 Coaching Service)",
+      "ADPList Mentorship",
     ],
   },
   {
@@ -639,6 +640,11 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                             </a>
                           ) : (item === "1:1 Calls" || item === "Priority DM" || item === "Package (1-1 Coaching Service)") ? (
                             <a href="https://topmate.io/tffnyc" target="_blank" rel="noopener noreferrer"
+                              className="flex items-center py-4 md:py-[18px]" onClick={e => e.stopPropagation()}>
+                              <span className="link-underline font-['Raleway',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
+                            </a>
+                          ) : item === "ADPList Mentorship" ? (
+                            <a href="https://adplist.org/mentors/tiffany-c" target="_blank" rel="noopener noreferrer"
                               className="flex items-center py-4 md:py-[18px]" onClick={e => e.stopPropagation()}>
                               <span className="link-underline font-['Raleway',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
                             </a>
