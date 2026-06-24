@@ -31,6 +31,24 @@ type Page = "home" | "work" | "awards" | "speaking";
 const DarkModeCtx = createContext(false);
 const DarkModeToggleCtx = createContext<() => void>(() => {});
 
+// ─── Shared accordion state ────────────────────────────────────────
+// One open item at a time across the whole site (Work page expertise
+// cards, Awards & Speaking event rows, Connect's Speaking Inquiry).
+// Since only one page is ever mounted at once this is effectively
+// "one open accordion per page", but a single global id keeps every
+// accordion consumer trivially in sync without per-page wiring.
+const AccordionCtx = createContext<{ openId: string | null; setOpenId: (id: string | null) => void }>({
+  openId: null,
+  setOpenId: () => {},
+});
+
+function useAccordionItem(id: string) {
+  const { openId, setOpenId } = useContext(AccordionCtx);
+  const open = openId === id;
+  const toggle = () => setOpenId(open ? null : id);
+  return { open, toggle };
+}
+
 // ─── Animated gradient background (dark mode) ─────────────────────
 function AnimatedGradientBg() {
   return (
@@ -263,7 +281,8 @@ function SpeakingInquiryRow({ accent, itemColor, borderColor }: {
   accent: string; itemColor: string; borderColor: string;
 }) {
   const isDark = useContext(DarkModeCtx);
-  const [open, setOpen]       = useState(false);
+  const { open, toggle } = useAccordionItem("speaking-inquiry");
+  const { setOpenId } = useContext(AccordionCtx);
   const [status, setStatus]   = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [fields, setFields]   = useState<Record<string, string>>({});
 
@@ -293,7 +312,7 @@ function SpeakingInquiryRow({ accent, itemColor, borderColor }: {
         body: JSON.stringify({ _subject: `Speaking Inquiry: ${fields.topic ?? ""}`, ...fields }),
       });
       setStatus(res.ok ? "sent" : "error");
-      if (res.ok) setTimeout(() => { setOpen(false); setStatus("idle"); setFields({}); }, 3000);
+      if (res.ok) setTimeout(() => { setOpenId(null); setStatus("idle"); setFields({}); }, 3000);
     } catch {
       setStatus("error");
     }
@@ -304,7 +323,7 @@ function SpeakingInquiryRow({ accent, itemColor, borderColor }: {
       {/* Row trigger */}
       <button
         className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer"
-        onClick={() => setOpen(v => !v)}
+        onClick={toggle}
       >
         <Plus
           size={16}
@@ -460,6 +479,15 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
     const el = scrollEl.current;
     if (!el) return;
     const clamped = Math.max(0, Math.min(SECTIONS.length - 1, idx));
+    // Sections with a dedicated full page (Work, Award & Speaking) open
+    // that real page directly — horizontal scroll/swipe/keyboard behaves
+    // the same as clicking the nav. Only Coaching/Connect (no `page`)
+    // stay as in-place preview slides within the homepage's own scroll.
+    const targetPage = SECTIONS[clamped].page;
+    if (targetPage) {
+      onNavigate(targetPage);
+      return;
+    }
     activeIdxRef.current = clamped;
     el.scrollTo({ left: clamped * el.clientWidth, behavior: "smooth" });
     resetTimer();
@@ -475,6 +503,8 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
         if (p >= 100) {
           const next = activeIdxRef.current + 1;
           if (next >= SECTIONS.length) { setProgress(100); return; }
+          const nextPage = SECTIONS[next].page;
+          if (nextPage) { onNavigate(nextPage); return; }
           activeIdxRef.current = next;
           scrollEl.current?.scrollTo({ left: next * (scrollEl.current?.clientWidth ?? 0), behavior: "smooth" });
           startTime.current = Date.now();
@@ -570,7 +600,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             <LogoMark size={52} />
             <div className="flex-1 flex items-center">
               <p className="font-['Avenir',sans-serif] font-light leading-snug"
-                style={{ fontSize: "clamp(1.35rem, 5.5vw, 1.9rem)", color: fg, maxWidth: "92%" }}>
+                style={{ fontSize: "clamp(0.95rem, 4.4vw, 1.35rem)", color: fg, maxWidth: "100%" }}>
                 Tiffany shapes design functions and leads<br />
                 teams that build experiences that work for<br />
                 people and profit — with the planet in mind.
@@ -875,7 +905,7 @@ const EXPERTISE_CARDS = [
 ];
 
 function ExpertiseCard({ card }: { card: typeof EXPERTISE_CARDS[0] }) {
-  const [open, setOpen] = useState(false);
+  const { open, toggle } = useAccordionItem(`expertise:${card.key}`);
   const isDark = useContext(DarkModeCtx);
   const { Illustration } = card;
   const cardBrd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
@@ -883,7 +913,7 @@ function ExpertiseCard({ card }: { card: typeof EXPERTISE_CARDS[0] }) {
     <div
       className="flex flex-col md:flex-row items-start gap-4 md:gap-8 px-5 md:px-10 py-6 md:py-8 cursor-pointer"
       style={{ borderBottom: `1px solid ${cardBrd}`, background: open ? (isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.02)") : "transparent", transition: "background 0.3s" }}
-      onClick={() => setOpen(v => !v)}>
+      onClick={toggle}>
       <div className="flex-shrink-0" style={{ width: 64, height: 64 }}>
         <Illustration />
       </div>
@@ -1112,13 +1142,13 @@ function SpeakingEventRow({
   sub: string;
   brd: string;
 }) {
-  const [open, setOpen] = useState(false);
+  const { open, toggle } = useAccordionItem(`speaking-event:${ev.key}`);
   const expandable = Boolean(ev.img || ev.link);
 
   return (
     <div style={{ borderTop: isFirst ? "none" : `1px solid ${brd}` }}>
       <button
-        onClick={() => expandable && setOpen(v => !v)}
+        onClick={() => expandable && toggle()}
         className="relative w-full flex items-start gap-3 text-left px-6 md:px-20 py-5 md:py-7 transition-colors duration-200"
         style={{ cursor: expandable ? "pointer" : "default", background: "transparent" }}
         onMouseEnter={e => expandable && (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)")}
@@ -1189,12 +1219,12 @@ function SpeakingEventRow({
 // (matches the Figma composition) — portrait fits the row's height via
 // object-contain rather than being cropped/zoomed.
 function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; sub: string }) {
-  const [open, setOpen] = useState(false);
+  const { open, toggle } = useAccordionItem("women-digital");
 
   return (
     <div>
       <button
-        onClick={() => setOpen(v => !v)}
+        onClick={toggle}
         className="relative w-full flex items-start gap-3 text-left px-6 md:px-20 py-5 md:py-7 transition-colors duration-200"
         style={{ cursor: "pointer", background: "transparent" }}
         onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)")}
@@ -1509,6 +1539,11 @@ export default function App() {
   const [page, setPage]           = useState<Page>("home");
   const [detailKey, setDetailKey] = useState<string | null>(null);
   const [isDark, setIsDark]       = useState(false);
+  const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
+
+  // Reset the shared accordion state whenever the page changes so a
+  // stale open id from the previous page can't accidentally collide.
+  useEffect(() => { setOpenAccordionId(null); }, [page]);
 
   const navigateToEvent = (key: string) => {
     setDetailKey(key);
@@ -1527,6 +1562,7 @@ export default function App() {
   return (
     <DarkModeCtx.Provider value={isDark}>
     <DarkModeToggleCtx.Provider value={toggleDark}>
+    <AccordionCtx.Provider value={{ openId: openAccordionId, setOpenId: setOpenAccordionId }}>
     <div className="relative w-screen h-screen overflow-hidden" style={{ background: isDark ? "#181410" : "#f8f7f5" }}>
       {/* Persistent background — mounted once at the App root so its drift
           animation never resets on page navigation. Only the content above
@@ -1548,6 +1584,7 @@ export default function App() {
         )}
       </motion.div>
     </div>
+    </AccordionCtx.Provider>
     </DarkModeToggleCtx.Provider>
     </DarkModeCtx.Provider>
   );
