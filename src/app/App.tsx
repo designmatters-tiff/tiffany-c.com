@@ -5,10 +5,10 @@ import { Linkedin, X, ExternalLink, Plus } from "lucide-react";
 import workVectorImg from "@/imports/Work/de262c33781bad1f71ecf3f1af344f0a34fcb830.png";
 import workScreenshot from "@/imports/Work/20b286508ef46dd3c3d46807441d1c8751314568.png";
 import noiseGrad1 from "@/imports/Home/7e24109bcd9a8ce8e2da86d2a7818871291daeb7.png";
-import awardsWomenDigital from "@/imports/AwardsSpeaking/ef53a4ecb58e306876fea6466b96d64f35326137.png";
-import awardsFinalistCard from "@/imports/AwardsSpeaking/b794f860238911a59491cf1b672e2a3713a2e7ba.png";
-import awardsFuseCon from "@/imports/AwardsSpeaking/46e693ed4c467192678144ec5d057e938998f54c.png";
-import awardsTaipei from "@/imports/AwardsSpeaking/0a742a94d7dbd9ac0981d738a8d8a3dd3c69297d.png";
+import awardsWomenDigital from "@/imports/AwardsSpeaking/WID-tiff2025.png";
+import awardsFinalistCard from "@/imports/AwardsSpeaking/WID-2.png";
+import awardsFuseCon from "@/imports/AwardsSpeaking/Fusecon2025.png";
+import awardsTaipei from "@/imports/AwardsSpeaking/LTUX Taipei.png";
 import awardsRotterdam from "@/imports/AwardsSpeaking/ux-rotterdam.jpeg";
 
 // ─── Logo paths ───────────────────────────────────────────────────
@@ -58,6 +58,8 @@ function AnimatedGradientBg() {
 // ─── Dark / light toggle widget ───────────────────────────────────
 // Desktop: shown fixed top-right. Mobile: rendered inside MobileMenu instead
 // (see DarkModeToggle usage in MobileMenu / App root, which hides this on mobile).
+// Matches Figma node 45:17 — "Bright / Dark" text toggle with an underline
+// that slides between the two words on click, rather than a pill/track switch.
 function DarkModeToggle({
   isDark,
   onToggle,
@@ -67,38 +69,56 @@ function DarkModeToggle({
   onToggle: () => void;
   variant?: "floating" | "inline";
 }) {
-  const onLight = variant === "inline" ? "white" : (isDark ? "rgba(255,255,255,0.85)" : INK);
-  const onDim   = variant === "inline" ? "rgba(255,255,255,0.45)" : (isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)");
+  const brightRef = useRef<HTMLSpanElement>(null);
+  const darkRef = useRef<HTMLSpanElement>(null);
+  const [underline, setUnderline] = useState({ left: 0, width: 0 });
+
+  useEffect(() => {
+    const target = isDark ? darkRef.current : brightRef.current;
+    if (target) {
+      setUnderline({ left: target.offsetLeft, width: target.offsetWidth });
+    }
+  }, [isDark]);
+
+  const activeColor = variant === "inline" ? "white" : (isDark ? "white" : INK);
+  const dimColor     = variant === "inline" ? "rgba(255,255,255,0.45)" : (isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)");
+  const lineColor    = variant === "inline" ? "white" : (isDark ? GOLD_BRIGHT : INK);
+
   return (
     <button
       onClick={onToggle}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       className={
         variant === "floating"
-          ? "fixed top-5 right-5 z-[60] hidden md:flex items-center gap-2 px-3 py-2"
-          : "flex items-center gap-2 px-3 py-2"
+          ? "fixed top-5 right-5 z-[60] hidden md:flex items-center"
+          : "flex items-center"
       }
-      style={{
-        borderRadius: 0,
-        background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
-        border: isDark ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(0,0,0,0.1)",
-        transition: "background 0.3s, border-color 0.3s",
-      }}
+      style={{ background: "none", border: "none", padding: 0 }}
     >
-      <span className="font-['Raleway',sans-serif] font-medium text-[0.65rem] uppercase tracking-[0.15em]"
-        style={{ color: !isDark ? onLight : onDim, transition: "color 0.3s" }}>
-        Bright
-      </span>
-      {/* track */}
-      <div className="relative" style={{ width: 28, height: 16, borderRadius: 0, background: isDark ? GOLD : "#ccc", transition: "background 0.3s" }}>
-        <div className="absolute top-[2px]" style={{ width: 12, height: 12, borderRadius: 0, background: "white", transform: isDark ? "translateX(14px)" : "translateX(2px)", transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)" }} />
+      <div className="relative flex items-center gap-2">
+        <span ref={brightRef}
+          className="font-['Avenir',sans-serif] font-light text-xs uppercase tracking-[0.1em]"
+          style={{ color: !isDark ? activeColor : dimColor, transition: "color 0.3s" }}>
+          Bright
+        </span>
+        <span className="inline-block" style={{ width: 1, height: 12, background: dimColor, transform: "rotate(20deg)" }} />
+        <span ref={darkRef}
+          className="font-['Avenir',sans-serif] font-light text-xs uppercase tracking-[0.1em]"
+          style={{ color: isDark ? activeColor : dimColor, transition: "color 0.3s" }}>
+          Dark
+        </span>
+        {/* sliding underline — eases from beneath one word to the other */}
+        <div
+          className="absolute -bottom-1"
+          style={{
+            left: underline.left,
+            width: underline.width,
+            height: 1,
+            background: lineColor,
+            transition: "left 0.4s cubic-bezier(0.4,0,0.2,1), width 0.4s cubic-bezier(0.4,0,0.2,1), background 0.3s",
+          }}
+        />
       </div>
-      <span className="font-['Raleway',sans-serif] font-medium text-[0.65rem] uppercase tracking-[0.15em]"
-        style={{ color: isDark ? (variant === "inline" ? GOLD_BRIGHT : GOLD_BRIGHT) : onDim, transition: "color 0.3s" }}>
-        Dark
-      </span>
     </button>
   );
 }
@@ -198,7 +218,7 @@ function MobileMenu({
               style={{ borderBottom: "1px solid rgba(255,255,255,0.15)" }}
             >
               <span
-                className="font-['Raleway',sans-serif] font-medium tracking-wide"
+                className="font-['Avenir',sans-serif] font-medium tracking-wide"
                 style={{
                   fontSize: "1.5rem",
                   color: "white",
@@ -296,7 +316,7 @@ function SpeakingInquiryRow({ accent, itemColor, borderColor }: {
             transition: "transform 0.3s ease",
           }}
         />
-        <span className="link-underline font-['Raleway',sans-serif] font-light text-base md:text-lg text-left"
+        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg text-left"
           style={{ color: itemColor }}>
           Speaking Inquiry
         </span>
@@ -310,7 +330,7 @@ function SpeakingInquiryRow({ accent, itemColor, borderColor }: {
       }}>
         {status === "sent" ? (
           <div className="pb-6 pt-2">
-            <p className="font-['Raleway',sans-serif] font-light text-sm" style={{ color: accent }}>
+            <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: accent }}>
               ✓ Sent — Tiffany will be in touch soon.
             </p>
           </div>
@@ -320,7 +340,7 @@ function SpeakingInquiryRow({ accent, itemColor, borderColor }: {
               {FORM_FIELDS.map(f => (
                 <div key={f.name} className="flex flex-col gap-1">
                   <label
-                    className="font-['Raleway',sans-serif] font-light text-[0.58rem] uppercase tracking-[0.18em]"
+                    className="font-['Avenir',sans-serif] font-light text-[0.58rem] uppercase tracking-[0.18em]"
                     style={{ color: isDark ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.65)" }}
                   >
                     {f.label}{f.required && " *"}
@@ -339,7 +359,7 @@ function SpeakingInquiryRow({ accent, itemColor, borderColor }: {
             </div>
 
             {status === "error" && (
-              <p className="font-['Raleway',sans-serif] font-light text-xs mt-4" style={{ color: "#E05C5C" }}>
+              <p className="font-['Avenir',sans-serif] font-light text-xs mt-4" style={{ color: "#E05C5C" }}>
                 Something went wrong — please email designmatters.tiff@gmail.com directly.
               </p>
             )}
@@ -347,7 +367,7 @@ function SpeakingInquiryRow({ accent, itemColor, borderColor }: {
             <button
               type="submit"
               disabled={status === "sending"}
-              className="mt-7 px-6 py-2.5 rounded-full font-['Raleway',sans-serif] font-medium text-xs uppercase tracking-[0.18em] transition-opacity duration-200"
+              className="mt-7 px-6 py-2.5 rounded-full font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.18em] transition-opacity duration-200"
               style={{
                 background: accent,
                 color: "white",
@@ -550,11 +570,11 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             style={{ paddingBottom: "calc(64px + 8vh + 24px)" }}>
             <LogoMark size={52} />
             <div className="mt-8 flex-1">
-              <p className="font-['Raleway',sans-serif] font-light leading-snug"
+              <p className="font-['Museo',sans-serif] font-light leading-snug"
                 style={{ fontSize: "1.65rem", color: fg }}>
                 A product &amp; design leader who connects strategy to craft.
               </p>
-              <p className="font-['Raleway',sans-serif] font-light leading-relaxed mt-5"
+              <p className="font-['Avenir',sans-serif] font-light leading-relaxed mt-5"
                 style={{ fontSize: "1.05rem", color: fgSub, opacity: 0.85 }}>
                 Building products that work for people, profit, and planet —
                 from TNG eWallet (Malaysia's First Fintech Unicorn) to Cotton On Group's
@@ -562,7 +582,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               </p>
             </div>
             <div className="flex flex-col items-start gap-1 pb-2">
-              <p className="font-['Raleway',sans-serif] font-light text-[0.6rem] uppercase tracking-widest"
+              <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest"
                 style={{ color: dimCol }}>
                 swipe to explore
               </p>
@@ -582,11 +602,11 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               <LogoMark size={70} />
             </div>
             <div className="absolute" style={{ top: "17%", left: "23%", right: "6%", maxWidth: 660 }}>
-              <p className="font-['Raleway',sans-serif] font-light leading-snug"
+              <p className="font-['Museo',sans-serif] font-light leading-snug"
                 style={{ fontSize: "clamp(1.5rem, 2.5vw, 2.25rem)", color: fg }}>
                 A product &amp; design leader who connects strategy to craft.
               </p>
-              <p className="font-['Raleway',sans-serif] font-light leading-relaxed mt-6"
+              <p className="font-['Avenir',sans-serif] font-light leading-relaxed mt-6"
                 style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.75rem)", color: fgSub, opacity: 0.85 }}>
                 Building products that work for people, profit, and planet —
                 from First Malaysia Fintech Unicorn TNG eWallet to Cotton On Group's
@@ -596,7 +616,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             <div className="absolute" style={{ bottom: "calc(64px + 5vh + 40px)", left: "7%", right: "7%", height: 1, background: "rgba(178,147,59,0.25)" }} />
             <div className="absolute right-10 flex flex-col items-center gap-2"
               style={{ bottom: "calc(64px + 5vh + 28px)" }}>
-              <motion.p className="font-['Raleway',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em]"
+              <motion.p className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em]"
                 style={{ color: dimCol }}
                 animate={{ opacity: [0.4, 0.9, 0.4] }} transition={{ repeat: Infinity, duration: 3 }}>
                 scroll
@@ -623,7 +643,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               <div className="relative z-10 flex flex-col h-full px-6 md:px-20"
                 style={{ paddingTop: "8vh", paddingBottom: "calc(64px + 8vh + 32px)" }}>
 
-                <motion.p className="font-['Raleway',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-4 md:mb-6"
+                <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-4 md:mb-6"
                   style={{ color: section.accent }}
                   initial={false}
                   animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }}
@@ -631,7 +651,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                   {section.context}
                 </motion.p>
 
-                <motion.h2 className="font-['Raleway',sans-serif] font-light"
+                <motion.h2 className="font-['Museo',sans-serif] font-light"
                   style={{ fontSize: "clamp(1.9rem, 5vw, 4.5rem)", lineHeight: 1.05, maxWidth: "16ch", color: isDark ? "white" : INK }}
                   initial={false}
                   animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }}
@@ -655,18 +675,18 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                             <a href="https://www.linkedin.com/in/tiffany-c/" target="_blank" rel="noopener noreferrer"
                               className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
                               <Linkedin size={16} strokeWidth={1} style={{ color: section.accent, flexShrink: 0 }} />
-                              <span className="link-underline font-['Raleway',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>LinkedIn</span>
+                              <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>LinkedIn</span>
                               <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
                             </a>
                           ) : item === "designmatters.tiff@gmail.com" ? (
                             <a href="mailto:designmatters.tiff@gmail.com"
                               className="w-full flex items-center py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
-                              <span className="link-underline font-['Raleway',sans-serif] font-light text-sm md:text-lg" style={{ color: itemColor }}>{item}</span>
+                              <span className="link-underline font-['Avenir',sans-serif] font-light text-sm md:text-lg" style={{ color: itemColor }}>{item}</span>
                             </a>
                           ) : (item === "1:1 Calls" || item === "Priority DM" || item === "Package (1-1 Coaching Service)") ? (
                             <a href="https://topmate.io/tffnyc" target="_blank" rel="noopener noreferrer"
                               className="w-full flex items-center gap-2 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
-                              <span className="link-underline font-['Raleway',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
+                              <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
                               <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
                             </a>
                           ) : item === "Speaking Inquiry" ? (
@@ -677,7 +697,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                             />
                           ) : (
                             <div className="flex items-center py-4 md:py-[18px]">
-                              <span className="font-['Raleway',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
+                              <span className="font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
                             </div>
                           )}
                         </div>
@@ -731,7 +751,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               }}>
               <span className="flex items-center gap-3 min-w-0">
                 {i === 0 && <HamburgerIcon color="white" />}
-                <span className="font-['Raleway',sans-serif] font-medium text-[1.05rem] tracking-wide whitespace-nowrap overflow-hidden text-ellipsis text-white"
+                <span className="font-['Avenir',sans-serif] font-medium text-[1.05rem] tracking-wide whitespace-nowrap overflow-hidden text-ellipsis text-white"
                   style={{ fontWeight: active ? 600 : 500 }}>
                   {s.label}
                 </span>
@@ -760,13 +780,13 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           className="flex items-center gap-3"
           aria-label="Open navigation">
           <HamburgerIcon color="white" />
-          <span className="font-['Raleway',sans-serif] font-medium text-base text-white">
+          <span className="font-['Avenir',sans-serif] font-medium text-base text-white">
             Tiffany C.
           </span>
         </button>
         <div className="flex-1" />
         {activeIdx > 0 && (
-          <span className="font-['Raleway',sans-serif] font-light text-sm text-white/75">
+          <span className="font-['Avenir',sans-serif] font-light text-sm text-white/75">
             {currentSection.label}
           </span>
         )}
@@ -884,18 +904,18 @@ function ExpertiseCard({ card }: { card: typeof EXPERTISE_CARDS[0] }) {
             strokeWidth={1}
             style={{ color: card.accent, flexShrink: 0, transform: open ? "rotate(45deg)" : "rotate(0deg)", transition: "transform 0.3s" }}
           />
-          <h3 className="font-['Raleway',sans-serif] font-light"
+          <h3 className="font-['Museo',sans-serif] font-light"
             style={{ fontSize: "clamp(1.1rem, 2.2vw, 2.1rem)", color: isDark ? "white" : INK }}>
             {card.title}
           </h3>
         </div>
-        <p className="font-['Raleway',sans-serif] font-light text-sm leading-relaxed" style={{ color: isDark ? "rgba(255,255,255,0.55)" : DIM, maxWidth: 600 }}>
+        <p className="font-['Avenir',sans-serif] font-light text-sm leading-relaxed" style={{ color: isDark ? "rgba(255,255,255,0.55)" : DIM, maxWidth: 600 }}>
           {card.description}
         </p>
         <div className="overflow-hidden" style={{ maxHeight: open ? 200 : 0, opacity: open ? 1 : 0, transition: "max-height 0.4s ease, opacity 0.3s ease" }}>
           <ul className="mt-3 space-y-1.5">
             {card.bullets.map(b => (
-              <li key={b} className="font-['Raleway',sans-serif] font-light text-sm flex items-start gap-2" style={{ color: card.accent }}>
+              <li key={b} className="font-['Avenir',sans-serif] font-light text-sm flex items-start gap-2" style={{ color: card.accent }}>
                 <span className="mt-0.5 flex-shrink-0">—</span><span>{b}</span>
               </li>
             ))}
@@ -938,7 +958,7 @@ function PageBottomNav({
           onClick={() => onNavigate("home")}
           style={{ opacity: hoveredNav === "about" ? 1 : 0.52, transition: "opacity 0.25s", borderRight: "1px solid rgba(255,255,255,0.18)" }}>
           <HamburgerIcon />
-          <span className="font-['Raleway',sans-serif] font-medium text-[1.05rem] text-white whitespace-nowrap">Tiffany C.</span>
+          <span className="font-['Avenir',sans-serif] font-medium text-[1.05rem] text-white whitespace-nowrap">Tiffany C.</span>
         </button>
         <div className="flex-1" />
         {NAV_ITEMS.map(item => (
@@ -946,7 +966,7 @@ function PageBottomNav({
             onMouseEnter={() => setHoveredNav(item.key)}
             onMouseLeave={() => setHoveredNav(null)}
             onClick={() => item.page && onNavigate(item.page)}
-            className="font-['Raleway',sans-serif] font-medium text-[1.05rem] whitespace-nowrap flex-shrink-0 px-6 text-white"
+            className="font-['Avenir',sans-serif] font-medium text-[1.05rem] whitespace-nowrap flex-shrink-0 px-6 text-white"
             style={{
               fontWeight: activePage === item.page ? 600 : 500,
               opacity: activePage === item.page || hoveredNav === item.key ? 1 : 0.52,
@@ -963,10 +983,10 @@ function PageBottomNav({
         style={{ background: NAV_GRADIENT }}>
         <button onClick={() => setMenuOpen(true)} className="flex items-center gap-3" aria-label="Open navigation">
           <HamburgerIcon />
-          <span className="font-['Raleway',sans-serif] font-medium text-base text-white">Tiffany C.</span>
+          <span className="font-['Avenir',sans-serif] font-medium text-base text-white">Tiffany C.</span>
         </button>
         <div className="flex-1" />
-        <span className="font-['Raleway',sans-serif] font-light text-sm text-white/75">
+        <span className="font-['Avenir',sans-serif] font-light text-sm text-white/75">
           {NAV_ITEMS.find(n => n.page === activePage)?.label ?? ""}
         </span>
       </div>
@@ -1017,10 +1037,10 @@ function WorkPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           }}>
           {/* On desktop this renders as a sidebar; we use CSS to constrain it */}
           <div className="md:hidden">
-            <p className="font-['Raleway',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] mb-3" style={{ color: GOLD }}>Expertise</p>
+            <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] mb-3" style={{ color: GOLD }}>Expertise</p>
             <div className="flex flex-wrap gap-x-4 gap-y-1">
               {["AI + UX DesignOps", "Business Acumen", "Product & UX Methods", "People & Process"].map(s => (
-                <span key={s} className="font-['Raleway',sans-serif] font-light text-sm" style={{ color: INK }}>{s}</span>
+                <span key={s} className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: INK }}>{s}</span>
               ))}
             </div>
           </div>
@@ -1029,13 +1049,13 @@ function WorkPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
         {/* Sidebar — desktop only */}
         <div className="hidden md:flex flex-col flex-shrink-0 pt-12 pl-10 pr-8 overflow-y-auto"
           style={{ width: "clamp(200px, 22vw, 300px)", borderRight: "1px solid rgba(0,0,0,0.08)", minHeight: "calc(78vh - 64px)" }}>
-          <p className="font-['Raleway',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-5" style={{ color: GOLD }}>Expertise</p>
+          <p className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-5" style={{ color: GOLD }}>Expertise</p>
           {["AI + UX DesignOps", "Business Acumen", "Product & UX Methods", "People & Process"].map(skill => (
-            <p key={skill} className="font-['Raleway',sans-serif] font-light leading-snug mb-1"
+            <p key={skill} className="font-['Avenir',sans-serif] font-light leading-snug mb-1"
               style={{ fontSize: "clamp(1.05rem, 1.6vw, 1.8rem)", color: INK }}>{skill}</p>
           ))}
           <div className="mt-10">
-            <p className="font-['Raleway',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4" style={{ color: GOLD }}>Speaking</p>
+            <p className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4" style={{ color: GOLD }}>Speaking</p>
             {[
               { year: "2026", event: "UX Rotterdam, NL",           topic: "The Human Cost of Human-Centred-Design" },
               { year: "2025", event: "UX Camp Melbourne, AU",       topic: "404: System Burnout" },
@@ -1045,9 +1065,9 @@ function WorkPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               { year: "2023", event: "Design Leadership KL, MY",    topic: "Synergy for Sustainable Growth" },
             ].map(s => (
               <div key={s.event} className="mb-3">
-                <p className="font-['Raleway',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.12em]" style={{ color: DIM }}>{s.year}</p>
-                <p className="font-['Raleway',sans-serif] font-medium text-sm leading-snug" style={{ color: INK }}>{s.event}</p>
-                <p className="font-['Raleway',sans-serif] font-light text-xs leading-snug" style={{ color: DIM }}>{s.topic}</p>
+                <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.12em]" style={{ color: DIM }}>{s.year}</p>
+                <p className="font-['Avenir',sans-serif] font-medium text-sm leading-snug" style={{ color: INK }}>{s.event}</p>
+                <p className="font-['Avenir',sans-serif] font-light text-xs leading-snug" style={{ color: DIM }}>{s.topic}</p>
               </div>
             ))}
           </div>
@@ -1058,7 +1078,7 @@ function WorkPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           {EXPERTISE_CARDS.map(card => <ExpertiseCard key={card.key} card={card} />)}
           <div className="w-full">
             <div className="px-5 md:px-10 pt-6 md:pt-8 pb-3" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
-              <p className="font-['Raleway',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em]" style={{ color: GOLD }}>Selected Work</p>
+              <p className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em]" style={{ color: GOLD }}>Selected Work</p>
             </div>
             <img src={workScreenshot} alt="Work samples" className="w-full object-cover" />
             {/* Bottom spacer so content clears the floating nav */}
@@ -1120,8 +1140,8 @@ function AwardsSpeakingPage({
 
       {/* Page heading */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
-        <p className="font-['Raleway',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}>Recognition</p>
-        <h1 className="font-['Raleway',sans-serif] font-light" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: fg }}>
+        <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}>Recognition</p>
+        <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: fg }}>
           Awards &amp; Speaking
         </h1>
       </div>
@@ -1133,14 +1153,14 @@ function AwardsSpeakingPage({
             className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]" />
           <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.2)" }} />
           <div className="absolute bottom-6 md:bottom-8 left-6 md:left-20">
-            <p className="font-['Raleway',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] text-white/70 mb-1">2025 · National Awards · Australia</p>
-            <h2 className="font-['Raleway',sans-serif] font-medium text-white" style={{ fontSize: "clamp(1.25rem, 2.5vw, 2.25rem)" }}>
+            <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] text-white/70 mb-1">2025 · National Awards · Australia</p>
+            <h2 className="font-['Museo',sans-serif] font-medium text-white" style={{ fontSize: "clamp(1.25rem, 2.5vw, 2.25rem)" }}>
               UX Leader of the Year — Finalist
             </h2>
-            <p className="font-['Raleway',sans-serif] font-light text-white/80 text-sm mt-1">Women in Digital National Awards</p>
+            <p className="font-['Avenir',sans-serif] font-light text-white/80 text-sm mt-1">Women in Digital National Awards</p>
           </div>
           <div className="absolute top-6 right-6 md:top-8 md:right-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="font-['Raleway',sans-serif] font-medium text-xs uppercase tracking-widest text-white/90 bg-black/30 rounded-full px-3 py-1.5">
+            <span className="font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-widest text-white/90 bg-black/30 rounded-full px-3 py-1.5">
               View →
             </span>
           </div>
@@ -1150,7 +1170,7 @@ function AwardsSpeakingPage({
       {/* Speaking events */}
       <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
         <div className="px-6 md:px-20 pt-8 md:pt-12 pb-4 md:pb-6">
-          <p className="font-['Raleway',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em]" style={{ color: GOLD }}>Speaking</p>
+          <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em]" style={{ color: GOLD }}>Speaking</p>
         </div>
         {SPEAKING_EVENTS.map((ev, i) => (
           <div key={ev.key} className="group" style={EVENT_ROW_STYLE}
@@ -1163,14 +1183,14 @@ function AwardsSpeakingPage({
                     style={{ objectPosition: ev.dark ? "center 30%" : "center" }} />
                   <div className="absolute inset-0" style={{ background: ev.dark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.15)" }} />
                   <div className="absolute bottom-6 left-6 md:left-20">
-                    <p className="font-['Raleway',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] text-white/70 mb-1">{ev.caption}</p>
-                    <h3 className="font-['Raleway',sans-serif] font-medium text-white" style={{ fontSize: "clamp(1.1rem, 2.2vw, 2rem)" }}>
+                    <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] text-white/70 mb-1">{ev.caption}</p>
+                    <h3 className="font-['Museo',sans-serif] font-medium text-white" style={{ fontSize: "clamp(1.1rem, 2.2vw, 2rem)" }}>
                       {ev.role} @ {ev.event}
                     </h3>
-                    <p className="font-['Raleway',sans-serif] font-light text-white/75 text-sm mt-1" style={{ maxWidth: 480 }}>{ev.topic}</p>
+                    <p className="font-['Avenir',sans-serif] font-light text-white/75 text-sm mt-1" style={{ maxWidth: 480 }}>{ev.topic}</p>
                   </div>
                   <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <span className="font-['Raleway',sans-serif] font-medium text-xs uppercase tracking-widest text-white/90 bg-black/30 rounded-full px-3 py-1.5">
+                    <span className="font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-widest text-white/90 bg-black/30 rounded-full px-3 py-1.5">
                       View →
                     </span>
                   </div>
@@ -1181,13 +1201,13 @@ function AwardsSpeakingPage({
                 style={{ borderTop: i === 0 ? "none" : `1px solid ${brd}`, background: "transparent" }}
                 onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)")}
                 onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
-                <span className="font-['Raleway',sans-serif] font-light text-sm flex-shrink-0 w-9 md:w-10 pt-0.5" style={{ color: sub }}>{ev.year}</span>
+                <span className="font-['Avenir',sans-serif] font-light text-sm flex-shrink-0 w-9 md:w-10 pt-0.5" style={{ color: sub }}>{ev.year}</span>
                 <div className="flex-1">
-                  <p className="font-['Raleway',sans-serif] font-light text-[0.55rem] uppercase tracking-[0.18em] mb-0.5" style={{ color: sub }}>{ev.role} · {ev.location}</p>
-                  <p className="font-['Raleway',sans-serif] font-medium group-hover:underline" style={{ fontSize: "clamp(0.95rem, 1.6vw, 1.4rem)", color: fg }}>{ev.event}</p>
-                  <p className="font-['Raleway',sans-serif] font-light text-sm mt-0.5" style={{ color: sub }}>{ev.topic}</p>
+                  <p className="font-['Avenir',sans-serif] font-light text-[0.55rem] uppercase tracking-[0.18em] mb-0.5" style={{ color: sub }}>{ev.role} · {ev.location}</p>
+                  <p className="font-['Avenir',sans-serif] font-medium group-hover:underline" style={{ fontSize: "clamp(0.95rem, 1.6vw, 1.4rem)", color: fg }}>{ev.event}</p>
+                  <p className="font-['Avenir',sans-serif] font-light text-sm mt-0.5" style={{ color: sub }}>{ev.topic}</p>
                 </div>
-                <span className="font-['Raleway',sans-serif] font-light text-sm self-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0" style={{ color: GOLD }}>→</span>
+                <span className="font-['Avenir',sans-serif] font-light text-sm self-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0" style={{ color: GOLD }}>→</span>
               </div>
             )}
           </div>
@@ -1299,7 +1319,7 @@ function SpeakingDetailPage({
         </button>
         <button
           onClick={onBack}
-          className="link-underline flex items-center gap-2 font-['Raleway',sans-serif] font-light text-sm uppercase tracking-widest ml-auto"
+          className="link-underline flex items-center gap-2 font-['Avenir',sans-serif] font-light text-sm uppercase tracking-widest ml-auto"
           style={{ color: GOLD }}>
           ← Awards &amp; Speaking
         </button>
@@ -1328,7 +1348,7 @@ function SpeakingDetailPage({
           )}
           {/* Label on image as in Figma */}
           <div className="absolute bottom-8 left-6 md:left-20">
-            <p className="font-['Raleway',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] mb-1"
+            <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] mb-1"
               style={{ color: "rgba(255,255,255,0.65)" }}>
               {ev.pageLabel}
             </p>
@@ -1339,15 +1359,15 @@ function SpeakingDetailPage({
       {/* Event metadata */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8"
         style={{ borderBottom: `1px solid ${ev.dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
-        <p className="font-['Raleway',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2"
+        <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2"
           style={{ color: GOLD }}>
           {ev.year} · {ev.role} · {ev.location}
         </p>
-        <h1 className="font-['Raleway',sans-serif] font-light mb-5"
+        <h1 className="font-['Museo',sans-serif] font-light mb-5"
           style={{ fontSize: "clamp(1.9rem, 5vw, 4rem)", lineHeight: 1.05, color: textColor, maxWidth: "20ch" }}>
           {ev.event}
         </h1>
-        <p className="font-['Raleway',sans-serif] font-light"
+        <p className="font-['Avenir',sans-serif] font-light"
           style={{ fontSize: "clamp(1rem, 2vw, 1.5rem)", color: subColor, maxWidth: 560, lineHeight: 1.5 }}>
           "{ev.topic}"
         </p>
@@ -1356,10 +1376,10 @@ function SpeakingDetailPage({
         {ev.link && !ev.finalistLink && (
           <div className="mt-8 rounded-2xl overflow-hidden flex flex-col items-center justify-center"
             style={{ maxWidth: 560, height: 200, background: ev.dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", border: `1px solid ${ev.dark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"}` }}>
-            <p className="font-['Raleway',sans-serif] font-light text-xs uppercase tracking-widest mb-4"
+            <p className="font-['Avenir',sans-serif] font-light text-xs uppercase tracking-widest mb-4"
               style={{ color: subColor }}>Watch the talk</p>
             <a href={ev.link} target="_blank" rel="noopener noreferrer"
-              className="link-underline inline-flex items-center gap-2 font-['Raleway',sans-serif] font-medium text-sm uppercase tracking-[0.15em] cursor-pointer"
+              className="link-underline inline-flex items-center gap-2 font-['Avenir',sans-serif] font-medium text-sm uppercase tracking-[0.15em] cursor-pointer"
               style={{ color: GOLD }}>
               Watch on YouTube
               <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
@@ -1370,7 +1390,7 @@ function SpeakingDetailPage({
         {/* Finalist link */}
         {ev.finalistLink && (
           <a href={ev.finalistLink} target="_blank" rel="noopener noreferrer"
-            className="link-underline inline-flex items-center gap-2 mt-6 font-['Raleway',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
+            className="link-underline inline-flex items-center gap-2 mt-6 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
             style={{ color: GOLD }}>
             View official finalists page
             <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
@@ -1381,7 +1401,7 @@ function SpeakingDetailPage({
       {/* Finalist card (Women in Digital only) */}
       {ev.additionalImg && (
         <div className="px-4 md:px-20 py-8 md:py-12">
-          <p className="font-['Raleway',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] mb-4" style={{ color: DIM }}>
+          <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] mb-4" style={{ color: DIM }}>
             The 2025 UX Leader of the Year Finalists
           </p>
           <div className="rounded-2xl overflow-hidden" style={{ boxShadow: "0 0 28px rgba(0,0,0,0.12)", maxWidth: 900 }}>
