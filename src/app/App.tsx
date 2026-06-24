@@ -722,7 +722,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           const hovered = hoveredNav === s.key;
           return (
             <button key={s.key}
-              onClick={() => goTo(i)}
+              onClick={() => (s.page ? onNavigate(s.page) : goTo(i))}
               onMouseEnter={() => { setHoveredNav(s.key); isPaused.current = true; }}
               onMouseLeave={() => {
                 setHoveredNav(null);
@@ -1044,12 +1044,13 @@ function WorkPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           <div className="mt-10">
             <p className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4" style={{ color: GOLD }}>Speaking</p>
             {[
-              { year: "2026", event: "UX Rotterdam, NL",           topic: "The Human Cost of Human-Centred-Design" },
-              { year: "2025", event: "UX Camp Melbourne, AU",       topic: "404: System Burnout" },
-              { year: "2025", event: "Ladies that UX Taipei, TW",   topic: "Driving Organisational Change" },
-              { year: "2025", event: "FUSECON, MY",                 topic: "Mental Health: From Awareness to Action" },
-              { year: "2024", event: "Friends of Figma KL × adplist", topic: "The Journey to Senior Designer" },
-              { year: "2023", event: "Design Leadership KL, MY",    topic: "Synergy for Sustainable Growth" },
+              { year: "2026", event: "Speaker @ UX Rotterdam, NL",                          topic: "The Human Cost of Human-Centred-Design" },
+              { year: "2025", event: "Speaker @ UX Camp Melbourne, AU",                      topic: "404: System Burnout" },
+              { year: "2025", event: "Panelist @ Ladies that UX Taipei, TW",                 topic: "Driving Organisational Change" },
+              { year: "2025", event: "Panelist @ FUSECON 2025, MY",                          topic: "Mental Health: From Awareness to Action" },
+              { year: "2024", event: "Panelist @ FUSECON 2024, MY",                          topic: "UX in Malaysia & beyond" },
+              { year: "2024", event: "Panelist @ Friends of Figma KL × adplist, MY",         topic: "The Journey to Senior Designer" },
+              { year: "2023", event: "Speaker @ Design Leadership KL, MY",                   topic: "Synergy for Sustainable Growth" },
             ].map(s => (
               <div key={s.event} className="mb-3">
                 <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.12em]" style={{ color: DIM }}>{s.year}</p>
@@ -1089,6 +1090,7 @@ const SPEAKING_EVENTS = [
   { key: "ux-camp",   year: "2025", role: "Speaker",  event: "UX Camp Melbourne",             location: "Melbourne, AU", topic: "404: System Burnout — An error message to my UX career",            link: "https://youtu.be/hJIJB3di6T4?si=a1XcoU3eV6f0bVvE",  img: null,          caption: null,             dark: false },
   { key: "taipei",    year: "2025", role: "Panelist", event: "Ladies that UX Taipei",         location: "Taipei, TW",    topic: "Driving Organisational Change and Creating Meaningful Impact",     link: null,                                               img: awardsTaipei,  caption: "2025 @ Taipei, TW",  dark: false },
   { key: "fusecon",   year: "2025", role: "Panelist", event: "FUSECON 2025",                  location: "Malaysia",      topic: "Mental Health: From Awareness to Action",                          link: null,                                               img: awardsFuseCon, caption: "FUSECON 2025, MY",    dark: true  },
+  { key: "fusecon-2024", year: "2024", role: "Panelist", event: "FUSECON 2024",               location: "Malaysia",      topic: "UX in Malaysia & beyond",                                          link: null,                                               img: null,          caption: null,             dark: false },
   { key: "figma-kl",  year: "2024", role: "Panelist", event: "Friends of Figma KL × adplist", location: "KL, MY",        topic: "The Journey to Senior Designer: Skills, Insights and Experiences", link: null,                                               img: null,          caption: null,             dark: false },
   { key: "design-kl", year: "2023", role: "Speaker",  event: "Design Leadership Kuala Lumpur",location: "KL, MY",        topic: "Synergy for Sustainable Growth: Empowering UX Team",               link: null,                                               img: null,          caption: null,             dark: false },
 ];
@@ -1184,17 +1186,16 @@ function AwardsSpeakingPage({
                 </div>
               </div>
             ) : (
-              <div className="flex items-start gap-4 md:gap-6 px-6 md:px-20 py-5 md:py-7 transition-colors duration-200"
+              <div className="relative flex flex-col gap-1 px-6 md:px-20 py-5 md:py-7 transition-colors duration-200"
                 style={{ borderTop: i === 0 ? "none" : `1px solid ${brd}`, background: "transparent" }}
                 onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)")}
                 onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
-                <span className="font-['Avenir',sans-serif] font-light text-sm flex-shrink-0 w-9 md:w-10 pt-0.5" style={{ color: sub }}>{ev.year}</span>
-                <div className="flex-1">
-                  <p className="font-['Avenir',sans-serif] font-light text-[0.55rem] uppercase tracking-[0.18em] mb-0.5" style={{ color: sub }}>{ev.role} · {ev.location}</p>
-                  <p className="font-['Avenir',sans-serif] font-medium group-hover:underline" style={{ fontSize: "clamp(0.95rem, 1.6vw, 1.4rem)", color: fg }}>{ev.event}</p>
-                  <p className="font-['Avenir',sans-serif] font-light text-sm mt-0.5" style={{ color: sub }}>{ev.topic}</p>
-                </div>
-                <span className="font-['Avenir',sans-serif] font-light text-sm self-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0" style={{ color: GOLD }}>→</span>
+                <span className="font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>{ev.year}</span>
+                <p className="font-['Avenir',sans-serif] font-medium group-hover:underline" style={{ fontSize: "clamp(0.95rem, 1.6vw, 1.4rem)", color: fg }}>
+                  {ev.role} @ {ev.event}, {ev.location}
+                </p>
+                <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub }}>{ev.topic}</p>
+                <span className="absolute top-5 md:top-7 right-6 md:right-20 font-['Avenir',sans-serif] font-light text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ color: GOLD }}>→</span>
               </div>
             )}
           </div>
@@ -1258,6 +1259,12 @@ const SPEAKING_DETAIL: Record<string, {
     year: "2025", role: "Panelist", event: "FUSECON 2025", location: "Malaysia",
     topic: "Mental Health: From Awareness to Action",
     heroImg: awardsFuseCon, additionalImg: null, link: null, dark: true, finalistLink: null,
+  },
+  "fusecon-2024": {
+    pageLabel: "FUSECON 2024, MY",
+    year: "2024", role: "Panelist", event: "FUSECON 2024", location: "Malaysia",
+    topic: "UX in Malaysia & beyond",
+    heroImg: null, additionalImg: null, link: null, dark: false, finalistLink: null,
   },
   "figma-kl": {
     pageLabel: "Panelist @ Friends of Figma KL × adplist",
