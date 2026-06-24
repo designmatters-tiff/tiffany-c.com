@@ -676,11 +676,11 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
         })}
       </div>
 
-      {/* ── Desktop nav — floating above bottom edge ── */}
+      {/* ── Desktop nav — floating above bottom edge, aligned to content width ── */}
       <nav className="absolute z-30 hidden md:flex items-stretch h-16 overflow-hidden"
         style={{
-          bottom: "5%", left: "5%", right: "5%",
-          borderRadius: 28,
+          bottom: "5%", left: 80, right: 80,
+          borderRadius: 0,
           background: NAV_GRADIENT,
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}>
@@ -723,11 +723,11 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
         })}
       </nav>
 
-      {/* ── Mobile nav bar — floating ── */}
+      {/* ── Mobile nav bar — floating, aligned to content width ── */}
       <nav className="absolute z-30 md:hidden flex items-center h-14 px-5 overflow-hidden"
         style={{
-          bottom: "5%", left: "5%", right: "5%",
-          borderRadius: 28,
+          bottom: "5%", left: 24, right: 24,
+          borderRadius: 0,
           background: NAV_GRADIENT,
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}>
@@ -1042,8 +1042,8 @@ function WorkPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
         </div>
       </div>
 
-      <div className="sticky z-30 overflow-hidden"
-        style={{ bottom: "3%", margin: "0 5%", borderRadius: 28, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+      <div className="sticky z-30 overflow-hidden mx-6 md:mx-20"
+        style={{ bottom: "3%", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
         <PageBottomNav activePage="work" onNavigate={onNavigate} />
       </div>
     </div>
@@ -1170,8 +1170,8 @@ function AwardsSpeakingPage({
       </div>
 
       <div style={{ height: "calc(64px + 8vh)" }} />
-      <div className="sticky z-30 overflow-hidden"
-        style={{ bottom: "3%", margin: "0 5%", borderRadius: 28, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+      <div className="sticky z-30 overflow-hidden mx-6 md:mx-20"
+        style={{ bottom: "3%", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
         <PageBottomNav activePage="awards" onNavigate={onNavigate} />
       </div>
     </div>
@@ -1364,8 +1364,8 @@ function SpeakingDetailPage({
       )}
 
       <div style={{ height: "calc(64px + 8vh)" }} />
-      <div className="sticky z-30 overflow-hidden"
-        style={{ bottom: "3%", margin: "0 5%", borderRadius: 28, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+      <div className="sticky z-30 overflow-hidden mx-6 md:mx-20"
+        style={{ bottom: "3%", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
         <PageBottomNav activePage="awards" onNavigate={onNavigate} />
       </div>
     </div>
