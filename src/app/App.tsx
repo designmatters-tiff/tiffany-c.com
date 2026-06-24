@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { motion } from "motion/react";
-import { Linkedin, X, Sun, Moon, ExternalLink } from "lucide-react";
+import { Linkedin, X, ExternalLink, Plus } from "lucide-react";
 
 import workVectorImg from "@/imports/Work/de262c33781bad1f71ecf3f1af344f0a34fcb830.png";
 import workScreenshot from "@/imports/Work/20b286508ef46dd3c3d46807441d1c8751314568.png";
@@ -28,6 +28,7 @@ type Page = "home" | "work" | "awards" | "speaking";
 
 // ─── Dark mode context ────────────────────────────────────────────
 const DarkModeCtx = createContext(false);
+const DarkModeToggleCtx = createContext<() => void>(() => {});
 
 // ─── Animated gradient background (dark mode) ─────────────────────
 function AnimatedGradientBg() {
@@ -54,13 +55,30 @@ function AnimatedGradientBg() {
 }
 
 // ─── Dark / light toggle widget ───────────────────────────────────
-function DarkModeToggle({ isDark, onToggle }: { isDark: boolean; onToggle: () => void }) {
+// Desktop: shown fixed top-right. Mobile: rendered inside MobileMenu instead
+// (see DarkModeToggle usage in MobileMenu / App root, which hides this on mobile).
+function DarkModeToggle({
+  isDark,
+  onToggle,
+  variant = "floating",
+}: {
+  isDark: boolean;
+  onToggle: () => void;
+  variant?: "floating" | "inline";
+}) {
+  const onLight = variant === "inline" ? "white" : (isDark ? "rgba(255,255,255,0.85)" : INK);
+  const onDim   = variant === "inline" ? "rgba(255,255,255,0.45)" : (isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)");
   return (
     <button
       onClick={onToggle}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      className="fixed top-5 right-5 z-[60] flex items-center gap-2 px-3 py-2 rounded-full"
+      className={
+        variant === "floating"
+          ? "fixed top-5 right-5 z-[60] hidden md:flex items-center gap-2 px-3 py-2"
+          : "flex items-center gap-2 px-3 py-2"
+      }
       style={{
+        borderRadius: 0,
         background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
         backdropFilter: "blur(10px)",
         WebkitBackdropFilter: "blur(10px)",
@@ -68,14 +86,18 @@ function DarkModeToggle({ isDark, onToggle }: { isDark: boolean; onToggle: () =>
         transition: "background 0.3s, border-color 0.3s",
       }}
     >
-      <Sun size={12} color={isDark ? "rgba(255,255,255,0.5)" : "#aaa"} />
-      {/* pill track */}
-      <div className="relative rounded-full"
-        style={{ width: 28, height: 16, background: isDark ? GOLD : "#ccc", transition: "background 0.3s" }}>
-        <div className="absolute top-[2px] rounded-full bg-white shadow-sm"
-          style={{ width: 12, height: 12, transform: isDark ? "translateX(14px)" : "translateX(2px)", transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)" }} />
+      <span className="font-['Raleway',sans-serif] font-medium text-[0.65rem] uppercase tracking-[0.15em]"
+        style={{ color: !isDark ? onLight : onDim, transition: "color 0.3s" }}>
+        Bright
+      </span>
+      {/* track */}
+      <div className="relative" style={{ width: 28, height: 16, borderRadius: 0, background: isDark ? GOLD : "#ccc", transition: "background 0.3s" }}>
+        <div className="absolute top-[2px]" style={{ width: 12, height: 12, borderRadius: 0, background: "white", transform: isDark ? "translateX(14px)" : "translateX(2px)", transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)" }} />
       </div>
-      <Moon size={12} color={isDark ? GOLD_BRIGHT : "#aaa"} />
+      <span className="font-['Raleway',sans-serif] font-medium text-[0.65rem] uppercase tracking-[0.15em]"
+        style={{ color: isDark ? (variant === "inline" ? GOLD_BRIGHT : GOLD_BRIGHT) : onDim, transition: "color 0.3s" }}>
+        Dark
+      </span>
     </button>
   );
 }
@@ -152,7 +174,7 @@ function MobileMenu({
           style={{ background: "rgba(255,255,255,0.15)" }}
           aria-label="Close menu"
         >
-          <X size={20} color="white" />
+          <X size={20} strokeWidth={1} color="white" />
         </button>
       </div>
 
@@ -193,10 +215,10 @@ function MobileMenu({
         })}
       </div>
 
-      {/* Footer */}
-      <p className="px-6 pb-8 font-['Raleway',sans-serif] font-light text-xs tracking-widest uppercase text-white/40">
-        tiffany-c.design
-      </p>
+      {/* Footer — dark/bright toggle (mobile only; desktop toggle floats top-right) */}
+      <div className="px-6 pb-8 flex justify-start">
+        <DarkModeToggle isDark={useContext(DarkModeCtx)} onToggle={useContext(DarkModeToggleCtx)} variant="inline" />
+      </div>
     </motion.div>
   );
 }
@@ -260,22 +282,23 @@ function SpeakingInquiryRow({ accent, itemColor, borderColor }: {
     <div>
       {/* Row trigger */}
       <button
-        className="w-full flex items-center justify-between py-4 md:py-[18px] cursor-pointer"
+        className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer"
         onClick={() => setOpen(v => !v)}
       >
+        <Plus
+          size={16}
+          strokeWidth={1}
+          style={{
+            color: accent,
+            flexShrink: 0,
+            transform: open ? "rotate(45deg)" : "rotate(0deg)",
+            transition: "transform 0.3s ease",
+          }}
+        />
         <span className="link-underline font-['Raleway',sans-serif] font-light text-base md:text-lg text-left"
           style={{ color: itemColor }}>
           Speaking Inquiry
         </span>
-        <span
-          className="font-['Raleway',sans-serif] font-light text-lg flex-shrink-0 ml-3"
-          style={{
-            color: accent,
-            display: "inline-block",
-            transform: open ? "rotate(45deg)" : "rotate(0deg)",
-            transition: "transform 0.3s ease",
-          }}
-        >+</span>
       </button>
 
       {/* Expanding form */}
@@ -297,7 +320,7 @@ function SpeakingInquiryRow({ accent, itemColor, borderColor }: {
                 <div key={f.name} className="flex flex-col gap-1">
                   <label
                     className="font-['Raleway',sans-serif] font-light text-[0.58rem] uppercase tracking-[0.18em]"
-                    style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)" }}
+                    style={{ color: isDark ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.65)" }}
                   >
                     {f.label}{f.required && " *"}
                   </label>
@@ -377,7 +400,7 @@ const SECTIONS = [
     key: "connect", label: "Connect",          page: null,
     accent: "#9B5A88",
     tagline: "Let's Connect",
-    context: "Geelong, AU · Open to collaboration",
+    context: "Open to collaboration",
     items: ["linkedin", "designmatters.tiff@gmail.com", "Speaking Inquiry"],
   },
 ] as const;
@@ -534,7 +557,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 style={{ fontSize: "1.05rem", color: fgSub, opacity: 0.85 }}>
                 Building products that work for people, profit, and planet —
                 from TNG eWallet (Malaysia's First Fintech Unicorn) to Cotton On Group's
-                9-country eCommerce platform. Based in Geelong, AU.
+                9-country eCommerce platform.
               </p>
             </div>
             <div className="flex flex-col items-start gap-1 pb-2">
@@ -566,7 +589,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.75rem)", color: fgSub, opacity: 0.85 }}>
                 Building products that work for people, profit, and planet —
                 from First Malaysia Fintech Unicorn TNG eWallet to Cotton On Group's
-                9-country eCommerce platform. Based in Geelong, AU.
+                9-country eCommerce platform.
               </p>
             </div>
             <div className="absolute" style={{ bottom: "calc(64px + 5vh + 40px)", left: "7%", right: "7%", height: 1, background: "rgba(178,147,59,0.25)" }} />
@@ -630,9 +653,9 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                           {isLinkedin ? (
                             <a href="https://www.linkedin.com/in/tiffany-c/" target="_blank" rel="noopener noreferrer"
                               className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
-                              <Linkedin size={16} style={{ color: section.accent, flexShrink: 0 }} />
+                              <Linkedin size={16} strokeWidth={1} style={{ color: section.accent, flexShrink: 0 }} />
                               <span className="link-underline font-['Raleway',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>LinkedIn</span>
-                              <ExternalLink size={13} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
+                              <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
                             </a>
                           ) : item === "designmatters.tiff@gmail.com" ? (
                             <a href="mailto:designmatters.tiff@gmail.com"
@@ -643,7 +666,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                             <a href="https://topmate.io/tffnyc" target="_blank" rel="noopener noreferrer"
                               className="w-full flex items-center gap-2 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
                               <span className="link-underline font-['Raleway',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
-                              <ExternalLink size={13} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
+                              <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
                             </a>
                           ) : item === "Speaking Inquiry" ? (
                             <SpeakingInquiryRow
@@ -854,15 +877,16 @@ function ExpertiseCard({ card }: { card: typeof EXPERTISE_CARDS[0] }) {
         <Illustration />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-3 mb-2">
+          <Plus
+            size={18}
+            strokeWidth={1}
+            style={{ color: card.accent, flexShrink: 0, transform: open ? "rotate(45deg)" : "rotate(0deg)", transition: "transform 0.3s" }}
+          />
           <h3 className="font-['Raleway',sans-serif] font-light"
             style={{ fontSize: "clamp(1.1rem, 2.2vw, 2.1rem)", color: isDark ? "white" : INK }}>
             {card.title}
           </h3>
-          <span className="font-['Raleway',sans-serif] font-light text-xl ml-3 flex-shrink-0"
-            style={{ color: card.accent, display: "inline-block", transform: open ? "rotate(45deg)" : "rotate(0deg)", transition: "transform 0.3s" }}>
-            +
-          </span>
         </div>
         <p className="font-['Raleway',sans-serif] font-light text-sm leading-relaxed" style={{ color: isDark ? "rgba(255,255,255,0.55)" : DIM, maxWidth: 600 }}>
           {card.description}
@@ -1335,7 +1359,7 @@ function SpeakingDetailPage({
               className="link-underline inline-flex items-center gap-2 font-['Raleway',sans-serif] font-medium text-sm uppercase tracking-[0.15em] cursor-pointer"
               style={{ color: GOLD }}>
               Watch on YouTube
-              <ExternalLink size={13} style={{ opacity: 0.7, flexShrink: 0 }} />
+              <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
             </a>
           </div>
         )}
@@ -1346,7 +1370,7 @@ function SpeakingDetailPage({
             className="link-underline inline-flex items-center gap-2 mt-6 font-['Raleway',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
             style={{ color: GOLD }}>
             View official finalists page
-            <ExternalLink size={13} style={{ opacity: 0.7, flexShrink: 0 }} />
+            <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
           </a>
         )}
       </div>
@@ -1391,8 +1415,11 @@ export default function App() {
 
   const motionKey = page === "speaking" ? `speaking:${detailKey}` : page;
 
+  const toggleDark = useCallback(() => setIsDark(d => !d), []);
+
   return (
     <DarkModeCtx.Provider value={isDark}>
+    <DarkModeToggleCtx.Provider value={toggleDark}>
     <div className="relative w-screen h-screen overflow-hidden" style={{ background: isDark ? "#181410" : "#f8f7f5" }}>
       {/* Persistent background — mounted once at the App root so its drift
           animation never resets on page navigation. Only the content above
@@ -1402,7 +1429,7 @@ export default function App() {
           <AnimatedGradientBg />
         </div>
       )}
-      <DarkModeToggle isDark={isDark} onToggle={() => setIsDark(d => !d)} />
+      <DarkModeToggle isDark={isDark} onToggle={toggleDark} />
       <motion.div key={motionKey} className="absolute inset-0" style={{ zIndex: 1 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.45 }}>
         {page === "home"     && <HomePage onNavigate={setPage} />}
         {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={setPage} /></div>}
@@ -1414,6 +1441,7 @@ export default function App() {
         )}
       </motion.div>
     </div>
+    </DarkModeToggleCtx.Provider>
     </DarkModeCtx.Provider>
   );
 }
