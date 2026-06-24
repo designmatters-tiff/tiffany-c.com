@@ -1154,7 +1154,7 @@ function AwardsSpeakingPage({
           <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.2)" }} />
           <div className="absolute bottom-6 md:bottom-8 left-6 md:left-20">
             <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] text-white/70 mb-1">2025 · National Awards · Australia</p>
-            <h2 className="font-['Museo',sans-serif] font-medium text-white" style={{ fontSize: "clamp(1.25rem, 2.5vw, 2.25rem)" }}>
+            <h2 className="font-['Museo',sans-serif] font-light text-white" style={{ fontSize: "clamp(1.25rem, 2.5vw, 2.25rem)" }}>
               UX Leader of the Year — Finalist
             </h2>
             <p className="font-['Avenir',sans-serif] font-light text-white/80 text-sm mt-1">Women in Digital National Awards</p>
@@ -1184,7 +1184,7 @@ function AwardsSpeakingPage({
                   <div className="absolute inset-0" style={{ background: ev.dark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.15)" }} />
                   <div className="absolute bottom-6 left-6 md:left-20">
                     <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] text-white/70 mb-1">{ev.caption}</p>
-                    <h3 className="font-['Museo',sans-serif] font-medium text-white" style={{ fontSize: "clamp(1.1rem, 2.2vw, 2rem)" }}>
+                    <h3 className="font-['Museo',sans-serif] font-light text-white" style={{ fontSize: "clamp(1.1rem, 2.2vw, 2rem)" }}>
                       {ev.role} @ {ev.event}
                     </h3>
                     <p className="font-['Avenir',sans-serif] font-light text-white/75 text-sm mt-1" style={{ maxWidth: 480 }}>{ev.topic}</p>
