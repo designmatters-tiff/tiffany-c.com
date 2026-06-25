@@ -710,7 +710,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                   {section.context}
                 </motion.p>
 
-                <motion.h2 className="font-['Museo',sans-serif] font-light"
+                <motion.h2 className="font-['TAN_Mon_Cheri',sans-serif] font-normal"
                   style={{ fontSize: "48px", lineHeight: 1.05, maxWidth: "16ch", color: GOLD }}
                   initial={false}
                   animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }}
@@ -814,7 +814,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               }}>
               <span className="flex items-center gap-3 min-w-0">
                 {i === 0 && <HamburgerIcon color="white" />}
-                <span className="font-['Museo',sans-serif] font-light text-[0.85rem] whitespace-nowrap overflow-hidden text-ellipsis text-white">
+                <span className="font-['TAN_Mon_Cheri',sans-serif] font-normal text-[0.85rem] whitespace-nowrap overflow-hidden text-ellipsis text-white">
                   {s.label}
                 </span>
               </span>
@@ -842,13 +842,13 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           className="flex items-center gap-3"
           aria-label="Open navigation">
           <HamburgerIcon color="white" />
-          <span className="font-['Museo',sans-serif] font-light text-sm text-white">
+          <span className="font-['TAN_Mon_Cheri',sans-serif] font-normal text-sm text-white">
             Tiffany C.
           </span>
         </button>
         <div className="flex-1" />
         {activeIdx > 0 && (
-          <span className="font-['Museo',sans-serif] font-light text-sm text-white/75">
+          <span className="font-['TAN_Mon_Cheri',sans-serif] font-normal text-sm text-white/75">
             {currentSection.label}
           </span>
         )}
@@ -967,7 +967,7 @@ function ExpertiseCard({ card }: { card: typeof EXPERTISE_CARDS[0] }) {
             strokeWidth={1}
             style={{ color: card.accent, flexShrink: 0, transform: open ? "rotate(45deg)" : "rotate(0deg)", transition: "transform 0.3s" }}
           />
-          <h3 className="font-['Museo',sans-serif] font-light"
+          <h3 className="font-['TAN_Mon_Cheri',sans-serif] font-normal"
             style={{ fontSize: "clamp(1.1rem, 2.2vw, 2.1rem)", color: isDark ? GOLD : INK }}>
             {card.title}
           </h3>
@@ -1027,14 +1027,14 @@ function PageBottomNav({
             borderRight: "1px solid rgba(255,255,255,0.18)",
           }}>
           <HamburgerIcon />
-          <span className="font-['Museo',sans-serif] font-light text-[0.85rem] text-white whitespace-nowrap overflow-hidden text-ellipsis">Tiffany C.</span>
+          <span className="font-['TAN_Mon_Cheri',sans-serif] font-normal text-[0.85rem] text-white whitespace-nowrap overflow-hidden text-ellipsis">Tiffany C.</span>
         </button>
         {NAV_ITEMS.map(item => (
           <button key={item.key}
             onMouseEnter={() => setHoveredNav(item.key)}
             onMouseLeave={() => setHoveredNav(null)}
             onClick={() => item.page && onNavigate(item.page)}
-            className="flex items-center font-['Museo',sans-serif] font-light text-[0.85rem] whitespace-nowrap overflow-hidden text-ellipsis text-white"
+            className="flex items-center font-['TAN_Mon_Cheri',sans-serif] font-normal text-[0.85rem] whitespace-nowrap overflow-hidden text-ellipsis text-white"
             style={{
               flex: activePage === item.page || hoveredNav === item.key ? "3 1 0%" : "1 1 0%",
               minWidth: 0, padding: "0 20px",
@@ -1243,7 +1243,7 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
         />
         <div className="flex-1 flex flex-col gap-1">
           <span className="font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>2025 · National Awards · Australia</span>
-          <p className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.5rem)", color: fg }}>
+          <p className="font-['TAN_Mon_Cheri',sans-serif] font-normal" style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.5rem)", color: fg }}>
             UX Leader of the Year — Finalist
           </p>
           <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub }}>Women in Digital National Awards</p>
@@ -1308,7 +1308,7 @@ function AwardsSpeakingPage({
       {/* Page heading */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
         <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}>Recognition</p>
-        <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: fg }}>
+        <h1 className="font-['TAN_Mon_Cheri',sans-serif] font-normal" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: fg }}>
           Awards &amp; Speaking
         </h1>
       </div>
@@ -1483,7 +1483,7 @@ function SpeakingDetailPage({
           style={{ color: GOLD }}>
           {ev.year} · {ev.role} · {ev.location}
         </p>
-        <h1 className="font-['Museo',sans-serif] font-light mb-5"
+        <h1 className="font-['TAN_Mon_Cheri',sans-serif] font-normal mb-5"
           style={{ fontSize: "clamp(1.9rem, 5vw, 4rem)", lineHeight: 1.05, color: textColor, maxWidth: "20ch" }}>
           {ev.event}
         </h1>
