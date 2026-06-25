@@ -579,7 +579,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const currentSection = SECTIONS[activeIdx];
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden" style={{ background: isDark ? "transparent" : "#f8f7f5" }}>
+    <div className="relative w-screen h-dvh overflow-hidden" style={{ background: isDark ? "transparent" : "#f8f7f5" }}>
 
       {/* ── Horizontal scroll track ── */}
       <div
@@ -681,7 +681,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                     <button
                       onClick={() => setMobileExpanded(m => ({ ...m, [section.key]: true }))}
                       className="absolute left-1/2 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
-                      style={{ transform: "translateX(-50%)", bottom: "calc(5% + 56px + 34px)", color: GOLD, background: "none", border: "none", zIndex: 6 }}>
+                      style={{ transform: "translateX(-50%)", bottom: "calc(5% + 56px + 34px + env(safe-area-inset-bottom))", color: GOLD, background: "none", border: "none", zIndex: 6 }}>
                       View more
                     </button>
                   </>
@@ -775,7 +775,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           slide, including the embedded Work/Award & Speaking pages, which
           have no room in their own content for a per-slide indicator. ── */}
       <div className="md:hidden absolute z-30 flex items-center gap-1.5 left-1/2"
-        style={{ bottom: "calc(5% + 56px + 14px)", transform: "translateX(-50%)" }}>
+        style={{ bottom: "calc(5% + 56px + 14px + env(safe-area-inset-bottom))", transform: "translateX(-50%)" }}>
         {SECTIONS.map((_, di) => (
           <div key={di} className="rounded-full transition-all duration-300"
             style={{ width: activeIdx === di ? 16 : 5, height: 5,
@@ -832,7 +832,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       {/* ── Mobile nav bar — floating, aligned to content width ── */}
       <nav className="absolute z-30 md:hidden flex items-center h-14 px-5 overflow-hidden"
         style={{
-          bottom: "5%", left: 24, right: 24,
+          bottom: "calc(5% + env(safe-area-inset-bottom))", left: 24, right: 24,
           borderRadius: 0,
           background: NAV_GRADIENT,
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
@@ -1083,7 +1083,7 @@ function WorkPage({ onNavigate, embedded = false }: { onNavigate: (p: Page) => v
   const isDark = useContext(DarkModeCtx);
   const bg = isDark ? "transparent" : "#f8f7f5";
   return (
-    <div className="relative w-full" style={{ minHeight: embedded ? "100%" : "100vh", background: bg }}>
+    <div className="relative w-full" style={{ minHeight: embedded ? "100%" : "100dvh", background: bg }}>
       {!embedded && (
         <button
           onClick={() => onNavigate("home")}
@@ -1102,7 +1102,7 @@ function WorkPage({ onNavigate, embedded = false }: { onNavigate: (p: Page) => v
 
       {!embedded && (
         <div className="sticky z-30 overflow-hidden mx-6 md:mx-20"
-          style={{ bottom: "3%", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+          style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
           <PageBottomNav activePage="work" onNavigate={onNavigate} />
         </div>
       )}
@@ -1294,7 +1294,7 @@ function AwardsSpeakingPage({
   const sub = isDark ? "rgba(255,255,255,0.55)" : DIM;
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   return (
-    <div className="relative w-full" style={{ minHeight: embedded ? "100%" : "100vh", background: bg }}>
+    <div className="relative w-full" style={{ minHeight: embedded ? "100%" : "100dvh", background: bg }}>
       {!embedded && (
         <button
           onClick={() => onNavigate("home")}
@@ -1329,7 +1329,7 @@ function AwardsSpeakingPage({
       <div style={{ height: "calc(64px + 8vh)" }} />
       {!embedded && (
         <div className="sticky z-30 overflow-hidden mx-6 md:mx-20"
-          style={{ bottom: "3%", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+          style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
           <PageBottomNav activePage="awards" onNavigate={onNavigate} />
         </div>
       )}
@@ -1425,7 +1425,7 @@ function SpeakingDetailPage({
   const subColor = (ev.dark || globalDark) ? "rgba(255,255,255,0.55)" : DIM;
 
   return (
-    <div className="relative w-full" style={{ minHeight: "100vh", background: bg }}>
+    <div className="relative w-full" style={{ minHeight: "100dvh", background: bg }}>
 
       {/* Back bar */}
       <div className="relative flex items-center gap-4 px-6 md:px-20 pt-8 pb-6"
@@ -1532,7 +1532,7 @@ function SpeakingDetailPage({
 
       <div style={{ height: "calc(64px + 8vh)" }} />
       <div className="sticky z-30 overflow-hidden mx-6 md:mx-20"
-        style={{ bottom: "3%", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+        style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
         <PageBottomNav activePage="awards" onNavigate={onNavigate} />
       </div>
     </div>
@@ -1569,7 +1569,7 @@ export default function App() {
     <DarkModeCtx.Provider value={isDark}>
     <DarkModeToggleCtx.Provider value={toggleDark}>
     <AccordionCtx.Provider value={{ openId: openAccordionId, setOpenId: setOpenAccordionId }}>
-    <div className="relative w-screen h-screen overflow-hidden" style={{ background: isDark ? "#181410" : "#f8f7f5" }}>
+    <div className="relative w-screen h-dvh overflow-hidden" style={{ background: isDark ? "#181410" : "#f8f7f5" }}>
       {/* Persistent background — mounted once at the App root so its drift
           animation never resets on page navigation. Only the content above
           it (motion.div below) transitions between pages. */}
