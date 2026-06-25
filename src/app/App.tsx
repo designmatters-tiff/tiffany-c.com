@@ -677,11 +677,11 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
                 {capped && (
                   <>
-                    <div className="pointer-events-none absolute" style={{ left: 0, right: 0, bottom: 0, height: 160, background: `linear-gradient(to bottom, transparent 0%, ${pageBg} 75%)` }} />
+                    <div className="pointer-events-none absolute" style={{ left: 0, right: 0, bottom: 0, height: 260, zIndex: 5, background: `linear-gradient(to bottom, ${pageBg}00 0%, ${pageBg} 100%)` }} />
                     <button
                       onClick={() => setMobileExpanded(m => ({ ...m, [section.key]: true }))}
                       className="absolute left-1/2 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
-                      style={{ transform: "translateX(-50%)", bottom: "calc(5% + 56px + 34px)", color: GOLD, background: "none", border: "none" }}>
+                      style={{ transform: "translateX(-50%)", bottom: "calc(5% + 56px + 34px)", color: GOLD, background: "none", border: "none", zIndex: 6 }}>
                       View more
                     </button>
                   </>
