@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback, createContext, useContext } f
 import { motion } from "motion/react";
 import { Linkedin, X, ExternalLink, Plus } from "lucide-react";
 
-import workScreenshot from "@/imports/Work/20b286508ef46dd3c3d46807441d1c8751314568.png";
 import noiseGrad1 from "@/imports/Home/7e24109bcd9a8ce8e2da86d2a7818871291daeb7.png";
 import awardsWomenDigital from "@/imports/AwardsSpeaking/WID-tiff2025.png";
 import awardsFinalistCard from "@/imports/AwardsSpeaking/WID-2.png";
@@ -187,12 +186,19 @@ function MobileMenu({
   onClose,
   onGoTo,
   onNavigate,
+  forceScroll = false,
 }: {
   open: boolean;
   activeIdx: number;
   onClose: () => void;
   onGoTo: (i: number) => void;
   onNavigate: (p: Page) => void;
+  // When true (homepage usage), every item scrolls within the
+  // homepage's own track — Work/Award & Speaking slides already embed
+  // the real page, so there's no need to break out to a separate
+  // top-level route. PageBottomNav (used on standalone pages with no
+  // track to scroll) keeps the page-aware branching below.
+  forceScroll?: boolean;
 }) {
   return (
     <motion.div
@@ -225,7 +231,7 @@ function MobileMenu({
             <button
               key={s.key}
               onClick={() => {
-                if (s.page) {
+                if (s.page && !forceScroll) {
                   onNavigate(s.page);
                 } else {
                   onGoTo(i);
@@ -479,15 +485,6 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
     const el = scrollEl.current;
     if (!el) return;
     const clamped = Math.max(0, Math.min(SECTIONS.length - 1, idx));
-    // Sections with a dedicated full page (Work, Award & Speaking) open
-    // that real page directly — horizontal scroll/swipe/keyboard behaves
-    // the same as clicking the nav. Only Coaching/Connect (no `page`)
-    // stay as in-place preview slides within the homepage's own scroll.
-    const targetPage = SECTIONS[clamped].page;
-    if (targetPage) {
-      onNavigate(targetPage);
-      return;
-    }
     activeIdxRef.current = clamped;
     el.scrollTo({ left: clamped * el.clientWidth, behavior: "smooth" });
     resetTimer();
@@ -496,15 +493,14 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   // rAF auto-advance — skipped entirely on mobile
   useEffect(() => {
     const tick = () => {
-      if (!isMobileRef.current && !isPaused.current) {
+      const onEmbeddedPage = Boolean(SECTIONS[activeIdxRef.current].page);
+      if (!isMobileRef.current && !isPaused.current && !onEmbeddedPage) {
         const elapsed = Date.now() - startTime.current;
         const p = Math.min(100, (elapsed / AUTO_DURATION) * 100);
         setProgress(p);
         if (p >= 100) {
           const next = activeIdxRef.current + 1;
           if (next >= SECTIONS.length) { setProgress(100); return; }
-          const nextPage = SECTIONS[next].page;
-          if (nextPage) { onNavigate(nextPage); return; }
           activeIdxRef.current = next;
           scrollEl.current?.scrollTo({ left: next * (scrollEl.current?.clientWidth ?? 0), behavior: "smooth" });
           startTime.current = Date.now();
@@ -524,9 +520,21 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
     let timer: ReturnType<typeof setTimeout>;
     const onWheel = (e: WheelEvent) => {
       if (isMobileRef.current) return;
+
+      const absY = Math.abs(e.deltaY);
+      const absX = Math.abs(e.deltaX);
+
+      // On a slide that embeds a real, vertically-scrollable page
+      // (Work / Award & Speaking), a vertical gesture should scroll
+      // that page's own content — not hijack the wheel to advance to
+      // the next/prev section. Horizontal gestures still switch
+      // sections even while on one of these slides.
+      const isEmbeddedPage = Boolean(SECTIONS[activeIdxRef.current].page);
+      if (isEmbeddedPage && absY >= absX) return;
+
       e.preventDefault();
       if (wheeling.current) return;
-      const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      const delta = absY >= absX ? e.deltaY : e.deltaX;
       if (Math.abs(delta) < 6) return;
       wheeling.current = true;
       goTo(activeIdxRef.current + (delta > 0 ? 1 : -1));
@@ -652,6 +660,24 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
         {SECTIONS.slice(1).map((section, i) => {
           const idx = i + 1;
           const isActive = activeIdx === idx;
+
+          // Work / Award & Speaking embed the real page directly so
+          // scrolling horizontally into them glides straight into the
+          // actual content (no stale preview text). Vertical scroll
+          // inside the slide lengthens it independently of the
+          // horizontal scroll-snap track.
+          if (section.page) {
+            return (
+              <section key={section.key}
+                className="flex-shrink-0 relative overflow-y-auto"
+                style={{ width: "100vw", height: "100%", scrollSnapAlign: "start" }}>
+                {section.page === "work"
+                  ? <WorkPage onNavigate={onNavigate} embedded />
+                  : <AwardsSpeakingPage onNavigate={onNavigate} embedded />}
+              </section>
+            );
+          }
+
           return (
             <section key={section.key}
               className="flex-shrink-0 relative flex flex-col"
@@ -754,7 +780,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           const hovered = hoveredNav === s.key;
           return (
             <button key={s.key}
-              onClick={() => (s.page ? onNavigate(s.page) : goTo(i))}
+              onClick={() => goTo(i)}
               onMouseEnter={() => { setHoveredNav(s.key); isPaused.current = true; }}
               onMouseLeave={() => {
                 setHoveredNav(null);
@@ -819,6 +845,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
         onClose={() => setMenuOpen(false)}
         onGoTo={(i) => { goTo(i); setMenuOpen(false); }}
         onNavigate={(p) => { onNavigate(p); setMenuOpen(false); }}
+        forceScroll
       />
     </div>
   );
@@ -1031,81 +1058,38 @@ function PageBottomNav({
 
 // ─── Work page ────────────────────────────────────────────────────
 
-function WorkPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
+// `embedded` is used when this page is rendered inline inside the
+// homepage's horizontal scroll-snap track (see HomePage) — in that
+// case the homepage's own logomark/back-button and floating nav are
+// already on screen, so this component's copies are suppressed to
+// avoid duplicating them.
+function WorkPage({ onNavigate, embedded = false }: { onNavigate: (p: Page) => void; embedded?: boolean }) {
   const isDark = useContext(DarkModeCtx);
   const bg = isDark ? "transparent" : "#f8f7f5";
-  const fg = isDark ? GOLD : INK;
-  const sub = isDark ? "rgba(255,255,255,0.55)" : DIM;
-  const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   return (
-    <div className="relative w-full" style={{ minHeight: "100vh", background: bg }}>
-      <button
-        onClick={() => onNavigate("home")}
-        aria-label="Back to homepage"
-        className="fixed top-5 left-5 z-[59] cursor-pointer"
-      >
-        <LogoMark size={14} />
-      </button>
+    <div className="relative w-full" style={{ minHeight: embedded ? "100%" : "100vh", background: bg }}>
+      {!embedded && (
+        <button
+          onClick={() => onNavigate("home")}
+          aria-label="Back to homepage"
+          className="fixed top-5 left-5 z-[59] cursor-pointer"
+        >
+          <LogoMark size={14} />
+        </button>
+      )}
 
-      {/* Content — single column on mobile, two columns on desktop */}
-      <div className="flex flex-col md:flex-row pt-10 md:pt-14">
-        {/* Sidebar — mobile only (desktop sidebar is the block below) */}
-        <div className="md:hidden flex flex-col pt-8 px-5 pb-6"
-          style={{ borderBottom: "1px solid rgba(0,0,0,0.08)" }}>
-          <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] mb-3" style={{ color: GOLD }}>Expertise</p>
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            {["AI + UX DesignOps", "Business Acumen", "Product & UX Methods", "People & Process"].map(s => (
-              <span key={s} className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: INK }}>{s}</span>
-            ))}
-          </div>
-        </div>
-
-        {/* Sidebar — desktop only */}
-        <div className="hidden md:flex flex-col flex-shrink-0 pt-12 pl-10 pr-8 overflow-y-auto"
-          style={{ width: "clamp(200px, 22vw, 300px)", borderRight: "1px solid rgba(0,0,0,0.08)", minHeight: "calc(78vh - 64px)" }}>
-          <p className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-5" style={{ color: GOLD }}>Expertise</p>
-          {["AI + UX DesignOps", "Business Acumen", "Product & UX Methods", "People & Process"].map(skill => (
-            <p key={skill} className="font-['Avenir',sans-serif] font-light leading-snug mb-1"
-              style={{ fontSize: "clamp(1.05rem, 1.6vw, 1.8rem)", color: INK }}>{skill}</p>
-          ))}
-          <div className="mt-10">
-            <p className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4" style={{ color: GOLD }}>Speaking</p>
-            {[
-              { year: "2026", event: "Speaker @ UX Rotterdam, NL",                          topic: "The Human Cost of Human-Centred-Design" },
-              { year: "2025", event: "Speaker @ UX Camp Melbourne, AU",                      topic: "404: System Burnout" },
-              { year: "2025", event: "Panelist @ Ladies that UX Taipei, TW",                 topic: "Driving Organisational Change" },
-              { year: "2025", event: "Panelist @ FUSECON 2025, MY",                          topic: "Mental Health: From Awareness to Action" },
-              { year: "2024", event: "Panelist @ FUSECON 2024, MY",                          topic: "UX in Malaysia & beyond" },
-              { year: "2024", event: "Panelist @ Friends of Figma KL × adplist, MY",         topic: "The Journey to Senior Designer" },
-              { year: "2023", event: "Speaker @ Design Leadership KL, MY",                   topic: "Synergy for Sustainable Growth" },
-            ].map(s => (
-              <div key={s.event} className="mb-3">
-                <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.12em]" style={{ color: DIM }}>{s.year}</p>
-                <p className="font-['Avenir',sans-serif] font-medium text-sm leading-snug" style={{ color: INK }}>{s.event}</p>
-                <p className="font-['Avenir',sans-serif] font-light text-xs leading-snug" style={{ color: DIM }}>{s.topic}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Cards — full width on mobile */}
-        <div className="flex-1">
-          {EXPERTISE_CARDS.map(card => <ExpertiseCard key={card.key} card={card} />)}
-          <div className="w-full">
-            <div className="px-5 md:px-10 pt-6 md:pt-8 pb-3" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
-              <p className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em]" style={{ color: GOLD }}>Selected Work</p>
-            </div>
-            <img src={workScreenshot} alt="Work samples" className="w-full object-cover" />
-            {/* Bottom spacer so content clears the floating nav */}
-            <div style={{ height: "calc(64px + 8vh)" }} />
-          </div>
-        </div>
+      <div className="pt-10 md:pt-14">
+        {EXPERTISE_CARDS.map(card => <ExpertiseCard key={card.key} card={card} />)}
+        {/* Bottom spacer so content clears the floating nav */}
+        <div style={{ height: "calc(64px + 8vh)" }} />
       </div>
 
-      <div className="sticky z-30 overflow-hidden mx-6 md:mx-20"
-        style={{ bottom: "3%", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
-        <PageBottomNav activePage="work" onNavigate={onNavigate} />
-      </div>
+      {!embedded && (
+        <div className="sticky z-30 overflow-hidden mx-6 md:mx-20"
+          style={{ bottom: "3%", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+          <PageBottomNav activePage="work" onNavigate={onNavigate} />
+        </div>
+      )}
     </div>
   );
 }
@@ -1279,12 +1263,14 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
   );
 }
 
+// `embedded` — see WorkPage's comment; same idea when this renders
+// inline inside the homepage's horizontal scroll-snap track.
 function AwardsSpeakingPage({
   onNavigate,
-  onEventClick,
+  embedded = false,
 }: {
   onNavigate: (p: Page) => void;
-  onEventClick: (key: string) => void;
+  embedded?: boolean;
 }) {
   const isDark = useContext(DarkModeCtx);
   const bg = isDark ? "transparent" : "#f8f7f5";
@@ -1292,14 +1278,16 @@ function AwardsSpeakingPage({
   const sub = isDark ? "rgba(255,255,255,0.55)" : DIM;
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   return (
-    <div className="relative w-full" style={{ minHeight: "100vh", background: bg }}>
-      <button
-        onClick={() => onNavigate("home")}
-        aria-label="Back to homepage"
-        className="fixed top-5 left-5 z-[59] cursor-pointer"
-      >
-        <LogoMark size={14} />
-      </button>
+    <div className="relative w-full" style={{ minHeight: embedded ? "100%" : "100vh", background: bg }}>
+      {!embedded && (
+        <button
+          onClick={() => onNavigate("home")}
+          aria-label="Back to homepage"
+          className="fixed top-5 left-5 z-[59] cursor-pointer"
+        >
+          <LogoMark size={14} />
+        </button>
+      )}
 
       {/* Page heading */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
@@ -1323,10 +1311,12 @@ function AwardsSpeakingPage({
       </div>
 
       <div style={{ height: "calc(64px + 8vh)" }} />
-      <div className="sticky z-30 overflow-hidden mx-6 md:mx-20"
-        style={{ bottom: "3%", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
-        <PageBottomNav activePage="awards" onNavigate={onNavigate} />
-      </div>
+      {!embedded && (
+        <div className="sticky z-30 overflow-hidden mx-6 md:mx-20"
+          style={{ bottom: "3%", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+          <PageBottomNav activePage="awards" onNavigate={onNavigate} />
+        </div>
+      )}
     </div>
   );
 }
@@ -1576,7 +1566,7 @@ export default function App() {
       <motion.div key={motionKey} className="absolute inset-0" style={{ zIndex: 1 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.45 }}>
         {page === "home"     && <HomePage onNavigate={setPage} />}
         {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={setPage} /></div>}
-        {page === "awards"   && <div className="absolute inset-0 overflow-y-auto"><AwardsSpeakingPage onNavigate={setPage} onEventClick={navigateToEvent} /></div>}
+        {page === "awards"   && <div className="absolute inset-0 overflow-y-auto"><AwardsSpeakingPage onNavigate={setPage} /></div>}
         {page === "speaking" && detailKey && (
           <div className="absolute inset-0 overflow-y-auto">
             <SpeakingDetailPage eventKey={detailKey} onBack={navigateBack} onNavigate={setPage} />
