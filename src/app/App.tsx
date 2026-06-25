@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback, createContext, useContext } f
 import { motion } from "motion/react";
 import { Linkedin, X, ExternalLink, Plus } from "lucide-react";
 
-import noiseGrad1 from "@/imports/Home/7e24109bcd9a8ce8e2da86d2a7818871291daeb7.png";
 import awardsWomenDigital from "@/imports/AwardsSpeaking/WID-tiff2025.png";
 import awardsFinalistCard from "@/imports/AwardsSpeaking/WID-2.png";
 import awardsFuseCon from "@/imports/AwardsSpeaking/Fusecon2025.png";
@@ -67,6 +66,46 @@ function AnimatedGradientBg() {
       <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.04]" style={{ mixBlendMode:"overlay" }}>
         <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
         <rect width="100%" height="100%" filter="url(#grain)"/>
+      </svg>
+    </>
+  );
+}
+
+// ─── Light mode background — soft multicolour blobs ────────────────
+// Pure CSS (radial-gradient + blur + transform drift), same technique
+// as AnimatedGradientBg above — no images, no JS animation loop, so it
+// costs nothing extra at load. Blobs are irregular (asymmetric
+// border-radius) and very low-opacity so they sit quietly behind
+// content rather than competing with it.
+function LightGradientBlobs() {
+  return (
+    <>
+      <style>{`
+        @keyframes blob-drift-a { 0%{transform:translate(0%,0%) scale(1) rotate(0deg)} 33%{transform:translate(6%,-8%) scale(1.06) rotate(8deg)} 66%{transform:translate(-4%,6%) scale(0.96) rotate(-6deg)} 100%{transform:translate(0%,0%) scale(1) rotate(0deg)} }
+        @keyframes blob-drift-b { 0%{transform:translate(0%,0%) scale(1) rotate(0deg)} 40%{transform:translate(-7%,5%) scale(1.1) rotate(-10deg)} 70%{transform:translate(5%,-4%) scale(0.93) rotate(6deg)} 100%{transform:translate(0%,0%) scale(1) rotate(0deg)} }
+        @keyframes blob-drift-c { 0%{transform:translate(0%,0%) scale(1.04) rotate(0deg)} 50%{transform:translate(8%,4%) scale(0.95) rotate(10deg)} 100%{transform:translate(0%,0%) scale(1.04) rotate(0deg)} }
+      `}</style>
+      <div className="absolute pointer-events-none" style={{
+        width: "48vw", height: "42vw", top: "-12%", left: "-8%",
+        borderRadius: "62% 38% 55% 45% / 48% 52% 45% 55%",
+        background: "radial-gradient(circle at 35% 35%, rgba(98,129,183,0.22) 0%, rgba(194,122,166,0.16) 45%, transparent 75%)",
+        filter: "blur(50px)", animation: "blob-drift-a 30s ease-in-out infinite",
+      }} />
+      <div className="absolute pointer-events-none" style={{
+        width: "38vw", height: "36vw", top: "8%", right: "-10%",
+        borderRadius: "55% 45% 40% 60% / 60% 40% 60% 40%",
+        background: "radial-gradient(circle at 60% 40%, rgba(178,147,59,0.18) 0%, rgba(110,160,140,0.14) 50%, transparent 75%)",
+        filter: "blur(55px)", animation: "blob-drift-b 34s ease-in-out infinite",
+      }} />
+      <div className="absolute pointer-events-none" style={{
+        width: "42vw", height: "38vw", bottom: "-14%", left: "15%",
+        borderRadius: "45% 55% 60% 40% / 55% 45% 55% 45%",
+        background: "radial-gradient(circle at 45% 55%, rgba(194,122,166,0.16) 0%, rgba(98,129,183,0.12) 50%, transparent 75%)",
+        filter: "blur(55px)", animation: "blob-drift-c 38s ease-in-out infinite",
+      }} />
+      <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.025]" style={{ mixBlendMode: "multiply" }}>
+        <filter id="grain-light"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+        <rect width="100%" height="100%" filter="url(#grain-light)"/>
       </svg>
     </>
   );
@@ -600,22 +639,26 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           className="flex-shrink-0 relative overflow-hidden"
           style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", background: isDark ? "transparent" : pageBg }}
         >
-          {/* Dark mode: the animated gradient lives at the App root so it stays
-              continuous across page navigation — only content here, no bg fill. */}
-          {!isDark && (
-            <img src={noiseGrad1} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover pointer-events-none" style={{ opacity: 0.04, mixBlendMode: "multiply" }} />
-          )}
+          {/* The animated gradient/blob background lives at the App root so it
+              stays continuous across page navigation — only content here. */}
 
           {/* Mobile layout */}
           <div className="md:hidden absolute inset-0 flex flex-col px-6 pt-14"
             style={{ paddingBottom: "calc(64px + 8vh + 24px)" }}>
             <LogoMark size={52} />
             <div className="flex-1 flex items-center">
-              <p className="font-['Avenir',sans-serif] font-light leading-snug"
-                style={{ fontSize: "clamp(0.95rem, 4.4vw, 1.35rem)", color: fg, maxWidth: "100%" }}>
-                Tiffany shapes design functions and leads<br />
-                teams that build experiences that work for<br />
-                people and profit — with the planet in mind.
+              <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
+                style={{ fontSize: "clamp(0.85rem, 3.8vw, 1.05rem)", color: fg, maxWidth: "100%" }}>
+                I work with C-suites and product teams to shape design
+                functions that deliver. As an ex-founder who built and
+                exited my own brand, and a leader across fintech, retail,
+                and SaaS, I bring an entrepreneurial and outcomes-focused
+                lens to design leadership.
+                <br /><br />
+                My forte is connecting strategy to craft, pragmatically.
+                Because the clarity between a high-level decision and the
+                job that ships is where sustainable growth for people and
+                profit actually lives.
               </p>
             </div>
             <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest pb-2"
@@ -630,11 +673,18 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
               <LogoMark size={70} />
             </div>
             <div className="absolute inset-0 flex items-center px-20">
-              <p className="font-['Avenir',sans-serif] font-light leading-snug"
-                style={{ fontSize: "clamp(1.5rem, 2.6vw, 2.25rem)", color: fg, maxWidth: "60%" }}>
-                Tiffany shapes design functions and leads teams<br />
-                that build experiences that work for people and<br />
-                profit — with the planet in mind.
+              <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
+                style={{ fontSize: "clamp(1.05rem, 1.7vw, 1.4rem)", color: fg, maxWidth: "60%" }}>
+                I work with C-suites and product teams to shape design
+                functions that deliver. As an ex-founder who built and
+                exited my own brand, and a leader across fintech, retail,
+                and SaaS, I bring an entrepreneurial and outcomes-focused
+                lens to design leadership.
+                <br /><br />
+                My forte is connecting strategy to craft, pragmatically.
+                Because the clarity between a high-level decision and the
+                job that ships is where sustainable growth for people and
+                profit actually lives.
               </p>
             </div>
             <div className="absolute" style={{ bottom: "calc(64px + 5vh + 40px)", left: "7%", right: "7%", height: 1, background: "rgba(178,147,59,0.25)" }} />
@@ -1573,11 +1623,9 @@ export default function App() {
       {/* Persistent background — mounted once at the App root so its drift
           animation never resets on page navigation. Only the content above
           it (motion.div below) transitions between pages. */}
-      {isDark && (
-        <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
-          <AnimatedGradientBg />
-        </div>
-      )}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+        {isDark ? <AnimatedGradientBg /> : <LightGradientBlobs />}
+      </div>
       <DarkModeToggle isDark={isDark} onToggle={toggleDark} />
       <motion.div key={motionKey} className="absolute inset-0" style={{ zIndex: 1 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.45 }}>
         {page === "home"     && <HomePage onNavigate={setPage} />}
