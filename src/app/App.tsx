@@ -467,6 +467,10 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
   const [progress, setProgress]     = useState(0);
   const [menuOpen, setMenuOpen]     = useState(false);
+  // On mobile, the embedded Work/Award & Speaking pages are capped to one
+  // screen with a gradient fade + "View more" until expanded, so the
+  // persistent carousel indicator always has room.
+  const [mobileExpanded, setMobileExpanded] = useState<Record<string, boolean>>({});
   const activeIdxRef = useRef(0);
   const wheeling     = useRef(false);
   const isPaused     = useRef(false);
@@ -614,19 +618,10 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 people and profit — with the planet in mind.
               </p>
             </div>
-            <div className="flex flex-col items-start gap-1 pb-2">
-              <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest"
-                style={{ color: dimCol }}>
-                swipe to explore
-              </p>
-              <div className="flex items-center gap-1">
-                {SECTIONS.map((_, i) => (
-                  <div key={i} className="rounded-full transition-all duration-300"
-                    style={{ width: activeIdx === i ? 16 : 5, height: 5,
-                      background: activeIdx === i ? GOLD : (isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.2)") }} />
-                ))}
-              </div>
-            </div>
+            <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest pb-2"
+              style={{ color: dimCol }}>
+              swipe to explore
+            </p>
           </div>
 
           {/* Desktop layout */}
@@ -665,15 +660,32 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           // scrolling horizontally into them glides straight into the
           // actual content (no stale preview text). Vertical scroll
           // inside the slide lengthens it independently of the
-          // horizontal scroll-snap track.
+          // horizontal scroll-snap track. On mobile, that content is
+          // capped to one screen with a gradient fade + "View more"
+          // until expanded, so there's always room for the persistent
+          // carousel indicator instead of it disappearing into a long page.
           if (section.page) {
+            const expanded = mobileExpanded[section.key] ?? false;
+            const capped = isMobile && !expanded;
             return (
               <section key={section.key}
-                className="flex-shrink-0 relative overflow-y-auto"
-                style={{ width: "100vw", height: "100%", scrollSnapAlign: "start" }}>
+                className="flex-shrink-0 relative"
+                style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", overflowY: capped ? "hidden" : "auto" }}>
                 {section.page === "work"
                   ? <WorkPage onNavigate={onNavigate} embedded />
                   : <AwardsSpeakingPage onNavigate={onNavigate} embedded />}
+
+                {capped && (
+                  <>
+                    <div className="pointer-events-none absolute" style={{ left: 0, right: 0, bottom: 0, height: 160, background: `linear-gradient(to bottom, transparent 0%, ${pageBg} 75%)` }} />
+                    <button
+                      onClick={() => setMobileExpanded(m => ({ ...m, [section.key]: true }))}
+                      className="absolute left-1/2 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
+                      style={{ transform: "translateX(-50%)", bottom: "calc(5% + 56px + 34px)", color: GOLD, background: "none", border: "none" }}>
+                      View more
+                    </button>
+                  </>
+                )}
               </section>
             );
           }
@@ -753,18 +765,22 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                   })}
                 </div>
 
-                {/* Mobile swipe dots */}
-                <div className="md:hidden flex items-center gap-1.5 mt-6">
-                  {SECTIONS.map((_, di) => (
-                    <div key={di} className="rounded-full transition-all duration-300"
-                      style={{ width: activeIdx === di ? 16 : 5, height: 5,
-                        background: activeIdx === di ? section.accent : (isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.18)") }} />
-                  ))}
-                </div>
               </div>
             </section>
           );
         })}
+      </div>
+
+      {/* ── Persistent mobile carousel indicator — stays visible across every
+          slide, including the embedded Work/Award & Speaking pages, which
+          have no room in their own content for a per-slide indicator. ── */}
+      <div className="md:hidden absolute z-30 flex items-center gap-1.5 left-1/2"
+        style={{ bottom: "calc(5% + 56px + 14px)", transform: "translateX(-50%)" }}>
+        {SECTIONS.map((_, di) => (
+          <div key={di} className="rounded-full transition-all duration-300"
+            style={{ width: activeIdx === di ? 16 : 5, height: 5,
+              background: activeIdx === di ? GOLD : (isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.25)") }} />
+        ))}
       </div>
 
       {/* ── Desktop nav — floating above bottom edge, aligned to content width ── */}
@@ -938,7 +954,7 @@ function ExpertiseCard({ card }: { card: typeof EXPERTISE_CARDS[0] }) {
   const cardBrd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   return (
     <div
-      className="flex flex-col md:flex-row items-start gap-4 md:gap-8 px-5 md:px-10 py-6 md:py-8 cursor-pointer"
+      className="flex flex-col md:flex-row items-start gap-4 md:gap-8 px-5 md:px-10 py-4 md:py-8 cursor-pointer"
       style={{ borderBottom: `1px solid ${cardBrd}`, background: open ? (isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.02)") : "transparent", transition: "background 0.3s" }}
       onClick={toggle}>
       <div className="flex-shrink-0" style={{ width: 64, height: 64 }}>
@@ -1133,7 +1149,7 @@ function SpeakingEventRow({
     <div style={{ borderTop: isFirst ? "none" : `1px solid ${brd}` }}>
       <button
         onClick={() => expandable && toggle()}
-        className="relative w-full flex items-start gap-3 text-left px-6 md:px-20 py-5 md:py-7 transition-colors duration-200"
+        className="relative w-full flex items-start gap-3 text-left px-6 md:px-20 py-3 md:py-7 transition-colors duration-200"
         style={{ cursor: expandable ? "pointer" : "default", background: "transparent" }}
         onMouseEnter={e => expandable && (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)")}
         onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
@@ -1209,7 +1225,7 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
     <div>
       <button
         onClick={toggle}
-        className="relative w-full flex items-start gap-3 text-left px-6 md:px-20 py-5 md:py-7 transition-colors duration-200"
+        className="relative w-full flex items-start gap-3 text-left px-6 md:px-20 py-3 md:py-7 transition-colors duration-200"
         style={{ cursor: "pointer", background: "transparent" }}
         onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)")}
         onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
