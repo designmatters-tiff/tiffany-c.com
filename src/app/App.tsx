@@ -81,28 +81,38 @@ function LightGradientBlobs() {
   return (
     <>
       <style>{`
-        @keyframes blob-drift-a { 0%{transform:translate(0%,0%) scale(1) rotate(0deg)} 33%{transform:translate(6%,-8%) scale(1.06) rotate(8deg)} 66%{transform:translate(-4%,6%) scale(0.96) rotate(-6deg)} 100%{transform:translate(0%,0%) scale(1) rotate(0deg)} }
-        @keyframes blob-drift-b { 0%{transform:translate(0%,0%) scale(1) rotate(0deg)} 40%{transform:translate(-7%,5%) scale(1.1) rotate(-10deg)} 70%{transform:translate(5%,-4%) scale(0.93) rotate(6deg)} 100%{transform:translate(0%,0%) scale(1) rotate(0deg)} }
-        @keyframes blob-drift-c { 0%{transform:translate(0%,0%) scale(1.04) rotate(0deg)} 50%{transform:translate(8%,4%) scale(0.95) rotate(10deg)} 100%{transform:translate(0%,0%) scale(1.04) rotate(0deg)} }
+        @keyframes blob-drift-a { 0%{transform:translate(0%,0%) scale(1) rotate(0deg)} 33%{transform:translate(-5%,-7%) scale(1.07) rotate(7deg)} 66%{transform:translate(4%,5%) scale(0.95) rotate(-5deg)} 100%{transform:translate(0%,0%) scale(1) rotate(0deg)} }
+        @keyframes blob-drift-b { 0%{transform:translate(0%,0%) scale(1) rotate(0deg)} 40%{transform:translate(6%,5%) scale(1.1) rotate(-9deg)} 70%{transform:translate(-4%,-5%) scale(0.93) rotate(6deg)} 100%{transform:translate(0%,0%) scale(1) rotate(0deg)} }
+        @keyframes blob-drift-c { 0%{transform:translate(0%,0%) scale(1.04) rotate(0deg)} 50%{transform:translate(-6%,4%) scale(0.94) rotate(9deg)} 100%{transform:translate(0%,0%) scale(1.04) rotate(0deg)} }
+        @keyframes blob-drift-d { 0%{transform:translate(0%,0%) scale(1) rotate(0deg)} 45%{transform:translate(5%,-6%) scale(1.08) rotate(-8deg)} 75%{transform:translate(-4%,5%) scale(0.96) rotate(5deg)} 100%{transform:translate(0%,0%) scale(1) rotate(0deg)} }
       `}</style>
       <div className="absolute inset-0" style={{ background: "#f8f7f5" }} />
+      {/* Joyful multicolour patch — concentrated on the right, left stays
+          clean warm cream. Golden yellow is the dominant centre, with
+          peach, violet and sky-blue blended around it. */}
       <div className="absolute pointer-events-none" style={{
-        width: "48vw", height: "42vw", top: "-12%", left: "-8%",
-        borderRadius: "62% 38% 55% 45% / 48% 52% 45% 55%",
-        background: "radial-gradient(circle at 35% 35%, rgba(98,129,183,0.22) 0%, rgba(194,122,166,0.16) 45%, transparent 75%)",
-        filter: "blur(50px)", animation: "blob-drift-a 30s ease-in-out infinite",
+        width: "52vw", height: "48vw", top: "22%", right: "-12%",
+        borderRadius: "58% 42% 50% 50% / 52% 48% 52% 48%",
+        background: "radial-gradient(circle at 50% 50%, rgba(244,196,72,0.42) 0%, rgba(244,196,72,0.28) 35%, transparent 72%)",
+        filter: "blur(55px)", animation: "blob-drift-a 30s ease-in-out infinite",
       }} />
       <div className="absolute pointer-events-none" style={{
-        width: "38vw", height: "36vw", top: "8%", right: "-10%",
+        width: "40vw", height: "38vw", top: "-6%", right: "4%",
         borderRadius: "55% 45% 40% 60% / 60% 40% 60% 40%",
-        background: "radial-gradient(circle at 60% 40%, rgba(178,147,59,0.18) 0%, rgba(110,160,140,0.14) 50%, transparent 75%)",
-        filter: "blur(55px)", animation: "blob-drift-b 34s ease-in-out infinite",
+        background: "radial-gradient(circle at 55% 50%, rgba(244,176,120,0.40) 0%, rgba(244,176,120,0.24) 40%, transparent 74%)",
+        filter: "blur(58px)", animation: "blob-drift-b 34s ease-in-out infinite",
       }} />
       <div className="absolute pointer-events-none" style={{
-        width: "42vw", height: "38vw", bottom: "-14%", left: "15%",
-        borderRadius: "45% 55% 60% 40% / 55% 45% 55% 45%",
-        background: "radial-gradient(circle at 45% 55%, rgba(194,122,166,0.16) 0%, rgba(98,129,183,0.12) 50%, transparent 75%)",
-        filter: "blur(55px)", animation: "blob-drift-c 38s ease-in-out infinite",
+        width: "34vw", height: "32vw", top: "-14%", right: "-12%",
+        borderRadius: "48% 52% 58% 42% / 55% 45% 55% 45%",
+        background: "radial-gradient(circle at 55% 45%, rgba(140,108,224,0.36) 0%, rgba(140,108,224,0.20) 45%, transparent 75%)",
+        filter: "blur(58px)", animation: "blob-drift-c 38s ease-in-out infinite",
+      }} />
+      <div className="absolute pointer-events-none" style={{
+        width: "44vw", height: "40vw", bottom: "-18%", right: "-8%",
+        borderRadius: "45% 55% 60% 40% / 52% 48% 52% 48%",
+        background: "radial-gradient(circle at 50% 50%, rgba(140,180,226,0.36) 0%, rgba(160,200,210,0.20) 45%, transparent 75%)",
+        filter: "blur(60px)", animation: "blob-drift-d 32s ease-in-out infinite",
       }} />
       <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.025]" style={{ mixBlendMode: "multiply" }}>
         <filter id="grain-light"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
