@@ -85,6 +85,7 @@ function LightGradientBlobs() {
         @keyframes blob-drift-b { 0%{transform:translate(0%,0%) scale(1) rotate(0deg)} 40%{transform:translate(-7%,5%) scale(1.1) rotate(-10deg)} 70%{transform:translate(5%,-4%) scale(0.93) rotate(6deg)} 100%{transform:translate(0%,0%) scale(1) rotate(0deg)} }
         @keyframes blob-drift-c { 0%{transform:translate(0%,0%) scale(1.04) rotate(0deg)} 50%{transform:translate(8%,4%) scale(0.95) rotate(10deg)} 100%{transform:translate(0%,0%) scale(1.04) rotate(0deg)} }
       `}</style>
+      <div className="absolute inset-0" style={{ background: "#f8f7f5" }} />
       <div className="absolute pointer-events-none" style={{
         width: "48vw", height: "42vw", top: "-12%", left: "-8%",
         borderRadius: "62% 38% 55% 45% / 48% 52% 45% 55%",
@@ -618,7 +619,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const currentSection = SECTIONS[activeIdx];
 
   return (
-    <div className="relative w-screen h-dvh overflow-hidden" style={{ background: isDark ? "transparent" : "#f8f7f5" }}>
+    <div className="relative w-screen h-dvh overflow-hidden" style={{ background: "transparent" }}>
 
       {/* ── Horizontal scroll track ── */}
       <div
@@ -637,7 +638,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
         {/* ── Section 0: Tiffany C. ── */}
         <section
           className="flex-shrink-0 relative overflow-hidden"
-          style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", background: isDark ? "transparent" : pageBg }}
+          style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", background: "transparent" }}
         >
           {/* The animated gradient/blob background lives at the App root so it
               stays continuous across page navigation — only content here. */}
@@ -743,7 +744,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           return (
             <section key={section.key}
               className="flex-shrink-0 relative flex flex-col"
-              style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", background: isDark ? "transparent" : pageBg }}>
+              style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", background: "transparent" }}>
 
               <div className="absolute inset-0 pointer-events-none"
                 style={{ opacity: isActive ? 1 : 0, transition: "opacity 0.6s ease",
@@ -1131,7 +1132,7 @@ function PageBottomNav({
 // avoid duplicating them.
 function WorkPage({ onNavigate, embedded = false }: { onNavigate: (p: Page) => void; embedded?: boolean }) {
   const isDark = useContext(DarkModeCtx);
-  const bg = isDark ? "transparent" : "#f8f7f5";
+  const bg = "transparent";
   return (
     <div className="relative w-full" style={{ minHeight: embedded ? "100%" : "100dvh", background: bg }}>
       {!embedded && (
@@ -1339,7 +1340,7 @@ function AwardsSpeakingPage({
   embedded?: boolean;
 }) {
   const isDark = useContext(DarkModeCtx);
-  const bg = isDark ? "transparent" : "#f8f7f5";
+  const bg = "transparent";
   const fg = isDark ? GOLD : INK;
   const sub = isDark ? "rgba(255,255,255,0.55)" : DIM;
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
@@ -1470,7 +1471,7 @@ function SpeakingDetailPage({
   if (!ev) return null;
 
   // Event-specific dark (fusecon) overrides global light mode
-  const bg = ev.dark ? "#030303" : (globalDark ? "transparent" : "#f8f7f5");
+  const bg = ev.dark ? "#030303" : "transparent";
   const textColor = (ev.dark || globalDark) ? GOLD : INK;
   const subColor = (ev.dark || globalDark) ? "rgba(255,255,255,0.55)" : DIM;
 
