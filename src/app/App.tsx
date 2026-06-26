@@ -624,7 +624,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       <div
         ref={scrollEl}
         className="absolute inset-0 z-10 flex overflow-x-auto overflow-y-hidden scrollbar-hide"
-        style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}
+        style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}
         onMouseEnter={() => { if (!isMobileRef.current) isPaused.current = true; }}
         onMouseLeave={() => {
           if (!isMobileRef.current && !hoveredNav) {
@@ -720,7 +720,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             return (
               <section key={section.key}
                 className="flex-shrink-0 relative"
-                style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", overflowY: capped ? "hidden" : "auto" }}>
+                style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", overflowY: capped ? "hidden" : "auto", WebkitOverflowScrolling: "touch", touchAction: capped ? "pan-x" : "pan-y" }}>
                 {section.page === "work"
                   ? <WorkPage onNavigate={onNavigate} embedded />
                   : <AwardsSpeakingPage onNavigate={onNavigate} embedded />}
