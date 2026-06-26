@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { motion } from "motion/react";
-import { Linkedin, X, ExternalLink, Plus } from "lucide-react";
+import { Linkedin, Instagram, X, ExternalLink, Plus } from "lucide-react";
 
 import awardsWomenDigital from "@/imports/AwardsSpeaking/WID-tiff2025.png";
 import awardsFinalistCard from "@/imports/AwardsSpeaking/WID-2.png";
@@ -23,7 +23,7 @@ const INK         = "#111111";
 const DIM         = "#666660";
 const NAV_GRADIENT = "linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30)), linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
 
-type Page = "home" | "work" | "awards" | "speaking";
+type Page = "home" | "work" | "awards" | "speaking" | "coaching" | "connect";
 
 // ─── Dark mode context ────────────────────────────────────────────
 const DarkModeCtx = createContext(false);
@@ -463,14 +463,14 @@ function SpeakingInquiryRow({ accent, itemColor, borderColor }: {
 const SECTIONS = [
   { key: "about",   label: "Tiffany C.",      page: null,  accent: GOLD, items: [] },
   {
-    key: "work",    label: "Work",             page: "work" as Page,
+    key: "work",    label: "Work",             page: "work" as Page, embeds: true,
     accent: "#8A6E2E",
     tagline: "Design Strategy & Leadership",
     context: "Fintech • eCommerce • Utility SaaS",
     items: ["AI + UX DesignOps", "Business Acumen", "Product & UX Methods", "People & Process"],
   },
   {
-    key: "awards",  label: "Award & Speaking", page: "awards" as Page,
+    key: "awards",  label: "Award & Speaking", page: "awards" as Page, embeds: true,
     accent: "#5070A0",
     tagline: "Recognition & Voices",
     context: "Finalist · Speaker · Panelist",
@@ -482,10 +482,10 @@ const SECTIONS = [
     ],
   },
   {
-    key: "coaching", label: "Coaching",        page: null,
+    key: "coaching", label: "Coaching",        page: "coaching" as Page,
     accent: "#5070A0",
     tagline: "UX Career Coaching",
-    context: "1:1 · Priority DM · Packages",
+    context: "Open to collaboration",
     items: [
       "1:1 Calls",
       "Priority DM",
@@ -493,13 +493,76 @@ const SECTIONS = [
     ],
   },
   {
-    key: "connect", label: "Connect",          page: null,
+    key: "connect", label: "Connect",          page: "connect" as Page,
     accent: "#9B5A88",
     tagline: "Let's Connect",
     context: "Open to collaboration",
-    items: ["linkedin", "designmatters.tiff@gmail.com", "Speaking Inquiry"],
+    items: ["Speaking Inquiry", "linkedin", "instagram", "designmatters.tiff@gmail.com"],
   },
 ] as const;
+
+// ─── Contact / link row content ───────────────────────────────────
+// Renders the inner content for a single Coaching/Connect item. Shared
+// between the homepage swipe-deck (wrapped in a clip-path reveal) and
+// the standalone Coaching/Connect pages so the per-item-type branching
+// lives in one place.
+function ContactItem({
+  item,
+  accent,
+  itemColor,
+  borderColor,
+}: {
+  item: string;
+  accent: string;
+  itemColor: string;
+  borderColor: string;
+}) {
+  if (item === "linkedin") {
+    return (
+      <a href="https://www.linkedin.com/in/tiffany-c/" target="_blank" rel="noopener noreferrer"
+        className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
+        <Linkedin size={16} strokeWidth={1} style={{ color: accent, flexShrink: 0 }} />
+        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>LinkedIn</span>
+        <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
+      </a>
+    );
+  }
+  if (item === "instagram") {
+    return (
+      <a href="https://www.instagram.com/tffny.c/" target="_blank" rel="noopener noreferrer"
+        className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
+        <Instagram size={16} strokeWidth={1} style={{ color: accent, flexShrink: 0 }} />
+        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>Instagram</span>
+        <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
+      </a>
+    );
+  }
+  if (item === "designmatters.tiff@gmail.com") {
+    return (
+      <a href="mailto:designmatters.tiff@gmail.com"
+        className="w-full flex items-center py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
+        <span className="link-underline font-['Avenir',sans-serif] font-light text-sm md:text-lg" style={{ color: itemColor }}>{item}</span>
+      </a>
+    );
+  }
+  if (item === "1:1 Calls" || item === "Priority DM" || item === "Package (1-1 Coaching Service)") {
+    return (
+      <a href="https://topmate.io/tffnyc" target="_blank" rel="noopener noreferrer"
+        className="w-full flex items-center gap-2 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
+        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
+        <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
+      </a>
+    );
+  }
+  if (item === "Speaking Inquiry") {
+    return <SpeakingInquiryRow accent={accent} itemColor={itemColor} borderColor={borderColor} />;
+  }
+  return (
+    <div className="flex items-center py-4 md:py-[18px]">
+      <span className="font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
+    </div>
+  );
+}
 
 const AUTO_DURATION = 5000;
 
@@ -547,7 +610,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   // rAF auto-advance — skipped entirely on mobile
   useEffect(() => {
     const tick = () => {
-      const onEmbeddedPage = Boolean(SECTIONS[activeIdxRef.current].page);
+      const onEmbeddedPage = Boolean((SECTIONS[activeIdxRef.current] as { embeds?: boolean }).embeds);
       if (!isMobileRef.current && !isPaused.current && !onEmbeddedPage) {
         const elapsed = Date.now() - startTime.current;
         const p = Math.min(100, (elapsed / AUTO_DURATION) * 100);
@@ -583,7 +646,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       // that page's own content — not hijack the wheel to advance to
       // the next/prev section. Horizontal gestures still switch
       // sections even while on one of these slides.
-      const isEmbeddedPage = Boolean(SECTIONS[activeIdxRef.current].page);
+      const isEmbeddedPage = Boolean((SECTIONS[activeIdxRef.current] as { embeds?: boolean }).embeds);
       if (isEmbeddedPage && absY >= absX) return;
 
       e.preventDefault();
@@ -666,10 +729,10 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 and SaaS, I bring an entrepreneurial and outcomes-focused
                 lens to design leadership.
                 <br /><br />
-                My forte is connecting strategy to craft, pragmatically.
-                Because the clarity between a high-level decision and the
-                job that ships is where sustainable growth for people and
-                profit actually lives.
+                My forte is connecting strategy to craft, breaking it into
+                tangible wins toward an ultimate company vision. Because the
+                clarity between a big decision and a small win is where
+                sustainable growth lives.
               </p>
             </div>
             <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest pb-2"
@@ -683,7 +746,11 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             <div className="absolute" style={{ top: "11%", left: "7%" }}>
               <LogoMark size={70} />
             </div>
-            <div className="absolute inset-0 flex items-center px-20">
+            <div className="absolute inset-0 flex flex-col justify-center px-20">
+              <h1 className="font-['Museo',sans-serif] font-light mb-7"
+                style={{ fontSize: "clamp(1.8rem, 3.4vw, 3rem)", lineHeight: 1.05, color: fg, maxWidth: "60%" }}>
+                Tiff is a product &amp; design leader
+              </h1>
               <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
                 style={{ fontSize: "clamp(1.05rem, 1.7vw, 1.4rem)", color: fg, maxWidth: "60%" }}>
                 I work with C-suites and product teams to shape design
@@ -692,10 +759,10 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 and SaaS, I bring an entrepreneurial and outcomes-focused
                 lens to design leadership.
                 <br /><br />
-                My forte is connecting strategy to craft, pragmatically.
-                Because the clarity between a high-level decision and the
-                job that ships is where sustainable growth for people and
-                profit actually lives.
+                My forte is connecting strategy to craft, breaking it into
+                tangible wins toward an ultimate company vision. Because the
+                clarity between a big decision and a small win is where
+                sustainable growth lives.
               </p>
             </div>
             <div className="absolute" style={{ bottom: "calc(64px + 5vh + 40px)", left: "7%", right: "7%", height: 1, background: "rgba(178,147,59,0.25)" }} />
@@ -725,7 +792,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           // capped to one screen with a gradient fade + "View more"
           // until expanded, so there's always room for the persistent
           // carousel indicator instead of it disappearing into a long page.
-          if (section.page) {
+          if ("embeds" in section && section.embeds) {
             const expanded = mobileExpanded[section.key] ?? false;
             const capped = isMobile && !expanded;
             return (
@@ -783,7 +850,6 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
                 <div style={{ borderTop: `1px solid ${border}` }}>
                   {section.items.map((item, k) => {
-                    const isLinkedin = item === "linkedin";
                     const itemColor = isDark ? "white" : INK;
                     return (
                       <div key={item} style={{ borderBottom: `1px solid ${border}`, lineHeight: 0, overflow: "hidden" }}>
@@ -791,35 +857,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                           clipPath: isActive ? "inset(0 0 0% 0)" : "inset(0 0 100% 0)",
                           transition: `clip-path 0.55s cubic-bezier(0.4,0,0.2,1) ${0.22 + k * 0.09}s`,
                         }}>
-                          {isLinkedin ? (
-                            <a href="https://www.linkedin.com/in/tiffany-c/" target="_blank" rel="noopener noreferrer"
-                              className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
-                              <Linkedin size={16} strokeWidth={1} style={{ color: section.accent, flexShrink: 0 }} />
-                              <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>LinkedIn</span>
-                              <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
-                            </a>
-                          ) : item === "designmatters.tiff@gmail.com" ? (
-                            <a href="mailto:designmatters.tiff@gmail.com"
-                              className="w-full flex items-center py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
-                              <span className="link-underline font-['Avenir',sans-serif] font-light text-sm md:text-lg" style={{ color: itemColor }}>{item}</span>
-                            </a>
-                          ) : (item === "1:1 Calls" || item === "Priority DM" || item === "Package (1-1 Coaching Service)") ? (
-                            <a href="https://topmate.io/tffnyc" target="_blank" rel="noopener noreferrer"
-                              className="w-full flex items-center gap-2 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
-                              <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
-                              <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
-                            </a>
-                          ) : item === "Speaking Inquiry" ? (
-                            <SpeakingInquiryRow
-                              accent={section.accent}
-                              itemColor={itemColor}
-                              borderColor={border}
-                            />
-                          ) : (
-                            <div className="flex items-center py-4 md:py-[18px]">
-                              <span className="font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
-                            </div>
-                          )}
+                          <ContactItem item={item} accent={section.accent} itemColor={itemColor} borderColor={border} />
                         </div>
                       </div>
                     );
@@ -1066,8 +1104,8 @@ function PageBottomNav({
   const NAV_ITEMS = [
     { key: "work",     label: "Work",             page: "work" as Page },
     { key: "awards",   label: "Award & Speaking", page: "awards" as Page },
-    { key: "coaching", label: "Coaching",         page: null },
-    { key: "connect",  label: "Connect",          page: null },
+    { key: "coaching", label: "Coaching",         page: "coaching" as Page },
+    { key: "connect",  label: "Connect",          page: "connect" as Page },
   ];
 
   return (
@@ -1168,6 +1206,94 @@ function WorkPage({ onNavigate, embedded = false }: { onNavigate: (p: Page) => v
         </div>
       )}
     </div>
+  );
+}
+
+// ─── Coaching & Connect pages ──────────────────────────────────────
+// Both share the same shell: eyebrow + heading, then a list of contact
+// rows rendered via the shared ContactItem component. Modelled on
+// AwardsSpeakingPage so the back button, spacing and sticky PageBottomNav
+// all match the other standalone pages.
+function ContactListPage({
+  eyebrow,
+  title,
+  items,
+  accent,
+  activePage,
+  onNavigate,
+}: {
+  eyebrow: string;
+  title: string;
+  items: readonly string[];
+  accent: string;
+  activePage: Page;
+  onNavigate: (p: Page) => void;
+}) {
+  const isDark = useContext(DarkModeCtx);
+  const fg = isDark ? GOLD : INK;
+  const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
+  const itemColor = isDark ? "white" : INK;
+  return (
+    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+      <button
+        onClick={() => onNavigate("home")}
+        aria-label="Back to homepage"
+        className="fixed top-5 left-5 z-[59] cursor-pointer"
+      >
+        <LogoMark size={14} />
+      </button>
+
+      {/* Page heading */}
+      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
+        <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}>{eyebrow}</p>
+        <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: fg }}>
+          {title}
+        </h1>
+      </div>
+
+      {/* Items */}
+      <div className="px-6 md:px-20 pt-2 md:pt-6">
+        <div style={{ borderTop: `1px solid ${brd}` }}>
+          {items.map(item => (
+            <div key={item} style={{ borderBottom: `1px solid ${brd}` }}>
+              <ContactItem item={item} accent={accent} itemColor={itemColor} borderColor={brd} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ height: "calc(64px + 8vh)" }} />
+      <div className="sticky z-30 overflow-hidden mx-6 md:mx-20"
+        style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+        <PageBottomNav activePage={activePage} onNavigate={onNavigate} />
+      </div>
+    </div>
+  );
+}
+
+function CoachingPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
+  return (
+    <ContactListPage
+      eyebrow="Open to collaboration"
+      title="UX Career Coaching"
+      items={["1:1 Calls", "Priority DM", "Package (1-1 Coaching Service)"]}
+      accent="#5070A0"
+      activePage="coaching"
+      onNavigate={onNavigate}
+    />
+  );
+}
+
+function ConnectPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
+  return (
+    <ContactListPage
+      eyebrow="Open to collaboration"
+      title="Let's Connect"
+      items={["Speaking Inquiry", "linkedin", "instagram", "designmatters.tiff@gmail.com"]}
+      accent="#9B5A88"
+      activePage="connect"
+      onNavigate={onNavigate}
+    />
   );
 }
 
@@ -1642,6 +1768,8 @@ export default function App() {
         {page === "home"     && <HomePage onNavigate={setPage} />}
         {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={setPage} /></div>}
         {page === "awards"   && <div className="absolute inset-0 overflow-y-auto"><AwardsSpeakingPage onNavigate={setPage} /></div>}
+        {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={setPage} /></div>}
+        {page === "connect"  && <div className="absolute inset-0 overflow-y-auto"><ConnectPage onNavigate={setPage} /></div>}
         {page === "speaking" && detailKey && (
           <div className="absolute inset-0 overflow-y-auto">
             <SpeakingDetailPage eventKey={detailKey} onBack={navigateBack} onNavigate={setPage} />
