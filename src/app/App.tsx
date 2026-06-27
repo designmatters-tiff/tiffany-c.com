@@ -139,6 +139,7 @@ function DarkModeToggle({
   const brightRef = useRef<HTMLSpanElement>(null);
   const darkRef = useRef<HTMLSpanElement>(null);
   const [underline, setUnderline] = useState({ left: 0, width: 0 });
+  const [hoverWord, setHoverWord] = useState<"bright" | "dark" | null>(null);
 
   useEffect(() => {
     const target = isDark ? darkRef.current : brightRef.current;
@@ -164,14 +165,18 @@ function DarkModeToggle({
     >
       <div className="relative flex items-center gap-2">
         <span ref={brightRef}
+          onMouseEnter={() => setHoverWord("bright")}
+          onMouseLeave={() => setHoverWord(null)}
           className="font-['Avenir',sans-serif] font-light text-xs uppercase tracking-[0.1em]"
-          style={{ color: !isDark ? activeColor : dimColor, transition: "color 0.3s" }}>
+          style={{ color: (!isDark || hoverWord === "bright") ? activeColor : dimColor, transition: "color 0.3s" }}>
           Bright
         </span>
         <span className="inline-block" style={{ width: 1, height: 12, background: dimColor, transform: "rotate(20deg)" }} />
         <span ref={darkRef}
+          onMouseEnter={() => setHoverWord("dark")}
+          onMouseLeave={() => setHoverWord(null)}
           className="font-['Avenir',sans-serif] font-light text-xs uppercase tracking-[0.1em]"
-          style={{ color: isDark ? activeColor : dimColor, transition: "color 0.3s" }}>
+          style={{ color: (isDark || hoverWord === "dark") ? activeColor : dimColor, transition: "color 0.3s" }}>
           Dark
         </span>
         {/* sliding underline — eases from beneath one word to the other */}
