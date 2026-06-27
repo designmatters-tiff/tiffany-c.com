@@ -574,6 +574,12 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const fg      = isDark ? GOLD : INK;
   const dimCol  = isDark ? "rgba(255,255,255,0.38)" : DIM;
   const border  = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
+  // Speaking Inquiry (Connect) can grow taller than the viewport once
+  // expanded — only then does this section need its own vertical
+  // scroll/touch handling, so the horizontal swipe-between-sections
+  // gesture stays unaffected the rest of the time.
+  const { openId: openAccordionIdHome } = useContext(AccordionCtx);
+  const speakingInquiryOpen = openAccordionIdHome === "speaking-inquiry";
 
   const scrollEl  = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx]   = useState(0);
@@ -818,10 +824,19 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             );
           }
 
+          // Connect's Speaking Inquiry accordion can push this section's
+          // content taller than the viewport once expanded — only then
+          // does it need its own vertical scroll/touch handling.
+          const sectionNeedsScroll = section.key === "connect" && speakingInquiryOpen;
           return (
             <section key={section.key}
               className="flex-shrink-0 relative flex flex-col"
-              style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", background: "transparent" }}>
+              style={{
+                width: "100vw", height: "100%", scrollSnapAlign: "start", background: "transparent",
+                overflowY: sectionNeedsScroll ? "auto" : "hidden",
+                WebkitOverflowScrolling: "touch",
+                touchAction: sectionNeedsScroll ? "pan-y" : "pan-x",
+              }}>
 
               <div className="absolute inset-0 pointer-events-none"
                 style={{ opacity: isActive ? 1 : 0, transition: "opacity 0.6s ease",
@@ -872,14 +887,28 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
       {/* ── Persistent mobile carousel indicator — stays visible across every
           slide, including the embedded Work/Award & Speaking pages, which
-          have no room in their own content for a per-slide indicator. ── */}
-      <div className="md:hidden absolute z-30 flex items-center gap-1.5 left-1/2"
-        style={{ bottom: "calc(5% + 56px + 14px + env(safe-area-inset-bottom))", transform: "translateX(-50%)" }}>
-        {SECTIONS.map((_, di) => (
-          <div key={di} className="rounded-full transition-all duration-300"
-            style={{ width: activeIdx === di ? 16 : 5, height: 5,
-              background: activeIdx === di ? GOLD : (isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.25)") }} />
-        ))}
+          have no room in their own content for a per-slide indicator.
+          Design: a solid gold bar grows to cover every visited section
+          (merged into one continuous line), with small dots marking the
+          sections still ahead. ── */}
+      <div className="md:hidden absolute z-30 flex items-center"
+        style={{ bottom: "calc(5% + 56px + 14px + env(safe-area-inset-bottom))", left: 24, right: 24 }}>
+        <div className="rounded-full transition-all duration-300"
+          style={{
+            width: `${((activeIdx + 1) / SECTIONS.length) * 100}%`,
+            height: 2,
+            background: GOLD,
+            flexShrink: 0,
+          }} />
+        {activeIdx < SECTIONS.length - 1 && (
+          <div className="flex items-center gap-1.5" style={{ marginLeft: 8 }}>
+            {SECTIONS.slice(activeIdx + 1).map((_, i) => (
+              <div key={i} className="rounded-full"
+                style={{ width: 4, height: 4,
+                  background: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.25)" }} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── Desktop nav — floating above bottom edge, aligned to content width ── */}
