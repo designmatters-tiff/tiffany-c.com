@@ -1334,13 +1334,13 @@ function ConnectPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 // ─── Awards & Speaking page ────────────────────────────────────────
 
 const SPEAKING_EVENTS = [
-  { key: "rotterdam", year: "2026", role: "Speaker",  event: "UX Rotterdam",                  location: "Rotterdam, NL", topic: "The Human Cost of Human-Centred-Design",                           link: null,                                               img: awardsRotterdam, caption: "2026 @ Rotterdam, NL", dark: true },
-  { key: "ux-camp",   year: "2025", role: "Speaker",  event: "UX Camp Melbourne",             location: "Melbourne, AU", topic: "404: System Burnout — An error message to my UX career",            link: "https://youtu.be/hJIJB3di6T4?si=a1XcoU3eV6f0bVvE",  img: null,          caption: null,             dark: false },
-  { key: "taipei",    year: "2025", role: "Panelist", event: "Ladies that UX Taipei",         location: "Taipei, TW",    topic: "Driving Organisational Change and Creating Meaningful Impact",     link: null,                                               img: awardsTaipei,  caption: "2025 @ Taipei, TW",  dark: false },
-  { key: "fusecon",   year: "2025", role: "Panelist", event: "FUSECON 2025",                  location: "Malaysia",      topic: "Mental Health: From Awareness to Action",                          link: null,                                               img: awardsFuseCon, img2: awardsFuseConPanelist, caption: "FUSECON 2025, MY",    dark: true  },
-  { key: "fusecon-2024", year: "2024", role: "Panelist", event: "FUSECON 2024",               location: "Malaysia",      topic: "UX in Malaysia & beyond",                                          link: null,                                               img: null,          caption: null,             dark: false },
-  { key: "figma-kl",  year: "2024", role: "Panelist", event: "Friends of Figma KL × adplist", location: "KL, MY",        topic: "The Journey to Senior Designer: Skills, Insights and Experiences", link: null,                                               img: null,          caption: null,             dark: false },
-  { key: "design-kl", year: "2023", role: "Speaker",  event: "Design Leadership Kuala Lumpur",location: "KL, MY",        topic: "Synergy for Sustainable Growth: Empowering UX Team",               link: null,                                               img: null,          caption: null,             dark: false },
+  { key: "rotterdam", year: "2026", role: "Speaker",  event: "UX Rotterdam",                  location: "Rotterdam, NL", region: "Europe",    topic: "The Human Cost of Human-Centred-Design",                           link: null,                                               img: awardsRotterdam, caption: "2026 @ Rotterdam, NL", dark: true },
+  { key: "ux-camp",   year: "2025", role: "Speaker",  event: "UX Camp Melbourne",             location: "Melbourne, AU", region: "Australia", topic: "404: System Burnout — An error message to my UX career",            link: "https://youtu.be/hJIJB3di6T4?si=a1XcoU3eV6f0bVvE",  img: null,          caption: null,             dark: false },
+  { key: "taipei",    year: "2025", role: "Panelist", event: "Ladies that UX Taipei",         location: "Taipei, TW",    region: "Taiwan",    topic: "Driving Organisational Change and Creating Meaningful Impact",     link: null,                                               img: awardsTaipei,  caption: "2025 @ Taipei, TW",  dark: false },
+  { key: "fusecon",   year: "2025", role: "Panelist", event: "FUSECON 2025",                  location: "Malaysia",      region: "Malaysia",  topic: "Mental Health: From Awareness to Action",                          link: null,                                               img: awardsFuseCon, img2: awardsFuseConPanelist, caption: "FUSECON 2025, MY",    dark: true  },
+  { key: "fusecon-2024", year: "2024", role: "Panelist", event: "FUSECON 2024",               location: "Malaysia",      region: "Malaysia",  topic: "UX in Malaysia & beyond",                                          link: null,                                               img: null,          caption: null,             dark: false },
+  { key: "figma-kl",  year: "2024", role: "Panelist", event: "Friends of Figma KL × adplist", location: "KL, MY",        region: "Malaysia",  topic: "The Journey to Senior Designer: Skills, Insights and Experiences", link: null,                                               img: null,          caption: null,             dark: false },
+  { key: "design-kl", year: "2023", role: "Speaker",  event: "Design Leadership Kuala Lumpur",location: "KL, MY",        region: "Malaysia",  topic: "Synergy for Sustainable Growth: Empowering UX Team",               link: null,                                               img: null,          caption: null,             dark: false },
 ];
 
 // ─── Speaking event accordion row ──────────────────────────────────
@@ -1389,9 +1389,9 @@ function SpeakingEventRow({
           />
         )}
         <div className="flex-1 flex flex-col gap-1">
-          <span className="font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>{ev.year}</span>
+          <span className="font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>{ev.year} · {ev.region}</span>
           <p className="font-['Avenir',sans-serif] font-medium" style={{ fontSize: "clamp(0.95rem, 1.6vw, 1.4rem)", color: fg }}>
-            {ev.role} @ {ev.event}, {ev.location}
+            {ev.role} — {ev.event}
           </p>
           <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub }}>{ev.topic}</p>
         </div>
@@ -1463,9 +1463,9 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
           }}
         />
         <div className="flex-1 flex flex-col gap-1">
-          <span className="font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>2025 · National Awards · Australia</span>
+          <span className="font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>2025 · Australia</span>
           <p className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.5rem)", color: fg }}>
-            UX Leader of the Year — Finalist
+            Finalist — UX Leader of the Year
           </p>
           <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub }}>Women in Digital National Awards</p>
         </div>
