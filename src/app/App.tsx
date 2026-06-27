@@ -1067,7 +1067,7 @@ function ExpertiseCard({ card }: { card: typeof EXPERTISE_CARDS[0] }) {
             style={{ color: card.accent, flexShrink: 0, transform: open ? "rotate(45deg)" : "rotate(0deg)", transition: "transform 0.3s" }}
           />
           <h3 className="font-['Museo',sans-serif] font-light"
-            style={{ fontSize: "clamp(1.1rem, 2.2vw, 2.1rem)", color: isDark ? GOLD : INK }}>
+            style={{ fontSize: "clamp(1.1rem, 2.2vw, 2.1rem)", color: GOLD }}>
             {card.title}
           </h3>
         </div>
@@ -1230,7 +1230,7 @@ function ContactListPage({
   onNavigate: (p: Page) => void;
 }) {
   const isDark = useContext(DarkModeCtx);
-  const fg = isDark ? GOLD : INK;
+  const fg = GOLD;
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   const itemColor = isDark ? "white" : INK;
   return (
@@ -1477,7 +1477,7 @@ function AwardsSpeakingPage({
 }) {
   const isDark = useContext(DarkModeCtx);
   const bg = "transparent";
-  const fg = isDark ? GOLD : INK;
+  const fg = GOLD;
   const sub = isDark ? "rgba(255,255,255,0.55)" : DIM;
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   return (
@@ -1608,7 +1608,7 @@ function SpeakingDetailPage({
 
   // Event-specific dark (fusecon) overrides global light mode
   const bg = ev.dark ? "#030303" : "transparent";
-  const textColor = (ev.dark || globalDark) ? GOLD : INK;
+  const textColor = GOLD;
   const subColor = (ev.dark || globalDark) ? "rgba(255,255,255,0.55)" : DIM;
 
   return (
