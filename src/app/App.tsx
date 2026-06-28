@@ -256,9 +256,6 @@ function MobileMenu({
   forceScroll?: boolean;
 }) {
   const isDark = useContext(DarkModeCtx);
-  const menuBg = isDark
-    ? NAV_GRADIENT
-    : "linear-gradient(rgba(255,255,255,0.6), rgba(255,255,255,0.6)), linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
   const itemActive = isDark ? "white" : INK;
   const itemDim    = isDark ? "rgba(255,255,255,0.55)" : "rgba(17,17,17,0.5)";
   const rowBorder  = isDark ? "rgba(255,255,255,0.15)" : "rgba(17,17,17,0.12)";
@@ -266,21 +263,23 @@ function MobileMenu({
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex flex-col"
-      style={{ background: menuBg }}
+      className="fixed inset-0 z-50 flex flex-col overflow-hidden"
+      style={{ background: isDark ? NAV_GRADIENT : "transparent" }}
       initial={{ opacity: 0, y: "100%" }}
       animate={{ opacity: open ? 1 : 0, y: open ? "0%" : "100%" }}
       transition={{ duration: 0.38, ease: [0.4, 0, 0.2, 1] }}
       aria-hidden={!open}
       pointerEvents={open ? "auto" : "none"}
     >
+      {!isDark && <LightGradientBlobs />}
+
       {/* Header row */}
-      <div className="flex items-center px-6 pt-10 pb-6">
+      <div className="relative z-10 flex items-center px-6 pt-10 pb-6">
         <LogoMark size={44} color={itemActive} />
       </div>
 
       {/* Nav items list — right-aligned, active-section dot at the start */}
-      <div className="flex flex-col flex-1 px-6 pb-12 justify-center gap-1">
+      <div className="relative z-10 flex flex-col flex-1 px-6 pb-12 justify-center gap-1">
         {SECTIONS.map((s, i) => {
           const isActive = activeIdx === i;
           return (
@@ -313,7 +312,7 @@ function MobileMenu({
       </div>
 
       {/* Footer — dark/bright toggle and close, side by side */}
-      <div className="px-6 pb-8 flex items-center justify-between">
+      <div className="relative z-10 px-6 pb-8 flex items-center justify-between">
         <DarkModeToggle isDark={isDark} onToggle={useContext(DarkModeToggleCtx)} variant="inline" />
         <button onClick={onClose} aria-label="Close menu" style={{ background: "none", border: "none", padding: 0 }}>
           <X size={20} strokeWidth={1} color={closeColor} />
