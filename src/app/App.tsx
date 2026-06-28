@@ -299,11 +299,10 @@ function MobileMenu({
             >
               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: itemActive, opacity: isActive ? 1 : 0 }} />
               <span
-                className="font-['Avenir',sans-serif] font-medium tracking-wide"
+                className="font-['Museo',sans-serif] font-light tracking-wide"
                 style={{
                   fontSize: "1.5rem",
                   color: isActive ? itemActive : itemDim,
-                  fontWeight: isActive ? 600 : 400,
                 }}
               >
                 {s.label}
