@@ -264,14 +264,14 @@ function MobileMenu({
   return (
     <motion.div
       className="fixed inset-0 z-50 flex flex-col overflow-hidden"
-      style={{ background: isDark ? NAV_GRADIENT : "transparent" }}
+      style={{ background: "transparent" }}
       initial={{ opacity: 0, y: "100%" }}
       animate={{ opacity: open ? 1 : 0, y: open ? "0%" : "100%" }}
       transition={{ duration: 0.38, ease: [0.4, 0, 0.2, 1] }}
       aria-hidden={!open}
       pointerEvents={open ? "auto" : "none"}
     >
-      {!isDark && <LightGradientBlobs />}
+      {isDark ? <AnimatedGradientBg /> : <LightGradientBlobs />}
 
       {/* Header row */}
       <div className="relative z-10 flex items-center px-6 pt-10 pb-6">
