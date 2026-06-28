@@ -730,7 +730,11 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
           <div className="md:hidden absolute inset-0 flex flex-col px-6 pt-14"
             style={{ paddingBottom: "calc(64px + 8vh + 24px)" }}>
             <LogoMark size={52} />
-            <div className="flex-1 flex items-center">
+            <div className="flex-1 flex flex-col justify-center gap-5">
+              <h1 className="font-['Museo',sans-serif] font-light"
+                style={{ fontSize: "clamp(1.6rem, 8vw, 2.2rem)", lineHeight: 1.1, color: fg }}>
+                Tiff is a product &amp; design leader
+              </h1>
               <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
                 style={{ fontSize: "clamp(0.85rem, 3.8vw, 1.05rem)", color: fg, maxWidth: "100%" }}>
                 I work with C-suites and product teams to shape design
