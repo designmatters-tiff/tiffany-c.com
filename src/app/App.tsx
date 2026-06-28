@@ -732,7 +732,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             <LogoMark size={52} />
             <div className="flex-1 flex flex-col justify-center gap-5">
               <h1 className="font-['Museo',sans-serif] font-light"
-                style={{ fontSize: "clamp(1.6rem, 8vw, 2.2rem)", lineHeight: 1.1, color: fg }}>
+                style={{ fontSize: "clamp(1.6rem, 8vw, 2.2rem)", lineHeight: 1.1, color: GOLD }}>
                 Tiff is a product &amp; design leader
               </h1>
               <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
@@ -762,7 +762,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             </div>
             <div className="absolute inset-0 flex flex-col justify-center px-20">
               <h1 className="font-['Museo',sans-serif] font-light mb-7"
-                style={{ fontSize: "clamp(1.8rem, 3.4vw, 3rem)", lineHeight: 1.05, color: fg, maxWidth: "60%" }}>
+                style={{ fontSize: "clamp(1.8rem, 3.4vw, 3rem)", lineHeight: 1.05, color: GOLD, maxWidth: "60%" }}>
                 Tiff is a product &amp; design leader
               </h1>
               <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
