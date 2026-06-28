@@ -148,9 +148,9 @@ function DarkModeToggle({
     }
   }, [isDark]);
 
-  const activeColor = variant === "inline" ? "white" : (isDark ? "white" : INK);
-  const dimColor     = variant === "inline" ? "rgba(255,255,255,0.45)" : (isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)");
-  const lineColor    = variant === "inline" ? "white" : (isDark ? GOLD_BRIGHT : INK);
+  const activeColor = isDark ? "white" : INK;
+  const dimColor     = isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.4)";
+  const lineColor    = isDark ? GOLD_BRIGHT : INK;
 
   return (
     <button
@@ -255,10 +255,19 @@ function MobileMenu({
   // track to scroll) keeps the page-aware branching below.
   forceScroll?: boolean;
 }) {
+  const isDark = useContext(DarkModeCtx);
+  const menuBg = isDark
+    ? NAV_GRADIENT
+    : "linear-gradient(rgba(255,255,255,0.6), rgba(255,255,255,0.6)), linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
+  const itemActive = isDark ? "white" : INK;
+  const itemDim    = isDark ? "rgba(255,255,255,0.55)" : "rgba(17,17,17,0.5)";
+  const rowBorder  = isDark ? "rgba(255,255,255,0.15)" : "rgba(17,17,17,0.12)";
+  const closeColor = isDark ? "white" : INK;
+
   return (
     <motion.div
       className="fixed inset-0 z-50 flex flex-col"
-      style={{ background: NAV_GRADIENT }}
+      style={{ background: menuBg }}
       initial={{ opacity: 0, y: "100%" }}
       animate={{ opacity: open ? 1 : 0, y: open ? "0%" : "100%" }}
       transition={{ duration: 0.38, ease: [0.4, 0, 0.2, 1] }}
@@ -266,19 +275,11 @@ function MobileMenu({
       pointerEvents={open ? "auto" : "none"}
     >
       {/* Header row */}
-      <div className="flex items-center justify-between px-6 pt-10 pb-6">
-        <LogoMark size={44} color="white" />
-        <button
-          onClick={onClose}
-          className="w-10 h-10 flex items-center justify-center rounded-full"
-          style={{ background: "rgba(255,255,255,0.15)" }}
-          aria-label="Close menu"
-        >
-          <X size={20} strokeWidth={1} color="white" />
-        </button>
+      <div className="flex items-center px-6 pt-10 pb-6">
+        <LogoMark size={44} color={itemActive} />
       </div>
 
-      {/* Nav items list */}
+      {/* Nav items list — right-aligned, active-section dot at the start */}
       <div className="flex flex-col flex-1 px-6 pb-12 justify-center gap-1">
         {SECTIONS.map((s, i) => {
           const isActive = activeIdx === i;
@@ -293,31 +294,31 @@ function MobileMenu({
                 }
                 onClose();
               }}
-              className="flex items-center justify-between py-5 text-left"
-              style={{ borderBottom: "1px solid rgba(255,255,255,0.15)" }}
+              className="flex items-center justify-between py-5 text-right"
+              style={{ borderBottom: `1px solid ${rowBorder}` }}
             >
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: itemActive, opacity: isActive ? 1 : 0 }} />
               <span
                 className="font-['Avenir',sans-serif] font-medium tracking-wide"
                 style={{
                   fontSize: "1.5rem",
-                  color: "white",
-                  opacity: isActive ? 1 : 0.6,
+                  color: isActive ? itemActive : itemDim,
                   fontWeight: isActive ? 600 : 400,
                 }}
               >
                 {s.label}
               </span>
-              {isActive && (
-                <span className="w-2 h-2 rounded-full bg-white flex-shrink-0" />
-              )}
             </button>
           );
         })}
       </div>
 
-      {/* Footer — dark/bright toggle (mobile only; desktop toggle floats top-right) */}
-      <div className="px-6 pb-8 flex justify-start">
-        <DarkModeToggle isDark={useContext(DarkModeCtx)} onToggle={useContext(DarkModeToggleCtx)} variant="inline" />
+      {/* Footer — dark/bright toggle and close, side by side */}
+      <div className="px-6 pb-8 flex items-center justify-between">
+        <DarkModeToggle isDark={isDark} onToggle={useContext(DarkModeToggleCtx)} variant="inline" />
+        <button onClick={onClose} aria-label="Close menu" style={{ background: "none", border: "none", padding: 0 }}>
+          <X size={20} strokeWidth={1} color={closeColor} />
+        </button>
       </div>
     </motion.div>
   );
