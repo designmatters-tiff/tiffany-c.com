@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { motion } from "motion/react";
-import { Linkedin, Instagram, X, ExternalLink, Plus } from "lucide-react";
+import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight } from "lucide-react";
 
 import awardsWomenDigital from "@/imports/AwardsSpeaking/WID-tiff2025.png";
 import awardsFinalistCard from "@/imports/AwardsSpeaking/WID-2.png";
@@ -576,6 +576,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
   const pageBg  = isDark ? "#181410" : "#f8f7f5";
   const fg      = isDark ? GOLD : INK;
+  const bodyCol = isDark ? "rgba(255,255,255,0.85)" : INK;
   const dimCol  = isDark ? "rgba(255,255,255,0.38)" : DIM;
   const border  = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
   // Speaking Inquiry (Connect) can grow taller than the viewport once
@@ -736,7 +737,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 Tiff is a product &amp; design leader
               </h1>
               <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
-                style={{ fontSize: "clamp(0.85rem, 3.8vw, 1.05rem)", color: fg, maxWidth: "100%" }}>
+                style={{ fontSize: "clamp(0.85rem, 3.8vw, 1.05rem)", color: bodyCol, maxWidth: "100%" }}>
                 I work with C-suites and product teams to shape design
                 functions that deliver. As an ex-founder who built and
                 exited my own brand, and a leader across fintech, retail,
@@ -766,7 +767,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 Tiff is a product &amp; design leader
               </h1>
               <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
-                style={{ fontSize: "clamp(1.05rem, 1.7vw, 1.4rem)", color: fg, maxWidth: "60%" }}>
+                style={{ fontSize: "clamp(1.05rem, 1.7vw, 1.4rem)", color: bodyCol, maxWidth: "60%" }}>
                 I work with C-suites and product teams to shape design
                 functions that deliver. As an ex-founder who built and
                 exited my own brand, and a leader across fintech, retail,
@@ -1088,27 +1089,22 @@ function ExpertiseCard({ card }: { card: typeof EXPERTISE_CARDS[0] }) {
   const isDark = useContext(DarkModeCtx);
   const { Illustration } = card;
   const cardBrd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
+  const titleColor = isDark ? "white" : INK;
   return (
     <div
-      className="flex flex-col md:flex-row items-start gap-4 md:gap-8 px-5 md:px-10 py-4 md:py-8 cursor-pointer"
+      className="flex items-start gap-4 md:gap-6 px-5 md:px-10 py-5 md:py-7 cursor-pointer"
       style={{ borderBottom: `1px solid ${cardBrd}`, background: open ? (isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.02)") : "transparent", transition: "background 0.3s" }}
       onClick={toggle}>
-      <div className="flex-shrink-0" style={{ width: 64, height: 64 }}>
-        <Illustration />
+      <div className="flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden"
+        style={{ width: 56, height: 56, background: `${card.accent}1f` }}>
+        <div style={{ width: 38, height: 38 }}><Illustration /></div>
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-3 mb-2">
-          <Plus
-            size={18}
-            strokeWidth={1}
-            style={{ color: card.accent, flexShrink: 0, transform: open ? "rotate(45deg)" : "rotate(0deg)", transition: "transform 0.3s" }}
-          />
-          <h3 className="font-['Museo',sans-serif] font-light"
-            style={{ fontSize: "clamp(1.1rem, 2.2vw, 2.1rem)", color: GOLD }}>
-            {card.title}
-          </h3>
-        </div>
-        <p className="font-['Avenir',sans-serif] font-light text-sm leading-relaxed" style={{ color: isDark ? "rgba(255,255,255,0.55)" : DIM, maxWidth: 600 }}>
+        <h3 className="font-['Avenir',sans-serif] font-medium"
+          style={{ fontSize: "clamp(1rem, 1.6vw, 1.25rem)", color: titleColor }}>
+          {card.title}
+        </h3>
+        <p className="font-['Avenir',sans-serif] font-light text-sm leading-relaxed mt-1" style={{ color: isDark ? "rgba(255,255,255,0.55)" : DIM, maxWidth: 600 }}>
           {card.description}
         </p>
         <div className="overflow-hidden" style={{ maxHeight: open ? 200 : 0, opacity: open ? 1 : 0, transition: "max-height 0.4s ease, opacity 0.3s ease" }}>
@@ -1121,6 +1117,17 @@ function ExpertiseCard({ card }: { card: typeof EXPERTISE_CARDS[0] }) {
           </ul>
         </div>
       </div>
+      <ChevronRight
+        size={18}
+        strokeWidth={1.5}
+        style={{
+          color: isDark ? "rgba(255,255,255,0.4)" : "rgba(17,17,17,0.35)",
+          flexShrink: 0,
+          marginTop: 4,
+          transform: open ? "rotate(90deg)" : "rotate(0deg)",
+          transition: "transform 0.3s",
+        }}
+      />
     </div>
   );
 }
@@ -1218,6 +1225,7 @@ function PageBottomNav({
 function WorkPage({ onNavigate, embedded = false }: { onNavigate: (p: Page) => void; embedded?: boolean }) {
   const isDark = useContext(DarkModeCtx);
   const bg = "transparent";
+  const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   return (
     <div className="relative w-full" style={{ minHeight: embedded ? "100%" : "100dvh", background: bg }}>
       {!embedded && (
@@ -1230,7 +1238,15 @@ function WorkPage({ onNavigate, embedded = false }: { onNavigate: (p: Page) => v
         </button>
       )}
 
-      <div className="pt-10 md:pt-14">
+      {/* Page heading */}
+      <div className="px-6 md:px-10 pt-10 md:pt-14 pb-6 md:pb-8" style={{ borderBottom: `1px solid ${brd}` }}>
+        <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}>Fintech · eCommerce · SaaS</p>
+        <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: GOLD }}>
+          Work
+        </h1>
+      </div>
+
+      <div>
         {EXPERTISE_CARDS.map(card => <ExpertiseCard key={card.key} card={card} />)}
         {/* Bottom spacer so content clears the floating nav */}
         <div style={{ height: "calc(64px + 8vh)" }} />
