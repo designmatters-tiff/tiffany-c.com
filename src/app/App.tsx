@@ -256,8 +256,8 @@ function MobileMenu({
   forceScroll?: boolean;
 }) {
   const isDark = useContext(DarkModeCtx);
-  const itemActive = isDark ? "white" : INK;
-  const itemDim    = isDark ? "rgba(255,255,255,0.55)" : "rgba(17,17,17,0.5)";
+  const itemActive = GOLD;
+  const itemDim    = "rgba(178,147,59,0.55)";
   const rowBorder  = isDark ? "rgba(255,255,255,0.15)" : "rgba(17,17,17,0.12)";
   const closeColor = isDark ? "white" : INK;
 
