@@ -582,6 +582,11 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
   // screen with a gradient fade + "View more" until expanded, so the
   // persistent carousel indicator always has room.
   const [mobileExpanded, setMobileExpanded] = useState<Record<string, boolean>>({});
+  // Like Safari's URL bar — the floating nav only shrinks once the user
+  // actually scrolls down inside an expanded section, not just because
+  // it was expanded. Resets whenever the active section changes so a
+  // stale "scrolled" state from a previous section can't carry over.
+  const [navMinimized, setNavMinimized] = useState(false);
   const activeIdxRef = useRef(0);
   const wheeling     = useRef(false);
   const isPaused     = useRef(false);
@@ -689,10 +694,13 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
 
   const currentSection = SECTIONS[activeIdx];
   // True when the active section is an embedded Work/Award & Speaking
-  // page that's been expanded past its mobile "View more" cap — the
-  // floating nav bar shrinks to a left-aligned, content-width pill in
-  // that state to free up room for the now-longer scrollable content.
+  // page that's been expanded past its mobile "View more" cap — this
+  // makes the section vertically scrollable, which is the precondition
+  // for the Safari-style nav shrink (see navMinimized) to apply.
   const currentEmbedExpanded = isMobile && "embeds" in currentSection && currentSection.embeds && (mobileExpanded[currentSection.key] ?? false);
+  const navShrunk = currentEmbedExpanded && navMinimized;
+
+  useEffect(() => { setNavMinimized(false); }, [activeIdx]);
 
   return (
     <div className="relative w-screen h-dvh overflow-hidden" style={{ background: "transparent" }}>
@@ -805,10 +813,11 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
             return (
               <section key={section.key}
                 className="flex-shrink-0 relative"
-                style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", overflowY: capped ? "hidden" : "auto", WebkitOverflowScrolling: "touch", touchAction: capped ? "pan-x" : "pan-y" }}>
+                style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", overflowY: capped ? "hidden" : "auto", WebkitOverflowScrolling: "touch", touchAction: capped ? "pan-x" : "pan-y" }}
+                onScroll={expanded ? (e) => setNavMinimized(e.currentTarget.scrollTop > 24) : undefined}>
                 {section.page === "work"
-                  ? <WorkPage onNavigate={onNavigate} onOpenDetail={onOpenDetail} embedded isActive={isActive} compact={isMobile && expanded} />
-                  : <AwardsSpeakingPage onNavigate={onNavigate} embedded isActive={isActive} compact={isMobile && expanded} />}
+                  ? <WorkPage onNavigate={onNavigate} onOpenDetail={onOpenDetail} embedded isActive={isActive} compact={isActive && navShrunk} />
+                  : <AwardsSpeakingPage onNavigate={onNavigate} embedded isActive={isActive} compact={isActive && navShrunk} />}
 
                 {capped && (
                   <>
@@ -965,7 +974,7 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
           background: NAV_GRADIENT,
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}
-        animate={{ width: currentEmbedExpanded ? 168 : "calc(100% - 48px)" }}
+        animate={{ width: navShrunk ? 168 : "calc(100% - 48px)" }}
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
         <button
           onClick={() => setMenuOpen(true)}
@@ -976,7 +985,7 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
             Tiffany C.
           </span>
         </button>
-        {!currentEmbedExpanded && (
+        {!navShrunk && (
           <>
             <div className="flex-1" />
             {activeIdx > 0 && (
