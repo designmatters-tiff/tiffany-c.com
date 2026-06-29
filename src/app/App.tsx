@@ -702,6 +702,17 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
 
   useEffect(() => { setNavMinimized(false); }, [activeIdx]);
 
+  // Expanding any row's accordion (a finalist photo, a speaking event's
+  // image/video) inside a still-capped Work/Award & Speaking section
+  // can grow taller than the one-screen cap allows — auto-lift the cap
+  // so that content isn't clipped with no way to scroll down and see it.
+  const { openId: openAccordionIdHome } = useContext(AccordionCtx);
+  useEffect(() => {
+    if (openAccordionIdHome && "embeds" in currentSection && currentSection.embeds) {
+      setMobileExpanded(m => (m[currentSection.key] ? m : { ...m, [currentSection.key]: true }));
+    }
+  }, [openAccordionIdHome, currentSection]);
+
   return (
     <div className="relative w-screen h-dvh overflow-hidden" style={{ background: "transparent" }}>
 
