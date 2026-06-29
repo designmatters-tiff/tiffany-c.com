@@ -761,10 +761,6 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
                 sustainable growth lives.
               </p>
             </div>
-            <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest pb-2"
-              style={{ color: dimCol }}>
-              swipe to explore
-            </p>
           </div>
 
           {/* Desktop layout */}
@@ -907,25 +903,34 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
           have no room in their own content for a per-slide indicator.
           Design: a solid gold bar grows to cover every visited section
           (merged into one continuous line), with small dots marking the
-          sections still ahead. ── */}
-      <div className="md:hidden absolute z-30 flex items-center"
+          sections still ahead. Shares its row with "swipe to explore"
+          (hero only), right-aligned in a fixed-width track so the two
+          sit side by side instead of the indicator spanning full width. ── */}
+      <div className="md:hidden absolute z-30 flex items-center justify-between"
         style={{ bottom: "calc(5% + 56px + 14px + env(safe-area-inset-bottom))", left: 24, right: 24 }}>
-        <div className="rounded-full transition-all duration-300"
-          style={{
-            width: `${((activeIdx + 1) / SECTIONS.length) * 100}%`,
-            height: 2,
-            background: GOLD,
-            flexShrink: 0,
-          }} />
-        {activeIdx < SECTIONS.length - 1 && (
-          <div className="flex items-center gap-1.5" style={{ marginLeft: 8 }}>
-            {SECTIONS.slice(activeIdx + 1).map((_, i) => (
-              <div key={i} className="rounded-full"
-                style={{ width: 4, height: 4,
-                  background: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.25)" }} />
-            ))}
-          </div>
-        )}
+        {activeIdx === 0 ? (
+          <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest" style={{ color: dimCol }}>
+            swipe to explore
+          </p>
+        ) : <span />}
+        <div className="flex items-center flex-shrink-0" style={{ width: 96 }}>
+          <div className="rounded-full transition-all duration-300"
+            style={{
+              width: `${((activeIdx + 1) / SECTIONS.length) * 100}%`,
+              height: 2,
+              background: GOLD,
+              flexShrink: 0,
+            }} />
+          {activeIdx < SECTIONS.length - 1 && (
+            <div className="flex items-center gap-1.5" style={{ marginLeft: 8 }}>
+              {SECTIONS.slice(activeIdx + 1).map((_, i) => (
+                <div key={i} className="rounded-full"
+                  style={{ width: 4, height: 4,
+                    background: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.25)" }} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── Desktop nav — floating above bottom edge, aligned to content width ── */}
