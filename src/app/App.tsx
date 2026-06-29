@@ -688,6 +688,11 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
   }, [goTo]);
 
   const currentSection = SECTIONS[activeIdx];
+  // True when the active section is an embedded Work/Award & Speaking
+  // page that's been expanded past its mobile "View more" cap — the
+  // floating nav bar shrinks to a left-aligned, content-width pill in
+  // that state to free up room for the now-longer scrollable content.
+  const currentEmbedExpanded = isMobile && "embeds" in currentSection && currentSection.embeds && (mobileExpanded[currentSection.key] ?? false);
 
   return (
     <div className="relative w-screen h-dvh overflow-hidden" style={{ background: "transparent" }}>
@@ -802,8 +807,8 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
                 className="flex-shrink-0 relative"
                 style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", overflowY: capped ? "hidden" : "auto", WebkitOverflowScrolling: "touch", touchAction: capped ? "pan-x" : "pan-y" }}>
                 {section.page === "work"
-                  ? <WorkPage onNavigate={onNavigate} onOpenDetail={onOpenDetail} embedded isActive={isActive} />
-                  : <AwardsSpeakingPage onNavigate={onNavigate} embedded isActive={isActive} />}
+                  ? <WorkPage onNavigate={onNavigate} onOpenDetail={onOpenDetail} embedded isActive={isActive} compact={isMobile && expanded} />
+                  : <AwardsSpeakingPage onNavigate={onNavigate} embedded isActive={isActive} compact={isMobile && expanded} />}
 
                 {capped && (
                   <>
@@ -949,30 +954,39 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
         })}
       </nav>
 
-      {/* ── Mobile nav bar — floating, aligned to content width ── */}
-      <nav className="absolute z-30 md:hidden flex items-center h-14 px-5 overflow-hidden"
+      {/* ── Mobile nav bar — floating, aligned to content width. Shrinks
+          to a left-aligned, content-width pill once the active embedded
+          Work/Award & Speaking section is expanded past its "View more"
+          cap, to free up room for the now-longer scrollable content. ── */}
+      <motion.nav className="absolute z-30 md:hidden flex items-center h-14 px-5 overflow-hidden"
         style={{
-          bottom: "calc(5% + env(safe-area-inset-bottom))", left: 24, right: 24,
+          bottom: "calc(5% + env(safe-area-inset-bottom))", left: 24,
           borderRadius: 0,
           background: NAV_GRADIENT,
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
-        }}>
+        }}
+        animate={{ width: currentEmbedExpanded ? 168 : "calc(100% - 48px)" }}
+        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
         <button
           onClick={() => setMenuOpen(true)}
           className="flex items-center gap-3"
           aria-label="Open navigation">
           <HamburgerIcon color="white" />
-          <span className="font-['Museo',sans-serif] font-light text-sm text-white">
+          <span className="font-['Museo',sans-serif] font-light text-sm text-white whitespace-nowrap">
             Tiffany C.
           </span>
         </button>
-        <div className="flex-1" />
-        {activeIdx > 0 && (
-          <span className="font-['Museo',sans-serif] font-light text-sm text-white/75">
-            {currentSection.label}
-          </span>
+        {!currentEmbedExpanded && (
+          <>
+            <div className="flex-1" />
+            {activeIdx > 0 && (
+              <span className="font-['Museo',sans-serif] font-light text-sm text-white/75">
+                {currentSection.label}
+              </span>
+            )}
+          </>
         )}
-      </nav>
+      </motion.nav>
 
       {/* Mobile menu overlay */}
       <MobileMenu
@@ -1280,7 +1294,7 @@ function PageBottomNav({
 // case the homepage's own logomark/back-button and floating nav are
 // already on screen, so this component's copies are suppressed to
 // avoid duplicating them.
-function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; embedded?: boolean; isActive?: boolean }) {
+function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true, compact = false }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; embedded?: boolean; isActive?: boolean; compact?: boolean }) {
   const isDark = useContext(DarkModeCtx);
   const bg = "transparent";
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
@@ -1296,13 +1310,15 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true 
         </button>
       )}
 
-      {/* Page heading */}
-      <div className="px-6 md:px-10 pt-10 md:pt-14 pb-6 md:pb-8" style={{ borderBottom: `1px solid ${brd}` }}>
+      {/* Page heading — shrinks once the mobile "View more" cap lifts,
+          to leave more room for the now-longer scrollable content. */}
+      <div className="px-6 md:px-10 pt-10 md:pt-14 pb-6 md:pb-8" style={{ borderBottom: `1px solid ${brd}`, paddingBottom: compact ? 16 : undefined, transition: "padding-bottom 0.35s ease" }}>
         <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Fintech · eCommerce · SaaS
         </motion.p>
-        <motion.h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: GOLD }}
+        <motion.h1 className="font-['Museo',sans-serif] font-light"
+          style={{ fontSize: compact ? "1.5rem" : "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: GOLD, transition: "font-size 0.35s ease" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Work
         </motion.h1>
@@ -1591,10 +1607,12 @@ function AwardsSpeakingPage({
   onNavigate,
   embedded = false,
   isActive = true,
+  compact = false,
 }: {
   onNavigate: (p: Page) => void;
   embedded?: boolean;
   isActive?: boolean;
+  compact?: boolean;
 }) {
   const isDark = useContext(DarkModeCtx);
   const bg = "transparent";
@@ -1613,13 +1631,15 @@ function AwardsSpeakingPage({
         </button>
       )}
 
-      {/* Page heading */}
-      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
+      {/* Page heading — shrinks once the mobile "View more" cap lifts,
+          to leave more room for the now-longer scrollable content. */}
+      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}`, paddingBottom: compact ? 16 : undefined, transition: "padding-bottom 0.35s ease" }}>
         <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Recognition
         </motion.p>
-        <motion.h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: fg }}
+        <motion.h1 className="font-['Museo',sans-serif] font-light"
+          style={{ fontSize: compact ? "1.5rem" : "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: fg, transition: "font-size 0.35s ease" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Awards &amp; Speaking
         </motion.h1>
