@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
 import { motion } from "motion/react";
-import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight } from "lucide-react";
+import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft } from "lucide-react";
 
 import awardsWomenDigital from "@/imports/AwardsSpeaking/WID-tiff2025.png";
 import awardsFinalistCard from "@/imports/AwardsSpeaking/WID-2.png";
@@ -23,7 +23,7 @@ const INK         = "#111111";
 const DIM         = "#666660";
 const NAV_GRADIENT = "linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30)), linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
 
-type Page = "home" | "work" | "awards" | "speaking" | "coaching" | "connect";
+type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry";
 
 // ─── Dark mode context ────────────────────────────────────────────
 const DarkModeCtx = createContext(false);
@@ -57,7 +57,7 @@ function AnimatedGradientBg() {
         @keyframes drift-c { 0%{transform:translate(0%,0%) scale(1)} 50%{transform:translate(12%,6%) scale(1.06)} 80%{transform:translate(-8%,-10%) scale(1.1)} 100%{transform:translate(0%,0%) scale(1)} }
         @keyframes drift-d { 0%{transform:translate(0%,0%) scale(1.05)} 45%{transform:translate(-5%,14%) scale(0.93)} 75%{transform:translate(9%,-5%) scale(1.1)} 100%{transform:translate(0%,0%) scale(1.05)} }
       `}</style>
-      <div className="absolute inset-0 bg-[#181410]" />
+      <div className="absolute inset-0 bg-[#282828]" />
       <div className="absolute rounded-full pointer-events-none" style={{ width:"65vw",height:"65vw",top:"-15%",left:"-10%", background:"radial-gradient(circle,rgba(178,147,59,0.28) 0%,transparent 70%)", filter:"blur(48px)", animation:"drift-a 22s ease-in-out infinite" }} />
       <div className="absolute rounded-full pointer-events-none" style={{ width:"55vw",height:"55vw",top:"10%",right:"-15%", background:"radial-gradient(circle,rgba(38,88,90,0.42) 0%,transparent 70%)", filter:"blur(60px)", animation:"drift-b 28s ease-in-out infinite" }} />
       <div className="absolute rounded-full pointer-events-none" style={{ width:"60vw",height:"60vw",bottom:"-20%",left:"20%", background:"radial-gradient(circle,rgba(110,55,70,0.35) 0%,transparent 70%)", filter:"blur(55px)", animation:"drift-c 32s ease-in-out infinite" }} />
@@ -337,14 +337,16 @@ const FORM_FIELDS: { name: string; label: string; type?: string; required?: bool
   { name: "email",       label: "Email",          type: "email",  required: true  },
 ];
 
-function SpeakingInquiryRow({ accent, itemColor, borderColor }: {
-  accent: string; itemColor: string; borderColor: string;
-}) {
+// Speaking Inquiry is a full 2nd-level page (not an inline accordion) —
+// drilling in from Connect minimises the bottom nav to a breadcrumb
+// strip with a docked "Submit" CTA, leaving the full viewport for the
+// form. See DetailBottomBar.
+function SpeakingInquiryPage({ onBack }: { onBack: () => void }) {
   const isDark = useContext(DarkModeCtx);
-  const { open, toggle } = useAccordionItem("speaking-inquiry");
-  const { setOpenId } = useContext(AccordionCtx);
-  const [status, setStatus]   = useState<"idle" | "sending" | "sent" | "error">("idle");
-  const [fields, setFields]   = useState<Record<string, string>>({});
+  const accent = "#9B5A88";
+  const itemColor = isDark ? "white" : INK;
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [fields, setFields] = useState<Record<string, string>>({});
 
   const inputBase: React.CSSProperties = {
     width: "100%",
@@ -352,9 +354,9 @@ function SpeakingInquiryRow({ accent, itemColor, borderColor }: {
     border: "none",
     borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.18)"}`,
     outline: "none",
-    padding: "6px 0",
+    padding: "8px 0",
     fontSize: "0.9rem",
-    fontFamily: "'Raleway', sans-serif",
+    fontFamily: "'Avenir', sans-serif",
     fontWeight: 300,
     color: itemColor,
     transition: "border-color 0.2s",
@@ -362,8 +364,7 @@ function SpeakingInquiryRow({ accent, itemColor, borderColor }: {
 
   const set = (k: string, v: string) => setFields(f => ({ ...f, [k]: v }));
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setStatus("sending");
     try {
       const res = await fetch(SPEAKING_FORM_ENDPOINT, {
@@ -372,91 +373,71 @@ function SpeakingInquiryRow({ accent, itemColor, borderColor }: {
         body: JSON.stringify({ _subject: `Speaking Inquiry: ${fields.topic ?? ""}`, ...fields }),
       });
       setStatus(res.ok ? "sent" : "error");
-      if (res.ok) setTimeout(() => { setOpenId(null); setStatus("idle"); setFields({}); }, 3000);
+      if (res.ok) setTimeout(() => { onBack(); setStatus("idle"); setFields({}); }, 2500);
     } catch {
       setStatus("error");
     }
   };
 
   return (
-    <div>
-      {/* Row trigger */}
-      <button
-        className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer"
-        onClick={toggle}
-      >
-        <Plus
-          size={16}
-          strokeWidth={1}
-          style={{
-            color: accent,
-            flexShrink: 0,
-            transform: open ? "rotate(45deg)" : "rotate(0deg)",
-            transition: "transform 0.3s ease",
-          }}
-        />
-        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg text-left"
-          style={{ color: itemColor }}>
+    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10">
+        <button onClick={onBack}
+          className="flex items-center gap-1.5 font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4 cursor-pointer"
+          style={{ color: GOLD }}>
+          <ChevronLeft size={12} strokeWidth={1.5} /> Connect
+        </button>
+        <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", lineHeight: 1.05, color: GOLD }}>
           Speaking Inquiry
-        </span>
-      </button>
+        </h1>
+      </div>
 
-      {/* Expanding form */}
-      <div style={{
-        maxHeight: open ? "820px" : "0px",
-        overflow: "hidden",
-        transition: "max-height 0.5s cubic-bezier(0.4,0,0.2,1)",
-      }}>
+      <div className="px-6 md:px-20 pb-10" style={{ maxWidth: 760 }}>
         {status === "sent" ? (
-          <div className="pb-6 pt-2">
-            <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: accent }}>
-              ✓ Sent — Tiffany will be in touch soon.
-            </p>
-          </div>
+          <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: accent }}>
+            ✓ Sent — Tiffany will be in touch soon.
+          </p>
         ) : (
-          <form onSubmit={handleSubmit} className="pb-8 pt-1">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
-              {FORM_FIELDS.map(f => (
-                <div key={f.name} className="flex flex-col gap-1">
-                  <label
-                    className="font-['Avenir',sans-serif] font-light text-[0.58rem] uppercase tracking-[0.18em]"
-                    style={{ color: isDark ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.65)" }}
-                  >
-                    {f.label}{f.required && " *"}
-                  </label>
-                  <input
-                    type={f.type ?? "text"}
-                    required={f.required}
-                    value={fields[f.name] ?? ""}
-                    onChange={e => set(f.name, e.target.value)}
-                    style={inputBase}
-                    onFocus={e => (e.target.style.borderBottomColor = accent)}
-                    onBlur={e => (e.target.style.borderBottomColor = isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.18)")}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {status === "error" && (
-              <p className="font-['Avenir',sans-serif] font-light text-xs mt-4" style={{ color: "#E05C5C" }}>
-                Something went wrong — please email designmatters.tiff@gmail.com directly.
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={status === "sending"}
-              className="mt-7 px-6 py-2.5 rounded-full font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.18em] transition-opacity duration-200"
-              style={{
-                background: accent,
-                color: "white",
-                opacity: status === "sending" ? 0.6 : 1,
-              }}
-            >
-              {status === "sending" ? "Sending…" : "Send Inquiry"}
-            </button>
-          </form>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            {FORM_FIELDS.map(f => (
+              <div key={f.name} className="flex flex-col gap-1">
+                <label
+                  className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.18em]"
+                  style={{ color: isDark ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.65)" }}
+                >
+                  {f.label}{f.required && " *"}
+                </label>
+                <input
+                  type={f.type ?? "text"}
+                  required={f.required}
+                  value={fields[f.name] ?? ""}
+                  onChange={e => set(f.name, e.target.value)}
+                  style={inputBase}
+                  onFocus={e => (e.target.style.borderBottomColor = accent)}
+                  onBlur={e => (e.target.style.borderBottomColor = isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.18)")}
+                />
+              </div>
+            ))}
+          </div>
         )}
+
+        {status === "error" && (
+          <p className="font-['Avenir',sans-serif] font-light text-xs mt-4" style={{ color: "#E05C5C" }}>
+            Something went wrong — please email designmatters.tiff@gmail.com directly.
+          </p>
+        )}
+
+        {/* Bottom spacer so content clears the floating detail nav */}
+        <div style={{ height: "calc(64px + 8vh)" }} />
+      </div>
+
+      <div className="sticky z-30 mx-6 md:mx-20" style={{ bottom: "calc(3% + env(safe-area-inset-bottom))" }}>
+        <DetailBottomBar
+          parentLabel="Connect"
+          itemLabel="Speaking Inquiry"
+          onBack={onBack}
+          cta={{ label: status === "sending" ? "Sending…" : "Submit", onClick: handleSubmit, disabled: status === "sending" || status === "sent" }}
+        />
       </div>
     </div>
   );
@@ -515,11 +496,13 @@ function ContactItem({
   accent,
   itemColor,
   borderColor,
+  onNavigate,
 }: {
   item: string;
   accent: string;
   itemColor: string;
   borderColor: string;
+  onNavigate?: (p: Page) => void;
 }) {
   if (item === "linkedin") {
     return (
@@ -559,7 +542,17 @@ function ContactItem({
     );
   }
   if (item === "Speaking Inquiry") {
-    return <SpeakingInquiryRow accent={accent} itemColor={itemColor} borderColor={borderColor} />;
+    return (
+      <button
+        className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer text-left"
+        onClick={() => onNavigate?.("speakingInquiry")}
+      >
+        <ChevronRight size={16} strokeWidth={1} style={{ color: accent, flexShrink: 0 }} />
+        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>
+          Speaking Inquiry
+        </span>
+      </button>
+    );
   }
   return (
     <div className="flex items-center py-4 md:py-[18px]">
@@ -572,20 +565,13 @@ const AUTO_DURATION = 5000;
 
 // ─── Homepage ─────────────────────────────────────────────────────
 
-export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
+export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void }) {
   const isDark = useContext(DarkModeCtx);
-  const pageBg  = isDark ? "#181410" : "#f8f7f5";
+  const pageBg  = isDark ? "#282828" : "#f8f7f5";
   const fg      = isDark ? GOLD : INK;
   const bodyCol = isDark ? "rgba(255,255,255,0.85)" : INK;
   const dimCol  = isDark ? "rgba(255,255,255,0.38)" : DIM;
   const border  = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
-  // Speaking Inquiry (Connect) can grow taller than the viewport once
-  // expanded — only then does this section need its own vertical
-  // scroll/touch handling, so the horizontal swipe-between-sections
-  // gesture stays unaffected the rest of the time.
-  const { openId: openAccordionIdHome } = useContext(AccordionCtx);
-  const speakingInquiryOpen = openAccordionIdHome === "speaking-inquiry";
-
   const scrollEl  = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx]   = useState(0);
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
@@ -815,7 +801,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                 className="flex-shrink-0 relative"
                 style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", overflowY: capped ? "hidden" : "auto", WebkitOverflowScrolling: "touch", touchAction: capped ? "pan-x" : "pan-y" }}>
                 {section.page === "work"
-                  ? <WorkPage onNavigate={onNavigate} embedded />
+                  ? <WorkPage onNavigate={onNavigate} onOpenDetail={onOpenDetail} embedded />
                   : <AwardsSpeakingPage onNavigate={onNavigate} embedded />}
 
                 {capped && (
@@ -833,18 +819,14 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
             );
           }
 
-          // Connect's Speaking Inquiry accordion can push this section's
-          // content taller than the viewport once expanded — only then
-          // does it need its own vertical scroll/touch handling.
-          const sectionNeedsScroll = section.key === "connect" && speakingInquiryOpen;
           return (
             <section key={section.key}
               className="flex-shrink-0 relative flex flex-col"
               style={{
                 width: "100vw", height: "100%", scrollSnapAlign: "start", background: "transparent",
-                overflowY: sectionNeedsScroll ? "auto" : "hidden",
+                overflowY: "hidden",
                 WebkitOverflowScrolling: "touch",
-                touchAction: sectionNeedsScroll ? "pan-y" : "pan-x",
+                touchAction: "pan-x",
               }}>
 
               <div className="absolute inset-0 pointer-events-none"
@@ -881,7 +863,7 @@ export function HomePage({ onNavigate }: { onNavigate: (p: Page) => void }) {
                           clipPath: isActive ? "inset(0 0 0% 0)" : "inset(0 0 100% 0)",
                           transition: `clip-path 0.55s cubic-bezier(0.4,0,0.2,1) ${0.22 + k * 0.09}s`,
                         }}>
-                          <ContactItem item={item} accent={section.accent} itemColor={itemColor} borderColor={border} />
+                          <ContactItem item={item} accent={section.accent} itemColor={itemColor} borderColor={border} onNavigate={onNavigate} />
                         </div>
                       </div>
                     );
@@ -1084,17 +1066,21 @@ const EXPERTISE_CARDS = [
   },
 ];
 
-function ExpertiseCard({ card }: { card: typeof EXPERTISE_CARDS[0] }) {
-  const { open, toggle } = useAccordionItem(`expertise:${card.key}`);
+// Rows navigate to a full WorkDetailPage rather than expanding inline —
+// matches the same drill-in pattern as the Speaking Inquiry page.
+function ExpertiseCard({ card, onOpen }: { card: typeof EXPERTISE_CARDS[0]; onOpen: () => void }) {
   const isDark = useContext(DarkModeCtx);
   const { Illustration } = card;
   const cardBrd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   const titleColor = isDark ? "white" : INK;
   return (
-    <div
-      className="flex items-start gap-4 md:gap-6 px-5 md:px-10 py-5 md:py-7 cursor-pointer"
-      style={{ borderBottom: `1px solid ${cardBrd}`, background: open ? (isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.02)") : "transparent", transition: "background 0.3s" }}
-      onClick={toggle}>
+    <button
+      className="w-full flex items-start gap-4 md:gap-6 px-5 md:px-10 py-5 md:py-7 cursor-pointer text-left"
+      style={{ borderBottom: `1px solid ${cardBrd}`, background: "transparent", transition: "background 0.3s" }}
+      onClick={onOpen}
+      onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.02)")}
+      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+    >
       <div className="flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden"
         style={{ width: 56, height: 56, background: `${card.accent}1f` }}>
         <div style={{ width: 38, height: 38 }}><Illustration /></div>
@@ -1107,27 +1093,97 @@ function ExpertiseCard({ card }: { card: typeof EXPERTISE_CARDS[0] }) {
         <p className="font-['Avenir',sans-serif] font-light text-sm leading-relaxed mt-1" style={{ color: isDark ? "rgba(255,255,255,0.55)" : DIM, maxWidth: 600 }}>
           {card.description}
         </p>
-        <div className="overflow-hidden" style={{ maxHeight: open ? 200 : 0, opacity: open ? 1 : 0, transition: "max-height 0.4s ease, opacity 0.3s ease" }}>
-          <ul className="mt-3 space-y-1.5">
-            {card.bullets.map(b => (
-              <li key={b} className="font-['Avenir',sans-serif] font-light text-sm flex items-start gap-2" style={{ color: card.accent }}>
-                <span className="mt-0.5 flex-shrink-0">—</span><span>{b}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
       </div>
       <ChevronRight
         size={18}
         strokeWidth={1.5}
-        style={{
-          color: isDark ? "rgba(255,255,255,0.4)" : "rgba(17,17,17,0.35)",
-          flexShrink: 0,
-          marginTop: 4,
-          transform: open ? "rotate(90deg)" : "rotate(0deg)",
-          transition: "transform 0.3s",
-        }}
+        style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(17,17,17,0.35)", flexShrink: 0, marginTop: 4 }}
       />
+    </button>
+  );
+}
+
+// ─── Work case study detail page ───────────────────────────────────
+function WorkDetailPage({ cardKey, onBack }: { cardKey: string; onBack: () => void }) {
+  const isDark = useContext(DarkModeCtx);
+  const card = EXPERTISE_CARDS.find(c => c.key === cardKey);
+  if (!card) return null;
+  const { Illustration } = card;
+  return (
+    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10">
+        <button onClick={onBack}
+          className="flex items-center gap-1.5 font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4 cursor-pointer"
+          style={{ color: GOLD }}>
+          <ChevronLeft size={12} strokeWidth={1.5} /> Work
+        </button>
+        <div className="flex items-center gap-5 mb-2">
+          <div className="flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden"
+            style={{ width: 56, height: 56, background: `${card.accent}1f` }}>
+            <div style={{ width: 38, height: 38 }}><Illustration /></div>
+          </div>
+          <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", lineHeight: 1.05, color: GOLD }}>
+            {card.title}
+          </h1>
+        </div>
+      </div>
+
+      <div className="px-6 md:px-20 pb-10" style={{ maxWidth: 760 }}>
+        <p className="font-['Avenir',sans-serif] font-light leading-relaxed" style={{ color: isDark ? "rgba(255,255,255,0.85)" : INK }}>
+          {card.description}
+        </p>
+        <ul className="mt-6 space-y-2.5">
+          {card.bullets.map(b => (
+            <li key={b} className="font-['Avenir',sans-serif] font-light text-sm flex items-start gap-2" style={{ color: card.accent }}>
+              <span className="mt-0.5 flex-shrink-0">—</span><span>{b}</span>
+            </li>
+          ))}
+        </ul>
+
+        {/* Bottom spacer so content clears the floating detail nav */}
+        <div style={{ height: "calc(64px + 8vh)" }} />
+      </div>
+
+      <div className="sticky z-30 mx-6 md:mx-20" style={{ bottom: "calc(3% + env(safe-area-inset-bottom))" }}>
+        <DetailBottomBar parentLabel="Work" itemLabel={card.title} onBack={onBack} />
+      </div>
+    </div>
+  );
+}
+
+// ─── Minimised bottom nav for 2nd-level detail pages ───────────────
+// Used when drilling into a Work case study or the Speaking Inquiry
+// form — the regular full-height PageBottomNav shrinks down to a
+// breadcrumb strip (parent / item) to leave more room for content,
+// with an optional CTA button (e.g. "Submit") docked beside it.
+function DetailBottomBar({
+  parentLabel,
+  itemLabel,
+  onBack,
+  cta,
+}: {
+  parentLabel: string;
+  itemLabel: string;
+  onBack: () => void;
+  cta?: { label: string; onClick: () => void; disabled?: boolean };
+}) {
+  return (
+    <div className="flex items-stretch gap-2">
+      <button onClick={onBack}
+        className="flex-1 min-w-0 flex items-center gap-3 h-11 px-5 cursor-pointer"
+        style={{ background: NAV_GRADIENT }}>
+        <HamburgerIcon />
+        <span className="font-['Avenir',sans-serif] font-light text-sm text-white whitespace-nowrap overflow-hidden text-ellipsis">
+          {parentLabel} / {itemLabel}
+        </span>
+      </button>
+      {cta && (
+        <button onClick={cta.onClick} disabled={cta.disabled}
+          className="gold-submit-btn h-11 px-6 flex-shrink-0 font-['Museo',sans-serif] font-light text-sm text-white cursor-pointer"
+          style={{ opacity: cta.disabled ? 0.6 : 1 }}>
+          {cta.label}
+        </button>
+      )}
     </div>
   );
 }
@@ -1222,7 +1278,7 @@ function PageBottomNav({
 // case the homepage's own logomark/back-button and floating nav are
 // already on screen, so this component's copies are suppressed to
 // avoid duplicating them.
-function WorkPage({ onNavigate, embedded = false }: { onNavigate: (p: Page) => void; embedded?: boolean }) {
+function WorkPage({ onNavigate, onOpenDetail, embedded = false }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; embedded?: boolean }) {
   const isDark = useContext(DarkModeCtx);
   const bg = "transparent";
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
@@ -1247,7 +1303,7 @@ function WorkPage({ onNavigate, embedded = false }: { onNavigate: (p: Page) => v
       </div>
 
       <div>
-        {EXPERTISE_CARDS.map(card => <ExpertiseCard key={card.key} card={card} />)}
+        {EXPERTISE_CARDS.map(card => <ExpertiseCard key={card.key} card={card} onOpen={() => onOpenDetail?.(card.key)} />)}
         {/* Bottom spacer so content clears the floating nav */}
         <div style={{ height: "calc(64px + 8vh)" }} />
       </div>
@@ -1309,7 +1365,7 @@ function ContactListPage({
         <div style={{ borderTop: `1px solid ${brd}` }}>
           {items.map(item => (
             <div key={item} style={{ borderBottom: `1px solid ${brd}` }}>
-              <ContactItem item={item} accent={accent} itemColor={itemColor} borderColor={brd} />
+              <ContactItem item={item} accent={accent} itemColor={itemColor} borderColor={brd} onNavigate={onNavigate} />
             </div>
           ))}
         </div>
@@ -1801,7 +1857,17 @@ export default function App() {
     setDetailKey(null);
   };
 
-  const motionKey = page === "speaking" ? `speaking:${detailKey}` : page;
+  const navigateToWorkDetail = (key: string) => {
+    setDetailKey(key);
+    setPage("workDetail");
+  };
+
+  const navigateBackFromWork = () => {
+    setPage("work");
+    setDetailKey(null);
+  };
+
+  const motionKey = page === "speaking" ? `speaking:${detailKey}` : page === "workDetail" ? `workDetail:${detailKey}` : page;
 
   const toggleDark = useCallback(() => setIsDark(d => !d), []);
 
@@ -1809,7 +1875,7 @@ export default function App() {
     <DarkModeCtx.Provider value={isDark}>
     <DarkModeToggleCtx.Provider value={toggleDark}>
     <AccordionCtx.Provider value={{ openId: openAccordionId, setOpenId: setOpenAccordionId }}>
-    <div className="relative w-screen h-dvh overflow-hidden" style={{ background: isDark ? "#181410" : "#f8f7f5" }}>
+    <div className="relative w-screen h-dvh overflow-hidden" style={{ background: isDark ? "#282828" : "#f8f7f5" }}>
       {/* Persistent background — mounted once at the App root so its drift
           animation never resets on page navigation. Only the content above
           it (motion.div below) transitions between pages. */}
@@ -1818,14 +1884,24 @@ export default function App() {
       </div>
       <DarkModeToggle isDark={isDark} onToggle={toggleDark} />
       <motion.div key={motionKey} className="absolute inset-0" style={{ zIndex: 1 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.45 }}>
-        {page === "home"     && <HomePage onNavigate={setPage} />}
-        {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={setPage} /></div>}
+        {page === "home"     && <HomePage onNavigate={setPage} onOpenDetail={navigateToWorkDetail} />}
+        {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={setPage} onOpenDetail={navigateToWorkDetail} /></div>}
         {page === "awards"   && <div className="absolute inset-0 overflow-y-auto"><AwardsSpeakingPage onNavigate={setPage} /></div>}
         {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={setPage} /></div>}
         {page === "connect"  && <div className="absolute inset-0 overflow-y-auto"><ConnectPage onNavigate={setPage} /></div>}
+        {page === "speakingInquiry" && (
+          <div className="absolute inset-0 overflow-y-auto">
+            <SpeakingInquiryPage onBack={() => setPage("connect")} />
+          </div>
+        )}
         {page === "speaking" && detailKey && (
           <div className="absolute inset-0 overflow-y-auto">
             <SpeakingDetailPage eventKey={detailKey} onBack={navigateBack} onNavigate={setPage} />
+          </div>
+        )}
+        {page === "workDetail" && detailKey && (
+          <div className="absolute inset-0 overflow-y-auto">
+            <WorkDetailPage cardKey={detailKey} onBack={navigateBackFromWork} />
           </div>
         )}
       </motion.div>

@@ -146,6 +146,23 @@
   .link-underline:hover::after {
     width: 100%;
   }
+
+  /* Gold CTA button — matches Figma states (Active/Hover/Onclick/Focused) */
+  .gold-submit-btn {
+    background: #946f07;
+    border: 2px solid transparent;
+    transition: background 0.15s ease;
+  }
+  .gold-submit-btn:hover {
+    background: #a88930;
+  }
+  .gold-submit-btn:active {
+    background: #634900;
+  }
+  .gold-submit-btn:focus-visible {
+    background: #946f07;
+    border-color: rgba(151, 151, 151, 0.6);
+  }
 }
 
 @layer base {
