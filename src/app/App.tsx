@@ -967,7 +967,7 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
           to a left-aligned, content-width pill once the active embedded
           Work/Award & Speaking section is expanded past its "View more"
           cap, to free up room for the now-longer scrollable content. ── */}
-      <motion.nav className="absolute z-30 md:hidden flex items-center h-14 px-5 overflow-hidden"
+      <motion.nav className="fixed z-30 md:hidden flex items-center h-14 px-5 overflow-hidden"
         style={{
           bottom: "calc(5% + env(safe-area-inset-bottom))", left: 24,
           borderRadius: 0,
