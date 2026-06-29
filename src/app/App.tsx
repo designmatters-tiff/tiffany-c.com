@@ -387,9 +387,10 @@ function SpeakingInquiryPage({ onBack }: { onBack: () => void }) {
           style={{ color: GOLD }}>
           <ChevronLeft size={12} strokeWidth={1.5} /> Connect
         </button>
-        <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", lineHeight: 1.05, color: GOLD }}>
+        <motion.h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", lineHeight: 1.05, color: GOLD }}
+          initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Speaking Inquiry
-        </h1>
+        </motion.h1>
       </div>
 
       <div className="px-6 md:px-20 pb-10" style={{ maxWidth: 760 }}>
@@ -801,8 +802,8 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
                 className="flex-shrink-0 relative"
                 style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", overflowY: capped ? "hidden" : "auto", WebkitOverflowScrolling: "touch", touchAction: capped ? "pan-x" : "pan-y" }}>
                 {section.page === "work"
-                  ? <WorkPage onNavigate={onNavigate} onOpenDetail={onOpenDetail} embedded />
-                  : <AwardsSpeakingPage onNavigate={onNavigate} embedded />}
+                  ? <WorkPage onNavigate={onNavigate} onOpenDetail={onOpenDetail} embedded isActive={isActive} />
+                  : <AwardsSpeakingPage onNavigate={onNavigate} embedded isActive={isActive} />}
 
                 {capped && (
                   <>
@@ -1122,9 +1123,10 @@ function WorkDetailPage({ cardKey, onBack }: { cardKey: string; onBack: () => vo
             style={{ width: 56, height: 56, background: `${card.accent}1f` }}>
             <div style={{ width: 38, height: 38 }}><Illustration /></div>
           </div>
-          <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", lineHeight: 1.05, color: GOLD }}>
+          <motion.h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", lineHeight: 1.05, color: GOLD }}
+            initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
             {card.title}
-          </h1>
+          </motion.h1>
         </div>
       </div>
 
@@ -1278,7 +1280,7 @@ function PageBottomNav({
 // case the homepage's own logomark/back-button and floating nav are
 // already on screen, so this component's copies are suppressed to
 // avoid duplicating them.
-function WorkPage({ onNavigate, onOpenDetail, embedded = false }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; embedded?: boolean }) {
+function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; embedded?: boolean; isActive?: boolean }) {
   const isDark = useContext(DarkModeCtx);
   const bg = "transparent";
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
@@ -1296,10 +1298,14 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false }: { onNavigate: 
 
       {/* Page heading */}
       <div className="px-6 md:px-10 pt-10 md:pt-14 pb-6 md:pb-8" style={{ borderBottom: `1px solid ${brd}` }}>
-        <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}>Fintech · eCommerce · SaaS</p>
-        <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: GOLD }}>
+        <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}
+          initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
+          Fintech · eCommerce · SaaS
+        </motion.p>
+        <motion.h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: GOLD }}
+          initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Work
-        </h1>
+        </motion.h1>
       </div>
 
       <div>
@@ -1354,10 +1360,14 @@ function ContactListPage({
 
       {/* Page heading */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
-        <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}>{eyebrow}</p>
-        <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: fg }}>
+        <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}
+          initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          {eyebrow}
+        </motion.p>
+        <motion.h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: fg }}
+          initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
           {title}
-        </h1>
+        </motion.h1>
       </div>
 
       {/* Items */}
@@ -1580,9 +1590,11 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
 function AwardsSpeakingPage({
   onNavigate,
   embedded = false,
+  isActive = true,
 }: {
   onNavigate: (p: Page) => void;
   embedded?: boolean;
+  isActive?: boolean;
 }) {
   const isDark = useContext(DarkModeCtx);
   const bg = "transparent";
@@ -1603,10 +1615,14 @@ function AwardsSpeakingPage({
 
       {/* Page heading */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
-        <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}>Recognition</p>
-        <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: fg }}>
+        <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}
+          initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
+          Recognition
+        </motion.p>
+        <motion.h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: fg }}
+          initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Awards &amp; Speaking
-        </h1>
+        </motion.h1>
       </div>
 
       {/* Women in Digital — default-collapsed accordion, matches SpeakingEventRow */}
@@ -1775,14 +1791,16 @@ function SpeakingDetailPage({
       {/* Event metadata */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8"
         style={{ borderBottom: `1px solid ${ev.dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
-        <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2"
-          style={{ color: GOLD }}>
+        <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2"
+          style={{ color: GOLD }}
+          initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {ev.year} · {ev.role} · {ev.location}
-        </p>
-        <h1 className="font-['Museo',sans-serif] font-light mb-5"
-          style={{ fontSize: "clamp(1.9rem, 5vw, 4rem)", lineHeight: 1.05, color: textColor, maxWidth: "20ch" }}>
+        </motion.p>
+        <motion.h1 className="font-['Museo',sans-serif] font-light mb-5"
+          style={{ fontSize: "clamp(1.9rem, 5vw, 4rem)", lineHeight: 1.05, color: textColor, maxWidth: "20ch" }}
+          initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
           {ev.event}
-        </h1>
+        </motion.h1>
         <p className="font-['Avenir',sans-serif] font-light"
           style={{ fontSize: "clamp(1rem, 2vw, 1.5rem)", color: subColor, maxWidth: 560, lineHeight: 1.5 }}>
           "{ev.topic}"
