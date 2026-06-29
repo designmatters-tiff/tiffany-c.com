@@ -1343,9 +1343,9 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           behind it. */}
       <div className="sticky top-0 z-20 px-6 md:px-10 pt-10 md:pt-14 pb-6 md:pb-8"
         style={{
-          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.8)" : "rgba(248,247,245,0.8)") : "transparent",
-          backdropFilter: headerScrolled ? "blur(12px)" : "none",
-          WebkitBackdropFilter: headerScrolled ? "blur(12px)" : "none",
+          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
+          backdropFilter: headerScrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? brd : "transparent"}`,
           paddingBottom: compact ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
@@ -1363,6 +1363,10 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
 
       <div>
         {EXPERTISE_CARDS.map(card => <ExpertiseCard key={card.key} card={card} onOpen={() => onOpenDetail?.(card.key)} />)}
+        <p className="text-center font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] pt-8"
+          style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)" }}>
+          End of the list
+        </p>
         {/* Bottom spacer so content clears the floating nav */}
         <div style={{ height: "calc(64px + 8vh)" }} />
       </div>
@@ -1678,9 +1682,9 @@ function AwardsSpeakingPage({
           behind it. */}
       <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
         style={{
-          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.8)" : "rgba(248,247,245,0.8)") : "transparent",
-          backdropFilter: headerScrolled ? "blur(12px)" : "none",
-          WebkitBackdropFilter: headerScrolled ? "blur(12px)" : "none",
+          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
+          backdropFilter: headerScrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? brd : "transparent"}`,
           paddingBottom: compact ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
@@ -1709,6 +1713,10 @@ function AwardsSpeakingPage({
         ))}
       </div>
 
+      <p className="text-center font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] pt-8"
+        style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)" }}>
+        End of the list
+      </p>
       <div style={{ height: "calc(64px + 8vh)" }} />
       {!embedded && (
         <div className="sticky z-30 overflow-hidden mx-6 md:mx-20"
