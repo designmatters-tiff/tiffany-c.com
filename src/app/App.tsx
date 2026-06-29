@@ -821,10 +821,10 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
               <section key={section.key}
                 className="flex-shrink-0 relative"
                 style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", overflowY: capped ? "hidden" : "auto", WebkitOverflowScrolling: "touch", touchAction: capped ? "pan-x" : "pan-y" }}
-                onScroll={expanded ? (e) => setNavMinimized(e.currentTarget.scrollTop > 24) : undefined}>
+                onScroll={!capped ? (e) => setNavMinimized(e.currentTarget.scrollTop > 24) : undefined}>
                 {section.page === "work"
-                  ? <WorkPage onNavigate={onNavigate} onOpenDetail={onOpenDetail} embedded isActive={isActive} compact={isActive && navShrunk} />
-                  : <AwardsSpeakingPage onNavigate={onNavigate} embedded isActive={isActive} compact={isActive && navShrunk} />}
+                  ? <WorkPage onNavigate={onNavigate} onOpenDetail={onOpenDetail} embedded isActive={isActive} compact={isActive && navShrunk} headerScrolled={isActive && navMinimized} />
+                  : <AwardsSpeakingPage onNavigate={onNavigate} embedded isActive={isActive} compact={isActive && navShrunk} headerScrolled={isActive && navMinimized} />}
 
                 {capped && (
                   <>
@@ -1319,10 +1319,9 @@ function PageBottomNav({
 // case the homepage's own logomark/back-button and floating nav are
 // already on screen, so this component's copies are suppressed to
 // avoid duplicating them.
-function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true, compact = false }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; embedded?: boolean; isActive?: boolean; compact?: boolean }) {
+function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true, compact = false, headerScrolled = false }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; embedded?: boolean; isActive?: boolean; compact?: boolean; headerScrolled?: boolean }) {
   const isDark = useContext(DarkModeCtx);
   const bg = "transparent";
-  const pageBg = isDark ? "#282828" : "#f8f7f5";
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   return (
     <div className="relative w-full" style={{ minHeight: embedded ? "100%" : "100dvh", background: bg }}>
@@ -1337,9 +1336,20 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
       )}
 
       {/* Page heading — sticky so it stays visible while the rows below
-          scroll past it, shrinking once the mobile "View more" cap lifts
-          to leave more room for the now-longer scrollable content. */}
-      <div className="sticky top-0 z-20 px-6 md:px-10 pt-10 md:pt-14 pb-6 md:pb-8" style={{ background: pageBg, borderBottom: `1px solid ${brd}`, paddingBottom: compact ? 16 : undefined, transition: "padding-bottom 0.35s ease" }}>
+          scroll past it, shrinking once the mobile "View more" cap lifts.
+          Transparent at rest so the multicolour background shows through;
+          only once the user scrolls does it pick up a frosted (blurred,
+          80% opacity) backdrop so the now-passing content reads cleanly
+          behind it. */}
+      <div className="sticky top-0 z-20 px-6 md:px-10 pt-10 md:pt-14 pb-6 md:pb-8"
+        style={{
+          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.8)" : "rgba(248,247,245,0.8)") : "transparent",
+          backdropFilter: headerScrolled ? "blur(12px)" : "none",
+          WebkitBackdropFilter: headerScrolled ? "blur(12px)" : "none",
+          borderBottom: `1px solid ${headerScrolled ? brd : "transparent"}`,
+          paddingBottom: compact ? 16 : undefined,
+          transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
+        }}>
         <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Fintech · eCommerce · SaaS
@@ -1635,15 +1645,16 @@ function AwardsSpeakingPage({
   embedded = false,
   isActive = true,
   compact = false,
+  headerScrolled = false,
 }: {
   onNavigate: (p: Page) => void;
   embedded?: boolean;
   isActive?: boolean;
   compact?: boolean;
+  headerScrolled?: boolean;
 }) {
   const isDark = useContext(DarkModeCtx);
   const bg = "transparent";
-  const pageBg = isDark ? "#282828" : "#f8f7f5";
   const fg = GOLD;
   const sub = isDark ? "rgba(255,255,255,0.55)" : DIM;
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
@@ -1660,9 +1671,20 @@ function AwardsSpeakingPage({
       )}
 
       {/* Page heading — sticky so it stays visible while the rows below
-          scroll past it, shrinking once the mobile "View more" cap lifts
-          to leave more room for the now-longer scrollable content. */}
-      <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ background: pageBg, borderBottom: `1px solid ${brd}`, paddingBottom: compact ? 16 : undefined, transition: "padding-bottom 0.35s ease" }}>
+          scroll past it, shrinking once the mobile "View more" cap lifts.
+          Transparent at rest so the multicolour background shows through;
+          only once the user scrolls does it pick up a frosted (blurred,
+          80% opacity) backdrop so the now-passing content reads cleanly
+          behind it. */}
+      <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
+        style={{
+          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.8)" : "rgba(248,247,245,0.8)") : "transparent",
+          backdropFilter: headerScrolled ? "blur(12px)" : "none",
+          WebkitBackdropFilter: headerScrolled ? "blur(12px)" : "none",
+          borderBottom: `1px solid ${headerScrolled ? brd : "transparent"}`,
+          paddingBottom: compact ? 16 : undefined,
+          transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
+        }}>
         <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Recognition
