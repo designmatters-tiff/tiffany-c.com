@@ -836,17 +836,17 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 alt="Tiffany Chew"
                 className="rounded-full object-cover absolute"
                 style={{
-                  width: "16vw",
-                  height: "16vw",
-                  maxWidth: 210,
-                  maxHeight: 210,
-                  right: "30%",
-                  top: "-10%",
+                  width: "24vw",
+                  height: "24vw",
+                  maxWidth: 315,
+                  maxHeight: 315,
+                  right: 0,
+                  top: "-14%",
                   border: `1px solid ${GOLD}`,
                 }}
               />
               <h1 className="font-['Museo',sans-serif] font-light"
-                style={{ fontSize: "clamp(1.8rem, 3.4vw, 3rem)", lineHeight: 1.05, color: GOLD, maxWidth: "60%" }}>
+                style={{ fontSize: "clamp(1.8rem, 3.4vw, 3rem)", lineHeight: 1.05, color: GOLD, maxWidth: "52%" }}>
                 Tiff is a product &amp; design leader
               </h1>
             </div>
@@ -948,8 +948,8 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 style={{ opacity: isActive ? 1 : 0, transition: "opacity 0.6s ease",
                   background: `radial-gradient(ellipse 70% 50% at 60% 30%, ${section.accent}0d 0%, transparent 70%)` }} />
 
-              <div className="relative z-10 flex flex-col h-full px-6 md:px-20"
-                style={{ paddingTop: "8vh", paddingBottom: "calc(64px + 8vh + 32px)" }}>
+              <div className="relative z-10 flex flex-col h-full px-6 md:px-20 pt-10 md:pt-14"
+                style={{ paddingBottom: "calc(64px + 8vh + 32px)" }}>
 
                 <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-4 md:mb-6"
                   style={{ color: section.accent }}
@@ -992,10 +992,18 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
       </div>
 
       {/* ── "Swipe to explore" (hero only), alone on its own row above the
-          nav bar. ── */}
+          nav bar. Same copy and the same bottom-left position on both
+          breakpoints — only the offset constants change, since the
+          mobile floating nav is 56px tall vs. 64px on desktop. ── */}
       {activeIdx === 0 && (
-        <p className="md:hidden absolute z-30 font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest"
-          style={{ bottom: "calc(5% + 56px + 14px + env(safe-area-inset-bottom))", left: 24, color: dimCol }}>
+        <p className="absolute z-30 font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest"
+          style={{
+            bottom: isMobile
+              ? "calc(5% + 56px + 14px + env(safe-area-inset-bottom))"
+              : "calc(64px + 5vh + 28px)",
+            left: isMobile ? 24 : "7%",
+            color: dimCol,
+          }}>
           swipe to explore
         </p>
       )}
