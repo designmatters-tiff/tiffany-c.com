@@ -805,30 +805,32 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
             </div>
           </div>
 
-          {/* Desktop layout */}
+          {/* Desktop layout — top-aligned stack (logo, heading, body) with
+              fixed gaps, matching the Figma reference exactly, rather than
+              vertically centering the whole block. */}
+          <div className="hidden md:flex absolute inset-0 flex-col px-20"
+            style={{ paddingTop: 64, paddingBottom: "calc(64px + 5vh + 96px)" }}>
+            <LogoMark size={70} />
+            <h1 className="font-['Museo',sans-serif] font-light"
+              style={{ fontSize: "clamp(1.8rem, 3.4vw, 3rem)", lineHeight: 1.05, color: GOLD, maxWidth: "60%", marginTop: 64 }}>
+              Hi, I'm Tiff, a product &amp; design leader
+            </h1>
+            <div className="flex-1" />
+            <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
+              style={{ fontSize: "clamp(1.05rem, 1.7vw, 1.4rem)", color: bodyCol, maxWidth: "60%" }}>
+              I work with C-suites and product teams to shape design
+              functions that deliver. As an ex-founder who built and
+              exited my own brand, and a leader across fintech, retail,
+              and SaaS, I bring an entrepreneurial and outcomes-focused
+              lens to design leadership.
+              <br /><br />
+              My forte is connecting strategy to craft, breaking it into
+              tangible wins toward an ultimate company vision. Because the
+              clarity between a big decision and a small win is where
+              sustainable growth lives.
+            </p>
+          </div>
           <div className="hidden md:block">
-            <div className="absolute" style={{ top: "11%", left: "7%" }}>
-              <LogoMark size={70} />
-            </div>
-            <div className="absolute inset-0 flex flex-col justify-center px-20">
-              <h1 className="font-['Museo',sans-serif] font-light mb-7"
-                style={{ fontSize: "clamp(1.8rem, 3.4vw, 3rem)", lineHeight: 1.05, color: GOLD, maxWidth: "60%" }}>
-                Hi, I'm Tiff, a product &amp; design leader
-              </h1>
-              <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
-                style={{ fontSize: "clamp(1.05rem, 1.7vw, 1.4rem)", color: bodyCol, maxWidth: "60%" }}>
-                I work with C-suites and product teams to shape design
-                functions that deliver. As an ex-founder who built and
-                exited my own brand, and a leader across fintech, retail,
-                and SaaS, I bring an entrepreneurial and outcomes-focused
-                lens to design leadership.
-                <br /><br />
-                My forte is connecting strategy to craft, breaking it into
-                tangible wins toward an ultimate company vision. Because the
-                clarity between a big decision and a small win is where
-                sustainable growth lives.
-              </p>
-            </div>
             <div className="absolute" style={{ bottom: "calc(64px + 5vh + 40px)", left: "7%", right: "7%", height: 1, background: "rgba(178,147,59,0.25)" }} />
             <div className="absolute right-10 flex flex-col items-center gap-2"
               style={{ bottom: "calc(64px + 5vh + 28px)" }}>
