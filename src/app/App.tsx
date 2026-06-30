@@ -1181,7 +1181,7 @@ function ExpertiseCard({ card, onOpen }: { card: typeof EXPERTISE_CARDS[0]; onOp
   const titleColor = isDark ? "white" : INK;
   return (
     <button
-      className="w-full flex items-start gap-4 md:gap-6 px-5 md:px-10 py-5 md:py-7 cursor-pointer text-left"
+      className="w-full flex items-start gap-4 md:gap-6 px-5 md:px-20 py-5 md:py-7 cursor-pointer text-left"
       style={{ borderBottom: `1px solid ${cardBrd}`, background: "transparent", transition: "background 0.3s" }}
       onClick={onOpen}
       onMouseEnter={e => (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.02)")}
@@ -1399,7 +1399,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           only once the user scrolls does it pick up a frosted (blurred,
           80% opacity) backdrop so the now-passing content reads cleanly
           behind it. */}
-      <div className="sticky top-0 z-20 px-6 md:px-10 pt-10 md:pt-14 pb-8 md:pb-10"
+      <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
         style={{
           background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
