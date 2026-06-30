@@ -1833,8 +1833,8 @@ function AwardsSpeakingPage({
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Recognition &amp; voice in community
         </motion.p>
-        <motion.h1 className="font-['Museo',sans-serif] font-light"
-          style={{ fontSize: compact ? "1.5rem" : "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: fg, transition: "font-size 0.35s ease" }}
+        <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]"
+          style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: fg, transition: "font-size 0.35s ease" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Awards &amp; Speaking
         </motion.h1>
