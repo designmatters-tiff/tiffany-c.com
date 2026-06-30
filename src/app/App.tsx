@@ -436,7 +436,7 @@ function SpeakingInquiryPage({ onBack }: { onBack: () => void }) {
         <div style={{ height: 96 }} />
       </div>
 
-      <div className="fixed inset-x-6 md:inset-x-20 z-30" style={{ bottom: "calc(3% + env(safe-area-inset-bottom))" }}>
+      <div className="fixed inset-x-3 md:inset-x-20 z-30" style={{ bottom: "calc(3% + env(safe-area-inset-bottom))" }}>
         <DetailBottomBar
           parentLabel="Connect"
           itemLabel="Speaking Inquiry"
@@ -586,6 +586,12 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
   // screen with a gradient fade + "View more" until expanded, so the
   // persistent carousel indicator always has room.
   const [mobileExpanded, setMobileExpanded] = useState<Record<string, boolean>>({});
+  // Whether an embedded section's natural content height actually
+  // exceeds the viewport — the "View more" cap should only ever kick
+  // in for sections that genuinely overflow (e.g. Awards & Speaking's
+  // long list), not unconditionally on every mobile section.
+  const [sectionOverflows, setSectionOverflows] = useState<Record<string, boolean>>({});
+  const embedSectionRefs = useRef<Record<string, HTMLElement | null>>({});
   // Like Safari's URL bar — the floating nav only shrinks once the user
   // actually scrolls down inside an expanded section, not just because
   // it was expanded. Resets whenever the active section changes so a
@@ -625,6 +631,26 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Measure each embedded section's natural content height against the
+  // viewport so the "View more" cap only applies when content actually
+  // overflows. scrollHeight reflects the full content size regardless
+  // of overflow:hidden, so this works even while capped.
+  useEffect(() => {
+    const observers: ResizeObserver[] = [];
+    Object.entries(embedSectionRefs.current).forEach(([key, el]) => {
+      if (!el) return;
+      const check = () => {
+        const overflows = el.scrollHeight > el.clientHeight + 1;
+        setSectionOverflows(m => (m[key] === overflows ? m : { ...m, [key]: overflows }));
+      };
+      check();
+      const ro = new ResizeObserver(check);
+      ro.observe(el);
+      observers.push(ro);
+    });
+    return () => observers.forEach(o => o.disconnect());
+  }, [isMobile]);
 
   // rAF auto-advance — skipped entirely on mobile
   useEffect(() => {
@@ -832,9 +858,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           // carousel indicator instead of it disappearing into a long page.
           if ("embeds" in section && section.embeds) {
             const expanded = mobileExpanded[section.key] ?? false;
-            const capped = isMobile && !expanded;
+            const overflows = sectionOverflows[section.key] ?? false;
+            const capped = isMobile && !expanded && overflows;
             return (
               <section key={section.key}
+                ref={(el) => { embedSectionRefs.current[section.key] = el; }}
                 className="flex-shrink-0 relative"
                 style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", overflowY: capped ? "hidden" : "auto", WebkitOverflowScrolling: "touch", touchAction: capped ? "pan-x" : "pan-y" }}
                 onScroll={!capped ? (e) => setNavMinimized(e.currentTarget.scrollTop > 24) : undefined}>
@@ -844,11 +872,18 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
 
                 {capped && (
                   <>
+                    {/* Frosted fade — same blurred/tinted treatment as the
+                        scrolled header, so the nav reads as a foreground
+                        layer with the list falling away behind it. The
+                        mask fades the blur in gradually rather than a
+                        hard edge. */}
                     <div className="pointer-events-none absolute" style={{
                       left: 0, right: 0, bottom: 0, height: 260, zIndex: 5,
-                      background: `linear-gradient(to bottom, ${pageBg}00 0%, ${isDark ? "rgba(40,40,40,0.7)" : "rgba(248,247,245,0.7)"} 100%)`,
-                      backdropFilter: "blur(3px)",
-                      WebkitBackdropFilter: "blur(3px)",
+                      background: isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)",
+                      backdropFilter: "blur(8px)",
+                      WebkitBackdropFilter: "blur(8px)",
+                      maskImage: "linear-gradient(to bottom, transparent 0%, black 55%)",
+                      WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 55%)",
                     }} />
                     <button
                       onClick={() => setMobileExpanded(m => ({ ...m, [section.key]: true }))}
@@ -1214,7 +1249,7 @@ function WorkDetailPage({ cardKey, onBack }: { cardKey: string; onBack: () => vo
         <div style={{ height: 96 }} />
       </div>
 
-      <div className="fixed inset-x-6 md:inset-x-20 z-30" style={{ bottom: "calc(3% + env(safe-area-inset-bottom))" }}>
+      <div className="fixed inset-x-3 md:inset-x-20 z-30" style={{ bottom: "calc(3% + env(safe-area-inset-bottom))" }}>
         <DetailBottomBar parentLabel="Work" itemLabel={card.title} onBack={onBack} />
       </div>
     </div>
@@ -1239,20 +1274,22 @@ function DetailBottomBar({
 }) {
   return (
     <div className="flex items-stretch gap-2">
-      <button onClick={onBack}
-        className="flex-1 min-w-0 flex items-center gap-3 h-9 px-5 cursor-pointer"
-        style={{ background: NAV_GRADIENT }}>
+      <motion.button onClick={onBack}
+        className="flex-1 min-w-0 flex items-center gap-3 px-5 cursor-pointer"
+        style={{ background: NAV_GRADIENT }}
+        initial={{ height: 56 }} animate={{ height: 36 }} transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
         <HamburgerIcon />
         <span className="font-['Avenir',sans-serif] font-light text-sm text-white whitespace-nowrap overflow-hidden text-ellipsis">
           {parentLabel} / {itemLabel}
         </span>
-      </button>
+      </motion.button>
       {cta && (
-        <button onClick={cta.onClick} disabled={cta.disabled}
-          className="gold-submit-btn h-9 px-6 flex-shrink-0 font-['Museo',sans-serif] font-light text-sm text-white cursor-pointer"
-          style={{ opacity: cta.disabled ? 0.6 : 1 }}>
+        <motion.button onClick={cta.onClick} disabled={cta.disabled}
+          className="gold-submit-btn px-6 flex-shrink-0 font-['Museo',sans-serif] font-light text-sm text-white cursor-pointer"
+          style={{ opacity: cta.disabled ? 0.6 : 1 }}
+          initial={{ height: 56 }} animate={{ height: 36 }} transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
           {cta.label}
-        </button>
+        </motion.button>
       )}
     </div>
   );
@@ -1360,7 +1397,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           only once the user scrolls does it pick up a frosted (blurred,
           80% opacity) backdrop so the now-passing content reads cleanly
           behind it. */}
-      <div className="sticky top-0 z-20 px-6 md:px-10 pt-10 md:pt-14 pb-6 md:pb-8"
+      <div className="sticky top-0 z-20 px-6 md:px-10 pt-10 md:pt-14 pb-8 md:pb-10"
         style={{
           background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
@@ -1380,7 +1417,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
         </motion.h1>
       </div>
 
-      <div>
+      <div style={{ paddingTop: 24 }}>
         {EXPERTISE_CARDS.map(card => <ExpertiseCard key={card.key} card={card} onOpen={() => onOpenDetail?.(card.key)} />)}
         {/* Bottom spacer so content clears the floating nav */}
         <div style={{ height: 96 }} />
@@ -1443,7 +1480,7 @@ function ContactListPage({
       </div>
 
       {/* Items */}
-      <div className="px-6 md:px-20 pt-2 md:pt-6">
+      <div className="px-6 md:px-20 pt-6">
         <div style={{ borderTop: `1px solid ${brd}` }}>
           {items.map(item => (
             <div key={item} style={{ borderBottom: `1px solid ${brd}` }}>
@@ -1729,7 +1766,9 @@ function AwardsSpeakingPage({
       </div>
 
       {/* Women in Digital — default-collapsed accordion, matches SpeakingEventRow */}
-      <WomenInDigitalRow isDark={isDark} fg={fg} sub={sub} />
+      <div style={{ paddingTop: 24 }}>
+        <WomenInDigitalRow isDark={isDark} fg={fg} sub={sub} />
+      </div>
 
       {/* Speaking events */}
       <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
@@ -2003,6 +2042,18 @@ export default function App() {
     setDetailKey(null);
   };
 
+  // General "back to home" handler for every other standalone page
+  // (Awards, Coaching, Connect, Speaking detail) — restores horizontal
+  // swipe by jumping straight to whichever section that page
+  // corresponds to, instead of always resetting to the hero.
+  const navigateGeneral = (target: Page) => {
+    if (target === "home") {
+      const idx = SECTIONS.findIndex(s => s.page === page);
+      setHomeInitialIdx(idx > 0 ? idx : 0);
+    }
+    setPage(target);
+  };
+
   const motionKey = page === "speaking" ? `speaking:${detailKey}` : page === "workDetail" ? `workDetail:${detailKey}` : page;
 
   const toggleDark = useCallback(() => setIsDark(d => !d), []);
@@ -2023,11 +2074,11 @@ export default function App() {
         initial={page === "workDetail" ? { opacity: 1, x: "100%" } : { opacity: 0, x: 0 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: page === "workDetail" ? 0.4 : 0.45, ease: [0.4, 0, 0.2, 1] }}>
-        {page === "home"     && <HomePage onNavigate={setPage} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} />}
-        {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={setPage} onOpenDetail={navigateToWorkDetail} /></div>}
-        {page === "awards"   && <div className="absolute inset-0 overflow-y-auto"><AwardsSpeakingPage onNavigate={setPage} /></div>}
-        {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={setPage} /></div>}
-        {page === "connect"  && <div className="absolute inset-0 overflow-y-auto"><ConnectPage onNavigate={setPage} /></div>}
+        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} />}
+        {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} /></div>}
+        {page === "awards"   && <div className="absolute inset-0 overflow-y-auto"><AwardsSpeakingPage onNavigate={navigateGeneral} /></div>}
+        {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={navigateGeneral} /></div>}
+        {page === "connect"  && <div className="absolute inset-0 overflow-y-auto"><ConnectPage onNavigate={navigateGeneral} /></div>}
         {page === "speakingInquiry" && (
           <div className="absolute inset-0 overflow-y-auto">
             <SpeakingInquiryPage onBack={() => setPage("connect")} />
@@ -2035,7 +2086,7 @@ export default function App() {
         )}
         {page === "speaking" && detailKey && (
           <div className="absolute inset-0 overflow-y-auto">
-            <SpeakingDetailPage eventKey={detailKey} onBack={navigateBack} onNavigate={setPage} />
+            <SpeakingDetailPage eventKey={detailKey} onBack={navigateBack} onNavigate={navigateGeneral} />
           </div>
         )}
         {page === "workDetail" && detailKey && (
