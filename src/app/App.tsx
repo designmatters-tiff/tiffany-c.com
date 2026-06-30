@@ -8,6 +8,7 @@ import awardsFuseCon from "@/imports/AwardsSpeaking/Fusecon2025.png";
 import awardsFuseConPanelist from "@/imports/AwardsSpeaking/FuseCon_panelist.jpg";
 import awardsTaipei from "@/imports/AwardsSpeaking/LTUX Taipei.png";
 import awardsRotterdam from "@/imports/AwardsSpeaking/ux-rotterdam.jpeg";
+import profilePhoto from "@/imports/Profile/tiff-headshot.jpeg";
 
 // ─── Logo paths ───────────────────────────────────────────────────
 const T_PATH =
@@ -785,14 +786,32 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
             style={{ paddingBottom: "calc(64px + 8vh + 24px)" }}>
             <LogoMark size={52} />
             <div className="flex-1 flex flex-col justify-center gap-5">
-              <h1 className="font-['Museo',sans-serif] font-light"
-                style={{ fontSize: "clamp(1.6rem, 8vw, 2.2rem)", lineHeight: 1.1, color: GOLD }}>
-                Hi, I'm Tiff, a product &amp; design leader
-              </h1>
+              <div>
+                <img
+                  src={profilePhoto}
+                  alt="Tiffany Chew"
+                  className="rounded-full object-cover"
+                  style={{
+                    float: "right",
+                    width: "34vw",
+                    height: "34vw",
+                    maxWidth: 160,
+                    maxHeight: 160,
+                    marginLeft: 16,
+                    marginBottom: 8,
+                    shapeOutside: "circle(50%)",
+                    border: `1px solid ${GOLD}`,
+                  }}
+                />
+                <h1 className="font-['Museo',sans-serif] font-light"
+                  style={{ fontSize: "clamp(1.6rem, 8vw, 2.2rem)", lineHeight: 1.1, color: GOLD }}>
+                  Hi, I'm a product &amp; design leader
+                </h1>
+              </div>
               <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
                 style={{ fontSize: "clamp(0.85rem, 3.8vw, 1.05rem)", color: bodyCol, maxWidth: "100%" }}>
                 I work with C-suites and product teams to shape design
-                functions that deliver. As an ex-founder who built and
+                functions that deliver. As a founder who built and
                 exited my own brand, and a leader across fintech, retail,
                 and SaaS, I bring an entrepreneurial and outcomes-focused
                 lens to design leadership.
@@ -811,10 +830,26 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           <div className="hidden md:flex absolute inset-0 flex-col px-20"
             style={{ paddingTop: 64, paddingBottom: "calc(64px + 5vh + 96px)" }}>
             <LogoMark size={70} />
-            <h1 className="font-['Museo',sans-serif] font-light"
-              style={{ fontSize: "clamp(1.8rem, 3.4vw, 3rem)", lineHeight: 1.05, color: GOLD, maxWidth: "60%", marginTop: 64 }}>
-              Hi, I'm Tiff, a product &amp; design leader
-            </h1>
+            <div className="relative" style={{ marginTop: 64 }}>
+              <img
+                src={profilePhoto}
+                alt="Tiffany Chew"
+                className="rounded-full object-cover absolute"
+                style={{
+                  width: "16vw",
+                  height: "16vw",
+                  maxWidth: 210,
+                  maxHeight: 210,
+                  right: "30%",
+                  top: "-10%",
+                  border: `1px solid ${GOLD}`,
+                }}
+              />
+              <h1 className="font-['Museo',sans-serif] font-light"
+                style={{ fontSize: "clamp(1.8rem, 3.4vw, 3rem)", lineHeight: 1.05, color: GOLD, maxWidth: "60%" }}>
+                Tiff is a product &amp; design leader
+              </h1>
+            </div>
             <div className="flex-1" />
             <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
               style={{ fontSize: "clamp(1.05rem, 1.7vw, 1.4rem)", color: bodyCol, maxWidth: "60%" }}>
@@ -865,7 +900,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
             return (
               <section key={section.key}
                 ref={(el) => { embedSectionRefs.current[section.key] = el; }}
-                className="flex-shrink-0 relative"
+                className="flex-shrink-0 relative scrollbar-hide"
                 style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", overflowY: capped ? "hidden" : "auto", WebkitOverflowScrolling: "touch", touchAction: capped ? "pan-x" : "pan-y" }}
                 onScroll={!capped ? (e) => setNavMinimized(e.currentTarget.scrollTop > 24) : undefined}>
                 {section.page === "work"
@@ -999,8 +1034,10 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
         )}
       </div>
 
-      {/* ── Desktop nav — floating above bottom edge, aligned to content width ── */}
-      <nav className="absolute z-30 hidden md:flex items-stretch h-16 overflow-hidden"
+      {/* ── Desktop nav — floating above bottom edge, aligned to content width.
+          Fixed (not absolute) so it stays pinned to the viewport regardless
+          of any section's internal vertical scroll. ── */}
+      <nav className="fixed z-30 hidden md:flex items-stretch h-16 overflow-hidden"
         style={{
           bottom: "5%", left: 80, right: 80,
           borderRadius: 0,
@@ -1299,6 +1336,24 @@ function DetailBottomBar({
 
 // ─── Shared gradient bottom nav (Work / Awards pages) ─────────────
 
+// Wraps PageBottomNav with a full-width fade scrim behind it, so content
+// scrolling up from underneath fades into the page background before it
+// would otherwise be visible peeking past the nav's side margins/edges.
+function StickyPageNav({ activePage, onNavigate }: { activePage: Page; onNavigate: (p: Page) => void }) {
+  const isDark = useContext(DarkModeCtx);
+  const pageBg = isDark ? "#181410" : "#f8f7f5";
+  return (
+    <>
+      <div className="fixed inset-x-0 bottom-0 z-20 pointer-events-none"
+        style={{ height: 180, background: `linear-gradient(to bottom, ${pageBg}00 0%, ${pageBg} 65%)` }} />
+      <div className="fixed inset-x-6 md:inset-x-20 z-30 overflow-hidden"
+        style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+        <PageBottomNav activePage={activePage} onNavigate={onNavigate} />
+      </div>
+    </>
+  );
+}
+
 function PageBottomNav({
   activePage,
   onNavigate,
@@ -1425,12 +1480,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
         <div style={{ height: 96 }} />
       </div>
 
-      {!embedded && (
-        <div className="fixed inset-x-6 md:inset-x-20 z-30 overflow-hidden"
-          style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
-          <PageBottomNav activePage="work" onNavigate={onNavigate} />
-        </div>
-      )}
+      {!embedded && <StickyPageNav activePage="work" onNavigate={onNavigate} />}
     </div>
   );
 }
@@ -1493,10 +1543,7 @@ function ContactListPage({
       </div>
 
       <div style={{ height: 96 }} />
-      <div className="fixed inset-x-6 md:inset-x-20 z-30 overflow-hidden"
-        style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
-        <PageBottomNav activePage={activePage} onNavigate={onNavigate} />
-      </div>
+      <StickyPageNav activePage={activePage} onNavigate={onNavigate} />
     </div>
   );
 }
@@ -1672,7 +1719,7 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
           }}
         />
         <div className="flex-1 flex flex-col gap-1">
-          <span className="font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>2025 · Australia</span>
+          <span className="font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>2025 · National Awards · Australia</span>
           <p className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.5rem)", color: fg }}>
             Finalist — UX Leader of the Year
           </p>
@@ -1729,8 +1776,20 @@ function AwardsSpeakingPage({
   const fg = GOLD;
   const sub = isDark ? "rgba(255,255,255,0.55)" : DIM;
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
-  return (
-    <div className="relative w-full" style={{ minHeight: embedded ? "100%" : "100dvh", background: bg }}>
+
+  // Standalone (non-embedded) visits — reached directly via nav rather than
+  // the homepage swipe-track — get their own cap/scroll handling: only the
+  // 4 latest items show until "View more" is clicked, and the frosted
+  // header + footer nav only switch on once the user actually scrolls.
+  // (Embedded/mobile homepage capping is handled one level up in HomePage.)
+  const [selfExpanded, setSelfExpanded] = useState(false);
+  const [selfScrolled, setSelfScrolled] = useState(false);
+  const capped = !embedded && !selfExpanded;
+  const scrolled = embedded ? headerScrolled : selfScrolled;
+  const visibleEvents = capped ? SPEAKING_EVENTS.slice(0, 3) : SPEAKING_EVENTS;
+
+  const content = (
+    <>
       {!embedded && (
         <button
           onClick={() => onNavigate("home")}
@@ -1749,10 +1808,10 @@ function AwardsSpeakingPage({
           behind it. */}
       <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
         style={{
-          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
-          backdropFilter: headerScrolled ? "blur(8px)" : "none",
-          WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
-          borderBottom: `1px solid ${headerScrolled ? brd : "transparent"}`,
+          background: scrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
+          backdropFilter: scrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(8px)" : "none",
+          borderBottom: `1px solid ${scrolled ? brd : "transparent"}`,
           paddingBottom: compact ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
@@ -1777,22 +1836,67 @@ function AwardsSpeakingPage({
         <div className="px-6 md:px-20 pt-8 md:pt-12 pb-4 md:pb-6">
           <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em]" style={{ color: GOLD }}>Speaking</p>
         </div>
-        {SPEAKING_EVENTS.map((ev, i) => (
+        {visibleEvents.map((ev, i) => (
           <SpeakingEventRow key={ev.key} ev={ev} isFirst={i === 0} isDark={isDark} fg={fg} sub={sub} brd={brd} />
         ))}
       </div>
 
-      <p className="text-center font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] pt-8"
-        style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)" }}>
-        End of the list
-      </p>
-      <div style={{ height: 96 }} />
-      {!embedded && (
-        <div className="fixed inset-x-6 md:inset-x-20 z-30 overflow-hidden"
-          style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
-          <PageBottomNav activePage="awards" onNavigate={onNavigate} />
-        </div>
+      {!capped && (
+        <p className="text-center font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] pt-8"
+          style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)" }}>
+          End of the list
+        </p>
       )}
+      <div style={{ height: 96 }} />
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <div className="relative w-full" style={{ minHeight: "100%", background: bg }}>
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full h-full" style={{ background: bg }}>
+      <div
+        className="absolute inset-0 scrollbar-hide"
+        style={{
+          overflowY: capped ? "hidden" : "auto",
+          WebkitOverflowScrolling: "touch",
+        }}
+        onScroll={!capped ? (e) => setSelfScrolled(e.currentTarget.scrollTop > 24) : undefined}
+      >
+        {content}
+      </div>
+
+      {capped && (
+        <>
+          <div className="pointer-events-none fixed inset-x-0 bottom-0" style={{
+            height: 260, zIndex: 25,
+            background: isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            maskImage: "linear-gradient(to bottom, transparent 0%, black 55%)",
+            WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 55%)",
+          }} />
+          <button
+            onClick={() => setSelfExpanded(true)}
+            className="fixed left-1/2 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
+            style={{ transform: "translateX(-50%)", bottom: "calc(8% + env(safe-area-inset-bottom))", color: GOLD, background: "none", border: "none", zIndex: 26 }}>
+            View more
+          </button>
+        </>
+      )}
+
+      {/* Footer nav only switches on once the user has scrolled past the
+          heading — kept hidden (rather than unmounted) before that so it
+          fades in instead of popping in abruptly. */}
+      <div style={{ opacity: scrolled ? 1 : 0, pointerEvents: scrolled ? "auto" : "none", transition: "opacity 0.3s ease" }}>
+        <StickyPageNav activePage="awards" onNavigate={onNavigate} />
+      </div>
     </div>
   );
 }
@@ -1993,10 +2097,7 @@ function SpeakingDetailPage({
       )}
 
       <div style={{ height: 96 }} />
-      <div className="fixed inset-x-6 md:inset-x-20 z-30 overflow-hidden"
-        style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
-        <PageBottomNav activePage="awards" onNavigate={onNavigate} />
-      </div>
+      <StickyPageNav activePage="awards" onNavigate={onNavigate} />
     </div>
   );
 }
@@ -2078,7 +2179,7 @@ export default function App() {
         transition={{ duration: page === "workDetail" ? 0.4 : 0.45, ease: [0.4, 0, 0.2, 1] }}>
         {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} />}
         {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} /></div>}
-        {page === "awards"   && <div className="absolute inset-0 overflow-y-auto"><AwardsSpeakingPage onNavigate={navigateGeneral} /></div>}
+        {page === "awards"   && <div className="absolute inset-0"><AwardsSpeakingPage onNavigate={navigateGeneral} /></div>}
         {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={navigateGeneral} /></div>}
         {page === "connect"  && <div className="absolute inset-0 overflow-y-auto"><ConnectPage onNavigate={navigateGeneral} /></div>}
         {page === "speakingInquiry" && (
