@@ -1375,10 +1375,6 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
 
       <div>
         {EXPERTISE_CARDS.map(card => <ExpertiseCard key={card.key} card={card} onOpen={() => onOpenDetail?.(card.key)} />)}
-        <p className="text-center font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] pt-8"
-          style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)" }}>
-          End of the list
-        </p>
         {/* Bottom spacer so content clears the floating nav */}
         <div style={{ height: "calc(64px + 8vh)" }} />
       </div>
