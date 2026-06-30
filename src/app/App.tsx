@@ -902,8 +902,8 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
         })}
       </div>
 
-      {/* ── "Swipe to explore" (hero only) — left-aligned at the same row
-          as the carousel indicator. ── */}
+      {/* ── "Swipe to explore" (hero only), alone on its own row above the
+          nav bar. ── */}
       {activeIdx === 0 && (
         <p className="md:hidden absolute z-30 font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest"
           style={{ bottom: "calc(5% + 56px + 14px + env(safe-area-inset-bottom))", left: 24, color: dimCol }}>
@@ -911,18 +911,18 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
         </p>
       )}
 
-      {/* ── Persistent mobile carousel indicator — stays visible across every
-          slide, including the embedded Work/Award & Speaking pages, which
-          have no room in their own content for a per-slide indicator.
-          Design: a solid gold bar grows to cover every visited section
-          (merged into one continuous line), with small dots marking the
-          sections still ahead. Right-aligned to match the floating nav
-          bar's right edge; hidden while the user is scrolled down inside
-          an expanded Work/Award & Speaking section, since the nav itself
-          shrinks then and there's no room for both. ── */}
+      {/* ── Persistent mobile carousel indicator — sits directly below the
+          floating nav bar, spanning the same width. Stays visible across
+          every slide, including the embedded Work/Award & Speaking pages,
+          which have no room in their own content for a per-slide
+          indicator. Design: a solid gold bar grows to cover every visited
+          section (merged into one continuous line), with small dots
+          marking the sections still ahead. Hidden while the user is
+          scrolled down inside an expanded Work/Award & Speaking section,
+          since the nav itself shrinks then and sits lower on screen. ── */}
       <div className="md:hidden absolute z-30 flex items-center"
         style={{
-          bottom: "calc(5% + 56px + 14px + env(safe-area-inset-bottom))", right: 24, width: 96,
+          bottom: "calc(2% + env(safe-area-inset-bottom))", left: 24, right: 24,
           opacity: navShrunk ? 0 : 1,
           transition: "opacity 0.25s ease",
           pointerEvents: navShrunk ? "none" : "auto",
@@ -1485,7 +1485,7 @@ function ConnectPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 
 const SPEAKING_EVENTS = [
   { key: "rotterdam", year: "2026", role: "Speaker",  event: "UX Rotterdam",                  location: "Rotterdam, NL", region: "Europe",    topic: "The Human Cost of Human-Centred-Design",                           link: null,                                               img: awardsRotterdam, caption: "2026 @ Rotterdam, NL", dark: true },
-  { key: "ux-camp",   year: "2025", role: "Speaker",  event: "UX Camp Melbourne",             location: "Melbourne, AU", region: "Australia", topic: "404: System Burnout — An error message to my UX career",            link: "https://youtu.be/hJIJB3di6T4?si=a1XcoU3eV6f0bVvE",  img: null,          caption: null,             dark: false },
+  { key: "ux-camp",   year: "2025", role: "Speaker",  event: "UX Camp Melbourne",             location: "Melbourne, AU", region: "Australia", topic: "404: System Burnout — An error message to my UX career",            link: null, youtubeId: "hJIJB3di6T4",                                img: null,          caption: null,             dark: false },
   { key: "taipei",    year: "2025", role: "Panelist", event: "Ladies that UX Taipei",         location: "Taipei, TW",    region: "Taiwan",    topic: "Driving Organisational Change and Creating Meaningful Impact",     link: null,                                               img: awardsTaipei,  caption: "2025 @ Taipei, TW",  dark: false },
   { key: "fusecon",   year: "2025", role: "Panelist", event: "FUSECON 2025",                  location: "Malaysia",      region: "Malaysia",  topic: "Mental Health: From Awareness to Action",                          link: null,                                               img: awardsFuseCon, img2: awardsFuseConPanelist, caption: "FUSECON 2025, MY",    dark: true  },
   { key: "fusecon-2024", year: "2024", role: "Panelist", event: "FUSECON 2024",               location: "Malaysia",      region: "Malaysia",  topic: "UX in Malaysia & beyond",                                          link: null,                                               img: null,          caption: null,             dark: false },
@@ -1514,7 +1514,7 @@ function SpeakingEventRow({
   brd: string;
 }) {
   const { open, toggle } = useAccordionItem(`speaking-event:${ev.key}`);
-  const expandable = Boolean(ev.img || ev.link);
+  const expandable = Boolean(ev.img || ev.link || ev.youtubeId);
 
   return (
     <div style={{ borderTop: isFirst ? "none" : `1px solid ${brd}` }}>
@@ -1567,6 +1567,19 @@ function SpeakingEventRow({
                 <img src={ev.img} alt={`${ev.event} — ${ev.topic}`}
                   className={ev.portrait ? "absolute inset-0 w-full h-full object-contain" : "absolute inset-0 w-full h-full object-cover"}
                   style={ev.portrait ? undefined : { objectPosition: ev.dark ? "center 30%" : "center" }} />
+              </div>
+            )}
+            {ev.youtubeId && (
+              <div className="relative w-full overflow-hidden mt-5" style={{ aspectRatio: "16 / 9", background: "#000" }}>
+                <iframe
+                  src={`https://www.youtube.com/embed/${ev.youtubeId}`}
+                  title={`${ev.event} — ${ev.topic}`}
+                  className="absolute inset-0 w-full h-full"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                />
               </div>
             )}
             {ev.link && (
