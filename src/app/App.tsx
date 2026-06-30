@@ -433,10 +433,10 @@ function SpeakingInquiryPage({ onBack }: { onBack: () => void }) {
         )}
 
         {/* Bottom spacer so content clears the floating detail nav */}
-        <div style={{ height: "calc(64px + 8vh)" }} />
+        <div style={{ height: 96 }} />
       </div>
 
-      <div className="sticky z-30 mx-6 md:mx-20" style={{ bottom: "calc(3% + env(safe-area-inset-bottom))" }}>
+      <div className="fixed inset-x-6 md:inset-x-20 z-30" style={{ bottom: "calc(3% + env(safe-area-inset-bottom))" }}>
         <DetailBottomBar
           parentLabel="Connect"
           itemLabel="Speaking Inquiry"
@@ -1194,10 +1194,10 @@ function WorkDetailPage({ cardKey, onBack }: { cardKey: string; onBack: () => vo
         </ul>
 
         {/* Bottom spacer so content clears the floating detail nav */}
-        <div style={{ height: "calc(64px + 8vh)" }} />
+        <div style={{ height: 96 }} />
       </div>
 
-      <div className="sticky z-30 mx-6 md:mx-20" style={{ bottom: "calc(3% + env(safe-area-inset-bottom))" }}>
+      <div className="fixed inset-x-6 md:inset-x-20 z-30" style={{ bottom: "calc(3% + env(safe-area-inset-bottom))" }}>
         <DetailBottomBar parentLabel="Work" itemLabel={card.title} onBack={onBack} />
       </div>
     </div>
@@ -1337,16 +1337,6 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   return (
     <div className="relative w-full" style={{ minHeight: embedded ? "100%" : "100dvh", background: bg }}>
-      {!embedded && (
-        <button
-          onClick={() => onNavigate("home")}
-          aria-label="Back to homepage"
-          className="fixed top-5 left-5 z-[59] cursor-pointer"
-        >
-          <LogoMark size={14} />
-        </button>
-      )}
-
       {/* Page heading — sticky so it stays visible while the rows below
           scroll past it, shrinking once the mobile "View more" cap lifts.
           Transparent at rest so the multicolour background shows through;
@@ -1376,11 +1366,11 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
       <div>
         {EXPERTISE_CARDS.map(card => <ExpertiseCard key={card.key} card={card} onOpen={() => onOpenDetail?.(card.key)} />)}
         {/* Bottom spacer so content clears the floating nav */}
-        <div style={{ height: "calc(64px + 8vh)" }} />
+        <div style={{ height: 96 }} />
       </div>
 
       {!embedded && (
-        <div className="sticky z-30 overflow-hidden mx-6 md:mx-20"
+        <div className="fixed inset-x-6 md:inset-x-20 z-30 overflow-hidden"
           style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
           <PageBottomNav activePage="work" onNavigate={onNavigate} />
         </div>
@@ -1446,8 +1436,8 @@ function ContactListPage({
         </div>
       </div>
 
-      <div style={{ height: "calc(64px + 8vh)" }} />
-      <div className="sticky z-30 overflow-hidden mx-6 md:mx-20"
+      <div style={{ height: 96 }} />
+      <div className="fixed inset-x-6 md:inset-x-20 z-30 overflow-hidden"
         style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
         <PageBottomNav activePage={activePage} onNavigate={onNavigate} />
       </div>
@@ -1738,9 +1728,9 @@ function AwardsSpeakingPage({
         style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)" }}>
         End of the list
       </p>
-      <div style={{ height: "calc(64px + 8vh)" }} />
+      <div style={{ height: 96 }} />
       {!embedded && (
-        <div className="sticky z-30 overflow-hidden mx-6 md:mx-20"
+        <div className="fixed inset-x-6 md:inset-x-20 z-30 overflow-hidden"
           style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
           <PageBottomNav activePage="awards" onNavigate={onNavigate} />
         </div>
@@ -1944,8 +1934,8 @@ function SpeakingDetailPage({
         </div>
       )}
 
-      <div style={{ height: "calc(64px + 8vh)" }} />
-      <div className="sticky z-30 overflow-hidden mx-6 md:mx-20"
+      <div style={{ height: 96 }} />
+      <div className="fixed inset-x-6 md:inset-x-20 z-30 overflow-hidden"
         style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
         <PageBottomNav activePage="awards" onNavigate={onNavigate} />
       </div>
