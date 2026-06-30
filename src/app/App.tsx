@@ -392,7 +392,7 @@ function SpeakingInquiryPage({ onBack }: { onBack: () => void }) {
           style={{ color: GOLD }}>
           <ChevronLeft size={12} strokeWidth={1.5} /> Connect
         </button>
-        <motion.h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", lineHeight: 1.05, color: GOLD }}
+        <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]" style={{ lineHeight: 1.05, color: GOLD }}
           initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Speaking Inquiry
         </motion.h1>
@@ -804,7 +804,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                   }}
                 />
                 <h1 className="font-['Museo',sans-serif] font-light"
-                  style={{ fontSize: "clamp(1.6rem, 8vw, 2.2rem)", lineHeight: 1.1, color: GOLD }}>
+                  style={{ fontSize: "3rem", lineHeight: 1.1, color: GOLD }}>
                   Hi, I'm a product &amp; design leader
                 </h1>
               </div>
@@ -846,7 +846,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 }}
               />
               <h1 className="font-['Museo',sans-serif] font-light"
-                style={{ fontSize: "clamp(1.8rem, 3.4vw, 3rem)", lineHeight: 1.05, color: GOLD, maxWidth: "52%" }}>
+                style={{ fontSize: "4rem", lineHeight: 1.05, color: GOLD, maxWidth: "52%" }}>
                 Tiff is a product &amp; design leader
               </h1>
             </div>
@@ -959,8 +959,8 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                   {section.context}
                 </motion.p>
 
-                <motion.h2 className="font-['Museo',sans-serif] font-light"
-                  style={{ fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, maxWidth: "16ch", color: GOLD }}
+                <motion.h2 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]"
+                  style={{ lineHeight: 1.05, maxWidth: "16ch", color: GOLD }}
                   initial={false}
                   animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }}
                   transition={{ duration: 0.55, delay: 0.06 }}>
@@ -1273,7 +1273,7 @@ function WorkDetailPage({ cardKey, onBack }: { cardKey: string; onBack: () => vo
             style={{ width: 56, height: 56, background: `${card.accent}1f` }}>
             <div style={{ width: 38, height: 38 }}><Illustration /></div>
           </div>
-          <motion.h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", lineHeight: 1.05, color: GOLD }}
+          <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]" style={{ lineHeight: 1.05, color: GOLD }}
             initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
             {card.title}
           </motion.h1>
@@ -1475,8 +1475,8 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Fintech · eCommerce · SaaS
         </motion.p>
-        <motion.h1 className="font-['Museo',sans-serif] font-light"
-          style={{ fontSize: compact ? "1.5rem" : "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: GOLD, transition: "font-size 0.35s ease" }}
+        <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]"
+          style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: GOLD, transition: "font-size 0.35s ease" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Work
         </motion.h1>
@@ -1533,7 +1533,7 @@ function ContactListPage({
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {eyebrow}
         </motion.p>
-        <motion.h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: fg }}
+        <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]" style={{ lineHeight: 1.05, color: fg }}
           initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
           {title}
         </motion.h1>
@@ -1639,12 +1639,15 @@ function SpeakingEventRow({
             }}
           />
         )}
-        <div className="flex-1 flex flex-col gap-1">
-          <span className="font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>{ev.year} · {ev.region}</span>
-          <p className="font-['Avenir',sans-serif] font-medium" style={{ fontSize: "clamp(0.95rem, 1.6vw, 1.4rem)", color: fg }}>
-            {ev.role} — {ev.event}
-          </p>
-          <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub }}>{ev.topic}</p>
+        <div className="flex-1 flex flex-col md:flex-row md:items-start md:justify-between gap-1 md:gap-6 min-w-0">
+          <div className="flex flex-col gap-1 min-w-0">
+            <span className="md:hidden font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>{ev.year} · {ev.region}</span>
+            <p className="font-['Avenir',sans-serif] font-medium" style={{ fontSize: "clamp(0.95rem, 1.6vw, 1.4rem)", color: fg }}>
+              {ev.role} @ {ev.event}
+            </p>
+            <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub }}>{ev.topic}</p>
+          </div>
+          <span className="hidden md:block flex-shrink-0 font-['Avenir',sans-serif] font-light text-[0.7rem] text-right" style={{ color: sub }}>{ev.year} · {ev.region}</span>
         </div>
       </button>
 
@@ -1726,12 +1729,15 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
             transition: "transform 0.3s ease",
           }}
         />
-        <div className="flex-1 flex flex-col gap-1">
-          <span className="font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>2025 · National Awards · Australia</span>
-          <p className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.5rem)", color: fg }}>
-            Finalist — UX Leader of the Year
-          </p>
-          <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub }}>Women in Digital National Awards</p>
+        <div className="flex-1 flex flex-col md:flex-row md:items-start md:justify-between gap-1 md:gap-6 min-w-0">
+          <div className="flex flex-col gap-1 min-w-0">
+            <span className="md:hidden font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>2025 · Australia</span>
+            <p className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.5rem)", color: fg }}>
+              UX Leader of the Year — Finalist
+            </p>
+            <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub }}>Women in Digital National Awards</p>
+          </div>
+          <span className="hidden md:block flex-shrink-0 font-['Avenir',sans-serif] font-light text-[0.7rem] text-right" style={{ color: sub }}>2025 · Australia</span>
         </div>
       </button>
 
@@ -1825,7 +1831,7 @@ function AwardsSpeakingPage({
         }}>
         <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
-          Recognition
+          Recognition &amp; voice in community
         </motion.p>
         <motion.h1 className="font-['Museo',sans-serif] font-light"
           style={{ fontSize: compact ? "1.5rem" : "clamp(2rem, 5vw, 4rem)", lineHeight: 1.05, color: fg, transition: "font-size 0.35s ease" }}
@@ -1849,12 +1855,6 @@ function AwardsSpeakingPage({
         ))}
       </div>
 
-      {!capped && (
-        <p className="text-center font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] pt-8"
-          style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)" }}>
-          End of the list
-        </p>
-      )}
       <div style={{ height: 96 }} />
     </>
   );
