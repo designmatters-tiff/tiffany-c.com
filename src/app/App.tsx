@@ -257,9 +257,9 @@ function MobileMenu({
 }) {
   const isDark = useContext(DarkModeCtx);
   const itemActive = GOLD;
-  const itemDim    = "rgba(178,147,59,0.55)";
   const rowBorder  = isDark ? "rgba(255,255,255,0.15)" : "rgba(17,17,17,0.12)";
   const closeColor = isDark ? "white" : INK;
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
   return (
     <motion.div
@@ -293,6 +293,8 @@ function MobileMenu({
                 }
                 onClose();
               }}
+              onMouseEnter={() => setHoveredKey(s.key)}
+              onMouseLeave={() => setHoveredKey(null)}
               className="flex items-center justify-between py-5 text-right"
               style={{ borderBottom: `1px solid ${rowBorder}` }}
             >
@@ -301,7 +303,9 @@ function MobileMenu({
                 className="font-['Museo',sans-serif] font-light tracking-wide"
                 style={{
                   fontSize: "1.5rem",
-                  color: isActive ? itemActive : itemDim,
+                  color: itemActive,
+                  opacity: isActive || hoveredKey === s.key ? 1 : 0.55,
+                  transition: "opacity 0.2s ease",
                 }}
               >
                 {s.label}
@@ -898,39 +902,47 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
         })}
       </div>
 
+      {/* ── "Swipe to explore" (hero only) — left-aligned at the same row
+          as the carousel indicator. ── */}
+      {activeIdx === 0 && (
+        <p className="md:hidden absolute z-30 font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest"
+          style={{ bottom: "calc(5% + 56px + 14px + env(safe-area-inset-bottom))", left: 24, color: dimCol }}>
+          swipe to explore
+        </p>
+      )}
+
       {/* ── Persistent mobile carousel indicator — stays visible across every
           slide, including the embedded Work/Award & Speaking pages, which
           have no room in their own content for a per-slide indicator.
           Design: a solid gold bar grows to cover every visited section
           (merged into one continuous line), with small dots marking the
-          sections still ahead. Shares its row with "swipe to explore"
-          (hero only), right-aligned in a fixed-width track so the two
-          sit side by side instead of the indicator spanning full width. ── */}
-      <div className="md:hidden absolute z-30 flex items-center justify-between"
-        style={{ bottom: "calc(5% + 56px + 14px + env(safe-area-inset-bottom))", left: 24, right: 24 }}>
-        {activeIdx === 0 ? (
-          <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest" style={{ color: dimCol }}>
-            swipe to explore
-          </p>
-        ) : <span />}
-        <div className="flex items-center flex-shrink-0" style={{ width: 96 }}>
-          <div className="rounded-full transition-all duration-300"
-            style={{
-              width: `${((activeIdx + 1) / SECTIONS.length) * 100}%`,
-              height: 2,
-              background: GOLD,
-              flexShrink: 0,
-            }} />
-          {activeIdx < SECTIONS.length - 1 && (
-            <div className="flex items-center gap-1.5" style={{ marginLeft: 8 }}>
-              {SECTIONS.slice(activeIdx + 1).map((_, i) => (
-                <div key={i} className="rounded-full"
-                  style={{ width: 4, height: 4,
-                    background: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.25)" }} />
-              ))}
-            </div>
-          )}
-        </div>
+          sections still ahead. Right-aligned to match the floating nav
+          bar's right edge; hidden while the user is scrolled down inside
+          an expanded Work/Award & Speaking section, since the nav itself
+          shrinks then and there's no room for both. ── */}
+      <div className="md:hidden absolute z-30 flex items-center"
+        style={{
+          bottom: "calc(5% + 56px + 14px + env(safe-area-inset-bottom))", right: 24, width: 96,
+          opacity: navShrunk ? 0 : 1,
+          transition: "opacity 0.25s ease",
+          pointerEvents: navShrunk ? "none" : "auto",
+        }}>
+        <div className="rounded-full transition-all duration-300"
+          style={{
+            width: `${((activeIdx + 1) / SECTIONS.length) * 100}%`,
+            height: 2,
+            background: GOLD,
+            flexShrink: 0,
+          }} />
+        {activeIdx < SECTIONS.length - 1 && (
+          <div className="flex items-center gap-1.5" style={{ marginLeft: 8 }}>
+            {SECTIONS.slice(activeIdx + 1).map((_, i) => (
+              <div key={i} className="rounded-full"
+                style={{ width: 4, height: 4,
+                  background: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.25)" }} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── Desktop nav — floating above bottom edge, aligned to content width ── */}
@@ -983,14 +995,14 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
           to a left-aligned, content-width pill once the active embedded
           Work/Award & Speaking section is expanded past its "View more"
           cap, to free up room for the now-longer scrollable content. ── */}
-      <motion.nav className="fixed z-30 md:hidden flex items-center h-14 px-5 overflow-hidden"
+      <motion.nav className="fixed z-30 md:hidden flex items-center px-5 overflow-hidden"
         style={{
           bottom: "calc(5% + env(safe-area-inset-bottom))", left: 24,
           borderRadius: 0,
           background: NAV_GRADIENT,
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}
-        animate={{ width: navShrunk ? 168 : "calc(100% - 48px)" }}
+        animate={{ width: navShrunk ? 168 : "calc(100% - 48px)", height: navShrunk ? 36 : 56 }}
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
         <button
           onClick={() => setMenuOpen(true)}
@@ -1085,23 +1097,23 @@ function IllustrationPeople() {
 
 const EXPERTISE_CARDS = [
   {
-    key: "ai", title: "AI + UX DesignOps", accent: GOLD, Illustration: IllustrationAI,
-    description: "Rebuilding design workflows as AI-native infrastructure — shortening the design-to-dev cycle, setting AI fluency as a hiring standard, and embedding AI tooling into research, copy, and system governance.",
+    key: "ai", title: "AI + UX", accent: GOLD, Illustration: IllustrationAI,
+    description: "I experiment with the team hands-on in iterating workflows and AI-native infrastructure from ground up",
     bullets: ["Reduced trilingual UX copy turnaround by 20% through AI tooling", "AI-native hiring standards & team norms at Cotton On Group", "Automated design system governance & DesignOps maturity frameworks"],
   },
   {
     key: "business", title: "Business Acumen", accent: "#8A6E2E", Illustration: IllustrationBusiness,
-    description: "Identified a revenue gap and designed the Save for Later feature — projected at A$3.5M in annualised global revenue, delivered in a 9-week design and tech effort. Exceeded brand perception target by 14% against a 9.8% KPI at TNG eWallet.",
+    description: "I believe design is to drive business values and solve users problem, and we know we are successful by measurable outcomes.",
     bullets: ["Roadmap co-ownership, AB testing & experimentation", "Cross-unit prioritisation frameworks resolving four business units", "Sep 2024: first profitable month in TNG's seven-year history"],
   },
   {
-    key: "ux", title: "Product & UX Methods", accent: "#5070A0", Illustration: IllustrationUX,
-    description: "Led 0-to-1 UX for an enterprise SaaS IoT platform and scaled a fintech super-app to 23M+ users across B2C and B2B surfaces — delivering 20+ features covering payments, loyalty, wealth, and merchant tools.",
+    key: "ux", title: "Product & UX Strategies", accent: "#5070A0", Illustration: IllustrationUX,
+    description: "I led 0-to-1 UX for an enterprise SaaS IoT platform and scaled design strategies for fintech and global eCommerce used by millions daily",
     bullets: ["Built UX Research function & company-wide NPS benchmarks from scratch", "Multi-platform, multi-brand design system adhering to accessibility standards", "End-to-end product design: discovery → delivery across fintech, retail & SaaS"],
   },
   {
     key: "people", title: "People & Process", accent: "#5070A0", Illustration: IllustrationPeople,
-    description: "Grew a multidisciplinary design department from 7 to 22 within a controlled budget. Established cross-unit prioritisation frameworks and UX Research operations from the ground up.",
+    description: "I grow multidisciplinary design team, established cross-unit prioritization frameworks and UX Research operations.",
     bullets: ["Team growth: 7 → 22 designers across B2C, B2B & Research", "Coaching Responsibility Agreements & design culture building", "Chapter Lead — Ladies that UX, Kuala Lumpur (2022–2024)"],
   },
 ];
