@@ -1519,14 +1519,6 @@ function ContactListPage({
   const itemColor = isDark ? "white" : INK;
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
-      <button
-        onClick={() => onNavigate("home")}
-        aria-label="Back to homepage"
-        className="fixed top-5 left-5 z-[59] cursor-pointer"
-      >
-        <LogoMark size={14} />
-      </button>
-
       {/* Page heading */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
         <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}
@@ -1652,7 +1644,7 @@ function SpeakingEventRow({
       </button>
 
       {expandable && (
-        <div className="overflow-hidden" style={{ maxHeight: open ? 760 : 0, opacity: open ? 1 : 0, transition: "max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease" }}>
+        <div className="overflow-hidden" style={{ maxHeight: open ? 1400 : 0, opacity: open ? 1 : 0, transition: "max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease" }}>
           <div className="px-6 md:px-20 pb-8">
             {ev.img && ev.img2 ? (
               // Two images side by side (stacked on mobile) — portrait shots
@@ -1667,14 +1659,18 @@ function SpeakingEventRow({
                 </div>
               </div>
             ) : ev.img && (
-              <div className="relative w-full overflow-hidden" style={{ height: "clamp(220px, 40vw, 480px)", background: ev.dark ? "#030303" : "#f8f7f5" }}>
+              // Desktop: capped to 50% of viewport height, image keeps its
+              // natural aspect ratio (object-contain, auto width) instead
+              // of being cropped to fill — mobile keeps the original
+              // clamp()-based crop/cover treatment.
+              <div className="relative w-full overflow-hidden h-[clamp(220px,40vw,480px)] md:h-[50vh] md:flex md:items-center md:justify-center" style={{ background: ev.dark ? "#030303" : "#f8f7f5" }}>
                 <img src={ev.img} alt={`${ev.event} — ${ev.topic}`}
-                  className={ev.portrait ? "absolute inset-0 w-full h-full object-contain" : "absolute inset-0 w-full h-full object-cover"}
+                  className={`absolute inset-0 w-full h-full ${ev.portrait ? "object-contain" : "object-cover"} md:static md:inset-auto md:w-auto md:h-full md:max-w-full md:object-contain`}
                   style={ev.portrait ? undefined : { objectPosition: ev.dark ? "center 30%" : "center" }} />
               </div>
             )}
             {ev.youtubeId && (
-              <div className="relative w-full overflow-hidden mt-5" style={{ aspectRatio: "16 / 9", background: "#000" }}>
+              <div className="relative w-full overflow-hidden mt-5 md:w-auto md:h-[50vh] md:mx-auto md:max-w-full" style={{ aspectRatio: "16 / 9", background: "#000" }}>
                 <iframe
                   src={`https://www.youtube.com/embed/${ev.youtubeId}`}
                   title={`${ev.event} — ${ev.topic}`}
@@ -2056,8 +2052,8 @@ function SpeakingDetailPage({
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {ev.year} · {ev.role} · {ev.location}
         </motion.p>
-        <motion.h1 className="font-['Museo',sans-serif] font-light mb-5"
-          style={{ fontSize: "clamp(1.9rem, 5vw, 4rem)", lineHeight: 1.05, color: textColor, maxWidth: "20ch" }}
+        <motion.h1 className="font-['Museo',sans-serif] font-light mb-5 text-[3rem] md:text-[4rem]"
+          style={{ lineHeight: 1.05, color: textColor, maxWidth: "20ch" }}
           initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
           {ev.event}
         </motion.h1>
