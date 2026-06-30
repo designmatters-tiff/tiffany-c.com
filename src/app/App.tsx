@@ -570,7 +570,7 @@ const AUTO_DURATION = 5000;
 
 // ─── Homepage ─────────────────────────────────────────────────────
 
-export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void }) {
+export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number }) {
   const isDark = useContext(DarkModeCtx);
   const pageBg  = isDark ? "#282828" : "#f8f7f5";
   const fg      = isDark ? GOLD : INK;
@@ -578,7 +578,7 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
   const dimCol  = isDark ? "rgba(255,255,255,0.38)" : DIM;
   const border  = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
   const scrollEl  = useRef<HTMLDivElement>(null);
-  const [activeIdx, setActiveIdx]   = useState(0);
+  const [activeIdx, setActiveIdx]   = useState(initialIdx);
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
   const [progress, setProgress]     = useState(0);
   const [menuOpen, setMenuOpen]     = useState(false);
@@ -613,6 +613,18 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
     el.scrollTo({ left: clamped * el.clientWidth, behavior: "smooth" });
     resetTimer();
   }, [resetTimer]);
+
+  // Restores horizontal-swipe position when returning from a Work
+  // detail page — jumps instantly (no smooth scroll) so it doesn't
+  // visibly re-play the swipe on mount.
+  useEffect(() => {
+    const el = scrollEl.current;
+    if (el && initialIdx > 0) {
+      el.scrollTo({ left: initialIdx * el.clientWidth, behavior: "auto" });
+      activeIdxRef.current = initialIdx;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // rAF auto-advance — skipped entirely on mobile
   useEffect(() => {
@@ -832,7 +844,12 @@ export function HomePage({ onNavigate, onOpenDetail }: { onNavigate: (p: Page) =
 
                 {capped && (
                   <>
-                    <div className="pointer-events-none absolute" style={{ left: 0, right: 0, bottom: 0, height: 260, zIndex: 5, background: `linear-gradient(to bottom, ${pageBg}00 0%, ${pageBg} 100%)` }} />
+                    <div className="pointer-events-none absolute" style={{
+                      left: 0, right: 0, bottom: 0, height: 260, zIndex: 5,
+                      background: `linear-gradient(to bottom, ${pageBg}00 0%, ${isDark ? "rgba(40,40,40,0.7)" : "rgba(248,247,245,0.7)"} 100%)`,
+                      backdropFilter: "blur(3px)",
+                      WebkitBackdropFilter: "blur(3px)",
+                    }} />
                     <button
                       onClick={() => setMobileExpanded(m => ({ ...m, [section.key]: true }))}
                       className="absolute left-1/2 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
@@ -1098,22 +1115,22 @@ function IllustrationPeople() {
 const EXPERTISE_CARDS = [
   {
     key: "ai", title: "AI + UX", accent: GOLD, Illustration: IllustrationAI,
-    description: "I experiment with the team hands-on in iterating workflows and AI-native infrastructure from ground up",
+    description: "Designing and iterating AI-native workflows and infrastructure from the ground up.",
     bullets: ["Reduced trilingual UX copy turnaround by 20% through AI tooling", "AI-native hiring standards & team norms at Cotton On Group", "Automated design system governance & DesignOps maturity frameworks"],
   },
   {
     key: "business", title: "Business Acumen", accent: "#8A6E2E", Illustration: IllustrationBusiness,
-    description: "I believe design is to drive business values and solve users problem, and we know we are successful by measurable outcomes.",
+    description: "Aligning product design with measurable revenue growth and user outcomes.",
     bullets: ["Roadmap co-ownership, AB testing & experimentation", "Cross-unit prioritisation frameworks resolving four business units", "Sep 2024: first profitable month in TNG's seven-year history"],
   },
   {
     key: "ux", title: "Product & UX Strategies", accent: "#5070A0", Illustration: IllustrationUX,
-    description: "I led 0-to-1 UX for an enterprise SaaS IoT platform and scaled design strategies for fintech and global eCommerce used by millions daily",
+    description: "Led 0-to-1 enterprise SaaS and scaled global platforms used by millions daily.",
     bullets: ["Built UX Research function & company-wide NPS benchmarks from scratch", "Multi-platform, multi-brand design system adhering to accessibility standards", "End-to-end product design: discovery → delivery across fintech, retail & SaaS"],
   },
   {
     key: "people", title: "People & Process", accent: "#5070A0", Illustration: IllustrationPeople,
-    description: "I grow multidisciplinary design team, established cross-unit prioritization frameworks and UX Research operations.",
+    description: "Built high-performing multidisciplinary teams and cross-unit prioritization frameworks.",
     bullets: ["Team growth: 7 → 22 designers across B2C, B2B & Research", "Coaching Responsibility Agreements & design culture building", "Chapter Lead — Ladies that UX, Kuala Lumpur (2022–2024)"],
   },
 ];
@@ -1223,7 +1240,7 @@ function DetailBottomBar({
   return (
     <div className="flex items-stretch gap-2">
       <button onClick={onBack}
-        className="flex-1 min-w-0 flex items-center gap-3 h-11 px-5 cursor-pointer"
+        className="flex-1 min-w-0 flex items-center gap-3 h-9 px-5 cursor-pointer"
         style={{ background: NAV_GRADIENT }}>
         <HamburgerIcon />
         <span className="font-['Avenir',sans-serif] font-light text-sm text-white whitespace-nowrap overflow-hidden text-ellipsis">
@@ -1232,7 +1249,7 @@ function DetailBottomBar({
       </button>
       {cta && (
         <button onClick={cta.onClick} disabled={cta.disabled}
-          className="gold-submit-btn h-11 px-6 flex-shrink-0 font-['Museo',sans-serif] font-light text-sm text-white cursor-pointer"
+          className="gold-submit-btn h-9 px-6 flex-shrink-0 font-['Museo',sans-serif] font-light text-sm text-white cursor-pointer"
           style={{ opacity: cta.disabled ? 0.6 : 1 }}>
           {cta.label}
         </button>
@@ -1965,13 +1982,24 @@ export default function App() {
     setDetailKey(null);
   };
 
+  // Remembers whether Work-detail was opened from the standalone /work
+  // route or from the homepage's embedded Work section, so "back"
+  // returns to the same context — including, for the homepage case,
+  // jumping straight back to the Work section so horizontal swipe
+  // between sections keeps working immediately.
+  const [workDetailOrigin, setWorkDetailOrigin] = useState<Page>("work");
+  const workSectionIdx = SECTIONS.findIndex(s => s.key === "work");
+  const [homeInitialIdx, setHomeInitialIdx] = useState(0);
+
   const navigateToWorkDetail = (key: string) => {
+    setWorkDetailOrigin(page === "home" ? "home" : "work");
     setDetailKey(key);
     setPage("workDetail");
   };
 
   const navigateBackFromWork = () => {
-    setPage("work");
+    if (workDetailOrigin === "home") setHomeInitialIdx(workSectionIdx);
+    setPage(workDetailOrigin);
     setDetailKey(null);
   };
 
@@ -1991,8 +2019,11 @@ export default function App() {
         {isDark ? <AnimatedGradientBg /> : <LightGradientBlobs />}
       </div>
       <DarkModeToggle isDark={isDark} onToggle={toggleDark} />
-      <motion.div key={motionKey} className="absolute inset-0" style={{ zIndex: 1 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.45 }}>
-        {page === "home"     && <HomePage onNavigate={setPage} onOpenDetail={navigateToWorkDetail} />}
+      <motion.div key={motionKey} className="absolute inset-0" style={{ zIndex: 1 }}
+        initial={page === "workDetail" ? { opacity: 1, x: "100%" } : { opacity: 0, x: 0 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: page === "workDetail" ? 0.4 : 0.45, ease: [0.4, 0, 0.2, 1] }}>
+        {page === "home"     && <HomePage onNavigate={setPage} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} />}
         {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={setPage} onOpenDetail={navigateToWorkDetail} /></div>}
         {page === "awards"   && <div className="absolute inset-0 overflow-y-auto"><AwardsSpeakingPage onNavigate={setPage} /></div>}
         {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={setPage} /></div>}
