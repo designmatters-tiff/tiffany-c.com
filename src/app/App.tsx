@@ -8,7 +8,7 @@ import awardsFuseCon from "@/imports/AwardsSpeaking/Fusecon2025.png";
 import awardsFuseConPanelist from "@/imports/AwardsSpeaking/FuseCon_panelist.jpg";
 import awardsTaipei from "@/imports/AwardsSpeaking/LTUX Taipei.png";
 import awardsRotterdam from "@/imports/AwardsSpeaking/ux-rotterdam.jpeg";
-import profilePhoto from "@/imports/Profile/tiff-headshot.jpeg";
+import profilePhoto from "@/imports/Profile/tiff-headshot.jpg";
 
 // ─── Logo paths ───────────────────────────────────────────────────
 const T_PATH =
