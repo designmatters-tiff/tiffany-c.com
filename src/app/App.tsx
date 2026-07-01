@@ -775,23 +775,42 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
             startTime.current = Date.now();
             setProgress(0);
           }
-          dragState.current.active = false;
-          if (scrollEl.current) scrollEl.current.style.cursor = "";
+          if (dragState.current.active) {
+            dragState.current.active = false;
+            if (scrollEl.current) {
+              scrollEl.current.style.cursor = "";
+              scrollEl.current.style.scrollSnapType = "x mandatory";
+              scrollEl.current.style.userSelect = "";
+            }
+          }
         }}
         onMouseDown={e => {
           if (isMobileRef.current) return;
           dragState.current = { active: true, startX: e.pageX, scrollLeft: scrollEl.current?.scrollLeft ?? 0 };
-          if (scrollEl.current) scrollEl.current.style.cursor = "grabbing";
+          if (scrollEl.current) {
+            scrollEl.current.style.cursor = "grabbing";
+            scrollEl.current.style.scrollSnapType = "none";
+            scrollEl.current.style.userSelect = "none";
+          }
         }}
         onMouseMove={e => {
           if (!dragState.current.active || isMobileRef.current) return;
-          e.preventDefault();
           const dx = e.pageX - dragState.current.startX;
           if (scrollEl.current) scrollEl.current.scrollLeft = dragState.current.scrollLeft - dx;
         }}
         onMouseUp={() => {
+          if (!dragState.current.active) return;
           dragState.current.active = false;
-          if (scrollEl.current) scrollEl.current.style.cursor = "";
+          if (scrollEl.current) {
+            scrollEl.current.style.cursor = "";
+            scrollEl.current.style.userSelect = "";
+            // snap to nearest section
+            const el = scrollEl.current;
+            const w = el.clientWidth;
+            const nearest = Math.round(el.scrollLeft / w);
+            el.style.scrollSnapType = "x mandatory";
+            el.scrollTo({ left: nearest * w, behavior: "smooth" });
+          }
         }}
       >
         {/* ── Section 0: Tiffany C. ── */}
