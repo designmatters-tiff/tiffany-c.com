@@ -8,6 +8,9 @@ import awardsFuseCon from "@/imports/AwardsSpeaking/Fusecon2025.png";
 import awardsFuseConPanelist from "@/imports/AwardsSpeaking/FuseCon_panelist.jpg";
 import awardsTaipei from "@/imports/AwardsSpeaking/LTUX Taipei.png";
 import awardsRotterdam from "@/imports/AwardsSpeaking/ux-rotterdam.jpeg";
+import awardsFuseCon2024 from "@/imports/AwardsSpeaking/FUSECON 2024/Fusecon2024.jpeg";
+import awardsDesignKL from "@/imports/AwardsSpeaking/Design Leadership KL/DLKL2023.jpeg";
+import awardsDesignKLTiff from "@/imports/AwardsSpeaking/Design Leadership KL/DLKL2023-tiff.jpeg";
 import profilePhoto from "@/imports/Profile/tiff-headshot.jpg";
 
 // ─── Logo paths ───────────────────────────────────────────────────
@@ -1581,9 +1584,9 @@ const SPEAKING_EVENTS = [
   { key: "ux-camp",   year: "2025", role: "Speaker",  event: "UX Camp Melbourne",             location: "Melbourne, AU", region: "Australia", topic: "404: System Burnout — An error message to my UX career",            link: null, youtubeId: "hJIJB3di6T4",                                img: null,          caption: null,             dark: false },
   { key: "taipei",    year: "2025", role: "Panelist", event: "Ladies that UX Taipei",         location: "Taipei, TW",    region: "Taiwan",    topic: "Driving Organisational Change and Creating Meaningful Impact",     link: null,                                               img: awardsTaipei,  caption: "2025 @ Taipei, TW",  dark: false },
   { key: "fusecon",   year: "2025", role: "Panelist", event: "FUSECON 2025",                  location: "Malaysia",      region: "Malaysia",  topic: "Mental Health: From Awareness to Action",                          link: null,                                               img: awardsFuseCon, img2: awardsFuseConPanelist, caption: "FUSECON 2025, MY",    dark: true  },
-  { key: "fusecon-2024", year: "2024", role: "Panelist", event: "FUSECON 2024",               location: "Malaysia",      region: "Malaysia",  topic: "UX in Malaysia & beyond",                                          link: null,                                               img: null,          caption: null,             dark: false },
+  { key: "fusecon-2024", year: "2024", role: "Panelist", event: "FUSECON 2024",               location: "Malaysia",      region: "Malaysia",  topic: "UX in Malaysia & beyond",                                          link: null,                                               img: awardsFuseCon2024, caption: "FUSECON 2024, MY", dark: false },
   { key: "figma-kl",  year: "2024", role: "Panelist", event: "Friends of Figma KL × adplist", location: "KL, MY",        region: "Malaysia",  topic: "The Journey to Senior Designer: Skills, Insights and Experiences", link: null,                                               img: null,          caption: null,             dark: false },
-  { key: "design-kl", year: "2023", role: "Speaker",  event: "Design Leadership Kuala Lumpur",location: "KL, MY",        region: "Malaysia",  topic: "Synergy for Sustainable Growth: Empowering UX Team",               link: null,                                               img: null,          caption: null,             dark: false },
+  { key: "design-kl", year: "2023", role: "Speaker",  event: "Design Leadership Kuala Lumpur",location: "KL, MY",        region: "Malaysia",  topic: "Synergy for Sustainable Growth: Empowering UX Team",               link: null,                                               img: awardsDesignKL, img2: awardsDesignKLTiff, caption: "Design Leadership KL 2023", dark: false },
 ];
 
 // ─── Speaking event accordion row ──────────────────────────────────
@@ -1958,7 +1961,7 @@ const SPEAKING_DETAIL: Record<string, {
     pageLabel: "FUSECON 2024, MY",
     year: "2024", role: "Panelist", event: "FUSECON 2024", location: "Malaysia",
     topic: "UX in Malaysia & beyond",
-    heroImg: null, additionalImg: null, link: null, dark: false, finalistLink: null,
+    heroImg: awardsFuseCon2024, additionalImg: null, link: null, dark: false, finalistLink: null,
   },
   "figma-kl": {
     pageLabel: "Panelist @ Friends of Figma KL × adplist",
@@ -1970,7 +1973,7 @@ const SPEAKING_DETAIL: Record<string, {
     pageLabel: "Speaker @ Design Leadership KL",
     year: "2023", role: "Speaker", event: "Design Leadership Kuala Lumpur", location: "Kuala Lumpur, MY",
     topic: "Synergy for Sustainable Growth: Empowering UX Team",
-    heroImg: null, additionalImg: null, link: null, dark: false, finalistLink: null,
+    heroImg: awardsDesignKL, additionalImg: awardsDesignKLTiff, link: null, dark: false, finalistLink: null,
   },
 };
 
