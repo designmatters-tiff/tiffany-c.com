@@ -27,7 +27,7 @@ const GOLD        = "#B2933B";
 const GOLD_BRIGHT = "#e3c85c";
 const INK         = "#111111";
 const DIM         = "#666660";
-const NAV_GRADIENT = "linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
+const NAV_GRADIENT = "linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30)), linear-gradient(to right, rgba(178,147,59,0.65), rgba(98,129,183,0.65), rgba(194,122,166,0.65))";
 
 type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry";
 
@@ -576,7 +576,7 @@ const AUTO_DURATION = 5000;
 
 // ─── Homepage ─────────────────────────────────────────────────────
 
-export function HomePage({ onNavigate, onOpenDetail, onEventDetail, initialIdx = 0 }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; onEventDetail?: (key: string) => void; initialIdx?: number }) {
+export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number }) {
   const isDark = useContext(DarkModeCtx);
   const pageBg  = isDark ? "#282828" : "#f8f7f5";
   const fg      = isDark ? GOLD : INK;
@@ -947,7 +947,7 @@ export function HomePage({ onNavigate, onOpenDetail, onEventDetail, initialIdx =
                 onScroll={!capped ? (e) => setNavMinimized(e.currentTarget.scrollTop > 24) : undefined}>
                 {section.page === "work"
                   ? <WorkPage onNavigate={onNavigate} onOpenDetail={onOpenDetail} embedded isActive={isActive} compact={isActive && navShrunk} headerScrolled={isActive && navMinimized} />
-                  : <AwardsSpeakingPage onNavigate={onNavigate} onEventDetail={onEventDetail} embedded isActive={isActive} compact={isActive && navShrunk} headerScrolled={isActive && navMinimized} />}
+                  : <AwardsSpeakingPage onNavigate={onNavigate} embedded isActive={isActive} compact={isActive && navShrunk} headerScrolled={isActive && navMinimized} />}
 
                 {capped && (
                   <>
@@ -1140,11 +1140,9 @@ export function HomePage({ onNavigate, onOpenDetail, onEventDetail, initialIdx =
         style={{
           bottom: "calc(5% + env(safe-area-inset-bottom))", left: 24,
           borderRadius: 0,
-          background: navShrunk
-            ? (isDark ? "rgba(40,40,40,0.65)" : "rgba(248,247,245,0.65)")
-            : NAV_GRADIENT,
-          backdropFilter: navShrunk ? "blur(16px)" : "none",
-          WebkitBackdropFilter: navShrunk ? "blur(16px)" : "none",
+          background: NAV_GRADIENT,
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}
         animate={{ width: navShrunk ? 168 : "calc(100% - 48px)", height: navShrunk ? 36 : 56 }}
@@ -1153,10 +1151,8 @@ export function HomePage({ onNavigate, onOpenDetail, onEventDetail, initialIdx =
           onClick={() => setMenuOpen(true)}
           className="flex items-center gap-3"
           aria-label="Open navigation">
-          <HamburgerIcon color={navShrunk && !isDark ? GOLD : "white"} />
-          <span
-            className="font-['Museo',sans-serif] font-light text-sm whitespace-nowrap"
-            style={{ color: navShrunk && !isDark ? GOLD : "white" }}>
+          <HamburgerIcon color="white" />
+          <span className="font-['Museo',sans-serif] font-light text-sm text-white whitespace-nowrap">
             Tiffany C.
           </span>
         </button>
@@ -1646,7 +1642,6 @@ function SpeakingEventRow({
   fg,
   sub,
   brd,
-  onDetail,
 }: {
   ev: typeof SPEAKING_EVENTS[number];
   isFirst: boolean;
@@ -1654,22 +1649,17 @@ function SpeakingEventRow({
   fg: string;
   sub: string;
   brd: string;
-  onDetail?: (key: string) => void;
 }) {
   const { open, toggle } = useAccordionItem(`speaking-event:${ev.key}`);
-  const hasDetail = Boolean(SPEAKING_DETAIL[ev.key]);
   const expandable = Boolean(ev.img || ev.link || ev.youtubeId);
 
   return (
     <div style={{ borderTop: isFirst ? "none" : `1px solid ${brd}` }}>
       <button
-        onClick={() => {
-          if (hasDetail && onDetail) { onDetail(ev.key); }
-          else if (expandable) toggle();
-        }}
+        onClick={() => expandable && toggle()}
         className="relative w-full flex items-start gap-3 text-left px-6 md:px-20 py-3 md:py-7 transition-colors duration-200"
-        style={{ cursor: (expandable || hasDetail) ? "pointer" : "default", background: "transparent" }}
-        onMouseEnter={e => (expandable || hasDetail) && (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)")}
+        style={{ cursor: expandable ? "pointer" : "default", background: "transparent" }}
+        onMouseEnter={e => expandable && (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)")}
         onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
       >
         {expandable && (
@@ -1824,14 +1814,12 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
 // inline inside the homepage's horizontal scroll-snap track.
 function AwardsSpeakingPage({
   onNavigate,
-  onEventDetail,
   embedded = false,
   isActive = true,
   compact = false,
   headerScrolled = false,
 }: {
   onNavigate: (p: Page) => void;
-  onEventDetail?: (key: string) => void;
   embedded?: boolean;
   isActive?: boolean;
   compact?: boolean;
@@ -1894,7 +1882,7 @@ function AwardsSpeakingPage({
           <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em]" style={{ color: GOLD }}>Speaking</p>
         </div>
         {visibleEvents.map((ev, i) => (
-          <SpeakingEventRow key={ev.key} ev={ev} isFirst={i === 0} isDark={isDark} fg={fg} sub={sub} brd={brd} onDetail={onEventDetail} />
+          <SpeakingEventRow key={ev.key} ev={ev} isFirst={i === 0} isDark={isDark} fg={fg} sub={sub} brd={brd} />
         ))}
       </div>
 
@@ -2227,9 +2215,9 @@ export default function App() {
         initial={page === "workDetail" ? { opacity: 1, x: "100%" } : { opacity: 0, x: 0 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: page === "workDetail" ? 0.4 : 0.45, ease: [0.4, 0, 0.2, 1] }}>
-        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} onEventDetail={navigateToEvent} initialIdx={homeInitialIdx} />}
+        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} />}
         {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} /></div>}
-        {page === "awards"   && <div className="absolute inset-0"><AwardsSpeakingPage onNavigate={navigateGeneral} onEventDetail={navigateToEvent} /></div>}
+        {page === "awards"   && <div className="absolute inset-0"><AwardsSpeakingPage onNavigate={navigateGeneral} /></div>}
         {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={navigateGeneral} /></div>}
         {page === "connect"  && <div className="absolute inset-0 overflow-y-auto"><ConnectPage onNavigate={navigateGeneral} /></div>}
         {page === "speakingInquiry" && (
