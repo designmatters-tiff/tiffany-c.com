@@ -27,7 +27,7 @@ const GOLD        = "#B2933B";
 const GOLD_BRIGHT = "#e3c85c";
 const INK         = "#111111";
 const DIM         = "#666660";
-const NAV_GRADIENT = "linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30)), linear-gradient(to right, rgba(178,147,59,0.65), rgba(98,129,183,0.65), rgba(194,122,166,0.65))";
+const NAV_GRADIENT = "linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
 
 type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry";
 
