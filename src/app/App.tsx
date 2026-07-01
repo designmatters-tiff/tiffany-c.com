@@ -27,7 +27,7 @@ const GOLD        = "#B2933B";
 const GOLD_BRIGHT = "#e3c85c";
 const INK         = "#111111";
 const DIM         = "#666660";
-const NAV_GRADIENT = "linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30)), linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
+const NAV_GRADIENT = "linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30)), linear-gradient(to right, rgba(178,147,59,0.65), rgba(98,129,183,0.65), rgba(194,122,166,0.65))";
 
 type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry";
 
@@ -1141,6 +1141,8 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           bottom: "calc(5% + env(safe-area-inset-bottom))", left: 24,
           borderRadius: 0,
           background: NAV_GRADIENT,
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}
         animate={{ width: navShrunk ? 168 : "calc(100% - 48px)", height: navShrunk ? 36 : 56 }}
@@ -1842,15 +1844,6 @@ function AwardsSpeakingPage({
 
   const content = (
     <>
-      {!embedded && (
-        <button
-          onClick={() => onNavigate("home")}
-          aria-label="Back to homepage"
-          className="fixed top-5 left-5 z-[59] cursor-pointer"
-        >
-          <LogoMark size={14} />
-        </button>
-      )}
 
       {/* Page heading — sticky so it stays visible while the rows below
           scroll past it, shrinking once the mobile "View more" cap lifts.
@@ -2040,13 +2033,6 @@ function SpeakingDetailPage({
       {/* Back bar */}
       <div className="relative flex items-center gap-4 px-6 md:px-20 pt-8 pb-6"
         style={{ borderBottom: `1px solid ${ev.dark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"}` }}>
-        <button
-          onClick={() => onNavigate("home")}
-          aria-label="Back to homepage"
-          className="fixed top-5 left-5 z-[59] cursor-pointer"
-        >
-          <LogoMark size={14} color={(ev.dark || globalDark) ? "white" : GOLD} />
-        </button>
         <button
           onClick={onBack}
           className="link-underline flex items-center gap-2 font-['Avenir',sans-serif] font-light text-sm uppercase tracking-widest ml-auto"
