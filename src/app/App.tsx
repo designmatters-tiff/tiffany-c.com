@@ -1635,7 +1635,7 @@ function SpeakingEventRow({
           <div className="flex flex-col gap-1 min-w-0">
             <span className="md:hidden font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>{ev.year} · {ev.region}</span>
             <p className="font-['Avenir',sans-serif] font-medium" style={{ fontSize: "clamp(0.95rem, 1.6vw, 1.4rem)", color: fg }}>
-              {ev.role} @ {ev.event}
+              {ev.role} — {ev.event}
             </p>
             <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub }}>{ev.topic}</p>
           </div>
@@ -1663,14 +1663,14 @@ function SpeakingEventRow({
               // natural aspect ratio (object-contain, auto width) instead
               // of being cropped to fill — mobile keeps the original
               // clamp()-based crop/cover treatment.
-              <div className="relative w-full overflow-hidden h-[clamp(220px,40vw,480px)] md:h-[50vh] md:flex md:items-center md:justify-center" style={{ background: ev.dark ? "#030303" : "#f8f7f5" }}>
+              <div className="relative w-full overflow-hidden h-[clamp(220px,40vw,480px)] md:h-[70vh] md:flex md:items-center md:justify-center" style={{ background: ev.dark ? "#030303" : "#f8f7f5" }}>
                 <img src={ev.img} alt={`${ev.event} — ${ev.topic}`}
                   className={`absolute inset-0 w-full h-full ${ev.portrait ? "object-contain" : "object-cover"} md:static md:inset-auto md:w-auto md:h-full md:max-w-full md:object-contain`}
                   style={ev.portrait ? undefined : { objectPosition: ev.dark ? "center 30%" : "center" }} />
               </div>
             )}
             {ev.youtubeId && (
-              <div className="relative w-full overflow-hidden mt-5 md:w-auto md:h-[50vh] md:mx-auto md:max-w-full" style={{ aspectRatio: "16 / 9", background: "#000" }}>
+              <div className="relative w-full overflow-hidden mt-5 md:w-auto md:h-[70vh] md:mx-auto md:max-w-full" style={{ aspectRatio: "16 / 9", background: "#000" }}>
                 <iframe
                   src={`https://www.youtube.com/embed/${ev.youtubeId}`}
                   title={`${ev.event} — ${ev.topic}`}
