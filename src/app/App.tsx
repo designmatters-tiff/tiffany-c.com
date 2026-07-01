@@ -582,6 +582,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
   const dimCol  = isDark ? "rgba(255,255,255,0.38)" : DIM;
   const border  = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
   const scrollEl  = useRef<HTMLDivElement>(null);
+  const dragState = useRef<{ active: boolean; startX: number; scrollLeft: number }>({ active: false, startX: 0, scrollLeft: 0 });
   const [activeIdx, setActiveIdx]   = useState(initialIdx);
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
   const [progress, setProgress]     = useState(0);
@@ -774,6 +775,23 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
             startTime.current = Date.now();
             setProgress(0);
           }
+          dragState.current.active = false;
+          if (scrollEl.current) scrollEl.current.style.cursor = "";
+        }}
+        onMouseDown={e => {
+          if (isMobileRef.current) return;
+          dragState.current = { active: true, startX: e.pageX, scrollLeft: scrollEl.current?.scrollLeft ?? 0 };
+          if (scrollEl.current) scrollEl.current.style.cursor = "grabbing";
+        }}
+        onMouseMove={e => {
+          if (!dragState.current.active || isMobileRef.current) return;
+          e.preventDefault();
+          const dx = e.pageX - dragState.current.startX;
+          if (scrollEl.current) scrollEl.current.scrollLeft = dragState.current.scrollLeft - dx;
+        }}
+        onMouseUp={() => {
+          dragState.current.active = false;
+          if (scrollEl.current) scrollEl.current.style.cursor = "";
         }}
       >
         {/* ── Section 0: Tiffany C. ── */}
@@ -1099,12 +1117,13 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           cap, to free up room for the now-longer scrollable content. ── */}
       <motion.nav className="fixed z-30 md:hidden flex items-center px-5 overflow-hidden"
         style={{
-          bottom: "calc(5% + env(safe-area-inset-bottom))", left: 24,
+          bottom: "calc(5% + env(safe-area-inset-bottom))",
           borderRadius: 0,
           background: NAV_GRADIENT,
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}
-        animate={{ width: navShrunk ? 168 : "calc(100% - 48px)", height: navShrunk ? 36 : 56 }}
+        initial={{ left: 24 }}
+        animate={{ width: navShrunk ? 168 : "calc(100% - 48px)", height: navShrunk ? 36 : 56, left: navShrunk ? 12 : 24 }}
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
         <button
           onClick={() => setMenuOpen(true)}
