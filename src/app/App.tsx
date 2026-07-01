@@ -9,6 +9,8 @@ import awardsFuseConPanelist from "@/imports/AwardsSpeaking/FuseCon_panelist.jpg
 import awardsTaipei from "@/imports/AwardsSpeaking/LTUX Taipei.png";
 import awardsRotterdam from "@/imports/AwardsSpeaking/ux-rotterdam.jpeg";
 import awardsFuseCon2024 from "@/imports/AwardsSpeaking/FUSECON 2024/Fusecon2024.jpeg";
+import awardsFoF2024Desktop from "@/imports/AwardsSpeaking/FoF 2024/desktop_fof2024.jpeg";
+import awardsFoF2024Mobile from "@/imports/AwardsSpeaking/FoF 2024/mobile_fof2024.jpeg";
 import awardsDesignKL from "@/imports/AwardsSpeaking/Design Leadership KL/DLKL2023.jpeg";
 import awardsDesignKLTiff from "@/imports/AwardsSpeaking/Design Leadership KL/DLKL2023-tiff.jpeg";
 import profilePhoto from "@/imports/Profile/tiff-headshot.jpg";
@@ -1136,13 +1138,12 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           cap, to free up room for the now-longer scrollable content. ── */}
       <motion.nav className="fixed z-30 md:hidden flex items-center px-5 overflow-hidden"
         style={{
-          bottom: "calc(5% + env(safe-area-inset-bottom))",
+          bottom: "calc(5% + env(safe-area-inset-bottom))", left: 24,
           borderRadius: 0,
           background: NAV_GRADIENT,
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}
-        initial={{ left: 24 }}
-        animate={{ width: navShrunk ? 168 : "calc(100% - 48px)", height: navShrunk ? 36 : 56, left: navShrunk ? 12 : 24 }}
+        animate={{ width: navShrunk ? 168 : "calc(100% - 48px)", height: navShrunk ? 36 : 56 }}
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
         <button
           onClick={() => setMenuOpen(true)}
@@ -1623,7 +1624,7 @@ const SPEAKING_EVENTS = [
   { key: "taipei",    year: "2025", role: "Panelist", event: "Ladies that UX Taipei",         location: "Taipei, TW",    region: "Taiwan",    topic: "Driving Organisational Change and Creating Meaningful Impact",     link: null,                                               img: awardsTaipei,  caption: "2025 @ Taipei, TW",  dark: false },
   { key: "fusecon",   year: "2025", role: "Panelist", event: "FUSECON 2025",                  location: "Malaysia",      region: "Malaysia",  topic: "Mental Health: From Awareness to Action",                          link: null,                                               img: awardsFuseCon, img2: awardsFuseConPanelist, caption: "FUSECON 2025, MY",    dark: true  },
   { key: "fusecon-2024", year: "2024", role: "Panelist", event: "FUSECON 2024",               location: "Malaysia",      region: "Malaysia",  topic: "UX in Malaysia & beyond",                                          link: null,                                               img: awardsFuseCon2024, caption: "FUSECON 2024, MY", dark: false },
-  { key: "figma-kl",  year: "2024", role: "Panelist", event: "Friends of Figma KL × adplist", location: "KL, MY",        region: "Malaysia",  topic: "The Journey to Senior Designer: Skills, Insights and Experiences", link: null,                                               img: null,          caption: null,             dark: false },
+  { key: "figma-kl",  year: "2024", role: "Panelist", event: "Friends of Figma KL × adplist", location: "KL, MY",        region: "Malaysia",  topic: "The Journey to Senior Designer: Skills, Insights and Experiences", link: null,                                               img: awardsFoF2024Desktop, caption: "Friends of Figma KL × adplist, 2024", dark: false },
   { key: "design-kl", year: "2023", role: "Speaker",  event: "Design Leadership Kuala Lumpur",location: "KL, MY",        region: "Malaysia",  topic: "Synergy for Sustainable Growth: Empowering UX Team",               link: null,                                               img: awardsDesignKL, img2: awardsDesignKLTiff, caption: "Design Leadership KL 2023", dark: false },
 ];
 
@@ -2005,7 +2006,7 @@ const SPEAKING_DETAIL: Record<string, {
     pageLabel: "Panelist @ Friends of Figma KL × adplist",
     year: "2024", role: "Panelist", event: "Friends of Figma KL × adplist", location: "Kuala Lumpur, MY",
     topic: "The Journey to Senior Designer: Skills, Insights and Experiences",
-    heroImg: null, additionalImg: null, link: null, dark: false, finalistLink: null,
+    heroImg: awardsFoF2024Desktop, mobileImg: awardsFoF2024Mobile, additionalImg: null, link: null, dark: false, finalistLink: null,
   },
   "design-kl": {
     pageLabel: "Speaker @ Design Leadership KL",
@@ -2059,9 +2060,15 @@ function SpeakingDetailPage({
         <div className="relative w-full overflow-hidden"
           style={{ height: "clamp(320px, 65vw, 780px)", background: ev.dark ? "#030303" : "#f0ede8" }}>
           <img
+            src={(ev as any).mobileImg ? (ev as any).mobileImg : ev.heroImg}
+            alt={ev.pageLabel}
+            className="absolute inset-0 w-full h-full object-cover md:hidden"
+            style={{ objectPosition: "center" }}
+          />
+          <img
             src={ev.heroImg}
             alt={ev.pageLabel}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover hidden md:block"
             style={{
               objectPosition: ev.dark ? "right center" : "center top",
               // FuseCon Figma is right-aligned portrait — match that
