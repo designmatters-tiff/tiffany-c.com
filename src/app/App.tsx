@@ -353,10 +353,20 @@ const FORM_FIELDS: { name: string; label: string; type?: string; required?: bool
 // drilling in from Connect minimises the bottom nav to a breadcrumb
 // strip with a docked "Submit" CTA, leaving the full viewport for the
 // form. See DetailBottomBar.
-function SpeakingInquiryPage({ onBack }: { onBack: () => void }) {
+function SpeakingInquiryContainer({ onBack }: { onBack: () => void }) {
+  const [headerScrolled, setHeaderScrolled] = useState(false);
+  return (
+    <div className="absolute inset-0 overflow-y-auto" onScroll={e => setHeaderScrolled(e.currentTarget.scrollTop > 24)}>
+      <SpeakingInquiryPage onBack={onBack} headerScrolled={headerScrolled} />
+    </div>
+  );
+}
+
+function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () => void; headerScrolled?: boolean }) {
   const isDark = useContext(DarkModeCtx);
   const accent = "#9B5A88";
   const itemColor = isDark ? "white" : INK;
+  const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [fields, setFields] = useState<Record<string, string>>({});
 
@@ -393,7 +403,14 @@ function SpeakingInquiryPage({ onBack }: { onBack: () => void }) {
 
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
-      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10">
+      <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
+        style={{
+          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
+          backdropFilter: headerScrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
+          borderBottom: `1px solid ${headerScrolled ? brd : "transparent"}`,
+          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
+        }}>
         <button onClick={onBack}
           className="flex items-center gap-1.5 font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4 cursor-pointer"
           style={{ color: GOLD }}>
@@ -1416,6 +1433,7 @@ function PageBottomNav({
   activePage: Page;
   onNavigate: (p: Page) => void;
 }) {
+  const isDark = useContext(DarkModeCtx);
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
   const [menuOpen, setMenuOpen]     = useState(false);
   const isMobile = useIsMobile();
@@ -2224,9 +2242,7 @@ export default function App() {
         {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={navigateGeneral} /></div>}
         {page === "connect"  && <div className="absolute inset-0 overflow-y-auto"><ConnectPage onNavigate={navigateGeneral} /></div>}
         {page === "speakingInquiry" && (
-          <div className="absolute inset-0 overflow-y-auto">
-            <SpeakingInquiryPage onBack={() => setPage("connect")} />
-          </div>
+          <SpeakingInquiryContainer onBack={() => setPage("connect")} />
         )}
         {page === "speaking" && detailKey && (
           <div className="absolute inset-0 overflow-y-auto">
