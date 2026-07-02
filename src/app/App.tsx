@@ -28,6 +28,8 @@ const GOLD_BRIGHT = "#e3c85c";
 const INK         = "#111111";
 const DIM         = "#666660";
 const NAV_GRADIENT = "linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
+const NAV_GRADIENT_DARK = "linear-gradient(rgba(0,0,0,0.50), rgba(0,0,0,0.50)), linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
+const navGradient = (isDark: boolean) => isDark ? NAV_GRADIENT_DARK : NAV_GRADIENT;
 
 type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry";
 
@@ -1091,7 +1093,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
         style={{
           bottom: "5%", left: 80, right: 80,
           borderRadius: 0,
-          background: NAV_GRADIENT,
+          background: navGradient(isDark),
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}>
         {SECTIONS.map((s, i) => {
@@ -1140,7 +1142,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
         style={{
           bottom: "calc(5% + env(safe-area-inset-bottom))", left: 24,
           borderRadius: 0,
-          background: NAV_GRADIENT,
+          background: navGradient(isDark),
           backdropFilter: "blur(16px)",
           WebkitBackdropFilter: "blur(16px)",
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
@@ -1363,11 +1365,12 @@ function DetailBottomBar({
   onBack: () => void;
   cta?: { label: string; onClick: () => void; disabled?: boolean };
 }) {
+  const isDark = useContext(DarkModeCtx);
   return (
     <div className="flex items-stretch gap-2">
       <motion.button onClick={onBack}
         className="flex-1 min-w-0 flex items-center gap-3 px-5 cursor-pointer"
-        style={{ background: NAV_GRADIENT }}
+        style={{ background: navGradient(isDark) }}
         initial={{ height: 56 }} animate={{ height: 36 }} transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
         <HamburgerIcon />
         <span className="font-['Avenir',sans-serif] font-light text-sm text-white whitespace-nowrap overflow-hidden text-ellipsis">
@@ -1428,7 +1431,7 @@ function PageBottomNav({
     <>
       {/* Desktop — same fluid flex-grow expand/collapse as the homepage nav */}
       <div className="hidden md:flex items-stretch h-16 overflow-hidden"
-        style={{ background: NAV_GRADIENT }}>
+        style={{ background: navGradient(isDark) }}>
         <button
           className="flex items-center gap-3 overflow-hidden"
           onMouseEnter={() => setHoveredNav("about")}
@@ -1464,7 +1467,7 @@ function PageBottomNav({
 
       {/* Mobile */}
       <div className="md:hidden flex items-center h-16 px-5"
-        style={{ background: NAV_GRADIENT }}>
+        style={{ background: navGradient(isDark) }}>
         <button onClick={() => setMenuOpen(true)} className="flex items-center gap-3" aria-label="Open navigation">
           <HamburgerIcon />
           <span className="font-['Avenir',sans-serif] font-medium text-base text-white">Tiffany C.</span>
