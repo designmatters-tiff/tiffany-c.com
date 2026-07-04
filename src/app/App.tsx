@@ -482,17 +482,17 @@ function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () =>
 // ─── Section data ─────────────────────────────────────────────────
 
 const SECTIONS = [
-  { key: "about",   label: "Tiffany C.",      page: null,  accent: GOLD, items: [] },
+  { key: "about",   label: "Tiffany C.",      page: null,  accent: GOLD, labelColor: GOLD, items: [] },
   {
     key: "work",    label: "Work",             page: "work" as Page, embeds: true,
-    accent: "#8A6E2E",
+    accent: "#8A6E2E", labelColor: "#888880",
     tagline: "Design Strategy & Leadership",
     context: "Fintech • eCommerce • Utility SaaS",
     items: ["AI + UX DesignOps", "Business Acumen", "Product & UX Methods", "People & Process"],
   },
   {
     key: "awards",  label: "Award & Speaking", page: "awards" as Page, embeds: true,
-    accent: "#5070A0",
+    accent: "#5070A0", labelColor: "#5070A0",
     tagline: "Recognition & Voices",
     context: "Finalist · Speaker · Panelist",
     items: [
@@ -504,7 +504,7 @@ const SECTIONS = [
   },
   {
     key: "coaching", label: "Coaching",        page: "coaching" as Page,
-    accent: "#5070A0",
+    accent: "#5070A0", labelColor: "#9B5A88",
     tagline: "UX Career Coaching",
     context: "Open to collaboration",
     items: [
@@ -515,7 +515,7 @@ const SECTIONS = [
   },
   {
     key: "connect", label: "Connect",          page: "connect" as Page,
-    accent: "#9B5A88",
+    accent: "#9B5A88", labelColor: "#9B5A88",
     tagline: "Let's Connect",
     context: "Open to collaboration",
     items: ["Speaking Inquiry", "linkedin", "instagram", "designmatters.tiff@gmail.com"],
@@ -1019,7 +1019,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 style={{ paddingBottom: "calc(64px + 8vh + 32px)" }}>
 
                 <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-4 md:mb-6"
-                  style={{ color: section.accent }}
+                  style={{ color: (section as any).labelColor ?? section.accent }}
                   initial={false}
                   animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }}
                   transition={{ duration: 0.5 }}>
@@ -1372,14 +1372,22 @@ function ExpertiseCard({ card, onOpen }: { card: typeof EXPERTISE_CARDS[0]; onOp
 }
 
 // ─── Work case study detail page ───────────────────────────────────
-function WorkDetailPage({ cardKey, onBack, onNavigate }: { cardKey: string; onBack: () => void; onNavigate: (p: Page) => void }) {
+function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false }: { cardKey: string; onBack: () => void; onNavigate: (p: Page) => void; headerScrolled?: boolean }) {
   const isDark = useContext(DarkModeCtx);
+  const isMobile = useIsMobile();
   const card = EXPERTISE_CARDS.find(c => c.key === cardKey);
   if (!card) return null;
   const { Illustration } = card;
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
-      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10">
+      <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
+        style={{
+          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
+          backdropFilter: headerScrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
+          borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
+          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
+        }}>
         <button onClick={onBack}
           className="flex items-center gap-1.5 font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4 cursor-pointer"
           style={{ color: GOLD }}>
@@ -1428,10 +1436,6 @@ function WorkDetailPage({ cardKey, onBack, onNavigate }: { cardKey: string; onBa
 
         {/* Bottom spacer so content clears the floating detail nav */}
         <div style={{ height: 96 }} />
-      </div>
-
-      <div className="fixed inset-x-3 md:inset-x-20 z-30" style={{ bottom: "calc(3% + env(safe-area-inset-bottom))" }}>
-        <DetailBottomBar parentLabel="Work" itemLabel={card.title} onBack={onBack} />
       </div>
     </div>
   );
@@ -1482,7 +1486,7 @@ function DetailBottomBar({
 // Wraps PageBottomNav with a full-width fade scrim behind it, so content
 // scrolling up from underneath fades into the page background before it
 // would otherwise be visible peeking past the nav's side margins/edges.
-function StickyPageNav({ activePage, onNavigate }: { activePage: Page; onNavigate: (p: Page) => void }) {
+function StickyPageNav({ activePage, detailLabel, onNavigate }: { activePage: Page; detailLabel?: string; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
   const pageBg = isDark ? "#181410" : "#f8f7f5";
   return (
@@ -1563,7 +1567,7 @@ function PageBottomNav({
         </button>
         <div className="flex-1" />
         <span className="font-['Avenir',sans-serif] font-light text-sm text-white/75">
-          {NAV_ITEMS.find(n => n.page === activePage)?.label ?? ""}
+          {detailLabel ? `Work / ${detailLabel}` : (NAV_ITEMS.find(n => n.page === activePage)?.label ?? "")}
         </span>
       </div>
 
@@ -1607,7 +1611,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           paddingBottom: compact ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
-        <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}
+        <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: "#888880" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Fintech · eCommerce · SaaS
         </motion.p>
@@ -1624,7 +1628,6 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
         <div style={{ height: 96 }} />
       </div>
 
-      {!embedded && <StickyPageNav activePage="work" onNavigate={onNavigate} />}
     </div>
   );
 }
@@ -1657,7 +1660,7 @@ function ContactListPage({
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       {/* Page heading */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
-        <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}
+        <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: accent }}
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {eyebrow}
         </motion.p>
@@ -1690,7 +1693,7 @@ function CoachingPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       eyebrow="Open to collaboration"
       title="UX Career Coaching"
       items={["1:1 Calls", "Priority DM", "Package (1-1 Coaching Service)"]}
-      accent="#5070A0"
+      accent="#9B5A88"
       activePage="coaching"
       onNavigate={onNavigate}
     />
@@ -1978,7 +1981,7 @@ function AwardsSpeakingPage({
           paddingBottom: compact ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
-        <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: GOLD }}
+        <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: "#5070A0" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Recognition &amp; voice in community
         </motion.p>
@@ -2463,7 +2466,13 @@ export default function App() {
     setPage(target);
   };
 
+  const [detailHeaderScrolled, setDetailHeaderScrolled] = useState(false);
+  const detailLabel = page === "workDetail" && detailKey ? EXPERTISE_CARDS.find(c => c.key === detailKey)?.title : undefined;
   const motionKey = page === "speaking" ? `speaking:${detailKey}` : page === "workDetail" ? `workDetail:${detailKey}` : page;
+
+  useEffect(() => {
+    if (page !== "workDetail") setDetailHeaderScrolled(false);
+  }, [page]);
 
   const toggleDark = useCallback(() => setIsDark(d => !d), []);
 
@@ -2501,14 +2510,17 @@ export default function App() {
           </div>
         )}
         {page === "workDetail" && detailKey && (
-          <div className="absolute inset-0 overflow-y-auto">
-            <WorkDetailPage cardKey={detailKey} onBack={navigateBackFromWork} onNavigate={navigateGeneral} />
+          <div className="absolute inset-0 overflow-y-auto" onScroll={(e) => setDetailHeaderScrolled((e.target as HTMLElement).scrollTop > 24)}>
+            <WorkDetailPage cardKey={detailKey} onBack={navigateBackFromWork} onNavigate={navigateGeneral} headerScrolled={detailHeaderScrolled} />
           </div>
         )}
         {page === "businessCase" && (
           <BusinessCasePage onBack={() => setPage('work')} onNavigate={navigateGeneral} />
         )}
       </motion.div>
+      {(page === "work" || page === "workDetail") && (
+        <StickyPageNav activePage="work" detailLabel={detailLabel} onNavigate={navigateGeneral} />
+      )}
     </div>
     </AccordionCtx.Provider>
     </DarkModeToggleCtx.Provider>
