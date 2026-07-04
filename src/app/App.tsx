@@ -4,8 +4,8 @@ import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft }
 
 import awardsWomenDigital from "@/imports/AwardsSpeaking/WID-tiff2025.png";
 import awardsFinalistCard from "@/imports/AwardsSpeaking/WID-2.png";
-import awardsFuseCon from "@/imports/AwardsSpeaking/Fusecon2025.png";
 import awardsFuseConPanelist from "@/imports/AwardsSpeaking/FuseCon_panelist.jpg";
+import awardsFuseCon from "@/imports/AwardsSpeaking/Fusecon2025.png";
 import awardsTaipei from "@/imports/AwardsSpeaking/LTUX Taipei.png";
 import awardsRotterdam from "@/imports/AwardsSpeaking/ux-rotterdam.jpeg";
 import awardsFuseCon2024 from "@/imports/AwardsSpeaking/FUSECON 2024/Fusecon2024.jpeg";
@@ -14,6 +14,9 @@ import awardsFoF2024Mobile from "@/imports/AwardsSpeaking/FoF 2024/mobile_fof202
 import awardsDesignKL from "@/imports/AwardsSpeaking/Design Leadership KL/DLKL2023.jpeg";
 import awardsDesignKLTiff from "@/imports/AwardsSpeaking/Design Leadership KL/DLKL2023-tiff.jpeg";
 import profilePhoto from "@/imports/Profile/tiff-headshot.jpg";
+import foggModel from "@/work/business/eCommerce/Fogg behavioural model.avif";
+import graphResult from "@/work/business/eCommerce/graph-result.avif";
+import interventionImg from "@/work/business/eCommerce/the intervention.avif";
 
 // ─── Logo paths ───────────────────────────────────────────────────
 const T_PATH =
@@ -32,7 +35,7 @@ const NAV_GRADIENT = "linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
 const NAV_GRADIENT_DARK = "linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
 const navGradient = (isDark: boolean) => isDark ? NAV_GRADIENT_DARK : NAV_GRADIENT;
 
-type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry";
+type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase";
 
 // ─── Dark mode context ────────────────────────────────────────────
 const DarkModeCtx = createContext(false);
@@ -1304,7 +1307,7 @@ const EXPERTISE_CARDS = [
   {
     key: "business", title: "Business Acumen", accent: "#8A6E2E", Illustration: IllustrationBusiness,
     description: "Aligning product design with measurable revenue growth and user outcomes.",
-    bullets: ["Roadmap co-ownership, AB testing & experimentation", "Cross-unit prioritisation frameworks resolving four business units", "Sep 2024: first profitable month in TNG's seven-year history"],
+    bullets: ["eCommerce: Behavioural UX Design (passcode required)"],
   },
   {
     key: "ux", title: "Product & UX Strategies", accent: "#5070A0", Illustration: IllustrationUX,
@@ -1369,7 +1372,7 @@ function ExpertiseCard({ card, onOpen }: { card: typeof EXPERTISE_CARDS[0]; onOp
 }
 
 // ─── Work case study detail page ───────────────────────────────────
-function WorkDetailPage({ cardKey, onBack }: { cardKey: string; onBack: () => void }) {
+function WorkDetailPage({ cardKey, onBack, onNavigate }: { cardKey: string; onBack: () => void; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
   const card = EXPERTISE_CARDS.find(c => c.key === cardKey);
   if (!card) return null;
@@ -1407,11 +1410,21 @@ function WorkDetailPage({ cardKey, onBack }: { cardKey: string; onBack: () => vo
               </a>
             </li>
           ))}
-          {card.bullets.map(b => (
-            <li key={b} className="font-['Avenir',sans-serif] font-light text-sm flex items-start gap-2" style={{ color: card.accent }}>
-              <span className="mt-0.5 flex-shrink-0">—</span><span>{b}</span>
-            </li>
-          ))}
+          {card.bullets.map(b => {
+            const isSpecial = b === "eCommerce: Behavioural UX Design (passcode required)";
+            return (
+              <li key={b} className="font-['Avenir',sans-serif] font-light text-sm flex items-start gap-2" style={{ color: card.accent }}>
+                <span className="mt-0.5 flex-shrink-0">—</span>
+                {isSpecial ? (
+                  <button onClick={() => onNavigate('businessCase')} className="link-underline" style={{ background: 'none', border: 'none', padding: 0, color: card.accent, cursor: 'pointer' }}>
+                    {b}
+                  </button>
+                ) : (
+                  <span>{b}</span>
+                )}
+              </li>
+            );
+          })}
         </ul>
 
         {/* Bottom spacer so content clears the floating detail nav */}
@@ -2248,6 +2261,126 @@ function SpeakingDetailPage({
   );
 }
 
+// (BusinessCasePage implemented further below)
+
+// Passcode-protected business case page
+// Migrate the Wix project content into a local React component so it
+// can be rendered inline after the passcode is entered.
+function BusinessCaseContent() {
+  const isDark = useContext(DarkModeCtx);
+  const fg = GOLD;
+  const sub = isDark ? "rgba(255,255,255,0.75)" : DIM;
+  return (
+    <div className="relative w-full" style={{ minHeight: '100dvh', background: 'transparent' }}>
+      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10">
+        <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: '2.4rem', color: fg }}>eCommerce: Behavioural UX Design</h1>
+        <div style={{ marginTop: 8 }}>
+          <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub }}>Goal — Increase Checkout Rate</p>
+          <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub, marginTop: 6 }}>Year: Designed & tested in 2025 · Client: Cotton On Group</p>
+          <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub, marginTop: 6 }}>My Role: Product Design Lead · Team: 1</p>
+          <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub, marginTop: 6 }}>Scope: Design Workshop Facilitation, research analysis, Business Website</p>
+        </div>
+
+        <section style={{ marginTop: 28 }}>
+          <h2 className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1.25rem' }}>The Solution</h2>
+          <p className="font-['Avenir',sans-serif] font-light" style={{ color: isDark ? 'rgba(255,255,255,0.85)' : INK, marginTop: 8 }}>
+            From analytics and session data we identified that promo code interactions were the most-clicked element on the bag page; users
+            were leaving the site to search for codes which broke checkout intent. The intervention surfaced account/login and voucher selectors
+            to reduce off-site search and make available vouchers discoverable at the point of checkout.
+          </p>
+          <div style={{ marginTop: 18 }}>
+            <img src={foggModel} alt="Fogg behavioural model" style={{ width: '100%', maxWidth: 760, display: 'block', borderRadius: 8 }} />
+            <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub, marginTop: 8 }}>Image: Fogg behavioural model — rationale for intervention.</p>
+          </div>
+        </section>
+
+        <section style={{ marginTop: 20 }}>
+          <h3 className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1rem' }}>AB testing</h3>
+          <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub, marginTop: 8 }}>
+            Group A: legacy design (promo code hidden). Group B: surfaced login and voucher selectors. The new flow reduced users leaving the
+            funnel to search for promo codes and improved checkout conversions for users with vouchers.
+          </p>
+          <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
+            <img src={interventionImg} alt="The intervention" style={{ width: '100%', borderRadius: 8 }} />
+          </div>
+        </section>
+
+        <section style={{ marginTop: 20 }}>
+          <h4 className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1rem' }}>Results</h4>
+          <div style={{ marginTop: 8 }}>
+            <p className="font-['Avenir',sans-serif] font-medium" style={{ color: fg }}>Revenue +57% · Checkout rate 2× · Conversion rate +0.28%</p>
+            <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub, marginTop: 8 }}>Measured from checkout entry to purchase.</p>
+            <div style={{ marginTop: 12 }}>
+              <img src={graphResult} alt="graph result" style={{ width: '100%', maxWidth: 720, borderRadius: 8 }} />
+            </div>
+          </div>
+        </section>
+
+        <div style={{ height: 96 }} />
+      </div>
+    </div>
+  );
+}
+
+function BusinessCasePage({ onBack }: { onBack: () => void }) {
+  const isDark = useContext(DarkModeCtx);
+  const [value, setValue] = useState("");
+  const [error, setError] = useState("");
+  const [unlocked, setUnlocked] = useState(false);
+  const PASSCODE = "tifffolio";
+
+  const submit = () => {
+    if (value.trim() === PASSCODE) {
+      setError("");
+      setUnlocked(true);
+    } else {
+      setError("Incorrect passcode");
+    }
+  };
+
+  if (unlocked) return <BusinessCaseContent />;
+
+  return (
+    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-6" style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+        <button onClick={onBack}
+          className="flex items-center gap-2 font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4 cursor-pointer"
+          style={{ color: GOLD }}>
+          <ChevronLeft size={12} strokeWidth={1.5} /> BUSINESS ACUMEN
+        </button>
+        <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: '2.25rem', lineHeight: 1.05, color: GOLD, margin: 0 }}>eCommerce: Behavioural UX Design</h1>
+      </div>
+
+      <div className="px-6 md:px-20 pt-8" style={{ maxWidth: 900 }}>
+        <div style={{ marginTop: 12, padding: '8px 0' }}>
+          <p className="font-['Avenir',sans-serif] font-light" style={{ color: isDark ? 'rgba(255,255,255,0.85)' : INK }}>This page requires passcode</p>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24 }}>
+            <label className="font-['Avenir',sans-serif] font-light text-xs uppercase" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : DIM, minWidth: 80 }}>PASSCODE *</label>
+            <div style={{ flex: 1, position: 'relative' }}>
+              <input
+                aria-label="Passcode"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && submit()}
+                placeholder=""
+                className="w-full"
+                style={{ background: 'transparent', border: 'none', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.12)'}`, padding: '8px 6px', color: isDark ? 'white' : INK, fontSize: '1rem', outline: 'none' }}
+              />
+            </div>
+            <div style={{ width: 96, textAlign: 'right' }}>
+              <button onClick={submit} className="font-['Avenir',sans-serif] font-medium" style={{ background: isDark ? 'transparent' : '#fff', border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}`, padding: '12px 10px', cursor: 'pointer', borderRadius: 2 }}>Submit</button>
+            </div>
+          </div>
+
+          {error && <p className="font-['Avenir',sans-serif] font-light" style={{ color: '#E05C5C', marginTop: 12 }}>{error}</p>}
+          <div style={{ height: 120 }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Root ─────────────────────────────────────────────────────────
 
 export default function App() {
@@ -2342,7 +2475,12 @@ export default function App() {
         )}
         {page === "workDetail" && detailKey && (
           <div className="absolute inset-0 overflow-y-auto">
-            <WorkDetailPage cardKey={detailKey} onBack={navigateBackFromWork} />
+            <WorkDetailPage cardKey={detailKey} onBack={navigateBackFromWork} onNavigate={navigateGeneral} />
+          </div>
+        )}
+        {page === "businessCase" && (
+          <div className="absolute inset-0 overflow-y-auto">
+            <BusinessCasePage onBack={() => setPage('work')} />
           </div>
         )}
       </motion.div>
