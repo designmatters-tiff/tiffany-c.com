@@ -2374,16 +2374,20 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
           <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560 }}>
             <p className="font-['Avenir',sans-serif] font-light" style={{ color: isDark ? 'rgba(255,255,255,0.85)' : INK }}>This page requires passcode</p>
 
-            <div style={{ marginTop: 32 }}>
-              <label className="font-['Avenir',sans-serif] font-light text-xs uppercase tracking-widest" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : DIM }}>PASSCODE *</label>
+            <div className="flex flex-col gap-1" style={{ marginTop: 32 }}>
+              <label
+                className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.18em]"
+                style={{ color: isDark ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.65)" }}>
+                PASSCODE *
+              </label>
               <input
                 aria-label="Passcode"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && submit()}
                 placeholder=""
-                className="w-full mt-2 block"
-                style={{ background: 'transparent', border: 'none', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.15)'}`, padding: '8px 0', color: isDark ? 'white' : INK, fontSize: '1rem', outline: 'none' }}
+                className="w-full"
+                style={{ background: 'transparent', border: 'none', borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.18)"}`, outline: 'none', padding: '8px 0', fontSize: '0.9rem', fontFamily: "'Avenir', sans-serif", fontWeight: 300, color: isDark ? 'white' : INK, transition: 'border-color 0.2s' }}
               />
             </div>
 
