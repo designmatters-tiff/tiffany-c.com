@@ -1363,44 +1363,20 @@ function WorkDetailPage({ cardKey, onBack }: { cardKey: string; onBack: () => vo
           {card.description}
         </p>
         <ul className="mt-6 space-y-2.5">
+          {"resources" in card && (card as any).resources?.filter((r: any) => r.url).map((r: any) => (
+            <li key={r.label} className="font-['Avenir',sans-serif] font-light text-sm flex items-start gap-2" style={{ color: card.accent }}>
+              <span className="mt-0.5 flex-shrink-0">—</span>
+              <a href={r.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1" style={{ color: card.accent }}>
+                {r.label}<ExternalLink size={11} strokeWidth={1.5} style={{ flexShrink: 0, opacity: 0.7 }} />
+              </a>
+            </li>
+          ))}
           {card.bullets.map(b => (
             <li key={b} className="font-['Avenir',sans-serif] font-light text-sm flex items-start gap-2" style={{ color: card.accent }}>
               <span className="mt-0.5 flex-shrink-0">—</span><span>{b}</span>
             </li>
           ))}
         </ul>
-
-        {"resources" in card && (card as any).resources?.length > 0 && (
-          <div className="mt-10">
-            <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-4" style={{ color: GOLD }}>
-              Resources
-            </p>
-            <div className="space-y-4">
-              {(card as any).resources.map((r: any) => (
-                <div key={r.label} className="flex flex-col gap-1 pb-4" style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
-                  {r.url ? (
-                    <a href={r.url} target="_blank" rel="noopener noreferrer"
-                      className="font-['Avenir',sans-serif] font-medium text-sm flex items-center gap-1.5"
-                      style={{ color: card.accent }}>
-                      {r.label}
-                      <ExternalLink size={12} strokeWidth={1.5} style={{ flexShrink: 0 }} />
-                    </a>
-                  ) : (
-                    <span className="font-['Avenir',sans-serif] font-medium text-sm flex items-center gap-2" style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)" }}>
-                      {r.label}
-                      {r.comingSoon && <span className="text-[0.55rem] uppercase tracking-widest px-1.5 py-0.5 rounded" style={{ background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }}>Coming soon</span>}
-                    </span>
-                  )}
-                  {r.description && (
-                    <p className="font-['Avenir',sans-serif] font-light text-sm leading-relaxed" style={{ color: isDark ? "rgba(255,255,255,0.55)" : DIM }}>
-                      {r.description}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Bottom spacer so content clears the floating detail nav */}
         <div style={{ height: 96 }} />
