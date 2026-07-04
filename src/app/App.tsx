@@ -1800,11 +1800,11 @@ function SpeakingEventRow({
               // Two images side by side (stacked on mobile) — portrait shots
               // use object-contain so they fit the row height instead of
               // being cropped/zoomed into.
-              <div className="flex flex-row gap-0">
-                <div className="relative w-2/5 h-[280px] md:h-[420px] overflow-hidden flex-shrink-0">
+              <div className="flex flex-col md:flex-row gap-0">
+                <div className="relative w-full md:w-2/5 h-[260px] md:h-[420px] overflow-hidden flex-shrink-0">
                   <img src={ev.img} alt={`${ev.event} — ${ev.topic}`} className="absolute inset-0 w-full h-full object-cover" />
                 </div>
-                <div className="relative w-3/5 h-[280px] md:h-[420px] overflow-hidden">
+                <div className="relative w-full md:w-3/5 h-[260px] md:h-[420px] overflow-hidden">
                   <img src={ev.img2} alt={`${ev.event} panel discussion`} className="absolute inset-0 w-full h-full object-cover" />
                 </div>
               </div>
@@ -2348,29 +2348,30 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
 
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
-      <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-6" style={{
-        background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
-        backdropFilter: headerScrolled ? "blur(8px)" : "none",
-        WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
-        borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
-        transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
-      }}>
-        <button onClick={onBack}
-          className="flex items-center gap-2 font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4 cursor-pointer"
-          style={{ color: GOLD }}>
-          <ChevronLeft size={12} strokeWidth={1.5} /> BUSINESS ACUMEN
-        </button>
-        <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: '2.25rem', lineHeight: 1.05, color: GOLD, margin: 0 }}>eCommerce: Behavioural UX Design</h1>
-      </div>
+      <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
+          backdropFilter: headerScrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
+          borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
+          paddingBottom: headerScrolled ? 16 : 24,
+          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
+        }}>
+          <button onClick={onBack}
+            className="flex items-center gap-2 font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4 cursor-pointer"
+            style={{ color: GOLD }}>
+            <ChevronLeft size={12} strokeWidth={1.5} /> BUSINESS ACUMEN
+          </button>
+          <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: headerScrolled ? '1.5rem' : '2.25rem', lineHeight: 1.05, color: GOLD, margin: 0, transition: 'font-size 0.3s ease' }}>eCommerce: Behavioural UX Design</h1>
+        </div>
 
-      <div ref={scrollRef} className="absolute inset-x-0 top-[calc(4.75rem)] bottom-0 overflow-y-auto" style={{ paddingTop: 24 }}>
         {unlocked ? (
           <>
             <BusinessCaseContent />
-            <StickyPageNav activePage="work" onNavigate={onNavigate} />
+            <div style={{ height: 96 }} />
           </>
         ) : (
-          <div className="px-6 md:px-20" style={{ maxWidth: 900 }}>
+          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 900 }}>
             <div style={{ marginTop: 12, padding: '8px 0' }}>
               <p className="font-['Avenir',sans-serif] font-light" style={{ color: isDark ? 'rgba(255,255,255,0.85)' : INK }}>This page requires passcode</p>
 
