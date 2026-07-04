@@ -27,8 +27,9 @@ const GOLD        = "#B2933B";
 const GOLD_BRIGHT = "#e3c85c";
 const INK         = "#111111";
 const DIM         = "#666660";
+// Nav gradient (opaque) — nav itself stays fully opaque per Figma.
 const NAV_GRADIENT = "linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
-const NAV_GRADIENT_DARK = "linear-gradient(rgba(0,0,0,0.50), rgba(0,0,0,0.50)), linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
+const NAV_GRADIENT_DARK = "linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
 const navGradient = (isDark: boolean) => isDark ? NAV_GRADIENT_DARK : NAV_GRADIENT;
 
 type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry";
@@ -1106,13 +1107,32 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
       </div>
 
       {/* ── Desktop nav — floating above bottom edge, aligned to content width.
-          Fixed (not absolute) so it stays pinned to the viewport regardless
-          of any section's internal vertical scroll. ── */}
+          We keep the nav itself fully opaque (matches Figma). A separate
+          fixed, pointer-events-none backdrop element sits behind the nav
+          and applies the `backdrop-filter: blur()` to the area behind it
+          (nav height + 24px top and bottom padding). */}
+      <div className="fixed z-20 hidden md:block pointer-events-none"
+        style={{
+          left: 80,
+          right: 80,
+          // Span from slightly above the nav (24px) down to the viewport bottom
+          top: "calc(100% - (5% + 64px + 24px))",
+          bottom: 0,
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          background: isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)",
+          maskImage: "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)",
+          WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)",
+        }} />
+
       <nav className="fixed z-30 hidden md:flex items-stretch h-16 overflow-hidden"
         style={{
           bottom: "5%", left: 80, right: 80,
           borderRadius: 0,
           background: navGradient(isDark),
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
+          backgroundClip: "padding-box",
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}>
         {SECTIONS.map((s, i) => {
@@ -1157,13 +1177,29 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           to a left-aligned, content-width pill once the active embedded
           Work/Award & Speaking section is expanded past its "View more"
           cap, to free up room for the now-longer scrollable content. ── */}
+      {/* Mobile backdrop: aligns with the mobile nav and gives a 24px top/bottom
+          blur area behind the fully opaque mobile nav. */}
+      <div className="fixed z-20 md:hidden pointer-events-none"
+        style={{
+          left: 0,
+          right: 0,
+          // Span from slightly above the mobile nav (24px) down to the viewport bottom
+          top: "calc(100% - (5% + env(safe-area-inset-bottom) + 56px + 24px))",
+          bottom: 0,
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          background: isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)",
+          maskImage: "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)",
+          WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)",
+        }} />
+
       <motion.nav className="fixed z-30 md:hidden flex items-center px-5 overflow-hidden"
         style={{
           bottom: "calc(5% + env(safe-area-inset-bottom))", left: 24,
           borderRadius: 0,
           background: navGradient(isDark),
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}
         animate={{ width: navShrunk ? 168 : "calc(100% - 48px)", height: navShrunk ? 36 : 56 }}
@@ -1745,20 +1781,20 @@ function SpeakingEventRow({
       </button>
 
       {expandable && (
-        <div className="overflow-hidden" style={{ maxHeight: open ? 1400 : 0, opacity: open ? 1 : 0, transition: "max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease" }}>
-          <div className="px-6 md:px-20 pb-32 md:pb-8">
+          <div className="overflow-hidden" style={{ maxHeight: open ? 1400 : 0, opacity: open ? 1 : 0, transition: "max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease" }}>
+          <div className="px-6 md:px-20 pb-8 md:pb-8">
             {ev.img && ev.img2 ? (
               // Two images side by side (stacked on mobile) — portrait shots
               // use object-contain so they fit the row height instead of
               // being cropped/zoomed into.
               <div className="flex flex-col md:flex-row gap-3">
-                <div className="relative w-full md:w-2/5 h-[280px] md:h-[420px] overflow-hidden flex-shrink-0" style={{ background: ev.dark ? "#030303" : "#f0ede8" }}>
+                <div className="relative w-full md:w-2/5 h-[280px] md:h-[420px] overflow-hidden flex-shrink-0" style={{ background: "transparent" }}>
                   <img src={ev.img} alt={`${ev.event} — ${ev.topic}`} className="absolute inset-0 w-full h-full object-contain" />
-                  <div className="md:hidden absolute inset-x-0 bottom-0 h-24 pointer-events-none" style={{ background: isDark ? "linear-gradient(to bottom, transparent, rgba(40,40,40,0.85))" : "linear-gradient(to bottom, transparent, rgba(248,247,245,0.85))" }} />
+                  <div className="md:hidden absolute inset-x-0 bottom-0 h-24 pointer-events-none" style={{ background: "transparent" }} />
                 </div>
-                <div className="relative w-full md:w-3/5 h-[220px] md:h-[420px] overflow-hidden" style={{ background: ev.dark ? "#030303" : "#f0ede8" }}>
+                <div className="relative w-full md:w-3/5 h-[220px] md:h-[420px] overflow-hidden" style={{ background: "transparent" }}>
                   <img src={ev.img2} alt={`${ev.event} panel discussion`} className="absolute inset-0 w-full h-full object-contain" />
-                  <div className="md:hidden absolute inset-x-0 bottom-0 h-24 pointer-events-none" style={{ background: isDark ? "linear-gradient(to bottom, transparent, rgba(40,40,40,0.85))" : "linear-gradient(to bottom, transparent, rgba(248,247,245,0.85))" }} />
+                  <div className="md:hidden absolute inset-x-0 bottom-0 h-24 pointer-events-none" style={{ background: "transparent" }} />
                 </div>
               </div>
             ) : ev.img && (
@@ -1766,11 +1802,11 @@ function SpeakingEventRow({
               // natural aspect ratio (object-contain, auto width) instead
               // of being cropped to fill — mobile keeps the original
               // clamp()-based crop/cover treatment.
-              <div className="relative w-full overflow-hidden h-[clamp(220px,40vw,480px)] md:h-[70vh] md:flex md:items-center md:justify-center" style={{ background: ev.dark ? "#030303" : "#f8f7f5" }}>
+              <div className="relative w-full overflow-hidden h-[clamp(220px,40vw,480px)] md:h-[70vh] md:flex md:items-center md:justify-center" style={{ background: "transparent" }}>
                 <img src={ev.img} alt={`${ev.event} — ${ev.topic}`}
                   className={`absolute inset-0 w-full h-full ${ev.portrait ? "object-contain" : "object-cover"} md:static md:inset-auto md:w-auto md:h-full md:max-w-full md:object-contain`}
                   style={ev.portrait ? undefined : { objectPosition: ev.dark ? "center 30%" : "center" }} />
-                <div className="md:hidden absolute inset-x-0 bottom-0 h-24 pointer-events-none" style={{ background: isDark ? "linear-gradient(to bottom, transparent, rgba(40,40,40,0.85))" : "linear-gradient(to bottom, transparent, rgba(248,247,245,0.85))" }} />
+                <div className="md:hidden absolute inset-x-0 bottom-0 h-24 pointer-events-none" style={{ background: "transparent" }} />
               </div>
             )}
             {ev.youtubeId && (
@@ -1843,10 +1879,10 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
 
       <div className="overflow-hidden" style={{ maxHeight: open ? 820 : 0, opacity: open ? 1 : 0, transition: "max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease" }}>
         <div className="px-6 md:px-20 pb-8">
-          <div className="relative w-full" style={{ height: "clamp(320px, 55vw, 620px)" }}>
+            <div className="relative w-full" style={{ height: "clamp(320px, 55vw, 620px)" }}>
             {/* Base layer: portrait photo, fit to height — not cropped/zoomed */}
             <img src={awardsWomenDigital} alt="Tiffany Chew at Women in Digital Awards 2025"
-              className="absolute inset-0 w-full h-full object-contain" style={{ background: "#0a0a0a", zIndex: 1 }} />
+              className="absolute inset-0 w-full h-full object-contain" style={{ background: "transparent", zIndex: 1 }} />
             {/* Overlay layer: finalist-list card, floated on top per Figma layout */}
             <div className="absolute left-1/2"
               style={{
