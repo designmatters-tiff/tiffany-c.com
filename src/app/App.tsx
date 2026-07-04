@@ -1800,14 +1800,12 @@ function SpeakingEventRow({
               // Two images side by side (stacked on mobile) — portrait shots
               // use object-contain so they fit the row height instead of
               // being cropped/zoomed into.
-              <div className="flex flex-col md:flex-row gap-3">
-                <div className="relative w-full md:w-2/5 h-[280px] md:h-[420px] overflow-hidden flex-shrink-0" style={{ background: "transparent" }}>
+              <div className="flex flex-row gap-0">
+                <div className="relative w-2/5 h-[280px] md:h-[420px] overflow-hidden flex-shrink-0">
                   <img src={ev.img} alt={`${ev.event} — ${ev.topic}`} className="absolute inset-0 w-full h-full object-contain" />
-                  <div className="md:hidden absolute inset-x-0 bottom-0 h-24 pointer-events-none" style={{ background: "transparent" }} />
                 </div>
-                <div className="relative w-full md:w-3/5 h-[220px] md:h-[420px] overflow-hidden" style={{ background: "transparent" }}>
+                <div className="relative w-3/5 h-[280px] md:h-[420px] overflow-hidden">
                   <img src={ev.img2} alt={`${ev.event} panel discussion`} className="absolute inset-0 w-full h-full object-contain" />
-                  <div className="md:hidden absolute inset-x-0 bottom-0 h-24 pointer-events-none" style={{ background: "transparent" }} />
                 </div>
               </div>
             ) : ev.img && (
@@ -2327,7 +2325,17 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [unlocked, setUnlocked] = useState(false);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
   const PASSCODE = "tifffolio";
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
 
   const submit = () => {
     if (value.trim() === PASSCODE) {
@@ -2340,7 +2348,13 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
 
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
-      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-6" style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+      <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-6" style={{
+        background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
+        backdropFilter: headerScrolled ? "blur(8px)" : "none",
+        WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
+        borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
+        transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
+      }}>
         <button onClick={onBack}
           className="flex items-center gap-2 font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4 cursor-pointer"
           style={{ color: GOLD }}>
@@ -2349,39 +2363,41 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
         <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: '2.25rem', lineHeight: 1.05, color: GOLD, margin: 0 }}>eCommerce: Behavioural UX Design</h1>
       </div>
 
-      {unlocked ? (
-        <>
-          <BusinessCaseContent />
-          <StickyPageNav activePage="work" onNavigate={onNavigate} />
-        </>
-      ) : (
-        <div className="px-6 md:px-20 pt-8" style={{ maxWidth: 900 }}>
-          <div style={{ marginTop: 12, padding: '8px 0' }}>
-            <p className="font-['Avenir',sans-serif] font-light" style={{ color: isDark ? 'rgba(255,255,255,0.85)' : INK }}>This page requires passcode</p>
+      <div ref={scrollRef} className="absolute inset-x-0 top-[calc(4.75rem)] bottom-0 overflow-y-auto" style={{ paddingTop: 24 }}>
+        {unlocked ? (
+          <>
+            <BusinessCaseContent />
+            <StickyPageNav activePage="work" onNavigate={onNavigate} />
+          </>
+        ) : (
+          <div className="px-6 md:px-20" style={{ maxWidth: 900 }}>
+            <div style={{ marginTop: 12, padding: '8px 0' }}>
+              <p className="font-['Avenir',sans-serif] font-light" style={{ color: isDark ? 'rgba(255,255,255,0.85)' : INK }}>This page requires passcode</p>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24 }}>
-              <label className="font-['Avenir',sans-serif] font-light text-xs uppercase" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : DIM, minWidth: 80 }}>PASSCODE *</label>
-              <div style={{ flex: 1, position: 'relative' }}>
-                <input
-                  aria-label="Passcode"
-                  value={value}
-                  onChange={(e) => setValue(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && submit()}
-                  placeholder=""
-                  className="w-full"
-                  style={{ background: 'transparent', border: 'none', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.12)'}`, padding: '8px 6px', color: isDark ? 'white' : INK, fontSize: '1rem', outline: 'none' }}
-                />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24 }}>
+                <label className="font-['Avenir',sans-serif] font-light text-xs uppercase" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : DIM, minWidth: 80 }}>PASSCODE *</label>
+                <div style={{ flex: 1, position: 'relative' }}>
+                  <input
+                    aria-label="Passcode"
+                    value={value}
+                    onChange={(e) => setValue(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && submit()}
+                    placeholder=""
+                    className="w-full"
+                    style={{ background: 'transparent', border: 'none', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.12)'}`, padding: '8px 6px', color: isDark ? 'white' : INK, fontSize: '1rem', outline: 'none' }}
+                  />
+                </div>
+                <div style={{ width: 96, textAlign: 'right' }}>
+                  <button onClick={submit} className="font-['Avenir',sans-serif] font-medium" style={{ background: isDark ? 'transparent' : '#fff', border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}`, padding: '12px 10px', cursor: 'pointer', borderRadius: 2 }}>Submit</button>
+                </div>
               </div>
-              <div style={{ width: 96, textAlign: 'right' }}>
-                <button onClick={submit} className="font-['Avenir',sans-serif] font-medium" style={{ background: isDark ? 'transparent' : '#fff', border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}`, padding: '12px 10px', cursor: 'pointer', borderRadius: 2 }}>Submit</button>
-              </div>
+
+              {error && <p className="font-['Avenir',sans-serif] font-light" style={{ color: '#E05C5C', marginTop: 12 }}>{error}</p>}
+              <div style={{ height: 120 }} />
             </div>
-
-            {error && <p className="font-['Avenir',sans-serif] font-light" style={{ color: '#E05C5C', marginTop: 12 }}>{error}</p>}
-            <div style={{ height: 120 }} />
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
@@ -2484,9 +2500,7 @@ export default function App() {
           </div>
         )}
         {page === "businessCase" && (
-          <div className="absolute inset-0 overflow-y-auto">
-            <BusinessCasePage onBack={() => setPage('work')} onNavigate={navigateGeneral} />
-          </div>
+          <BusinessCasePage onBack={() => setPage('work')} onNavigate={navigateGeneral} />
         )}
       </motion.div>
     </div>
