@@ -1413,14 +1413,13 @@ function WorkDetailPage({ cardKey, onBack, onNavigate }: { cardKey: string; onBa
           {card.bullets.map(b => {
             const isSpecial = b === "eCommerce: Behavioural UX Design (passcode required)";
             return (
-              <li key={b} className="font-['Avenir',sans-serif] font-light text-sm flex items-start gap-2" style={{ color: card.accent }}>
-                <span className="mt-0.5 flex-shrink-0">—</span>
+              <li key={b} className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: card.accent }}>
                 {isSpecial ? (
-                  <button onClick={() => onNavigate('businessCase')} className="link-underline" style={{ background: 'none', border: 'none', padding: 0, color: card.accent, cursor: 'pointer' }}>
-                    {b}
+                  <button onClick={() => onNavigate('businessCase')} className="link-underline" style={{ background: 'none', border: 'none', padding: 0, color: card.accent, cursor: 'pointer', textAlign: 'left', display: 'block', width: '100%' }}>
+                    — {b}
                   </button>
                 ) : (
-                  <span>{b}</span>
+                  <span className="flex items-start gap-2"><span className="mt-0.5 flex-shrink-0">—</span><span>{b}</span></span>
                 )}
               </li>
             );
