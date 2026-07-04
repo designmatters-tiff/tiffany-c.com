@@ -1802,10 +1802,10 @@ function SpeakingEventRow({
               // being cropped/zoomed into.
               <div className="flex flex-row gap-0">
                 <div className="relative w-2/5 h-[280px] md:h-[420px] overflow-hidden flex-shrink-0">
-                  <img src={ev.img} alt={`${ev.event} — ${ev.topic}`} className="absolute inset-0 w-full h-full object-contain" />
+                  <img src={ev.img} alt={`${ev.event} — ${ev.topic}`} className="absolute inset-0 w-full h-full object-cover" />
                 </div>
                 <div className="relative w-3/5 h-[280px] md:h-[420px] overflow-hidden">
-                  <img src={ev.img2} alt={`${ev.event} panel discussion`} className="absolute inset-0 w-full h-full object-contain" />
+                  <img src={ev.img2} alt={`${ev.event} panel discussion`} className="absolute inset-0 w-full h-full object-cover" />
                 </div>
               </div>
             ) : ev.img && (
