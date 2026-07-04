@@ -409,14 +409,16 @@ function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () =>
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? brd : "transparent"}`,
-          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
+          paddingBottom: headerScrolled ? 16 : undefined,
+          transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
         <button onClick={onBack}
           className="flex items-center gap-1.5 font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4 cursor-pointer"
           style={{ color: GOLD }}>
           <ChevronLeft size={12} strokeWidth={1.5} /> Connect
         </button>
-        <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]" style={{ lineHeight: 1.05, color: GOLD }}
+        <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]"
+          style={{ lineHeight: 1.05, color: GOLD, fontSize: headerScrolled ? "1.5rem" : undefined, transition: "font-size 0.35s ease" }}
           initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Speaking Inquiry
         </motion.h1>
@@ -1723,7 +1725,7 @@ function SpeakingEventRow({
 
       {expandable && (
         <div className="overflow-hidden" style={{ maxHeight: open ? 1400 : 0, opacity: open ? 1 : 0, transition: "max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease" }}>
-          <div className="px-6 md:px-20 pb-8">
+          <div className="px-6 md:px-20 pb-32 md:pb-8">
             {ev.img && ev.img2 ? (
               // Two images side by side (stacked on mobile) — portrait shots
               // use object-contain so they fit the row height instead of
@@ -1731,9 +1733,11 @@ function SpeakingEventRow({
               <div className="flex flex-col md:flex-row gap-3">
                 <div className="relative w-full md:w-2/5 h-[280px] md:h-[420px] overflow-hidden flex-shrink-0" style={{ background: ev.dark ? "#030303" : "#f0ede8" }}>
                   <img src={ev.img} alt={`${ev.event} — ${ev.topic}`} className="absolute inset-0 w-full h-full object-contain" />
+                  <div className="md:hidden absolute inset-x-0 bottom-0 h-24 pointer-events-none" style={{ background: isDark ? "linear-gradient(to bottom, transparent, rgba(40,40,40,0.85))" : "linear-gradient(to bottom, transparent, rgba(248,247,245,0.85))" }} />
                 </div>
                 <div className="relative w-full md:w-3/5 h-[220px] md:h-[420px] overflow-hidden" style={{ background: ev.dark ? "#030303" : "#f0ede8" }}>
                   <img src={ev.img2} alt={`${ev.event} panel discussion`} className="absolute inset-0 w-full h-full object-contain" />
+                  <div className="md:hidden absolute inset-x-0 bottom-0 h-24 pointer-events-none" style={{ background: isDark ? "linear-gradient(to bottom, transparent, rgba(40,40,40,0.85))" : "linear-gradient(to bottom, transparent, rgba(248,247,245,0.85))" }} />
                 </div>
               </div>
             ) : ev.img && (
@@ -1745,6 +1749,7 @@ function SpeakingEventRow({
                 <img src={ev.img} alt={`${ev.event} — ${ev.topic}`}
                   className={`absolute inset-0 w-full h-full ${ev.portrait ? "object-contain" : "object-cover"} md:static md:inset-auto md:w-auto md:h-full md:max-w-full md:object-contain`}
                   style={ev.portrait ? undefined : { objectPosition: ev.dark ? "center 30%" : "center" }} />
+                <div className="md:hidden absolute inset-x-0 bottom-0 h-24 pointer-events-none" style={{ background: isDark ? "linear-gradient(to bottom, transparent, rgba(40,40,40,0.85))" : "linear-gradient(to bottom, transparent, rgba(248,247,245,0.85))" }} />
               </div>
             )}
             {ev.youtubeId && (
