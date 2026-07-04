@@ -1495,7 +1495,7 @@ function StickyPageNav({ activePage, detailLabel, onNavigate }: { activePage: Pa
         style={{ height: 180, background: `linear-gradient(to bottom, ${pageBg}00 0%, ${pageBg} 65%)` }} />
       <div className="fixed inset-x-6 md:inset-x-20 z-30 overflow-hidden"
         style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
-        <PageBottomNav activePage={activePage} onNavigate={onNavigate} />
+        <PageBottomNav activePage={activePage} detailLabel={detailLabel} onNavigate={onNavigate} />
       </div>
     </>
   );
@@ -1503,9 +1503,11 @@ function StickyPageNav({ activePage, detailLabel, onNavigate }: { activePage: Pa
 
 function PageBottomNav({
   activePage,
+  detailLabel,
   onNavigate,
 }: {
   activePage: Page;
+  detailLabel?: string;
   onNavigate: (p: Page) => void;
 }) {
   const isDark = useContext(DarkModeCtx);
@@ -2273,8 +2275,7 @@ function BusinessCaseContent() {
   return (
     <div className="relative w-full" style={{ minHeight: '100dvh', background: 'transparent' }}>
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10">
-        <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: '2.4rem', color: fg }}>eCommerce: Behavioural UX Design</h1>
-        <div style={{ marginTop: 8 }}>
+        <div style={{}}>
           <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub }}>Goal — Increase Checkout Rate</p>
           <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub, marginTop: 6 }}>Year: Designed & tested in 2025 · Client: Cotton On Group</p>
           <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub, marginTop: 6 }}>My Role: Product Design Lead · Team: 1</p>
