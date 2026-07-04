@@ -2322,7 +2322,7 @@ function BusinessCaseContent() {
   );
 }
 
-function BusinessCasePage({ onBack }: { onBack: () => void }) {
+function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
@@ -2338,8 +2338,6 @@ function BusinessCasePage({ onBack }: { onBack: () => void }) {
     }
   };
 
-  if (unlocked) return <BusinessCaseContent />;
-
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-6" style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
@@ -2351,32 +2349,39 @@ function BusinessCasePage({ onBack }: { onBack: () => void }) {
         <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: '2.25rem', lineHeight: 1.05, color: GOLD, margin: 0 }}>eCommerce: Behavioural UX Design</h1>
       </div>
 
-      <div className="px-6 md:px-20 pt-8" style={{ maxWidth: 900 }}>
-        <div style={{ marginTop: 12, padding: '8px 0' }}>
-          <p className="font-['Avenir',sans-serif] font-light" style={{ color: isDark ? 'rgba(255,255,255,0.85)' : INK }}>This page requires passcode</p>
+      {unlocked ? (
+        <>
+          <BusinessCaseContent />
+          <StickyPageNav activePage="work" onNavigate={onNavigate} />
+        </>
+      ) : (
+        <div className="px-6 md:px-20 pt-8" style={{ maxWidth: 900 }}>
+          <div style={{ marginTop: 12, padding: '8px 0' }}>
+            <p className="font-['Avenir',sans-serif] font-light" style={{ color: isDark ? 'rgba(255,255,255,0.85)' : INK }}>This page requires passcode</p>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24 }}>
-            <label className="font-['Avenir',sans-serif] font-light text-xs uppercase" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : DIM, minWidth: 80 }}>PASSCODE *</label>
-            <div style={{ flex: 1, position: 'relative' }}>
-              <input
-                aria-label="Passcode"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && submit()}
-                placeholder=""
-                className="w-full"
-                style={{ background: 'transparent', border: 'none', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.12)'}`, padding: '8px 6px', color: isDark ? 'white' : INK, fontSize: '1rem', outline: 'none' }}
-              />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24 }}>
+              <label className="font-['Avenir',sans-serif] font-light text-xs uppercase" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : DIM, minWidth: 80 }}>PASSCODE *</label>
+              <div style={{ flex: 1, position: 'relative' }}>
+                <input
+                  aria-label="Passcode"
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && submit()}
+                  placeholder=""
+                  className="w-full"
+                  style={{ background: 'transparent', border: 'none', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.12)'}`, padding: '8px 6px', color: isDark ? 'white' : INK, fontSize: '1rem', outline: 'none' }}
+                />
+              </div>
+              <div style={{ width: 96, textAlign: 'right' }}>
+                <button onClick={submit} className="font-['Avenir',sans-serif] font-medium" style={{ background: isDark ? 'transparent' : '#fff', border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}`, padding: '12px 10px', cursor: 'pointer', borderRadius: 2 }}>Submit</button>
+              </div>
             </div>
-            <div style={{ width: 96, textAlign: 'right' }}>
-              <button onClick={submit} className="font-['Avenir',sans-serif] font-medium" style={{ background: isDark ? 'transparent' : '#fff', border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}`, padding: '12px 10px', cursor: 'pointer', borderRadius: 2 }}>Submit</button>
-            </div>
+
+            {error && <p className="font-['Avenir',sans-serif] font-light" style={{ color: '#E05C5C', marginTop: 12 }}>{error}</p>}
+            <div style={{ height: 120 }} />
           </div>
-
-          {error && <p className="font-['Avenir',sans-serif] font-light" style={{ color: '#E05C5C', marginTop: 12 }}>{error}</p>}
-          <div style={{ height: 120 }} />
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -2480,7 +2485,7 @@ export default function App() {
         )}
         {page === "businessCase" && (
           <div className="absolute inset-0 overflow-y-auto">
-            <BusinessCasePage onBack={() => setPage('work')} />
+            <BusinessCasePage onBack={() => setPage('work')} onNavigate={navigateGeneral} />
           </div>
         )}
       </motion.div>
