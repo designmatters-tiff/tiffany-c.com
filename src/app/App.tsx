@@ -1663,6 +1663,7 @@ function SpeakingEventRow({
   fg,
   sub,
   brd,
+  stickyTop = 0,
 }: {
   ev: typeof SPEAKING_EVENTS[number];
   isFirst: boolean;
@@ -1670,6 +1671,7 @@ function SpeakingEventRow({
   fg: string;
   sub: string;
   brd: string;
+  stickyTop?: number;
 }) {
   const { open, toggle } = useAccordionItem(`speaking-event:${ev.key}`);
   const expandable = Boolean(ev.img || ev.link || ev.youtubeId);
@@ -1678,10 +1680,21 @@ function SpeakingEventRow({
     <div style={{ borderTop: isFirst ? "none" : `1px solid ${brd}` }}>
       <button
         onClick={() => expandable && toggle()}
-        className="relative w-full flex items-start gap-3 text-left px-6 md:px-20 py-3 md:py-7 transition-colors duration-200"
-        style={{ cursor: expandable ? "pointer" : "default", background: "transparent" }}
-        onMouseEnter={e => expandable && (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)")}
-        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+        className="relative w-full flex items-start gap-3 text-left px-6 md:px-20 py-3 md:py-7"
+        style={{
+          cursor: expandable ? "pointer" : "default",
+          position: open ? "sticky" : "relative",
+          top: open ? stickyTop : undefined,
+          zIndex: open ? 15 : undefined,
+          background: open ? (isDark ? "rgba(40,40,40,0.82)" : "rgba(255,255,255,0.82)") : "transparent",
+          backdropFilter: open ? "blur(16px)" : "none",
+          WebkitBackdropFilter: open ? "blur(16px)" : "none",
+          boxShadow: open ? (isDark ? "0 2px 16px rgba(0,0,0,0.2)" : "0 2px 16px rgba(0,0,0,0.06)") : "none",
+          borderLeft: open ? `2px solid ${isDark ? "rgba(178,147,59,0.5)" : "rgba(178,147,59,0.35)"}` : "2px solid transparent",
+          transition: "background 0.35s ease, backdrop-filter 0.35s ease, box-shadow 0.35s ease, border-left-color 0.35s ease",
+        }}
+        onMouseEnter={e => expandable && !open && (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)")}
+        onMouseLeave={e => { if (!open) e.currentTarget.style.background = "transparent"; }}
       >
         {expandable && (
           <Plus
@@ -1863,6 +1876,18 @@ function AwardsSpeakingPage({
   const scrolled = embedded ? headerScrolled : selfScrolled;
   const visibleEvents = capped ? SPEAKING_EVENTS.slice(0, 3) : SPEAKING_EVENTS;
 
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const update = () => setHeaderHeight(el.offsetHeight);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const content = (
     <>
 
@@ -1872,7 +1897,7 @@ function AwardsSpeakingPage({
           only once the user scrolls does it pick up a frosted (blurred,
           80% opacity) backdrop so the now-passing content reads cleanly
           behind it. */}
-      <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
+      <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
         style={{
           background: scrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
           backdropFilter: scrolled ? "blur(8px)" : "none",
@@ -1903,7 +1928,7 @@ function AwardsSpeakingPage({
           <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em]" style={{ color: GOLD }}>Speaking</p>
         </div>
         {visibleEvents.map((ev, i) => (
-          <SpeakingEventRow key={ev.key} ev={ev} isFirst={i === 0} isDark={isDark} fg={fg} sub={sub} brd={brd} />
+          <SpeakingEventRow key={ev.key} ev={ev} isFirst={i === 0} isDark={isDark} fg={fg} sub={sub} brd={brd} stickyTop={headerHeight} />
         ))}
       </div>
 
@@ -2242,7 +2267,11 @@ export default function App() {
         {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={navigateGeneral} /></div>}
         {page === "connect"  && <div className="absolute inset-0 overflow-y-auto"><ConnectPage onNavigate={navigateGeneral} /></div>}
         {page === "speakingInquiry" && (
-          <SpeakingInquiryContainer onBack={() => setPage("connect")} />
+          <SpeakingInquiryContainer onBack={() => {
+            const connectIdx = SECTIONS.findIndex(s => s.key === "connect");
+            setHomeInitialIdx(connectIdx > 0 ? connectIdx : 0);
+            setPage("home");
+          }} />
         )}
         {page === "speaking" && detailKey && (
           <div className="absolute inset-0 overflow-y-auto">
