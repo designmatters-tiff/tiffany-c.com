@@ -2371,34 +2371,36 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
             <div style={{ height: 96 }} />
           </>
         ) : (
-          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 900 }}>
-            <div style={{ marginTop: 12, padding: '8px 0' }}>
-              <p className="font-['Avenir',sans-serif] font-light" style={{ color: isDark ? 'rgba(255,255,255,0.85)' : INK }}>This page requires passcode</p>
+          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560 }}>
+            <p className="font-['Avenir',sans-serif] font-light" style={{ color: isDark ? 'rgba(255,255,255,0.85)' : INK }}>This page requires passcode</p>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24 }}>
-                <label className="font-['Avenir',sans-serif] font-light text-xs uppercase" style={{ color: isDark ? 'rgba(255,255,255,0.6)' : DIM, minWidth: 80 }}>PASSCODE *</label>
-                <div style={{ flex: 1, position: 'relative' }}>
-                  <input
-                    aria-label="Passcode"
-                    value={value}
-                    onChange={(e) => setValue(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && submit()}
-                    placeholder=""
-                    className="w-full"
-                    style={{ background: 'transparent', border: 'none', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.12)'}`, padding: '8px 6px', color: isDark ? 'white' : INK, fontSize: '1rem', outline: 'none' }}
-                  />
-                </div>
-                <div style={{ width: 96, textAlign: 'right' }}>
-                  <button onClick={submit} className="font-['Avenir',sans-serif] font-medium" style={{ background: isDark ? 'transparent' : '#fff', border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}`, padding: '12px 10px', cursor: 'pointer', borderRadius: 2 }}>Submit</button>
-                </div>
-              </div>
+            <div style={{ marginTop: 32 }}>
+              <label className="font-['Avenir',sans-serif] font-light text-xs uppercase tracking-widest" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : DIM }}>PASSCODE *</label>
+              <input
+                aria-label="Passcode"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && submit()}
+                placeholder=""
+                className="w-full mt-2 block"
+                style={{ background: 'transparent', border: 'none', borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.15)'}`, padding: '8px 0', color: isDark ? 'white' : INK, fontSize: '1rem', outline: 'none' }}
+              />
+            </div>
 
-              {error && <p className="font-['Avenir',sans-serif] font-light" style={{ color: '#E05C5C', marginTop: 12 }}>{error}</p>}
-              <div style={{ height: 120 }} />
+            {error && <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: '#E05C5C', marginTop: 10 }}>{error}</p>}
+
+            <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={submit}
+                className="font-['Avenir',sans-serif] font-medium text-sm uppercase tracking-widest"
+                style={{ background: GOLD, color: '#fff', border: 'none', padding: '12px 28px', cursor: 'pointer', borderRadius: 2 }}>
+                Submit
+              </button>
             </div>
           </div>
         )}
       </div>
+      <StickyPageNav activePage="work" onNavigate={onNavigate} />
     </div>
   );
 }
