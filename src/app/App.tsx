@@ -1279,6 +1279,19 @@ const EXPERTISE_CARDS = [
     key: "people", title: "People & Process", accent: "#5070A0", Illustration: IllustrationPeople,
     description: "Built high-performing multidisciplinary teams and cross-unit prioritization frameworks.",
     bullets: ["Team growth: 7 → 22 designers across B2C, B2B & Research", "Coaching Responsibility Agreements & design culture building", "Chapter Lead — Ladies that UX, Kuala Lumpur (2022–2024)"],
+    resources: [
+      {
+        label: "Coaching Guide for Product Designers at all levels",
+        description: "A structured guide for talent development across junior, mid, and senior practitioners — covering skills, responsibilities, and growth frameworks.",
+        url: "https://tiffanychew.notion.site/Coaching-Guide-for-Product-Designers-at-all-levels-a6349a68618a4eda8b0f678e3738cb8b?pvs=4",
+      },
+      {
+        label: "Role, Responsibility, Requirement & Result (4Rs) for Product Designers, UX Writers & UX Researchers",
+        description: "A practical framework for defining what each role owns, what's expected, and how output is measured.",
+        url: null,
+        comingSoon: true,
+      },
+    ],
   },
 ];
 
@@ -1356,6 +1369,38 @@ function WorkDetailPage({ cardKey, onBack }: { cardKey: string; onBack: () => vo
             </li>
           ))}
         </ul>
+
+        {"resources" in card && (card as any).resources?.length > 0 && (
+          <div className="mt-10">
+            <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-4" style={{ color: GOLD }}>
+              Resources
+            </p>
+            <div className="space-y-4">
+              {(card as any).resources.map((r: any) => (
+                <div key={r.label} className="flex flex-col gap-1 pb-4" style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+                  {r.url ? (
+                    <a href={r.url} target="_blank" rel="noopener noreferrer"
+                      className="font-['Avenir',sans-serif] font-medium text-sm flex items-center gap-1.5"
+                      style={{ color: card.accent }}>
+                      {r.label}
+                      <ExternalLink size={12} strokeWidth={1.5} style={{ flexShrink: 0 }} />
+                    </a>
+                  ) : (
+                    <span className="font-['Avenir',sans-serif] font-medium text-sm flex items-center gap-2" style={{ color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)" }}>
+                      {r.label}
+                      {r.comingSoon && <span className="text-[0.55rem] uppercase tracking-widest px-1.5 py-0.5 rounded" style={{ background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }}>Coming soon</span>}
+                    </span>
+                  )}
+                  {r.description && (
+                    <p className="font-['Avenir',sans-serif] font-light text-sm leading-relaxed" style={{ color: isDark ? "rgba(255,255,255,0.55)" : DIM }}>
+                      {r.description}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Bottom spacer so content clears the floating detail nav */}
         <div style={{ height: 96 }} />
