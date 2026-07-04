@@ -1372,7 +1372,7 @@ function ExpertiseCard({ card, onOpen }: { card: typeof EXPERTISE_CARDS[0]; onOp
 }
 
 // ─── Work case study detail page ───────────────────────────────────
-function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false }: { cardKey: string; onBack: () => void; onNavigate: (p: Page) => void; headerScrolled?: boolean }) {
+function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, compact = false }: { cardKey: string; onBack: () => void; onNavigate: (p: Page) => void; headerScrolled?: boolean; compact?: boolean }) {
   const isDark = useContext(DarkModeCtx);
   const isMobile = useIsMobile();
   const card = EXPERTISE_CARDS.find(c => c.key === cardKey);
@@ -1386,7 +1386,8 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false }:
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
-          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
+          paddingBottom: compact ? 16 : undefined,
+          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
         <button onClick={onBack}
           className="flex items-center gap-1.5 font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4 cursor-pointer"
@@ -1398,7 +1399,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false }:
             style={{ width: 56, height: 56, background: `${card.accent}1f` }}>
             <div style={{ width: 38, height: 38 }}><Illustration /></div>
           </div>
-          <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]" style={{ lineHeight: 1.05, color: GOLD }}
+          <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]" style={{ fontSize: compact ? '1.5rem' : undefined, lineHeight: 1.05, color: GOLD, transition: 'font-size 0.35s ease' }}
             initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
             {card.title}
           </motion.h1>
@@ -2512,7 +2513,7 @@ export default function App() {
         )}
         {page === "workDetail" && detailKey && (
           <div className="absolute inset-0 overflow-y-auto" onScroll={(e) => setDetailHeaderScrolled((e.target as HTMLElement).scrollTop > 24)}>
-            <WorkDetailPage cardKey={detailKey} onBack={navigateBackFromWork} onNavigate={navigateGeneral} headerScrolled={detailHeaderScrolled} />
+            <WorkDetailPage cardKey={detailKey} onBack={navigateBackFromWork} onNavigate={navigateGeneral} headerScrolled={detailHeaderScrolled} compact={detailHeaderScrolled} />
           </div>
         )}
         {page === "businessCase" && (
