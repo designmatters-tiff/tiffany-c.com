@@ -1487,7 +1487,7 @@ function DetailBottomBar({
 // Wraps PageBottomNav with a full-width fade scrim behind it, so content
 // scrolling up from underneath fades into the page background before it
 // would otherwise be visible peeking past the nav's side margins/edges.
-function StickyPageNav({ activePage, detailLabel, onNavigate }: { activePage: Page; detailLabel?: string; onNavigate: (p: Page) => void }) {
+function StickyPageNav({ activePage, detailLabel, compact, onNavigate }: { activePage: Page; detailLabel?: string; compact?: boolean; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
   const pageBg = isDark ? "#181410" : "#f8f7f5";
   return (
@@ -1496,7 +1496,7 @@ function StickyPageNav({ activePage, detailLabel, onNavigate }: { activePage: Pa
         style={{ height: 180, background: `linear-gradient(to bottom, ${pageBg}00 0%, ${pageBg} 65%)` }} />
       <div className="fixed inset-x-6 md:inset-x-20 z-30 overflow-hidden"
         style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
-        <PageBottomNav activePage={activePage} detailLabel={detailLabel} onNavigate={onNavigate} />
+        <PageBottomNav activePage={activePage} detailLabel={detailLabel} compact={compact} onNavigate={onNavigate} />
       </div>
     </>
   );
@@ -1505,10 +1505,12 @@ function StickyPageNav({ activePage, detailLabel, onNavigate }: { activePage: Pa
 function PageBottomNav({
   activePage,
   detailLabel,
+  compact,
   onNavigate,
 }: {
   activePage: Page;
   detailLabel?: string;
+  compact?: boolean;
   onNavigate: (p: Page) => void;
 }) {
   const isDark = useContext(DarkModeCtx);
@@ -1562,14 +1564,14 @@ function PageBottomNav({
       </div>
 
       {/* Mobile */}
-      <div className="md:hidden flex items-center h-16 px-5"
-        style={{ background: navGradient(isDark) }}>
+      <div className={`md:hidden flex items-center ${compact ? 'h-12' : 'h-16'} px-5`}
+        style={{ background: navGradient(isDark), transition: 'height 0.25s ease' }}>
         <button onClick={() => setMenuOpen(true)} className="flex items-center gap-3" aria-label="Open navigation">
           <HamburgerIcon />
-          <span className="font-['Avenir',sans-serif] font-medium text-base text-white">Tiffany C.</span>
+          <span className={`font-['Avenir',sans-serif] font-medium ${compact ? 'text-sm' : 'text-base'} text-white`}>Tiffany C.</span>
         </button>
         <div className="flex-1" />
-        <span className="font-['Avenir',sans-serif] font-light text-sm text-white/75">
+        <span className={`font-['Avenir',sans-serif] font-light ${compact ? 'text-[0.75rem]' : 'text-sm'} text-white/75`} style={{ transition: 'font-size 0.25s ease' }}>
           {detailLabel ? `Work / ${detailLabel}` : (NAV_ITEMS.find(n => n.page === activePage)?.label ?? "")}
         </span>
       </div>
@@ -2521,7 +2523,7 @@ export default function App() {
         )}
       </motion.div>
       {(page === "work" || page === "workDetail") && (
-        <StickyPageNav activePage="work" detailLabel={detailLabel} onNavigate={navigateGeneral} />
+        <StickyPageNav activePage="work" detailLabel={detailLabel} compact={page === "workDetail" && detailHeaderScrolled} onNavigate={navigateGeneral} />
       )}
     </div>
     </AccordionCtx.Provider>
