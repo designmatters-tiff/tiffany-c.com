@@ -390,7 +390,26 @@ function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () =>
 
   const set = (k: string, v: string) => setFields(f => ({ ...f, [k]: v }));
 
+  // Validation runs on submit rather than on change, so the form stays quiet
+  // until the visitor has actually tried to send it.
+  const [showErrors, setShowErrors] = useState(false);
+  const invalid = (name: string) => {
+    const f = FORM_FIELDS.find(x => x.name === name);
+    if (!f) return false;
+    const v = (fields[name] ?? "").trim();
+    if (f.required && !v) return true;
+    // Browser email validation never fires — Submit is a button, not a form
+    // submit — so the format check lives here.
+    return f.type === "email" && !!v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  };
+  const firstInvalid = FORM_FIELDS.find(f => invalid(f.name))?.name;
+
   const handleSubmit = async () => {
+    if (firstInvalid) {
+      setShowErrors(true);
+      document.getElementById(`sif-${firstInvalid}`)?.focus();
+      return;
+    }
     setStatus("sending");
     try {
       const res = await fetch(SPEAKING_FORM_ENDPOINT, {
@@ -438,23 +457,39 @@ function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () =>
             {FORM_FIELDS.map(f => (
               <div key={f.name} className="flex flex-col gap-1">
                 <label
+                  htmlFor={`sif-${f.name}`}
                   className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.18em]"
                   style={{ color: isDark ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.65)" }}
                 >
                   {f.label}{f.required && " *"}
                 </label>
                 <input
+                  id={`sif-${f.name}`}
                   type={f.type ?? "text"}
                   required={f.required}
+                  aria-invalid={showErrors && invalid(f.name)}
                   value={fields[f.name] ?? ""}
                   onChange={e => set(f.name, e.target.value)}
-                  style={inputBase}
+                  style={{
+                    ...inputBase,
+                    borderBottomColor: showErrors && invalid(f.name)
+                      ? "#E05C5C"
+                      : (isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.18)"),
+                  }}
                   onFocus={e => (e.target.style.borderBottomColor = accent)}
-                  onBlur={e => (e.target.style.borderBottomColor = isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.18)")}
+                  onBlur={e => (e.target.style.borderBottomColor = showErrors && invalid(f.name)
+                    ? "#E05C5C"
+                    : (isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.18)"))}
                 />
               </div>
             ))}
           </div>
+        )}
+
+        {showErrors && firstInvalid && status !== "sent" && (
+          <p className="font-['Avenir',sans-serif] font-light text-xs mt-4" style={{ color: "#E05C5C" }}>
+            Please complete the required fields marked *.
+          </p>
         )}
 
         {status === "error" && (
