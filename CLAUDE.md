@@ -6,15 +6,17 @@ consulting clients, and support speaking presence.
 
 ## Read this first: what is actually true
 
-The repo contains older planning docs that **do not describe the current build**:
+**`src/app/App.tsx` is the source of truth** for what the site does. When a doc
+and the code disagree, the code wins.
 
-- `BRIEF_5.md` says the stack is Next.js (App Router). **It is not.** The site is
-  Vite + React 18, no framework router.
+- **`BRAND.md`** — voice, tone, colour, motion, and the rules behind them. Read it
+  before writing user-facing copy or adding anything visual. It also tracks open
+  brand items (including a broken form endpoint that blocks launch).
 - `guidelines/Guidelines.md` is an untouched Figma Make template. Ignore it.
 - `README.md` is the generic Figma Make export blurb.
 
-**`src/app/App.tsx` is the source of truth.** When a doc and the code disagree,
-the code wins. Read the code before acting on anything a `BRIEF_*.md` claims.
+Earlier `BRIEF_*.md` planning docs described a build that never happened (Next.js,
+light-mode-only, a different palette). They've been replaced by `BRAND.md`.
 
 ## Stack
 
