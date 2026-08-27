@@ -634,6 +634,24 @@ function ContactItem({
 
 const AUTO_DURATION = 5000;
 
+// Space the mobile hero must leave clear at the bottom of the slide, so the
+// body copy never runs under the "swipe to explore" label. It has to be built
+// from the same terms as the chrome stacked down there — the label sits at
+// `5% + 56px + 14px + env(safe-area-inset-bottom)` — plus the label's own line
+// box and a little breathing room:
+//
+//   5%   floating nav's bottom offset
+//   56px floating nav height (mobile; desktop's is 64px)
+//   14px gap between nav and label
+//   15px label line height
+//   24px breathing room
+//
+// The safe-area term is the part that actually bit: the label, nav and
+// carousel indicator all include it, so on any phone with a home indicator
+// they lift ~34px while content that omitted it stayed put — and the copy
+// ran underneath. Keep this in sync with the label's own offset below.
+const HERO_BOTTOM_RESERVE = "calc(5% + 109px + env(safe-area-inset-bottom))";
+
 // ─── Homepage ─────────────────────────────────────────────────────
 
 export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number }) {
@@ -670,6 +688,8 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
   const startTime    = useRef(Date.now());
   const rafRef       = useRef<number>(0);
   const isMobile     = useIsMobile();
+  const heroOverflows = sectionOverflows["hero"] ?? false;
+  const [heroScrolled, setHeroScrolled] = useState(false);
   const isMobileRef  = useRef(isMobile);
   useEffect(() => { isMobileRef.current = isMobile; }, [isMobile]);
 
@@ -877,17 +897,35 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
       >
         {/* ── Section 0: Tiffany C. ── */}
         <section
-          className="flex-shrink-0 relative overflow-hidden"
-          style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", background: "transparent" }}
+          ref={(el) => { embedSectionRefs.current["hero"] = el; }}
+          className="flex-shrink-0 relative overflow-x-hidden scrollbar-hide"
+          style={{
+            width: "100vw", height: "100%", scrollSnapAlign: "start", background: "transparent",
+            // The hero is a single screen by design, but it can't always be:
+            // a short viewport or large accessibility text pushes the body
+            // copy past the fold. Rather than clip it (the old
+            // overflow-hidden), let the slide scroll vertically — but only
+            // when it genuinely overflows, so horizontal swipe keeps
+            // ownership of the gesture on every phone where it does fit.
+            overflowY: isMobile && heroOverflows ? "auto" : "hidden",
+            touchAction: isMobile && heroOverflows ? "pan-y" : undefined,
+            WebkitOverflowScrolling: "touch",
+          }}
+          onScroll={(e) => setHeroScrolled(e.currentTarget.scrollTop > 8)}
         >
           {/* The animated gradient/blob background lives at the App root so it
               stays continuous across page navigation — only content here. */}
 
-          {/* Mobile layout */}
-          <div className="md:hidden absolute inset-0 flex flex-col px-6 pt-14"
-            style={{ paddingBottom: "calc(64px + 8vh + 24px)" }}>
+          {/* Mobile layout — min-height rather than inset-0 so the block can
+              grow past one screen and scroll instead of being clipped. */}
+          <div className="md:hidden relative flex flex-col px-6 pt-14"
+            style={{ minHeight: "100%", paddingBottom: HERO_BOTTOM_RESERVE }}>
             <LogoMark size={52} />
-            <div className="flex-1 flex flex-col justify-center gap-5">
+            {/* Auto margins, not justify-center: a centred flex child that
+                overflows spills past BOTH ends, putting the heading out of
+                reach even once the slide scrolls. Auto margins centre only
+                while there's room to spare. */}
+            <div className="flex flex-col gap-5" style={{ marginTop: "auto", marginBottom: "auto" }}>
               <div>
                 <img
                   src={profilePhoto}
@@ -905,8 +943,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                     border: `1px solid ${GOLD}`,
                   }}
                 />
+                {/* Fluid like the body copy below it, rather than locked at
+                    3rem. At four lines a fixed 3rem heading was what pushed
+                    the hero past the fold on shorter phones. */}
                 <h1 className="font-['Museo',sans-serif] font-light"
-                  style={{ fontSize: "3rem", lineHeight: 1.1, color: GOLD }}>
+                  style={{ fontSize: "clamp(2.25rem, 11vw, 3rem)", lineHeight: 1.1, color: GOLD }}>
                   Hi, I'm a product &amp; design leader
                 </h1>
               </div>
@@ -1097,6 +1138,24 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           nav bar. Same copy and the same bottom-left position on both
           breakpoints — only the offset constants change, since the
           mobile floating nav is 56px tall vs. 64px on desktop. ── */}
+      {/* When the hero is short enough to scroll, copy travels behind the
+          pinned label. Same frosted treatment the embedded sections use for
+          their "View more" cap, so the bottom chrome reads as a foreground
+          layer with the text falling away behind it rather than colliding.
+          Sized so the label sits inside the opaque part of the mask rather
+          than its fade: the label's top edge is ~152px off the bottom, and
+          this goes fully opaque 176px up (320px tall, black by 45%). */}
+      {activeIdx === 0 && isMobile && heroOverflows && (
+        <div className="md:hidden pointer-events-none absolute z-20" style={{
+          left: 0, right: 0, bottom: 0, height: 320,
+          background: isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          maskImage: "linear-gradient(to bottom, transparent 0%, black 45%)",
+          WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 45%)",
+        }} />
+      )}
+
       {activeIdx === 0 && (
         <p className="absolute z-30 font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest"
           style={{
@@ -1105,6 +1164,12 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
               : "calc(64px + 5vh + 28px)",
             left: isMobile ? 24 : "7%",
             color: dimCol,
+            // The label is pinned chrome, so on a short viewport where the
+            // hero scrolls, copy would travel underneath it. Fade it out
+            // once scrolling starts — same treatment the carousel indicator
+            // gets when the nav shrinks.
+            opacity: heroScrolled ? 0 : 1,
+            transition: "opacity 0.25s ease",
           }}>
           swipe to explore
         </p>
