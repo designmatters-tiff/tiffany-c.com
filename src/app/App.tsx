@@ -634,23 +634,19 @@ function ContactItem({
 
 const AUTO_DURATION = 5000;
 
-// Space the mobile hero must leave clear at the bottom of the slide, so the
-// body copy never runs under the "swipe to explore" label. It has to be built
-// from the same terms as the chrome stacked down there — the label sits at
-// `5% + 56px + 14px + env(safe-area-inset-bottom)` — plus the label's own line
-// box and a little breathing room:
+// Space the mobile hero leaves clear at the bottom of the slide, so the body
+// copy never runs under the floating nav. Built from the same terms as the
+// chrome stacked down there:
 //
 //   5%   floating nav's bottom offset
 //   56px floating nav height (mobile; desktop's is 64px)
-//   14px gap between nav and label
-//   15px label line height
 //   24px breathing room
 //
-// The safe-area term is the part that actually bit: the label, nav and
-// carousel indicator all include it, so on any phone with a home indicator
-// they lift ~34px while content that omitted it stayed put — and the copy
-// ran underneath. Keep this in sync with the label's own offset below.
-const HERO_BOTTOM_RESERVE = "calc(5% + 109px + env(safe-area-inset-bottom))";
+// The safe-area term is the part that originally bit: the nav and carousel
+// indicator both include it, so on any phone with a home indicator they lift
+// ~34px while content that omitted it stayed put — and the copy ran
+// underneath. Keep this in sync with the nav's own offset.
+const HERO_BOTTOM_RESERVE = "calc(5% + 80px + env(safe-area-inset-bottom))";
 
 // ─── Homepage ─────────────────────────────────────────────────────
 
@@ -689,7 +685,6 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
   const rafRef       = useRef<number>(0);
   const isMobile     = useIsMobile();
   const heroOverflows = sectionOverflows["hero"] ?? false;
-  const [heroScrolled, setHeroScrolled] = useState(false);
   const isMobileRef  = useRef(isMobile);
   useEffect(() => { isMobileRef.current = isMobile; }, [isMobile]);
 
@@ -911,7 +906,6 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
             touchAction: isMobile && heroOverflows ? "pan-y" : undefined,
             WebkitOverflowScrolling: "touch",
           }}
-          onScroll={(e) => setHeroScrolled(e.currentTarget.scrollTop > 8)}
         >
           {/* The animated gradient/blob background lives at the App root so it
               stays continuous across page navigation — only content here. */}
@@ -1008,18 +1002,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
               sustainable growth lives.
             </p>
           </div>
+          {/* Hairline above the nav. The pulsing "scroll" cue that used to sit
+              at its right-hand end is gone, for the same reason as the mobile
+              "swipe to explore" label — the hero's words come first. */}
           <div className="hidden md:block">
             <div className="absolute" style={{ bottom: "calc(64px + 5vh + 40px)", left: "7%", right: "7%", height: 1, background: "rgba(178,147,59,0.25)" }} />
-            <div className="absolute right-10 flex flex-col items-center gap-2"
-              style={{ bottom: "calc(64px + 5vh + 28px)" }}>
-              <motion.p className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em]"
-                style={{ color: dimCol }}
-                animate={{ opacity: [0.4, 0.9, 0.4] }} transition={{ repeat: Infinity, duration: 3 }}>
-                scroll
-              </motion.p>
-              <motion.div className="w-px" style={{ background: dimCol }}
-                animate={{ height: [16, 28, 16] }} transition={{ repeat: Infinity, duration: 3 }} />
-            </div>
           </div>
         </section>
 
@@ -1134,46 +1121,10 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
         })}
       </div>
 
-      {/* ── "Swipe to explore" (hero only), alone on its own row above the
-          nav bar. Same copy and the same bottom-left position on both
-          breakpoints — only the offset constants change, since the
-          mobile floating nav is 56px tall vs. 64px on desktop. ── */}
-      {/* When the hero is short enough to scroll, copy travels behind the
-          pinned label. Same frosted treatment the embedded sections use for
-          their "View more" cap, so the bottom chrome reads as a foreground
-          layer with the text falling away behind it rather than colliding.
-          Sized so the label sits inside the opaque part of the mask rather
-          than its fade: the label's top edge is ~152px off the bottom, and
-          this goes fully opaque 176px up (320px tall, black by 45%). */}
-      {activeIdx === 0 && isMobile && heroOverflows && (
-        <div className="md:hidden pointer-events-none absolute z-20" style={{
-          left: 0, right: 0, bottom: 0, height: 320,
-          background: isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)",
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
-          maskImage: "linear-gradient(to bottom, transparent 0%, black 45%)",
-          WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 45%)",
-        }} />
-      )}
-
-      {activeIdx === 0 && (
-        <p className="absolute z-30 font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest"
-          style={{
-            bottom: isMobile
-              ? "calc(5% + 56px + 14px + env(safe-area-inset-bottom))"
-              : "calc(64px + 5vh + 28px)",
-            left: isMobile ? 24 : "7%",
-            color: dimCol,
-            // The label is pinned chrome, so on a short viewport where the
-            // hero scrolls, copy would travel underneath it. Fade it out
-            // once scrolling starts — same treatment the carousel indicator
-            // gets when the nav shrinks.
-            opacity: heroScrolled ? 0 : 1,
-            transition: "opacity 0.25s ease",
-          }}>
-          swipe to explore
-        </p>
-      )}
+      {/* There used to be a "swipe to explore" label pinned above the nav
+          here. It sat over the hero's own words on shorter phones, and the
+          intro copy matters more than the hint — the carousel indicator
+          below already signals there's more than one section. */}
 
       {/* ── Persistent mobile carousel indicator — sits directly below the
           floating nav bar, spanning the same width. Stays visible across
