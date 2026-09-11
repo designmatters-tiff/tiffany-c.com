@@ -35,7 +35,7 @@ const NAV_GRADIENT = "linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
 const NAV_GRADIENT_DARK = "linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
 const navGradient = (isDark: boolean) => isDark ? NAV_GRADIENT_DARK : NAV_GRADIENT;
 
-type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase";
+type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "testimonials";
 
 // ─── Dark mode context ────────────────────────────────────────────
 const DarkModeCtx = createContext(false);
@@ -543,6 +543,7 @@ const SECTIONS = [
     tagline: "UX Career Coaching",
     context: "Open to collaboration",
     items: [
+      "What they say",
       "1:1 Calls",
       "Priority DM",
       "Package (1-1 Coaching Service)",
@@ -610,6 +611,19 @@ function ContactItem({
         <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
         <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
       </a>
+    );
+  }
+  if (item === "What they say") {
+    return (
+      <button
+        className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer text-left"
+        onClick={() => onNavigate?.("testimonials")}
+      >
+        <ChevronRight size={16} strokeWidth={1} style={{ color: accent, flexShrink: 0 }} />
+        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>
+          What they say
+        </span>
+      </button>
     );
   }
   if (item === "Speaking Inquiry") {
@@ -1748,7 +1762,7 @@ function CoachingPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
     <ContactListPage
       eyebrow="Open to collaboration"
       title="UX Career Coaching"
-      items={["1:1 Calls", "Priority DM", "Package (1-1 Coaching Service)"]}
+      items={["What they say", "1:1 Calls", "Priority DM", "Package (1-1 Coaching Service)"]}
       accent="#9B5A88"
       activePage="coaching"
       onNavigate={onNavigate}
@@ -1766,6 +1780,283 @@ function ConnectPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       activePage="connect"
       onNavigate={onNavigate}
     />
+  );
+}
+
+// ─── Testimonials ──────────────────────────────────────────────────
+//
+// Two groups rather than three. Sorting the testimonials by subject puts
+// almost everything in "leadership" — nobody has written about design craft
+// in isolation — so the split that carries information is by audience:
+// someone weighing her for a design leadership role, and someone deciding
+// whether to book coaching. They ask different questions.
+//
+// `source` is not decoration. Two of the coaching reviews are anonymous, and
+// a named, publicly checkable platform is what makes an unattributed quote
+// worth anything. Shaza's was written as an award nomination, which is
+// stronger stated plainly than passed off as unsolicited praise.
+//
+// Quotes are verbatim, including punctuation BRAND.md would not allow in
+// Tiffany's own copy — see the note under "Writing mechanics".
+
+type TestimonialGroup = "leadership" | "coaching";
+
+const TESTIMONIAL_GROUPS: { key: TestimonialGroup; label: string }[] = [
+  { key: "leadership", label: "Leadership & teams" },
+  { key: "coaching",   label: "Coaching" },
+];
+
+const TESTIMONIALS: {
+  key: string;
+  group: TestimonialGroup;
+  name: string | null;
+  title: string | null;
+  source: string;
+  date: string | null;
+  quote: string[];
+}[] = [
+  {
+    key: "shaza", group: "leadership",
+    name: "Shaza Hakim", title: "CEO & UX Principal, Stampede",
+    source: "Women in Digital 2025 nomination", date: null,
+    quote: [
+      "My name is Shaza. As a business co-founder, designer, and community leader in Malaysia, I've worked with Tiffany on several initiatives over the years.",
+      "I first got to know Tiffany through the Ladies That UX community she built. When she invited me to speak at their International Women's Day event, the conversations were genuine, the community felt inclusive beyond just gender, and you could tell she'd thoughtfully created a space for meaningful and safe discussions about our craft.",
+      "In 2024, we've shared panels at UX Malaysia and FUSECON. I remember being inspired by her forward-thinking vision paired with her commitment to ensuring others can help shape that future.",
+      "This perspective isn't unique to my experience. Speaking with several of her designers at TNG Digital, they shared that whilst working in a fast-paced, high-pressure environment, she consistently led with empathy and created psychological safety for her team.",
+      "In a male-dominated industry, Tiffany made sure her people felt supported and heard. Maintaining one's humanity and protecting one's team when the surrounding culture demands intense performance takes real strength. Tiffany did it exceptionally well.",
+      "In our conversations, I've seen how she manages to be both tough and kind. She is unwaveringly dedicated to her vision, but she's equally committed to bringing people along with her.",
+      "In writing this, I've realised that Tiffany builds things that last. Products, teams, communities.",
+      "She builds people up. In an industry that often celebrates individual brilliance, she's chosen to multiply her impact through others. To me, that's not just good leadership—it's transformational leadership, personified.",
+      "The Women in Digital UX Leader award should recognise leaders who don't just excel in their craft, but who fundamentally change how we think about success in tech.",
+      "Tiffany is exactly that kind of leader.",
+    ],
+  },
+  {
+    key: "shin", group: "leadership",
+    name: "Shin L.", title: "Lead UX Writer",
+    source: "Worked in Tiffany's team", date: null,
+    quote: [
+      "I had the privilege of working under Tiffany, and she stood out as an exceptional leader who masterfully combines strategic thinking with actionable execution. Tiffany showed me how to translate high-level organisational goals into actionable plans that deliver measurable impact.",
+      "One of her key contributions was leveraging content strategy to improve brand perception. Under her leadership, our efforts contributed to a remarkable 14% increase in our brand perception score in 2024. Additionally, Tiffany and I collaborated to implement strategies that harnessed artificial intelligence to enhance team efficiency. These initiatives resulted in a 20% improvement in overall efficiency, setting a benchmark for innovation within the team.",
+      "Beyond her strategic acumen, Tiffany is an empathetic and empowering leader. She fosters a culture of collaboration and trust, enabling her team to excel while feeling supported. Personally, I learned invaluable lessons from her about aligning strategic goals with execution, problem-solving, and driving meaningful outcomes.",
+      "Tiffany's ability to lead with both vision and heart makes her an incredible asset to any organisation. I feel fortunate to have worked with her and highly recommend her to anyone looking for a transformative leader.",
+    ],
+  },
+  {
+    key: "junhoe", group: "leadership",
+    name: "Junhoe W.", title: "Sr. Product Designer, BigPay",
+    source: "Reported to Tiffany", date: null,
+    quote: [
+      "Few people have the opportunity to report to a manager who is also a coach and mentor but I did when I worked for Tiffany Chew. I had the pleasure of working with Tiffany for two years at Plus Solar Systems, collaborating on several project teams. Tiffany's ability to juggle multiple projects was unlike any I've seen before and made a dramatic difference in the productivity level of our team. As a team member, Tiffany earns my highest recommendation.",
+    ],
+  },
+  {
+    key: "nehaa", group: "coaching",
+    name: "Nehaa", title: null,
+    source: "via Topmate", date: "10 September 2025",
+    quote: [
+      "I had the privilege of getting my portfolio reviewed by Tiffany, and it was truly a game-changer. She has such deep knowledge and an incredible eye for detail, pointing out nuances in my portfolio that I had completely missed. What stood out was how she gave me perspectives not just as a designer, but also as a design manager, and even how a non-designer would perceive my work. Tiffany provided clear, actionable feedback on both my portfolio and interview preparation, which I immediately incorporated. I'm beyond happy to share that after three years of searching, I was finally able to land a job thanks to her guidance. Forever grateful for Tiffany's mentorship and the clarity she brings.",
+    ],
+  },
+  {
+    key: "jia", group: "coaching",
+    name: "Jia", title: null,
+    source: "via Topmate", date: "7 September 2025",
+    quote: [
+      "Tiff has been an incredible guide throughout my job search. She gave me concrete feedback on my UX portfolio—how to showcase impact and structure case studies—coached me on positioning myself confidently in interviews, and walked me through strategies for negotiating offer terms. Thanks to her support, I was able to land my new role and feel aligned with my career goals.",
+    ],
+  },
+  {
+    key: "yoonjung", group: "coaching",
+    name: "Yoon Jung", title: null,
+    source: "via Topmate", date: "19 January 2026",
+    quote: [
+      "I had great session with Tiffany! She really deep-dived in to my portfolio and pointed out the weakest point I had and help me improve to show the strongest skills. Totally recommend to designers who are trying to step into Aus market!",
+    ],
+  },
+  {
+    key: "topmate-aug", group: "coaching",
+    name: null, title: null,
+    source: "via Topmate", date: "26 August 2025",
+    quote: [
+      "Hands-on experience in building and leading a high-performing product design team. Provides clinical, actionable advice that translates into real results. Highly recommended, and I'll definitely be returning for periodic follow-ups.",
+    ],
+  },
+  {
+    key: "topmate-oct", group: "coaching",
+    name: null, title: null,
+    source: "via Topmate", date: "8 October 2025",
+    quote: [
+      "I didn't think 15 minutes would be enough to get advice and to understand the problem space I'm in, but Tiffany surprised me by how much she knew about the issue I'm facing. It was short and effective, with actionable things to consider. Thank you Tiffany!",
+    ],
+  },
+];
+
+// Long quotes are clamped to a few lines and expand in place, so the grid
+// stays scannable without truncating anyone's words permanently.
+const CLAMP_LINES = 8;
+
+function TestimonialCard({ t, accent }: { t: (typeof TESTIMONIALS)[number]; accent: string }) {
+  const isDark = useContext(DarkModeCtx);
+  const [open, setOpen] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+  const quoteRef = useRef<HTMLDivElement | null>(null);
+
+  // Only offer "Read more" where the quote is actually clipped — measured,
+  // not guessed from character count, since wrapping depends on width.
+  useEffect(() => {
+    const el = quoteRef.current;
+    if (!el) return;
+    const check = () => setOverflows(el.scrollHeight > el.clientHeight + 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [open]);
+
+  const sub  = isDark ? "rgba(255,255,255,0.6)"  : DIM;
+  const body = isDark ? "rgba(255,255,255,0.85)" : INK;
+
+  return (
+    <figure
+      className="flex flex-col"
+      style={{
+        margin: 0, padding: '28px 26px', borderRadius: 2,
+        background: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.72)",
+        border: `1px solid ${isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.07)"}`,
+        breakInside: 'avoid',
+      }}>
+      <blockquote
+        ref={quoteRef}
+        style={{
+          margin: 0, color: body, overflow: 'hidden',
+          ...(open ? {} : { display: '-webkit-box', WebkitLineClamp: CLAMP_LINES, WebkitBoxOrient: 'vertical' as const }),
+        }}>
+        {t.quote.map((para, i) => (
+          <p key={i} className="font-['Avenir',sans-serif] font-light leading-relaxed"
+            style={{ margin: i === 0 ? 0 : '0.9em 0 0', fontSize: '0.95rem' }}>{para}</p>
+        ))}
+      </blockquote>
+
+      {(overflows || open) && (
+        <button onClick={() => setOpen(o => !o)}
+          className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.18em] cursor-pointer self-start"
+          style={{ background: 'none', border: 'none', padding: '14px 0 0', color: accent }}>
+          {open ? "Read less" : "Read more"}
+        </button>
+      )}
+
+      <figcaption style={{ marginTop: 'auto', paddingTop: 22 }}>
+        <div style={{ width: 24, height: 1, background: accent, opacity: 0.5, marginBottom: 14 }} />
+        {t.name && (
+          <p className="font-['Museo',sans-serif] font-light" style={{ color: body, fontSize: '1rem', margin: 0 }}>{t.name}</p>
+        )}
+        {t.title && (
+          <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, margin: '4px 0 0' }}>{t.title}</p>
+        )}
+        <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.16em]"
+          style={{ color: sub, margin: '10px 0 0' }}>
+          {[t.source, t.date].filter(Boolean).join(" · ")}
+        </p>
+      </figcaption>
+    </figure>
+  );
+}
+
+function TestimonialsPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
+  const isDark = useContext(DarkModeCtx);
+  const [group, setGroup] = useState<TestimonialGroup>("leadership");
+  const [headerScrolled, setHeaderScrolled] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  const accent = "#9B5A88";
+  const sub    = isDark ? "rgba(255,255,255,0.72)" : DIM;
+  const shown  = TESTIMONIALS.filter(t => t.group === group);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, []);
+
+  return (
+    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+      <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+
+        <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
+          backdropFilter: headerScrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
+          borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
+          paddingBottom: headerScrolled ? 16 : 24,
+          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
+        }}>
+          <button onClick={onBack}
+            className="flex items-center gap-2 font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4 cursor-pointer"
+            style={{ color: accent, background: 'none', border: 'none', padding: 0 }}>
+            <ChevronLeft size={12} strokeWidth={1.5} /> COACHING
+          </button>
+          <h1 className="font-['Museo',sans-serif] font-light"
+            style={{ fontSize: headerScrolled ? '1.5rem' : '2.25rem', lineHeight: 1.05, color: accent, margin: 0, transition: 'font-size 0.3s ease' }}>
+            What they say
+          </h1>
+        </div>
+
+        <div className="px-6 md:px-20">
+          <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub, maxWidth: '48ch', marginTop: 8 }}>
+            From seniors and peers I've worked alongside to the talent I've had the honour of leading and mentoring.
+          </p>
+
+          {/* Tabs — a two-way split by who's asking, not by subject matter. */}
+          <div role="tablist" aria-label="Testimonial groups" className="flex gap-6" style={{ marginTop: 32 }}>
+            {TESTIMONIAL_GROUPS.map(g => {
+              const active = g.key === group;
+              const count  = TESTIMONIALS.filter(t => t.group === g.key).length;
+              return (
+                <button key={g.key} role="tab" aria-selected={active} onClick={() => setGroup(g.key)}
+                  className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.18em] cursor-pointer"
+                  style={{
+                    background: 'none', border: 'none', padding: '0 0 10px',
+                    color: active ? accent : sub,
+                    borderBottom: `1px solid ${active ? accent : 'transparent'}`,
+                    transition: 'color 0.25s ease, border-color 0.25s ease',
+                  }}>
+                  {g.label} <span style={{ opacity: 0.55 }}>{count}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Masonry columns: quote lengths vary wildly (one line to ten
+              paragraphs), and a grid would leave tall gaps beside the short
+              ones. Two columns rather than three — three drops the measure to
+              ~45 characters, and once a long quote is expanded the balancing
+              leaves a column empty. */}
+          <div style={{ marginTop: 28, columnGap: 24 }}
+            className="[column-count:1] md:[column-count:2]">
+            {shown.map(t => (
+              <div key={t.key} style={{ breakInside: 'avoid', marginBottom: 20 }}>
+                <TestimonialCard t={t} accent={accent} />
+              </div>
+            ))}
+          </div>
+
+          <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, marginTop: 32 }}>
+            Coaching reviews are published on{" "}
+            <a href="https://topmate.io/tffnyc" target="_blank" rel="noopener noreferrer"
+              className="link-underline" style={{ color: accent }}>Topmate</a>{" "}and{" "}
+            <a href="https://adplist.org/mentors/tiffany-c" target="_blank" rel="noopener noreferrer"
+              className="link-underline" style={{ color: accent }}>ADPList</a>.
+          </p>
+
+          <div style={{ height: 120 }} />
+        </div>
+      </div>
+      <StickyPageNav activePage="coaching" onNavigate={onNavigate} />
+    </div>
   );
 }
 
@@ -2656,6 +2947,9 @@ export default function App() {
           <div className="absolute inset-0 overflow-y-auto" onScroll={(e) => setDetailHeaderScrolled((e.target as HTMLElement).scrollTop > 24)}>
             <WorkDetailPage cardKey={detailKey} onBack={navigateBackFromWork} onNavigate={navigateGeneral} headerScrolled={detailHeaderScrolled} compact={detailHeaderScrolled} />
           </div>
+        )}
+        {page === "testimonials" && (
+          <TestimonialsPage onBack={() => setPage("coaching")} onNavigate={navigateGeneral} />
         )}
         {page === "businessCase" && (
           <BusinessCasePage onBack={() => setPage('work')} onNavigate={navigateGeneral} />

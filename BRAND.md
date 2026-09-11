@@ -120,7 +120,9 @@ exclamation. If a line would sound odd said aloud in a meeting, rewrite it.
 - **Eyebrow labels** are uppercase with wide letter-spacing, and are context, not
   headline: *FINTECH · ECOMMERCE · SAAS*, *RECOGNITION & VOICE IN COMMUNITY*.
 - **Sentence case** for headings. Never Title Case Every Word.
-- **No exclamation marks.** None currently exist on the site. Keep it that way.
+- **No exclamation marks** in Tiffany's own copy. The rule governs her voice,
+  not other people's — testimonials are quoted verbatim, punctuation and all.
+  Editing someone's words to fit this guide would misrepresent them.
 
 ---
 
@@ -203,10 +205,12 @@ Things that affect brand consistency and are still outstanding:
 - **Email link styling** is inconsistent with LinkedIn and Instagram beside it —
   it's a real `mailto:` link but has no icon and no hover underline, so it reads
   as plain text.
-- **ADPList mentor profile** (`adplist.org/mentors/tiffany-c`) is a real credential
-  that appears nowhere in the UI.
-- **Testimonials** — designed as 3–4 cards (quote, name, title, company), awaiting
-  real content. Social proof is the one persuasion tool the site doesn't yet use.
+- ~~**ADPList mentor profile**~~ — now linked from the testimonials page,
+  alongside Topmate, as the public record behind the coaching reviews.
+- ~~**Testimonials**~~ — built. `testimonials` page, reached from Coaching, with
+  two tabs: leadership & teams (3) and coaching (5). Sources are shown rather
+  than hidden, since two coaching reviews are anonymous and a named public
+  platform is what makes an unattributed quote credible.
 - **Design Philosophy section** — the rational/intuitive duality, planned as an
   interactive breathing-wave illustration. Never built. It's the piece that would
   explain *how she thinks* rather than *what she delivered*.
