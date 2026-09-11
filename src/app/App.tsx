@@ -1963,6 +1963,8 @@ function TestimonialCard({ t, accent }: { t: (typeof TESTIMONIALS)[number]; acce
 function TestimonialsPage({
   onNavigate,
   embedded = false,
+  isActive = true,
+  compact = false,
   headerScrolled: embeddedScrolled = false,
 }: {
   onNavigate: (p: Page) => void;
@@ -1977,6 +1979,9 @@ function TestimonialsPage({
   // so the shrink flag is passed down rather than measured here.
   const [selfScrolled, setSelfScrolled] = useState(false);
   const headerScrolled = embedded ? embeddedScrolled : selfScrolled;
+  // Heading shrinks on the same signal the sibling sections use: the deck's
+  // `compact` flag when embedded, this page's own scroll when standalone.
+  const shrunk = embedded ? compact : selfScrolled;
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const accent = "#9B5A88";
@@ -2004,10 +2009,11 @@ function TestimonialsPage({
         }}>
           <p className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4"
             style={{ color: accent }}>TESTIMONIAL</p>
-          <h1 className="font-['Museo',sans-serif] font-light"
-            style={{ fontSize: headerScrolled ? '1.5rem' : '2.25rem', lineHeight: 1.05, color: accent, margin: 0, transition: 'font-size 0.3s ease' }}>
+          <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]"
+            style={{ fontSize: shrunk ? "1.5rem" : undefined, lineHeight: 1.05, color: accent, margin: 0, transition: "font-size 0.35s ease" }}
+            initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
             What they say
-          </h1>
+          </motion.h1>
         </div>
 
         <div className="px-6 md:px-20">
