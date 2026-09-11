@@ -145,8 +145,16 @@ Constants live at the top of `App.tsx` — use them, never a raw hex.
 | `DIM` | `#666660` | Secondary text |
 | `NAV_GRADIENT` | `#B2933B → #6281B7 → #C27AA6` | Nav bar, and the source of section heading colours |
 
-Backgrounds are warm off-white `#f8f7f5` (light) and near-black per page
-(`#282828`, `#181410`) in dark.
+**Backgrounds are flat, and tinted by the section.** The base is warm off-white
+`#f8f7f5` (light) / near-black `#282828` (dark), carrying 8% (light) or 12%
+(dark) of that section's heading colour — so the gold sections read cream and
+Connect reads cream-pink, on the same principle as the headings. `tintedBg()`
+in `App.tsx` mixes it; `PageTintCtx` carries it to the chrome that has to
+disappear into it. The ground cross-fades over 0.6s as the deck moves.
+
+Keep the mix low. It should register as warmth, not as colour — the type is
+what should be noticed. There is deliberately no gradient mesh behind the
+site; that was removed in favour of this.
 
 **Gold is an accent, not a fill.** It marks what matters — headings, links, the
 logomark — and loses its authority the moment it's used for large areas.

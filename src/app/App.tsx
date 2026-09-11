@@ -70,6 +70,26 @@ const SECTION_ORDER = ["about", "work", "awards", "testimonials", "coaching", "c
 // faithful sample would. The gradient takes over from Testimonial onward and
 // still ends exactly on the pink end at Connect.
 const GRADIENT_HEADINGS = new Set(["testimonials", "coaching", "connect"]);
+
+// The page ground is flat — no mesh — but not a single flat grey. It carries
+// the faintest wash of whatever colour the section's own heading uses, so the
+// gold sections read cream and Connect reads cream-pink, on the same principle
+// as the headings themselves. Deliberately low: it should register as warmth,
+// not as colour, and the type has to stay the thing you notice.
+function tintedBg(accent: string, isDark: boolean): string {
+  const rgb = [1, 3, 5].map(i => parseInt(accent.slice(i, i + 2), 16));
+  const base = isDark ? [40, 40, 40] : [248, 247, 245];
+  const amount = isDark ? 0.12 : 0.08;   // dark needs more to register at all
+  return "#" + base
+    .map((v, i) => Math.round(v + (rgb[i] - v) * amount).toString(16).padStart(2, "0"))
+    .join("");
+}
+
+// Which section's colour the ground is currently wearing. Read by the chrome
+// that has to disappear into it — the nav's bottom fade, the mobile menu —
+// so none of them can hold a stale flat cream while the ground has moved on.
+const PageTintCtx = createContext<string>("#f8f7f5");
+
 const HEADING_COLOUR: Record<string, string> = Object.fromEntries(
   SECTION_ORDER.map((key, i) => [
     key,
@@ -101,80 +121,6 @@ function useAccordionItem(id: string) {
   return { open, toggle };
 }
 
-// ─── Animated gradient background (dark mode) ─────────────────────
-function AnimatedGradientBg() {
-  return (
-    <>
-      <style>{`
-        @keyframes drift-a { 0%{transform:translate(0%,0%) scale(1)} 33%{transform:translate(8%,-12%) scale(1.08)} 66%{transform:translate(-6%,10%) scale(0.95)} 100%{transform:translate(0%,0%) scale(1)} }
-        @keyframes drift-b { 0%{transform:translate(0%,0%) scale(1)} 40%{transform:translate(-10%,8%) scale(1.12)} 70%{transform:translate(7%,-6%) scale(0.92)} 100%{transform:translate(0%,0%) scale(1)} }
-        @keyframes drift-c { 0%{transform:translate(0%,0%) scale(1)} 50%{transform:translate(12%,6%) scale(1.06)} 80%{transform:translate(-8%,-10%) scale(1.1)} 100%{transform:translate(0%,0%) scale(1)} }
-        @keyframes drift-d { 0%{transform:translate(0%,0%) scale(1.05)} 45%{transform:translate(-5%,14%) scale(0.93)} 75%{transform:translate(9%,-5%) scale(1.1)} 100%{transform:translate(0%,0%) scale(1.05)} }
-      `}</style>
-      <div className="absolute inset-0 bg-[#282828]" />
-      <div className="absolute rounded-full pointer-events-none" style={{ width:"65vw",height:"65vw",top:"-15%",left:"-10%", background:"radial-gradient(circle,rgba(178,147,59,0.28) 0%,transparent 70%)", filter:"blur(48px)", animation:"drift-a 22s ease-in-out infinite" }} />
-      <div className="absolute rounded-full pointer-events-none" style={{ width:"55vw",height:"55vw",top:"10%",right:"-15%", background:"radial-gradient(circle,rgba(38,88,90,0.42) 0%,transparent 70%)", filter:"blur(60px)", animation:"drift-b 28s ease-in-out infinite" }} />
-      <div className="absolute rounded-full pointer-events-none" style={{ width:"60vw",height:"60vw",bottom:"-20%",left:"20%", background:"radial-gradient(circle,rgba(110,55,70,0.35) 0%,transparent 70%)", filter:"blur(55px)", animation:"drift-c 32s ease-in-out infinite" }} />
-      <div className="absolute rounded-full pointer-events-none" style={{ width:"50vw",height:"50vw",top:"5%",left:"30%", background:"radial-gradient(circle,rgba(48,55,110,0.30) 0%,transparent 70%)", filter:"blur(64px)", animation:"drift-d 26s ease-in-out infinite" }} />
-      <div className="absolute inset-0 pointer-events-none" style={{ background:"linear-gradient(90deg,rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.15) 50%,rgba(0,0,0,0) 100%)" }} />
-      <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.04]" style={{ mixBlendMode:"overlay" }}>
-        <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
-        <rect width="100%" height="100%" filter="url(#grain)"/>
-      </svg>
-    </>
-  );
-}
-
-// ─── Light mode background — soft multicolour blobs ────────────────
-// Pure CSS (radial-gradient + blur + transform drift), same technique
-// as AnimatedGradientBg above — no images, no JS animation loop, so it
-// costs nothing extra at load. Blobs are irregular (asymmetric
-// border-radius) and very low-opacity so they sit quietly behind
-// content rather than competing with it.
-function LightGradientBlobs() {
-  return (
-    <>
-      <style>{`
-        @keyframes blob-drift-a { 0%{transform:translate(0%,0%) scale(1) rotate(0deg)} 33%{transform:translate(-5%,-7%) scale(1.07) rotate(7deg)} 66%{transform:translate(4%,5%) scale(0.95) rotate(-5deg)} 100%{transform:translate(0%,0%) scale(1) rotate(0deg)} }
-        @keyframes blob-drift-b { 0%{transform:translate(0%,0%) scale(1) rotate(0deg)} 40%{transform:translate(6%,5%) scale(1.1) rotate(-9deg)} 70%{transform:translate(-4%,-5%) scale(0.93) rotate(6deg)} 100%{transform:translate(0%,0%) scale(1) rotate(0deg)} }
-        @keyframes blob-drift-c { 0%{transform:translate(0%,0%) scale(1.04) rotate(0deg)} 50%{transform:translate(-6%,4%) scale(0.94) rotate(9deg)} 100%{transform:translate(0%,0%) scale(1.04) rotate(0deg)} }
-        @keyframes blob-drift-d { 0%{transform:translate(0%,0%) scale(1) rotate(0deg)} 45%{transform:translate(5%,-6%) scale(1.08) rotate(-8deg)} 75%{transform:translate(-4%,5%) scale(0.96) rotate(5deg)} 100%{transform:translate(0%,0%) scale(1) rotate(0deg)} }
-      `}</style>
-      <div className="absolute inset-0" style={{ background: "#f8f7f5" }} />
-      {/* Joyful multicolour patch — concentrated on the right, left stays
-          clean warm cream. Golden yellow is the dominant centre, with
-          peach, violet and sky-blue blended around it. */}
-      <div className="absolute pointer-events-none" style={{
-        width: "52vw", height: "48vw", top: "22%", right: "-12%",
-        borderRadius: "58% 42% 50% 50% / 52% 48% 52% 48%",
-        background: "radial-gradient(circle at 50% 50%, rgba(244,196,72,0.42) 0%, rgba(244,196,72,0.28) 35%, transparent 72%)",
-        filter: "blur(55px)", animation: "blob-drift-a 30s ease-in-out infinite",
-      }} />
-      <div className="absolute pointer-events-none" style={{
-        width: "40vw", height: "38vw", top: "-6%", right: "4%",
-        borderRadius: "55% 45% 40% 60% / 60% 40% 60% 40%",
-        background: "radial-gradient(circle at 55% 50%, rgba(244,176,120,0.40) 0%, rgba(244,176,120,0.24) 40%, transparent 74%)",
-        filter: "blur(58px)", animation: "blob-drift-b 34s ease-in-out infinite",
-      }} />
-      <div className="absolute pointer-events-none" style={{
-        width: "34vw", height: "32vw", top: "-14%", right: "-12%",
-        borderRadius: "48% 52% 58% 42% / 55% 45% 55% 45%",
-        background: "radial-gradient(circle at 55% 45%, rgba(140,108,224,0.36) 0%, rgba(140,108,224,0.20) 45%, transparent 75%)",
-        filter: "blur(58px)", animation: "blob-drift-c 38s ease-in-out infinite",
-      }} />
-      <div className="absolute pointer-events-none" style={{
-        width: "44vw", height: "40vw", bottom: "-18%", right: "-8%",
-        borderRadius: "45% 55% 60% 40% / 52% 48% 52% 48%",
-        background: "radial-gradient(circle at 50% 50%, rgba(140,180,226,0.36) 0%, rgba(160,200,210,0.20) 45%, transparent 75%)",
-        filter: "blur(60px)", animation: "blob-drift-d 32s ease-in-out infinite",
-      }} />
-      <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.025]" style={{ mixBlendMode: "multiply" }}>
-        <filter id="grain-light"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
-        <rect width="100%" height="100%" filter="url(#grain-light)"/>
-      </svg>
-    </>
-  );
-}
 
 // ─── Dark / light toggle widget ───────────────────────────────────
 // Desktop: shown fixed top-right. Mobile: rendered inside MobileMenu instead
@@ -267,7 +213,12 @@ function useIsMobile() {
 
 function LogoMark({ size = 70, color = GOLD }: { size?: number; color?: string }) {
   return (
-    <svg width={size} height={Math.round(size * 1.4)} viewBox="0 0 80 112" fill="none">
+    // flexShrink: 0 — the mark sits as a flex child in the hero and the mobile
+    // menu, and without this a short viewport squeezes it: measured 70x98 at
+    // 1440x900 but 70x17 at 1280x760, i.e. the logo silently flattening to a
+    // sliver on smaller laptops.
+    <svg width={size} height={Math.round(size * 1.4)} viewBox="0 0 80 112" fill="none"
+      style={{ flexShrink: 0 }}>
       <clipPath id="tiff-clip"><rect width="80" height="112" /></clipPath>
       <g clipPath="url(#tiff-clip)">
         <path d={T_PATH} fill={color} />
@@ -313,6 +264,7 @@ function MobileMenu({
   const itemActive = GOLD;
   const rowBorder  = isDark ? "rgba(255,255,255,0.15)" : "rgba(17,17,17,0.12)";
   const closeColor = isDark ? "white" : INK;
+  const menuBg = useContext(PageTintCtx);
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
   return (
@@ -325,7 +277,7 @@ function MobileMenu({
       aria-hidden={!open}
       pointerEvents={open ? "auto" : "none"}
     >
-      {isDark ? <AnimatedGradientBg /> : <LightGradientBlobs />}
+      <div className="absolute inset-0" style={{ background: menuBg }} />
 
       {/* Header row */}
       <div className="relative z-10 flex items-center px-6 pt-10 pb-6">
@@ -703,9 +655,9 @@ const HERO_BOTTOM_RESERVE = "calc(5% + 80px + env(safe-area-inset-bottom))";
 
 // ─── Homepage ─────────────────────────────────────────────────────
 
-export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number }) {
+export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onSectionChange }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number; onSectionChange?: (key: string) => void }) {
   const isDark = useContext(DarkModeCtx);
-  const pageBg  = isDark ? "#282828" : "#f8f7f5";
+  const pageBg  = useContext(PageTintCtx);
   const fg      = isDark ? GOLD : INK;
   const bodyCol = isDark ? "rgba(255,255,255,0.85)" : INK;
   const dimCol  = isDark ? "rgba(255,255,255,0.38)" : DIM;
@@ -740,6 +692,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
   const heroOverflows = sectionOverflows["hero"] ?? false;
   const isMobileRef  = useRef(isMobile);
   useEffect(() => { isMobileRef.current = isMobile; }, [isMobile]);
+
+  // Tell the App which section is showing so the ground can follow the deck.
+  useEffect(() => {
+    onSectionChange?.(SECTIONS[activeIdx]?.key ?? "about");
+  }, [activeIdx, onSectionChange]);
 
   const resetTimer = useCallback(() => {
     startTime.current = Date.now();
@@ -1038,8 +995,12 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
               {/* Same words as the mobile block above. The two breakpoints
                   are separate elements, so this is the one line that has to
                   be kept in step with it. */}
+              {/* Fluid, like the mobile block. At a fixed 4rem this wrapped to
+                  three lines on a small laptop and pushed the closing
+                  paragraph out of the slide, which clips — the section doesn't
+                  scroll on desktop. */}
               <h1 className="font-['Museo',sans-serif] font-light"
-                style={{ fontSize: "4rem", lineHeight: 1.05, color: GOLD, maxWidth: "52%" }}>
+                style={{ fontSize: "clamp(2.75rem, 4.6vw, 4rem)", lineHeight: 1.05, color: GOLD, maxWidth: "52%" }}>
                 Hi, I'm a product &amp; design leader
               </h1>
             </div>
@@ -1137,10 +1098,6 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 WebkitOverflowScrolling: "touch",
                 touchAction: "pan-x",
               }}>
-
-              <div className="absolute inset-0 pointer-events-none"
-                style={{ opacity: isActive ? 1 : 0, transition: "opacity 0.6s ease",
-                  background: `radial-gradient(ellipse 70% 50% at 60% 30%, ${section.accent}0d 0%, transparent 70%)` }} />
 
               <div className="relative z-10 flex flex-col h-full px-6 md:px-20 pt-10 md:pt-14"
                 style={{ paddingBottom: "calc(64px + 8vh + 32px)" }}>
@@ -1605,7 +1562,7 @@ function DetailBottomBar({
 // would otherwise be visible peeking past the nav's side margins/edges.
 function StickyPageNav({ activePage, detailLabel, compact, onNavigate }: { activePage: Page; detailLabel?: string; compact?: boolean; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
-  const pageBg = isDark ? "#181410" : "#f8f7f5";
+  const pageBg = useContext(PageTintCtx);
   return (
     <>
       <div className="fixed inset-x-0 bottom-0 z-20 pointer-events-none"
@@ -2996,6 +2953,20 @@ export default function App() {
     setPage(target);
   };
 
+  // The homepage deck reports which slide is showing; every other page maps to
+  // the section it belongs to, so drilling into a case study or an event keeps
+  // the ground its parent section was wearing.
+  const [homeSectionKey, setHomeSectionKey] = useState<string>("about");
+  const tintKey =
+      page === "home"                                      ? homeSectionKey
+    : page === "work" || page === "workDetail" || page === "businessCase" ? "work"
+    : page === "awards" || page === "speaking"             ? "awards"
+    : page === "testimonials"                              ? "testimonials"
+    : page === "coaching"                                  ? "coaching"
+    : page === "connect" || page === "speakingInquiry"     ? "connect"
+    : "about";
+  const pageTint = tintedBg(HEADING_COLOUR[tintKey] ?? GOLD, isDark);
+
   const [detailHeaderScrolled, setDetailHeaderScrolled] = useState(false);
   const detailLabel = page === "workDetail" && detailKey ? EXPERTISE_CARDS.find(c => c.key === detailKey)?.title : undefined;
   const motionKey = page === "speaking" ? `speaking:${detailKey}` : page === "workDetail" ? `workDetail:${detailKey}` : page;
@@ -3010,19 +2981,18 @@ export default function App() {
     <DarkModeCtx.Provider value={isDark}>
     <DarkModeToggleCtx.Provider value={toggleDark}>
     <AccordionCtx.Provider value={{ openId: openAccordionId, setOpenId: setOpenAccordionId }}>
-    <div className="relative w-screen h-dvh overflow-hidden" style={{ background: isDark ? "#282828" : "#f8f7f5" }}>
-      {/* Persistent background — mounted once at the App root so its drift
-          animation never resets on page navigation. Only the content above
-          it (motion.div below) transitions between pages. */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-        {isDark ? <AnimatedGradientBg /> : <LightGradientBlobs />}
-      </div>
+    <PageTintCtx.Provider value={pageTint}>
+    <div className="relative w-screen h-dvh overflow-hidden" style={{ background: pageTint, transition: "background 0.6s ease" }}>
+      {/* Flat ground, tinted by the current section. Mounted once at the App
+          root and cross-faded rather than swapped per page, so swiping the
+          deck shifts the colour gradually instead of stepping. */}
+      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, background: pageTint, transition: "background 0.6s ease" }} />
       <DarkModeToggle isDark={isDark} onToggle={toggleDark} />
       <motion.div key={motionKey} className="absolute inset-0" style={{ zIndex: 1 }}
         initial={page === "workDetail" ? { opacity: 1, x: "100%" } : { opacity: 0, x: 0 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: page === "workDetail" ? 0.4 : 0.45, ease: [0.4, 0, 0.2, 1] }}>
-        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} />}
+        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} onSectionChange={setHomeSectionKey} />}
         {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} /></div>}
         {page === "awards"   && <div className="absolute inset-0"><AwardsSpeakingPage onNavigate={navigateGeneral} /></div>}
         {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={navigateGeneral} /></div>}
@@ -3055,6 +3025,7 @@ export default function App() {
         <StickyPageNav activePage="work" detailLabel={detailLabel} compact={page === "workDetail" && detailHeaderScrolled} onNavigate={navigateGeneral} />
       )}
     </div>
+    </PageTintCtx.Provider>
     </AccordionCtx.Provider>
     </DarkModeToggleCtx.Provider>
     </DarkModeCtx.Provider>
