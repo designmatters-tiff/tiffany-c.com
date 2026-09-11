@@ -1517,7 +1517,8 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
             <li key={r.label} className="font-['Avenir',sans-serif] font-light text-sm flex items-start gap-2" style={{ color: card.accent }}>
               <span className="mt-0.5 flex-shrink-0">—</span>
               <a href={r.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1" style={{ color: card.accent }}>
-                {r.label}<ExternalLink size={11} strokeWidth={1.5} style={{ flexShrink: 0, opacity: 0.7 }} />
+                <span className="link-underline">{r.label}</span>
+                <ExternalLink size={11} strokeWidth={1.5} style={{ flexShrink: 0, opacity: 0.7 }} />
               </a>
             </li>
           ))}
@@ -2260,9 +2261,9 @@ function SpeakingEventRow({
             )}
             {ev.link && (
               <a href={ev.link} target="_blank" rel="noopener noreferrer"
-                className="link-underline inline-flex items-center gap-2 mt-5 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
+                className="inline-flex items-center gap-2 mt-5 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
                 style={{ color: GOLD }}>
-                Watch on YouTube
+                <span className="link-underline">Watch on YouTube</span>
                 <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
               </a>
             )}
@@ -2331,9 +2332,9 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
             </div>
           </div>
           <a href="https://womenindigital.org/women-in-digital-awards/women-in-digital-awards-2025-finalists/" target="_blank" rel="noopener noreferrer"
-            className="link-underline inline-flex items-center gap-2 mt-5 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
+            className="inline-flex items-center gap-2 mt-5 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
             style={{ color: GOLD }}>
-            View official finalists page
+            <span className="link-underline">View official finalists page</span>
             <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
           </a>
         </div>
@@ -2647,9 +2648,9 @@ function SpeakingDetailPage({
             <p className="font-['Avenir',sans-serif] font-light text-xs uppercase tracking-widest mb-4"
               style={{ color: subColor }}>Watch the talk</p>
             <a href={ev.link} target="_blank" rel="noopener noreferrer"
-              className="link-underline inline-flex items-center gap-2 font-['Avenir',sans-serif] font-medium text-sm uppercase tracking-[0.15em] cursor-pointer"
+              className="inline-flex items-center gap-2 font-['Avenir',sans-serif] font-medium text-sm uppercase tracking-[0.15em] cursor-pointer"
               style={{ color: GOLD }}>
-              Watch on YouTube
+              <span className="link-underline">Watch on YouTube</span>
               <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
             </a>
           </div>
@@ -2658,9 +2659,9 @@ function SpeakingDetailPage({
         {/* Finalist link */}
         {ev.finalistLink && (
           <a href={ev.finalistLink} target="_blank" rel="noopener noreferrer"
-            className="link-underline inline-flex items-center gap-2 mt-6 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
+            className="inline-flex items-center gap-2 mt-6 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
             style={{ color: GOLD }}>
-            View official finalists page
+            <span className="link-underline">View official finalists page</span>
             <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
           </a>
         )}
