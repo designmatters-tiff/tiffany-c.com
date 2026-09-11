@@ -1897,7 +1897,7 @@ const TESTIMONIALS: {
   },
   {
     key: "nehaa", group: "coaching",
-    name: "Nehaa", title: null,
+    name: "Nehaa", title: "Sr. Design Consultant",
     source: "via Topmate", date: "10 September 2025",
     quote: [
       "I had the privilege of getting my portfolio reviewed by Tiffany, and it was truly a game-changer. She has such deep knowledge and an incredible eye for detail, pointing out nuances in my portfolio that I had completely missed. What stood out was how she gave me perspectives not just as a designer, but also as a design manager, and even how a non-designer would perceive my work. Tiffany provided clear, actionable feedback on both my portfolio and interview preparation, which I immediately incorporated. I'm beyond happy to share that after three years of searching, I was finally able to land a job thanks to her guidance. Forever grateful for Tiffany's mentorship and the clarity she brings.",
@@ -1905,7 +1905,7 @@ const TESTIMONIALS: {
   },
   {
     key: "jia", group: "coaching",
-    name: "Jia", title: null,
+    name: "Jia", title: "Sr. UX Researcher",
     source: "via Topmate", date: "7 September 2025",
     quote: [
       "Tiff has been an incredible guide throughout my job search. She gave me concrete feedback on my UX portfolio—how to showcase impact and structure case studies—coached me on positioning myself confidently in interviews, and walked me through strategies for negotiating offer terms. Thanks to her support, I was able to land my new role and feel aligned with my career goals.",
@@ -1913,7 +1913,7 @@ const TESTIMONIALS: {
   },
   {
     key: "yoonjung", group: "coaching",
-    name: "Yoon Jung", title: null,
+    name: "Yoon Jung", title: "Product Designer",
     source: "via Topmate", date: "19 January 2026",
     quote: [
       "I had great session with Tiffany! She really deep-dived in to my portfolio and pointed out the weakest point I had and help me improve to show the strongest skills. Totally recommend to designers who are trying to step into Aus market!",
@@ -1921,7 +1921,7 @@ const TESTIMONIALS: {
   },
   {
     key: "topmate-aug", group: "coaching",
-    name: null, title: null,
+    name: null, title: "Product & Business Owner",
     source: "via Topmate", date: "26 August 2025",
     quote: [
       "Hands-on experience in building and leading a high-performing product design team. Provides clinical, actionable advice that translates into real results. Highly recommended, and I'll definitely be returning for periodic follow-ups.",
@@ -1929,7 +1929,7 @@ const TESTIMONIALS: {
   },
   {
     key: "topmate-oct", group: "coaching",
-    name: null, title: null,
+    name: null, title: "Sr. UX Researcher",
     source: "via Topmate", date: "8 October 2025",
     quote: [
       "I didn't think 15 minutes would be enough to get advice and to understand the problem space I'm in, but Tiffany surprised me by how much she knew about the issue I'm facing. It was short and effective, with actionable things to consider. Thank you Tiffany!",
@@ -1997,7 +1997,7 @@ function TestimonialCard({ t, accent }: { t: (typeof TESTIMONIALS)[number]; acce
           <p className="font-['Museo',sans-serif] font-light" style={{ color: body, fontSize: '1rem', margin: 0 }}>{t.name}</p>
         )}
         {t.title && (
-          <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, margin: '4px 0 0' }}>{t.title}</p>
+          <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, margin: t.name ? '4px 0 0' : 0 }}>{t.title}</p>
         )}
         <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.16em]"
           style={{ color: sub, margin: '10px 0 0' }}>
