@@ -2324,51 +2324,139 @@ function SpeakingDetailPage({
 // can be rendered inline after the passcode is entered.
 function BusinessCaseContent() {
   const isDark = useContext(DarkModeCtx);
-  const fg = GOLD;
-  const sub = isDark ? "rgba(255,255,255,0.75)" : DIM;
+  const fg   = GOLD;
+  const sub  = isDark ? "rgba(255,255,255,0.75)" : DIM;
+  const body = isDark ? "rgba(255,255,255,0.85)" : INK;
+  const rule = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
+
+  // Metadata reads as a definition list rather than run-on lines, matching the
+  // labelled columns the case study has always had.
+  const META: [string, React.ReactNode][] = [
+    ["Goal", "Increase checkout rate"],
+    ["Year", "Designed and tested in 2025"],
+    ["Client", "Cotton On Group"],
+    ["My role", "Product Design Lead"],
+    ["Team", "1"],
+    ["Scope of work", "Design workshop facilitation, research analysis"],
+    ["Business website", (
+      <a href="https://cottonon.com" target="_blank" rel="noopener noreferrer"
+        className="link-underline" style={{ color: fg }}>Cotton On</a>
+    )],
+  ];
+
   return (
     <div className="relative w-full" style={{ minHeight: '100dvh', background: 'transparent' }}>
-      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10">
-        <div style={{}}>
-          <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub }}>Goal — Increase Checkout Rate</p>
-          <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub, marginTop: 6 }}>Year: Designed & tested in 2025 · Client: Cotton On Group</p>
-          <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub, marginTop: 6 }}>My Role: Product Design Lead · Team: 1</p>
-          <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub, marginTop: 6 }}>Scope: Design Workshop Facilitation, research analysis, Business Website</p>
-        </div>
+      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10" style={{ maxWidth: 900 }}>
 
-        <section style={{ marginTop: 28 }}>
-          <h2 className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1.25rem' }}>The Solution</h2>
-          <p className="font-['Avenir',sans-serif] font-light" style={{ color: isDark ? 'rgba(255,255,255,0.85)' : INK, marginTop: 8 }}>
-            From analytics and session data we identified that promo code interactions were the most-clicked element on the bag page; users
-            were leaving the site to search for codes which broke checkout intent. The intervention surfaced account/login and voucher selectors
-            to reduce off-site search and make available vouchers discoverable at the point of checkout.
+        <dl className="grid gap-x-8 gap-y-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', margin: 0 }}>
+          {META.map(([label, value]) => (
+            <div key={label}>
+              <dt className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.18em]"
+                style={{ color: sub }}>{label}</dt>
+              <dd className="font-['Avenir',sans-serif] font-light" style={{ color: body, margin: '6px 0 0' }}>{value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        {/* ── Problem ── */}
+        <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+          <h2 className="font-['Museo',sans-serif] font-light"
+            style={{ color: fg, fontSize: 'clamp(1.5rem, 4vw, 2rem)', lineHeight: 1.2, maxWidth: '26ch', textWrap: 'balance', margin: 0 }}>
+            From Google Analytics and Content Square, we saw the promo code component is most clicked
+          </h2>
+          <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, marginTop: 12 }}>
+            Excluding the checkout button, which is the bag page's main call to action.
           </p>
-          <div style={{ marginTop: 18 }}>
-            <img src={foggModel} alt="Fogg behavioural model" style={{ width: '100%', maxWidth: 760, display: 'block', borderRadius: 8 }} />
-            <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub, marginTop: 8 }}>Image: Fogg behavioural model — rationale for intervention.</p>
-          </div>
-        </section>
 
-        <section style={{ marginTop: 20 }}>
-          <h3 className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1rem' }}>AB testing</h3>
-          <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub, marginTop: 8 }}>
-            Group A: legacy design (promo code hidden). Group B: surfaced login and voucher selectors. The new flow reduced users leaving the
-            funnel to search for promo codes and improved checkout conversions for users with vouchers.
-          </p>
-          <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
-            <img src={interventionImg} alt="The intervention" style={{ width: '100%', borderRadius: 8 }} />
-          </div>
-        </section>
-
-        <section style={{ marginTop: 20 }}>
-          <h4 className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1rem' }}>Results</h4>
-          <div style={{ marginTop: 8 }}>
-            <p className="font-['Avenir',sans-serif] font-medium" style={{ color: fg }}>Revenue +57% · Checkout rate 2× · Conversion rate +0.28%</p>
-            <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub, marginTop: 8 }}>Measured from checkout entry to purchase.</p>
-            <div style={{ marginTop: 12 }}>
-              <img src={graphResult} alt="graph result" style={{ width: '100%', maxWidth: 720, borderRadius: 8 }} />
+          <div className="grid gap-8 md:grid-cols-2" style={{ marginTop: 32 }}>
+            <div>
+              <h3 className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.18em]" style={{ color: sub }}>Background</h3>
+              <p className="font-['Avenir',sans-serif] font-light" style={{ color: body, marginTop: 8 }}>
+                We had a 3× lower checkout rate compared to other similar players in the industry.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.18em]" style={{ color: sub }}>The brief</h3>
+              <p className="font-['Avenir',sans-serif] font-light" style={{ color: body, marginTop: 8 }}>
+                Increase the checkout rate from the bag page.
+              </p>
+            </div>
+            <div className="md:col-span-2">
+              <h3 className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.18em]" style={{ color: sub }}>My responsibilities</h3>
+              <p className="font-['Avenir',sans-serif] font-light" style={{ color: body, marginTop: 8 }}>
+                I led the user surveys and interviews to find the qualitative reason behind what the data showed. The reason was simple —
+                users are motivated to check out when they have a promo code to use.
+              </p>
             </div>
           </div>
+        </section>
+
+        {/* ── Rationale ── */}
+        <section style={{ marginTop: 48 }}>
+          <figure style={{ margin: 0 }}>
+            <img src={foggModel} alt="The Fogg Behavior Model, annotated with the nudge and one-click voucher interventions"
+              style={{ width: '100%', maxWidth: 760, display: 'block', borderRadius: 8 }} />
+            <figcaption className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, marginTop: 12 }}>
+              Image 1: Concept of human behaviour and UX design.
+            </figcaption>
+          </figure>
+
+          <div style={{
+            marginTop: 32, padding: '20px 24px', borderRadius: 8,
+            background: isDark ? "rgba(255,255,255,0.06)" : "#1c1c1c",
+          }}>
+            <p className="font-['Avenir',sans-serif] font-light" style={{ color: isDark ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.92)', margin: 0 }}>
+              The design solution addresses a well-known broken flow: users leave the website to search for a code.
+            </p>
+          </div>
+        </section>
+
+        {/* ── Intervention ── */}
+        <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+          <h2 className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1.5rem', margin: 0 }}>AB testing</h2>
+          <div className="grid gap-6 md:grid-cols-2" style={{ marginTop: 16 }}>
+            <p className="font-['Avenir',sans-serif] font-light" style={{ color: body, margin: 0 }}>
+              <span style={{ color: fg }}>Group A</span> — the old design, without login, and the promo code field hidden inside a collapsed container.
+            </p>
+            <p className="font-['Avenir',sans-serif] font-light" style={{ color: body, margin: 0 }}>
+              <span style={{ color: fg }}>Group B</span> — the login surfaced, with selectors for the vouchers already available to that account.
+            </p>
+          </div>
+
+          <figure style={{ margin: '32px 0 0' }}>
+            <img src={interventionImg} alt="Group B: the collapsed promo code field on the left, and the surfaced voucher selectors after logging in on the right"
+              style={{ width: '100%', display: 'block', borderRadius: 8 }} />
+            <figcaption className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, marginTop: 12 }}>
+              Left: the new design where users have not logged in. Right: after logging in.
+            </figcaption>
+          </figure>
+        </section>
+
+        {/* ── Result ── */}
+        <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+          <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.18em]" style={{ color: sub }}>
+            Result from the tested group — voucher owners
+          </p>
+          <dl className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginTop: 20 }}>
+            {[["Revenue", "+57%"], ["Checkout rate", "2×"], ["Conversion rate", "+0.28%"]].map(([label, value]) => (
+              <div key={label}>
+                <dd className="font-['Museo',sans-serif] font-light"
+                  style={{ color: fg, fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', lineHeight: 1.1, margin: 0, fontVariantNumeric: 'tabular-nums' }}>{value}</dd>
+                <dt className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, marginTop: 6 }}>{label}</dt>
+              </div>
+            ))}
+          </dl>
+          <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, marginTop: 16 }}>
+            Measured from checkout entry to purchase.
+          </p>
+
+          <figure style={{ margin: '32px 0 0' }}>
+            <img src={graphResult} alt="Google Analytics funnel: view bag, enter checkout at 70.1%, purchase at 79.6%"
+              style={{ width: '100%', maxWidth: 760, display: 'block', borderRadius: 8 }} />
+            <figcaption className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, marginTop: 12 }}>
+              Chart: Google Analytics funnel from bag to successful checkout.
+            </figcaption>
+          </figure>
         </section>
 
         <div style={{ height: 96 }} />
