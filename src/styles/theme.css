@@ -128,12 +128,26 @@
     display: none;
   }
 
-  /* Underline animates left → right on hover */
-  .link-underline {
+  /* Underline animates left → right on hover.
+     This is the site's default for links, not an opt-in: every text link gets
+     it without having to remember the class. `.link-underline` stays, for the
+     cases where the sweep belongs on something that isn't an <a> — a <button>
+     that reads as a link, or the text span inside a full-width row.
+
+     Two guards keep the default from misfiring:
+       :has(.link-underline)  — a row like the LinkedIn item puts the class on
+                                its inner text span, because the <a> itself
+                                spans the full width and an underline across
+                                the whole row would be wrong. Without this the
+                                row would draw a second underline of its own.
+       .no-link-underline     — explicit opt-out for anything else. */
+  .link-underline,
+  a:not(.no-link-underline):not(:has(.link-underline)) {
     position: relative;
     text-decoration: none;
   }
-  .link-underline::after {
+  .link-underline::after,
+  a:not(.no-link-underline):not(:has(.link-underline))::after {
     content: '';
     position: absolute;
     bottom: -1px;
@@ -143,8 +157,16 @@
     background: currentColor;
     transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .link-underline:hover::after {
+  .link-underline:hover::after,
+  a:not(.no-link-underline):not(:has(.link-underline)):hover::after {
     width: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .link-underline::after,
+    a:not(.no-link-underline):not(:has(.link-underline))::after {
+      transition: none;
+    }
   }
 
   /* Gold CTA button — matches Figma states (Active/Hover/Onclick/Focused) */
