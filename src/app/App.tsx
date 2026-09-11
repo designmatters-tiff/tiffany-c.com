@@ -35,6 +35,38 @@ const NAV_GRADIENT = "linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
 const NAV_GRADIENT_DARK = "linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
 const navGradient = (isDark: boolean) => isDark ? NAV_GRADIENT_DARK : NAV_GRADIENT;
 
+// Each section's heading takes its colour from the bottom nav's gradient at
+// that section's own position along the bar, so the page and the nav agree.
+// Sampled rather than hardcoded, so the two can't drift apart if NAV_GRADIENT
+// is ever retuned. The ends are exact: the hero sits on the gold end, Connect
+// on the pink end.
+const NAV_STOPS: [number, [number, number, number]][] = [
+  [0,   [178, 147, 59]],   // #B2933B gold
+  [0.5, [98, 129, 183]],   // #6281B7 blue
+  [1,   [194, 122, 166]],  // #C27AA6 pink
+];
+
+function gradientAt(t: number): string {
+  const x = Math.min(1, Math.max(0, t));
+  for (let i = 0; i < NAV_STOPS.length - 1; i++) {
+    const [t0, c0] = NAV_STOPS[i];
+    const [t1, c1] = NAV_STOPS[i + 1];
+    if (x <= t1) {
+      const f = t1 === t0 ? 0 : (x - t0) / (t1 - t0);
+      return "#" + c0
+        .map((v, k) => Math.round(v + (c1[k] - v) * f).toString(16).padStart(2, "0"))
+        .join("");
+    }
+  }
+  return NAV_GRADIENT;
+}
+
+// Deck order — the same order the nav lists them in.
+const SECTION_ORDER = ["about", "work", "awards", "testimonials", "coaching", "connect"] as const;
+const HEADING_COLOUR: Record<string, string> = Object.fromEntries(
+  SECTION_ORDER.map((key, i) => [key, gradientAt(i / (SECTION_ORDER.length - 1))]),
+);
+
 type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "testimonials";
 
 // ─── Dark mode context ────────────────────────────────────────────
@@ -1099,7 +1131,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 </motion.p>
 
                 <motion.h2 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]"
-                  style={{ lineHeight: 1.05, maxWidth: "16ch", color: GOLD }}
+                  style={{ lineHeight: 1.05, maxWidth: "16ch", color: HEADING_COLOUR[section.key] ?? GOLD }}
                   initial={false}
                   animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }}
                   transition={{ duration: 0.55, delay: 0.06 }}>
@@ -1682,7 +1714,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           Fintech · eCommerce · SaaS
         </motion.p>
         <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]"
-          style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: GOLD, transition: "font-size 0.35s ease" }}
+          style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: HEADING_COLOUR.work, transition: "font-size 0.35s ease" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Work
         </motion.h1>
@@ -1708,6 +1740,7 @@ function ContactListPage({
   title,
   items,
   accent,
+  headingColor,
   activePage,
   onNavigate,
 }: {
@@ -1715,6 +1748,9 @@ function ContactListPage({
   title: string;
   items: readonly string[];
   accent: string;
+  // Coaching and Connect share this shell but sit at different points along
+  // the nav gradient, so the heading colour comes in per page.
+  headingColor?: string;
   activePage: Page;
   onNavigate: (p: Page) => void;
 }) {
@@ -1730,7 +1766,7 @@ function ContactListPage({
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {eyebrow}
         </motion.p>
-        <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]" style={{ lineHeight: 1.05, color: fg }}
+        <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]" style={{ lineHeight: 1.05, color: headingColor ?? fg }}
           initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
           {title}
         </motion.h1>
@@ -1760,6 +1796,7 @@ function CoachingPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       title="UX Career Coaching"
       items={["1:1 Calls", "Priority DM", "Package (1-1 Coaching Service)"]}
       accent="#9B5A88"
+      headingColor={HEADING_COLOUR.coaching}
       activePage="coaching"
       onNavigate={onNavigate}
     />
@@ -1773,6 +1810,7 @@ function ConnectPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       title="Let's Connect"
       items={["Speaking Inquiry", "linkedin", "instagram", "designmatters.tiff@gmail.com"]}
       accent="#9B5A88"
+      headingColor={HEADING_COLOUR.connect}
       activePage="connect"
       onNavigate={onNavigate}
     />
@@ -1984,7 +2022,7 @@ function TestimonialsPage({
   const shrunk = embedded ? compact : selfScrolled;
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  const accent = "#9B5A88";
+  const accent = HEADING_COLOUR.testimonials;
   const sub    = isDark ? "rgba(255,255,255,0.72)" : DIM;
   const shown  = TESTIMONIALS.filter(t => t.group === group);
 
@@ -2361,7 +2399,7 @@ function AwardsSpeakingPage({
           Recognition &amp; voice in community
         </motion.p>
         <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]"
-          style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: fg, transition: "font-size 0.35s ease" }}
+          style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: HEADING_COLOUR.awards, transition: "font-size 0.35s ease" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Awards &amp; Speaking
         </motion.h1>

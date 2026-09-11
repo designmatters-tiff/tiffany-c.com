@@ -138,7 +138,7 @@ Constants live at the top of `App.tsx` — use them, never a raw hex.
 | `GOLD_BRIGHT` | `#e3c85c` | Dark-mode gold |
 | `INK` | `#111111` | Body text (light) |
 | `DIM` | `#666660` | Secondary text |
-| `NAV_GRADIENT` | `#B2933B → #6281B7 → #C27AA6` | Nav bar only |
+| `NAV_GRADIENT` | `#B2933B → #6281B7 → #C27AA6` | Nav bar, and the source of section heading colours |
 
 Backgrounds are warm off-white `#f8f7f5` (light) and near-black per page
 (`#282828`, `#181410`) in dark.
@@ -148,10 +148,28 @@ logomark — and loses its authority the moment it's used for large areas.
 
 **The nav gradient** (gold → blue → pink) is the one place colour runs free. It
 represents the multi-faceted nature of the work and a quiet resilience. It
-belongs on the nav bar. Don't spread it to buttons, cards, or backgrounds.
+belongs on the nav bar and on section headings. Don't spread it to buttons,
+cards, or backgrounds.
 
-Section accents: Work bronze/grey, Awards blue `#5070A0`, Coaching and Connect
-purple-pink `#9B5A88`.
+**Section headings are sampled from that gradient** at each section's own
+position along the bar, so heading and nav agree. `gradientAt()` in `App.tsx`
+does the sampling — don't hardcode these, or they drift when the gradient is
+retuned. The ends are exact: the hero sits on the gold end, Connect on the pink.
+
+| Section | Sampled | |
+|---|---|---|
+| Tiffany C. (hero) | `#B2933B` | gold — the `GOLD` token exactly |
+| Work | `#928C6D` | the desaturated gold→blue midpoint; the weakest of the six |
+| Award & Speaking | `#72859E` | muted blue |
+| Testimonial | `#7580B4` | blue-violet |
+| Coaching | `#9C7DAD` | purple |
+| Connect | `#C27AA6` | pink — the far end |
+
+All six clear 3:1 on both grounds, which is the AA floor for text this size;
+none clears 4.5:1, so none of them may be reused for body copy.
+
+Section accents (eyebrows, items, rules) are separate: Work bronze/grey, Awards
+blue `#5070A0`, Coaching and Connect purple-pink `#9B5A88`.
 
 Every colour decision must handle **both light and dark mode** — read `isDark`
 from `DarkModeCtx` and branch.
