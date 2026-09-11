@@ -63,8 +63,18 @@ function gradientAt(t: number): string {
 
 // Deck order — the same order the nav lists them in.
 const SECTION_ORDER = ["about", "work", "awards", "testimonials", "coaching", "connect"] as const;
+
+// The first half of the deck stays on GOLD. Sampled, those positions land in
+// the desaturated gold→blue crossover and read as muddy olive, and this is the
+// half a hiring manager reads — the brand colour serves it better than a
+// faithful sample would. The gradient takes over from Testimonial onward and
+// still ends exactly on the pink end at Connect.
+const GRADIENT_HEADINGS = new Set(["testimonials", "coaching", "connect"]);
 const HEADING_COLOUR: Record<string, string> = Object.fromEntries(
-  SECTION_ORDER.map((key, i) => [key, gradientAt(i / (SECTION_ORDER.length - 1))]),
+  SECTION_ORDER.map((key, i) => [
+    key,
+    GRADIENT_HEADINGS.has(key) ? gradientAt(i / (SECTION_ORDER.length - 1)) : GOLD,
+  ]),
 );
 
 type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "testimonials";

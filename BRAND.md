@@ -151,22 +151,27 @@ represents the multi-faceted nature of the work and a quiet resilience. It
 belongs on the nav bar and on section headings. Don't spread it to buttons,
 cards, or backgrounds.
 
-**Section headings are sampled from that gradient** at each section's own
-position along the bar, so heading and nav agree. `gradientAt()` in `App.tsx`
-does the sampling — don't hardcode these, or they drift when the gradient is
-retuned. The ends are exact: the hero sits on the gold end, Connect on the pink.
+**The back half of the deck takes its heading colour from that gradient**, at
+each section's own position along the bar, so heading and nav agree. The front
+half stays on `GOLD`: sampled, those positions land in the desaturated
+gold→blue crossover and read as muddy olive, and it's the half a hiring manager
+reads first. Connect still lands exactly on the pink end.
 
-| Section | Sampled | |
+| Section | Heading | |
 |---|---|---|
-| Tiffany C. (hero) | `#B2933B` | gold — the `GOLD` token exactly |
-| Work | `#928C6D` | the desaturated gold→blue midpoint; the weakest of the six |
-| Award & Speaking | `#72859E` | muted blue |
+| Tiffany C. (hero) | `GOLD` | |
+| Work | `GOLD` | |
+| Award & Speaking | `GOLD` | |
 | Testimonial | `#7580B4` | blue-violet |
 | Coaching | `#9C7DAD` | purple |
 | Connect | `#C27AA6` | pink — the far end |
 
-All six clear 3:1 on both grounds, which is the AA floor for text this size;
-none clears 4.5:1, so none of them may be reused for body copy.
+`gradientAt()` in `App.tsx` samples; `GRADIENT_HEADINGS` says which sections opt
+in. Don't hardcode the sampled values — they'd drift if the gradient is retuned
+or a section is added. To move the gold/gradient boundary, change that set.
+
+The three sampled colours clear 3:1 on both grounds, the AA floor for text this
+size, but none clears 4.5:1 — so none may be reused for body copy.
 
 Section accents (eyebrows, items, rules) are separate: Work bronze/grey, Awards
 blue `#5070A0`, Coaching and Connect purple-pink `#9B5A88`.
