@@ -2251,10 +2251,16 @@ function SpeakingEventRow({
                 <div className="md:hidden absolute inset-x-0 bottom-0 h-24 pointer-events-none" style={{ background: "transparent" }} />
               </div>
             )}
-            {ev.youtubeId && (
+            {/* Mounted only while the row is open. The accordion hides rows by
+                clipping them to max-height, not by unmounting, so an iframe in
+                here would otherwise load on first paint — every visitor pulling
+                down YouTube's player, and being cookied by it, without ever
+                reaching Awards & Speaking, let alone opening the row.
+                nocookie keeps that to people who actually press play. */}
+            {ev.youtubeId && open && (
               <div className="relative w-full overflow-hidden mt-5 md:w-auto md:h-[70vh] md:mx-auto md:max-w-full" style={{ aspectRatio: "16 / 9", background: "#000" }}>
                 <iframe
-                  src={`https://www.youtube.com/embed/${ev.youtubeId}`}
+                  src={`https://www.youtube-nocookie.com/embed/${ev.youtubeId}`}
                   title={`${ev.event} — ${ev.topic}`}
                   className="absolute inset-0 w-full h-full"
                   frameBorder="0"
