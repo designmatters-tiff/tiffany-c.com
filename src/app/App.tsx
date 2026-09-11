@@ -383,8 +383,10 @@ function MobileMenu({
 }
 
 // ─── Speaking inquiry form ────────────────────────────────────────
-// Sign up at formspree.io, create a form, then paste the endpoint here.
-const SPEAKING_FORM_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID";
+// Formspree, posted as JSON from the browser. Submissions land in the inbox
+// the form is registered to; Formspree confirms that address before it starts
+// forwarding, so the first real submission is worth sending yourself.
+const SPEAKING_FORM_ENDPOINT = "https://formspree.io/f/xzebweln";
 
 const FORM_FIELDS: { name: string; label: string; type?: string; required?: boolean }[] = [
   { name: "topic",       label: "Topic",          required: true  },
