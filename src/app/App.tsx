@@ -538,12 +538,18 @@ const SECTIONS = [
     ],
   },
   {
+    key: "testimonials", label: "Testimonial", page: "testimonials" as Page, embeds: true,
+    accent: "#9B5A88", labelColor: "#9B5A88",
+    tagline: "What they say",
+    context: "Leadership · Coaching",
+    items: [],
+  },
+  {
     key: "coaching", label: "Coaching",        page: "coaching" as Page,
     accent: "#5070A0", labelColor: "#9B5A88",
     tagline: "UX Career Coaching",
     context: "Open to collaboration",
     items: [
-      "What they say",
       "1:1 Calls",
       "Priority DM",
       "Package (1-1 Coaching Service)",
@@ -611,19 +617,6 @@ function ContactItem({
         <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
         <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
       </a>
-    );
-  }
-  if (item === "What they say") {
-    return (
-      <button
-        className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer text-left"
-        onClick={() => onNavigate?.("testimonials")}
-      >
-        <ChevronRight size={16} strokeWidth={1} style={{ color: accent, flexShrink: 0 }} />
-        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>
-          What they say
-        </span>
-      </button>
     );
   }
   if (item === "Speaking Inquiry") {
@@ -1049,6 +1042,8 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 onScroll={!capped ? (e) => setNavMinimized(e.currentTarget.scrollTop > 24) : undefined}>
                 {section.page === "work"
                   ? <WorkPage onNavigate={onNavigate} onOpenDetail={onOpenDetail} embedded isActive={isActive} compact={isActive && navShrunk} headerScrolled={isActive && navMinimized} />
+                  : section.page === "testimonials"
+                  ? <TestimonialsPage onNavigate={onNavigate} embedded isActive={isActive} compact={isActive && navShrunk} headerScrolled={isActive && navMinimized} />
                   : <AwardsSpeakingPage onNavigate={onNavigate} embedded isActive={isActive} compact={isActive && navShrunk} headerScrolled={isActive && navMinimized} />}
 
                 {capped && (
@@ -1586,6 +1581,7 @@ function PageBottomNav({
   const NAV_ITEMS = [
     { key: "work",     label: "Work",             page: "work" as Page },
     { key: "awards",   label: "Award & Speaking", page: "awards" as Page },
+    { key: "testimonials", label: "Testimonial",  page: "testimonials" as Page },
     { key: "coaching", label: "Coaching",         page: "coaching" as Page },
     { key: "connect",  label: "Connect",          page: "connect" as Page },
   ];
@@ -1762,7 +1758,7 @@ function CoachingPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
     <ContactListPage
       eyebrow="Open to collaboration"
       title="UX Career Coaching"
-      items={["What they say", "1:1 Calls", "Priority DM", "Package (1-1 Coaching Service)"]}
+      items={["1:1 Calls", "Priority DM", "Package (1-1 Coaching Service)"]}
       accent="#9B5A88"
       activePage="coaching"
       onNavigate={onNavigate}
@@ -1964,10 +1960,23 @@ function TestimonialCard({ t, accent }: { t: (typeof TESTIMONIALS)[number]; acce
   );
 }
 
-function TestimonialsPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
+function TestimonialsPage({
+  onNavigate,
+  embedded = false,
+  headerScrolled: embeddedScrolled = false,
+}: {
+  onNavigate: (p: Page) => void;
+  embedded?: boolean;
+  isActive?: boolean;
+  compact?: boolean;
+  headerScrolled?: boolean;
+}) {
   const isDark = useContext(DarkModeCtx);
   const [group, setGroup] = useState<TestimonialGroup>("leadership");
-  const [headerScrolled, setHeaderScrolled] = useState(false);
+  // Embedded in the homepage deck, the scroll container lives one level up,
+  // so the shrink flag is passed down rather than measured here.
+  const [selfScrolled, setSelfScrolled] = useState(false);
+  const headerScrolled = embedded ? embeddedScrolled : selfScrolled;
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const accent = "#9B5A88";
@@ -1975,17 +1984,16 @@ function TestimonialsPage({ onBack, onNavigate }: { onBack: () => void; onNaviga
   const shown  = TESTIMONIALS.filter(t => t.group === group);
 
   useEffect(() => {
+    if (embedded) return;
     const el = scrollRef.current;
     if (!el) return;
-    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
+    const onScroll = () => setSelfScrolled(el.scrollTop > 24);
     el.addEventListener('scroll', onScroll, { passive: true });
     return () => el.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [embedded]);
 
-  return (
-    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
-      <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-
+  const content = (
+    <>
         <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
           background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
@@ -1994,11 +2002,8 @@ function TestimonialsPage({ onBack, onNavigate }: { onBack: () => void; onNaviga
           paddingBottom: headerScrolled ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
-          <button onClick={onBack}
-            className="flex items-center gap-2 font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4 cursor-pointer"
-            style={{ color: accent, background: 'none', border: 'none', padding: 0 }}>
-            <ChevronLeft size={12} strokeWidth={1.5} /> COACHING
-          </button>
+          <p className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4"
+            style={{ color: accent }}>TESTIMONIAL</p>
           <h1 className="font-['Museo',sans-serif] font-light"
             style={{ fontSize: headerScrolled ? '1.5rem' : '2.25rem', lineHeight: 1.05, color: accent, margin: 0, transition: 'font-size 0.3s ease' }}>
             What they say
@@ -2054,8 +2059,25 @@ function TestimonialsPage({ onBack, onNavigate }: { onBack: () => void; onNaviga
 
           <div style={{ height: 120 }} />
         </div>
+    </>
+  );
+
+  // Inside the homepage deck the slide owns the scrolling; standalone, this
+  // page does — same split the Work and Awards pages use.
+  if (embedded) {
+    return (
+      <div className="relative w-full" style={{ minHeight: "100%", background: "transparent" }}>
+        {content}
       </div>
-      <StickyPageNav activePage="coaching" onNavigate={onNavigate} />
+    );
+  }
+
+  return (
+    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+      <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        {content}
+      </div>
+      <StickyPageNav activePage="testimonials" onNavigate={onNavigate} />
     </div>
   );
 }
@@ -2949,7 +2971,7 @@ export default function App() {
           </div>
         )}
         {page === "testimonials" && (
-          <TestimonialsPage onBack={() => setPage("coaching")} onNavigate={navigateGeneral} />
+          <div className="absolute inset-0"><TestimonialsPage onNavigate={navigateGeneral} /></div>
         )}
         {page === "businessCase" && (
           <BusinessCasePage onBack={() => setPage('work')} onNavigate={navigateGeneral} />

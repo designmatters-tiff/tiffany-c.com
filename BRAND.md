@@ -207,10 +207,11 @@ Things that affect brand consistency and are still outstanding:
   as plain text.
 - ~~**ADPList mentor profile**~~ — now linked from the testimonials page,
   alongside Topmate, as the public record behind the coaching reviews.
-- ~~**Testimonials**~~ — built. `testimonials` page, reached from Coaching, with
-  two tabs: leadership & teams (3) and coaching (5). Sources are shown rather
-  than hidden, since two coaching reviews are anonymous and a named public
-  platform is what makes an unattributed quote credible.
+- ~~**Testimonials**~~ — built. A top-level *Testimonial* section, sitting
+  between Award & Speaking and Coaching, with two tabs: leadership & teams (3)
+  and coaching (5). Sources are shown rather than hidden, since two coaching
+  reviews are anonymous and a named public platform is what makes an
+  unattributed quote credible.
 - **Design Philosophy section** — the rational/intuitive duality, planned as an
   interactive breathing-wave illustration. Never built. It's the piece that would
   explain *how she thinks* rather than *what she delivered*.
