@@ -230,9 +230,6 @@ Things that affect brand consistency and are still outstanding:
 - **Speaking inquiry form doesn't work.** `SPEAKING_FORM_ENDPOINT` is still the
   placeholder `https://formspree.io/f/YOUR_FORM_ID`. Submissions fail and show an
   error. Anyone trying to book a talk currently can't. **Launch blocker.**
-- **UX Camp Melbourne has no photo.** The only speaking event with `img: null` —
-  it opens straight into the YouTube embed while the other six show a shot
-  first. The file has never been in the repo.
 - **Email link styling** is inconsistent with LinkedIn and Instagram beside it —
   it's a real `mailto:` link but has no icon and no hover underline, so it reads
   as plain text.
