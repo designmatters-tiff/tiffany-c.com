@@ -1043,7 +1043,13 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 Hi, I'm a product &amp; design leader
               </h1>
             </div>
-            <div className="flex-1" />
+            {/* Pushes the body copy toward the bottom on a tall screen, but
+                with a floor: flex-1 collapses to nothing once the viewport is
+                short enough, and the heading was landing flush against the
+                paragraph — 0px at 1280×800 and below. The other sections use
+                minHeight 4vh for the same reason; this clamps it so the gap
+                can't fall under 28px on a short laptop. */}
+            <div className="flex-1" style={{ minHeight: "clamp(28px, 4vh, 56px)" }} />
             <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
               style={{ fontSize: "clamp(1.05rem, 1.7vw, 1.4rem)", color: bodyCol, maxWidth: "60%" }}>
               I work with C-suites and product teams to shape design
