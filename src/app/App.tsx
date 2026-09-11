@@ -71,24 +71,6 @@ const SECTION_ORDER = ["about", "work", "awards", "testimonials", "coaching", "c
 // still ends exactly on the pink end at Connect.
 const GRADIENT_HEADINGS = new Set(["testimonials", "coaching", "connect"]);
 
-// The page ground is flat — no mesh — but not a single flat grey. It carries
-// the faintest wash of whatever colour the section's own heading uses, so the
-// gold sections read cream and Connect reads cream-pink, on the same principle
-// as the headings themselves. Deliberately low: it should register as warmth,
-// not as colour, and the type has to stay the thing you notice.
-function tintedBg(accent: string, isDark: boolean): string {
-  const rgb = [1, 3, 5].map(i => parseInt(accent.slice(i, i + 2), 16));
-  const base = isDark ? [40, 40, 40] : [248, 247, 245];
-  const amount = isDark ? 0.12 : 0.08;   // dark needs more to register at all
-  return "#" + base
-    .map((v, i) => Math.round(v + (rgb[i] - v) * amount).toString(16).padStart(2, "0"))
-    .join("");
-}
-
-// Which section's colour the ground is currently wearing. Read by the chrome
-// that has to disappear into it — the nav's bottom fade, the mobile menu —
-// so none of them can hold a stale flat cream while the ground has moved on.
-const PageTintCtx = createContext<string>("#f8f7f5");
 
 const HEADING_COLOUR: Record<string, string> = Object.fromEntries(
   SECTION_ORDER.map((key, i) => [
@@ -264,7 +246,7 @@ function MobileMenu({
   const itemActive = GOLD;
   const rowBorder  = isDark ? "rgba(255,255,255,0.15)" : "rgba(17,17,17,0.12)";
   const closeColor = isDark ? "white" : INK;
-  const menuBg = useContext(PageTintCtx);
+  const menuBg = isDark ? "#282828" : "#f8f7f5";
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
   return (
@@ -655,9 +637,9 @@ const HERO_BOTTOM_RESERVE = "calc(5% + 80px + env(safe-area-inset-bottom))";
 
 // ─── Homepage ─────────────────────────────────────────────────────
 
-export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onSectionChange }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number; onSectionChange?: (key: string) => void }) {
+export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number }) {
   const isDark = useContext(DarkModeCtx);
-  const pageBg  = useContext(PageTintCtx);
+  const pageBg  = isDark ? "#282828" : "#f8f7f5";
   const fg      = isDark ? GOLD : INK;
   const bodyCol = isDark ? "rgba(255,255,255,0.85)" : INK;
   const dimCol  = isDark ? "rgba(255,255,255,0.38)" : DIM;
@@ -692,11 +674,6 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onSectionCh
   const heroOverflows = sectionOverflows["hero"] ?? false;
   const isMobileRef  = useRef(isMobile);
   useEffect(() => { isMobileRef.current = isMobile; }, [isMobile]);
-
-  // Tell the App which section is showing so the ground can follow the deck.
-  useEffect(() => {
-    onSectionChange?.(SECTIONS[activeIdx]?.key ?? "about");
-  }, [activeIdx, onSectionChange]);
 
   const resetTimer = useCallback(() => {
     startTime.current = Date.now();
@@ -1562,7 +1539,7 @@ function DetailBottomBar({
 // would otherwise be visible peeking past the nav's side margins/edges.
 function StickyPageNav({ activePage, detailLabel, compact, onNavigate }: { activePage: Page; detailLabel?: string; compact?: boolean; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
-  const pageBg = useContext(PageTintCtx);
+  const pageBg = isDark ? "#181410" : "#f8f7f5";
   return (
     <>
       <div className="fixed inset-x-0 bottom-0 z-20 pointer-events-none"
@@ -2953,20 +2930,6 @@ export default function App() {
     setPage(target);
   };
 
-  // The homepage deck reports which slide is showing; every other page maps to
-  // the section it belongs to, so drilling into a case study or an event keeps
-  // the ground its parent section was wearing.
-  const [homeSectionKey, setHomeSectionKey] = useState<string>("about");
-  const tintKey =
-      page === "home"                                      ? homeSectionKey
-    : page === "work" || page === "workDetail" || page === "businessCase" ? "work"
-    : page === "awards" || page === "speaking"             ? "awards"
-    : page === "testimonials"                              ? "testimonials"
-    : page === "coaching"                                  ? "coaching"
-    : page === "connect" || page === "speakingInquiry"     ? "connect"
-    : "about";
-  const pageTint = tintedBg(HEADING_COLOUR[tintKey] ?? GOLD, isDark);
-
   const [detailHeaderScrolled, setDetailHeaderScrolled] = useState(false);
   const detailLabel = page === "workDetail" && detailKey ? EXPERTISE_CARDS.find(c => c.key === detailKey)?.title : undefined;
   const motionKey = page === "speaking" ? `speaking:${detailKey}` : page === "workDetail" ? `workDetail:${detailKey}` : page;
@@ -2981,18 +2944,16 @@ export default function App() {
     <DarkModeCtx.Provider value={isDark}>
     <DarkModeToggleCtx.Provider value={toggleDark}>
     <AccordionCtx.Provider value={{ openId: openAccordionId, setOpenId: setOpenAccordionId }}>
-    <PageTintCtx.Provider value={pageTint}>
-    <div className="relative w-screen h-dvh overflow-hidden" style={{ background: pageTint, transition: "background 0.6s ease" }}>
-      {/* Flat ground, tinted by the current section. Mounted once at the App
-          root and cross-faded rather than swapped per page, so swiping the
-          deck shifts the colour gradually instead of stepping. */}
-      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, background: pageTint, transition: "background 0.6s ease" }} />
+    <div className="relative w-screen h-dvh overflow-hidden" style={{ background: isDark ? "#282828" : "#f8f7f5" }}>
+      {/* Flat ground — warm cream in light, near-black in dark. No mesh, and
+          no per-section tinting: one colour behind the whole site. */}
+      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, background: isDark ? "#282828" : "#f8f7f5" }} />
       <DarkModeToggle isDark={isDark} onToggle={toggleDark} />
       <motion.div key={motionKey} className="absolute inset-0" style={{ zIndex: 1 }}
         initial={page === "workDetail" ? { opacity: 1, x: "100%" } : { opacity: 0, x: 0 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: page === "workDetail" ? 0.4 : 0.45, ease: [0.4, 0, 0.2, 1] }}>
-        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} onSectionChange={setHomeSectionKey} />}
+        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} />}
         {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} /></div>}
         {page === "awards"   && <div className="absolute inset-0"><AwardsSpeakingPage onNavigate={navigateGeneral} /></div>}
         {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={navigateGeneral} /></div>}
@@ -3025,7 +2986,6 @@ export default function App() {
         <StickyPageNav activePage="work" detailLabel={detailLabel} compact={page === "workDetail" && detailHeaderScrolled} onNavigate={navigateGeneral} />
       )}
     </div>
-    </PageTintCtx.Provider>
     </AccordionCtx.Provider>
     </DarkModeToggleCtx.Provider>
     </DarkModeCtx.Provider>
