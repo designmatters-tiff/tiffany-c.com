@@ -120,6 +120,11 @@ exclamation. If a line would sound odd said aloud in a meeting, rewrite it.
 - **Eyebrow labels** are uppercase with wide letter-spacing, and are context, not
   headline: *FINTECH · ECOMMERCE · SAAS*, *RECOGNITION & VOICE IN COMMUNITY*.
 - **Sentence case** for headings. Never Title Case Every Word.
+- **The page title and meta description are the site's search result.** They
+  carry her full name and role — "Tiffany Chew — Product & Design Leader" —
+  because a recruiter searches a person, not a portfolio. Keep the description
+  under ~155 characters or Google truncates it, and keep it in her voice: it's
+  read more often than most of the site.
 - **No exclamation marks** in Tiffany's own copy. The rule governs her voice,
   not other people's — testimonials are quoted verbatim, punctuation and all.
   Editing someone's words to fit this guide would misrepresent them.
@@ -225,6 +230,9 @@ Things that affect brand consistency and are still outstanding:
 - **Speaking inquiry form doesn't work.** `SPEAKING_FORM_ENDPOINT` is still the
   placeholder `https://formspree.io/f/YOUR_FORM_ID`. Submissions fail and show an
   error. Anyone trying to book a talk currently can't. **Launch blocker.**
+- **UX Camp Melbourne has no photo.** The only speaking event with `img: null` —
+  it opens straight into the YouTube embed while the other six show a shot
+  first. The file has never been in the repo.
 - **Email link styling** is inconsistent with LinkedIn and Instagram beside it —
   it's a real `mailto:` link but has no icon and no hover underline, so it reads
   as plain text.

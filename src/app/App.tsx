@@ -1033,9 +1033,12 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                   border: `1px solid ${GOLD}`,
                 }}
               />
+              {/* Same words as the mobile block above. The two breakpoints
+                  are separate elements, so this is the one line that has to
+                  be kept in step with it. */}
               <h1 className="font-['Museo',sans-serif] font-light"
                 style={{ fontSize: "4rem", lineHeight: 1.05, color: GOLD, maxWidth: "52%" }}>
-                Tiff is a product &amp; design leader
+                Hi, I'm a product &amp; design leader
               </h1>
             </div>
             <div className="flex-1" />
