@@ -369,12 +369,14 @@ function MobileMenu({
         })}
       </div>
 
-      {/* Footer — dark/bright toggle and close, side by side */}
+      {/* Footer — close on the left, sitting where the hamburger that opened
+          the menu sits in the collapsed nav, so the control doesn't jump
+          across the screen between states. Bright/dark takes the right. */}
       <div className="relative z-10 px-6 pb-8 flex items-center justify-between">
-        <DarkModeToggle isDark={isDark} onToggle={useContext(DarkModeToggleCtx)} variant="inline" />
         <button onClick={onClose} aria-label="Close menu" style={{ background: "none", border: "none", padding: 0 }}>
           <X size={20} strokeWidth={1} color={closeColor} />
         </button>
+        <DarkModeToggle isDark={isDark} onToggle={useContext(DarkModeToggleCtx)} variant="inline" />
       </div>
     </motion.div>
   );
