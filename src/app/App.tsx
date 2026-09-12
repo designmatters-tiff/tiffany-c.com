@@ -2017,7 +2017,9 @@ function TestimonialsPage({
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
-          paddingBottom: headerScrolled ? 16 : 24,
+          // The tab row is the last thing in this block and carries its own
+          // 10px underline gap, so the bar needs little padding of its own.
+          paddingBottom: headerScrolled ? 6 : 10,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
           <p className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4"
@@ -2027,15 +2029,25 @@ function TestimonialsPage({
             initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
             What they say
           </motion.h1>
-        </div>
 
-        <div className="px-6 md:px-20">
-          <p className="font-['Avenir',sans-serif] font-light" style={{ color: sub, maxWidth: '48ch', marginTop: 8 }}>
+          {/* The intro reads once, on arrival. It collapses as soon as the
+              user scrolls so the pinned bar stays shallow — otherwise three
+              stacked blocks would eat a third of a phone screen. */}
+          <p className="font-['Avenir',sans-serif] font-light" style={{
+            color: sub, maxWidth: '48ch', overflow: 'hidden',
+            marginTop: headerScrolled ? 0 : 8,
+            maxHeight: headerScrolled ? 0 : 160,
+            opacity: headerScrolled ? 0 : 1,
+            transition: "max-height 0.35s ease, opacity 0.25s ease, margin-top 0.35s ease",
+          }}>
             From seniors and peers I've worked alongside to the talent I've had the honour of leading and mentoring.
           </p>
 
-          {/* Tabs — a two-way split by who's asking, not by subject matter. */}
-          <div role="tablist" aria-label="Testimonial groups" className="flex gap-6" style={{ marginTop: 32 }}>
+          {/* Tabs — a two-way split by who's asking, not by subject matter.
+              They sit inside the sticky header so switching group stays
+              reachable once the user is deep in a long column of quotes. */}
+          <div role="tablist" aria-label="Testimonial groups" className="flex gap-6"
+            style={{ marginTop: headerScrolled ? 14 : 32, transition: "margin-top 0.35s ease" }}>
             {TESTIMONIAL_GROUPS.map(g => {
               const active = g.key === group;
               const count  = TESTIMONIALS.filter(t => t.group === g.key).length;
@@ -2053,7 +2065,9 @@ function TestimonialsPage({
               );
             })}
           </div>
+        </div>
 
+        <div className="px-6 md:px-20">
           {/* Masonry columns: quote lengths vary wildly (one line to ten
               paragraphs), and a grid would leave tall gaps beside the short
               ones. Two columns rather than three — three drops the measure to
