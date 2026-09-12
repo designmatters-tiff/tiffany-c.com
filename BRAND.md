@@ -190,17 +190,15 @@ from `DarkModeCtx` and branch.
 
 - **Museo** (300) — headings. Editorial, generous, never bold.
 - **Nunito Sans** (400) — body, and everything that reads as running text.
-- **Nunito Sans Black** (900) — a display weight with exactly two jobs:
-  1. **Figures in metrics** — the number only (`7 → 22`, `3×`, `20%`), never the
-     sentence carrying it. The `Figures` helper in `App.tsx` does this; it leaves
-     years and strings like `B2B` alone.
-  2. **The active item in navigation** — the testimonial tabs. The nav bars
-     themselves are Museo, where the active item is carried by width and
-     opacity; Museo has only a 300 weight, so weight cannot signal anything there.
+- **Nunito Sans Black** (900) — a display weight with exactly one job:
+  **figures in metrics** — the number only (`7 → 22`, `3×`, `20%`), never the
+  sentence carrying it. The `Figures` helper in `App.tsx` does this; it leaves
+  years and strings like `B2B` alone.
 
-  Eyebrows and section labels are *not* Black. They were tried at 900 and
-  reverted: at 12px, caps and letterspacing already carry them, and the weight
-  made them shout.
+  Nothing else is Black, and selection state never uses weight. Two things were
+  tried at 900 and reverted: eyebrow labels, where caps and letterspacing already
+  carry them at 12px, and the selected state in navigation and the testimonial
+  tabs, which is marked by colour, underline, width and opacity instead.
 
   Nothing else. Never on a run of running text longer than a few words, and
   never as a substitute for Museo on a heading.

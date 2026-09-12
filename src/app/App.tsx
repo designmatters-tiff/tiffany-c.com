@@ -267,7 +267,7 @@ function MobileMenu({
   onGoTo: (i: number) => void;
   onNavigate: (p: Page) => void;
   // When true (homepage usage), every item scrolls within the
-  // homepage's own track — Work/Award & Speaking slides already embed
+  // homepage's own track — Work/Awards & Speaking slides already embed
   // the real page, so there's no need to break out to a separate
   // top-level route. PageBottomNav (used on standalone pages with no
   // track to scroll) keeps the page-aware branching below.
@@ -543,7 +543,7 @@ const SECTIONS = [
     items: ["AI + UX DesignOps", "Business Acumen", "Product & UX Methods", "People & Process"],
   },
   {
-    key: "awards",  label: "Award & Speaking", page: "awards" as Page, embeds: true,
+    key: "awards",  label: "Awards & Speaking", page: "awards" as Page, embeds: true,
     accent: "#5070A0", labelColor: "#5070A0",
     tagline: "Recognition & Voices",
     context: "Finalist · Speaker · Panelist",
@@ -555,7 +555,7 @@ const SECTIONS = [
     ],
   },
   {
-    key: "testimonials", label: "Testimonial", page: "testimonials" as Page, embeds: true,
+    key: "testimonials", label: "Testimonials", page: "testimonials" as Page, embeds: true,
     accent: "#9B5A88", labelColor: "#9B5A88",
     tagline: "What they say",
     context: "Leadership · Coaching",
@@ -823,7 +823,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
       const absX = Math.abs(e.deltaX);
 
       // On a slide that embeds a real, vertically-scrollable page
-      // (Work / Award & Speaking), a vertical gesture should scroll
+      // (Work / Awards & Speaking), a vertical gesture should scroll
       // that page's own content — not hijack the wheel to advance to
       // the next/prev section. Horizontal gestures still switch
       // sections even while on one of these slides.
@@ -871,7 +871,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
   }, [goTo]);
 
   const currentSection = SECTIONS[activeIdx];
-  // True when the active section is an embedded Work/Award & Speaking
+  // True when the active section is an embedded Work/Awards & Speaking
   // page that's been expanded past its mobile "View more" cap — this
   // makes the section vertically scrollable, which is the precondition
   // for the Safari-style nav shrink (see navMinimized) to apply.
@@ -1075,7 +1075,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           const idx = i + 1;
           const isActive = activeIdx === idx;
 
-          // Work / Award & Speaking embed the real page directly so
+          // Work / Awards & Speaking embed the real page directly so
           // scrolling horizontally into them glides straight into the
           // actual content (no stale preview text). Vertical scroll
           // inside the slide lengthens it independently of the horizontal
@@ -1164,12 +1164,12 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
 
       {/* ── Persistent mobile carousel indicator — sits directly below the
           floating nav bar, spanning the same width. Stays visible across
-          every slide, including the embedded Work/Award & Speaking pages,
+          every slide, including the embedded Work/Awards & Speaking pages,
           which have no room in their own content for a per-slide
           indicator. Design: a solid gold bar grows to cover every visited
           section (merged into one continuous line), with small dots
           marking the sections still ahead. Hidden while the user is
-          scrolled down inside an expanded Work/Award & Speaking section,
+          scrolled down inside an expanded Work/Awards & Speaking section,
           since the nav itself shrinks then and sits lower on screen. ── */}
       <div className="md:hidden absolute z-30 flex items-center"
         style={{
@@ -1268,7 +1268,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
 
       {/* ── Mobile nav bar — floating, aligned to content width. Shrinks
           to a left-aligned, content-width pill once the active embedded
-          Work/Award & Speaking section is expanded past its "View more"
+          Work/Awards & Speaking section is expanded past its "View more"
           cap, to free up room for the now-longer scrollable content. ── */}
       {/* Mobile backdrop: aligns with the mobile nav and gives a 24px top/bottom
           blur area behind the fully opaque mobile nav. */}
@@ -1622,8 +1622,8 @@ function PageBottomNav({
 
   const NAV_ITEMS = [
     { key: "work",     label: "Work",             page: "work" as Page },
-    { key: "awards",   label: "Award & Speaking", page: "awards" as Page },
-    { key: "testimonials", label: "Testimonial",  page: "testimonials" as Page },
+    { key: "awards",   label: "Awards & Speaking", page: "awards" as Page },
+    { key: "testimonials", label: "Testimonials", page: "testimonials" as Page },
     { key: "coaching", label: "Coaching",         page: "coaching" as Page },
     { key: "connect",  label: "Connect",          page: "connect" as Page },
   ];
@@ -2091,7 +2091,9 @@ function TestimonialsPage({
 
           {/* Tabs — a two-way split by who's asking, not by subject matter.
               They sit inside the sticky header so switching group stays
-              reachable once the user is deep in a long column of quotes. */}
+              reachable once the user is deep in a long column of quotes.
+              The selected tab is marked by colour and the underline, not by
+              weight. */}
           <div role="tablist" aria-label="Testimonial groups" className="flex gap-6"
             style={{ marginTop: headerScrolled ? 14 : 32, transition: "margin-top 0.35s ease" }}>
             {TESTIMONIAL_GROUPS.map(g => {
@@ -2099,7 +2101,7 @@ function TestimonialsPage({
               const count  = TESTIMONIALS.filter(t => t.group === g.key).length;
               return (
                 <button key={g.key} role="tab" aria-selected={active} onClick={() => setGroup(g.key)}
-                  className={`font-['Nunito_Sans',sans-serif] ${active ? 'font-black' : ''} text-label uppercase tracking-[0.18em] cursor-pointer`}
+                  className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em] cursor-pointer"
                   style={{
                     background: 'none', border: 'none', padding: '0 0 10px',
                     color: active ? accent : sub,
