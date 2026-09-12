@@ -244,39 +244,41 @@
     font-size: var(--font-size);
   }
 
+  /* Body copy sits at 350, not 400. Nunito Sans is a variable font, and 350
+     matches the stem of Avenir Book — the face it replaced, which declared
+     usWeightClass 350 and was never really a 400. At 400 body text carries
+     about 14% more ink per stroke than the site was designed with. */
+  body {
+    font-weight: 350;
+  }
+
   h1 {
     font-size: var(--text-2xl);
-    font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   h2 {
     font-size: var(--text-xl);
-    font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   h3 {
     font-size: var(--text-lg);
-    font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   h4 {
     font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   label {
     font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 
   button {
     font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
     line-height: 1.5;
   }
 

@@ -189,7 +189,12 @@ from `DarkModeCtx` and branch.
 ### Type
 
 - **Museo** (300) — headings. Editorial, generous, never bold.
-- **Nunito Sans** (400) — body, and everything that reads as running text.
+- **Nunito Sans** (350) — body, and everything that reads as running text. It is
+  a variable font (wght 200-1000, one file), and 350 is deliberate: it matches the
+  stem of Avenir Book, the face it replaced, which declared `usWeightClass` 350 and
+  was never really a 400. Set as the document default on `body`, so body copy needs
+  no weight class at all. Do not reintroduce `font-medium` — 500 is now a real,
+  heavier weight rather than the no-op it used to be.
 - **Nunito Sans Black** (900) — a display weight with exactly one job:
   **figures in metrics** — the number only (`7 → 22`, `3×`, `20%`), never the
   sentence carrying it. The `Figures` helper in `App.tsx` does this; it leaves
