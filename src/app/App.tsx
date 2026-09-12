@@ -1248,10 +1248,10 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
               }}>
               <span className="flex items-center gap-3 min-w-0">
                 {i === 0 && <HamburgerIcon color="white" />}
-                {/* Weight carries the active state alongside the width and
-                    opacity shifts. Nunito Sans throughout so only the weight
-                    changes between states, never the face. */}
-                <span className={`font-['Nunito_Sans',sans-serif] ${active ? 'font-black' : ''} text-small whitespace-nowrap overflow-hidden text-ellipsis text-white`}>
+                {/* Museo throughout. The active state is carried by the width
+                    and opacity shifts on the button, not by weight — Museo
+                    ships only 300, so a heavier class here would do nothing. */}
+                <span className="font-['Museo',sans-serif] font-light text-small whitespace-nowrap overflow-hidden text-ellipsis text-white">
                   {s.label}
                 </span>
               </span>
@@ -1306,7 +1306,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           className="flex items-center gap-3"
           aria-label="Open navigation">
           <HamburgerIcon color="white" />
-          <span className="font-['Nunito_Sans',sans-serif] text-small text-white whitespace-nowrap">
+          <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap">
             Tiffany C.
           </span>
         </button>
@@ -1314,7 +1314,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           <>
             <div className="flex-1" />
             {activeIdx > 0 && (
-              <span className="font-['Nunito_Sans',sans-serif] font-black text-small text-white/75">
+              <span className="font-['Museo',sans-serif] font-light text-small text-white/75">
                 {currentSection.label}
               </span>
             )}
@@ -1568,7 +1568,7 @@ function DetailBottomBar({
         style={{ background: navGradient(isDark) }}
         initial={{ height: 56 }} animate={{ height: 36 }} transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
         <HamburgerIcon />
-        <span className="font-['Nunito_Sans',sans-serif] text-small text-white whitespace-nowrap overflow-hidden text-ellipsis">
+        <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap overflow-hidden text-ellipsis">
           {parentLabel} / {itemLabel}
         </span>
       </motion.button>
@@ -1646,14 +1646,14 @@ function PageBottomNav({
             borderRight: "1px solid rgba(255,255,255,0.18)",
           }}>
           <HamburgerIcon />
-          <span className="font-['Nunito_Sans',sans-serif] text-small text-white whitespace-nowrap overflow-hidden text-ellipsis">Tiffany C.</span>
+          <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap overflow-hidden text-ellipsis">Tiffany C.</span>
         </button>
         {NAV_ITEMS.map(item => (
           <button key={item.key}
             onMouseEnter={() => setHoveredNav(item.key)}
             onMouseLeave={() => setHoveredNav(null)}
             onClick={() => item.page && onNavigate(item.page)}
-            className={`flex items-center font-['Nunito_Sans',sans-serif] ${activePage === item.page ? 'font-black' : ''} text-small whitespace-nowrap overflow-hidden text-ellipsis text-white`}
+            className="flex items-center font-['Museo',sans-serif] font-light text-small whitespace-nowrap overflow-hidden text-ellipsis text-white"
             style={{
               flex: activePage === item.page || hoveredNav === item.key ? "3 1 0%" : "1 1 0%",
               minWidth: 0, padding: "0 20px",
@@ -1671,10 +1671,10 @@ function PageBottomNav({
         style={{ background: navGradient(isDark), transition: 'height 0.25s ease' }}>
         <button onClick={() => setMenuOpen(true)} className="flex items-center gap-3" aria-label="Open navigation">
           <HamburgerIcon />
-          <span className={`font-['Nunito_Sans',sans-serif] ${compact ? 'text-small' : 'text-body'} text-white`}>Tiffany C.</span>
+          <span className={`font-['Museo',sans-serif] font-light ${compact ? 'text-small' : 'text-body'} text-white`}>Tiffany C.</span>
         </button>
         <div className="flex-1" />
-        <span className={`font-['Nunito_Sans',sans-serif] font-black ${compact ? 'text-label' : 'text-small'} text-white/75`} style={{ transition: 'font-size 0.25s ease' }}>
+        <span className={`font-['Museo',sans-serif] font-light ${compact ? 'text-label' : 'text-small'} text-white/75`} style={{ transition: 'font-size 0.25s ease' }}>
           {detailLabel ? `Work / ${detailLabel}` : (NAV_ITEMS.find(n => n.page === activePage)?.label ?? "")}
         </span>
       </div>
