@@ -88,7 +88,7 @@
      h3        Avenir 400   1.25rem
      body      Avenir 400   1rem, 1.6 line-height
      small     Avenir 400   0.875rem
-     label     Avenir 900   0.75rem, uppercase
+     label     Avenir 400   0.75rem, uppercase
 
    The -lg variants are the md: step for the two Museo sizes, e.g.
    `text-display md:text-display-lg`.

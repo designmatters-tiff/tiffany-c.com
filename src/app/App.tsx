@@ -475,7 +475,7 @@ function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () =>
               <div key={f.name} className="flex flex-col gap-1">
                 <label
                   htmlFor={`sif-${f.name}`}
-                  className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.18em]"
+                  className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.18em]"
                   style={{ color: isDark ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.65)" }}
                 >
                   {f.label}{f.required && " *"}
@@ -1117,7 +1117,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
               <div className="relative z-10 flex flex-col h-full px-6 md:px-20 pt-10 md:pt-14"
                 style={{ paddingBottom: "calc(64px + 8vh + 32px)" }}>
 
-                <motion.p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.22em] mb-4 md:mb-6"
+                <motion.p className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.22em] mb-4 md:mb-6"
                   style={{ color: (section as any).labelColor ?? section.accent }}
                   initial={false}
                   animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }}
@@ -1719,7 +1719,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           paddingBottom: compact ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
-        <motion.p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.22em] mb-2" style={{ color: "#888880" }}
+        <motion.p className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.22em] mb-2" style={{ color: "#888880" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Fintech · eCommerce · SaaS
         </motion.p>
@@ -1772,7 +1772,7 @@ function ContactListPage({
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       {/* Page heading */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
-        <motion.p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.22em] mb-2" style={{ color: accent }}
+        <motion.p className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.22em] mb-2" style={{ color: accent }}
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {eyebrow}
         </motion.p>
@@ -2068,7 +2068,7 @@ function TestimonialsPage({
           paddingBottom: headerScrolled ? 6 : 10,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
-          <p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.2em] mb-4"
+          <p className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.2em] mb-4"
             style={{ color: accent }}>TESTIMONIAL</p>
           <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg"
             style={{ fontSize: shrunk ? "1.5rem" : undefined, lineHeight: 1.05, color: accent, margin: 0, transition: "font-size 0.35s ease" }}
@@ -2440,7 +2440,7 @@ function AwardsSpeakingPage({
           paddingBottom: compact ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
-        <motion.p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.22em] mb-2" style={{ color: "#5070A0" }}
+        <motion.p className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.22em] mb-2" style={{ color: "#5070A0" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Recognition &amp; voice in community
         </motion.p>
@@ -2459,7 +2459,7 @@ function AwardsSpeakingPage({
       {/* Speaking events */}
       <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
         <div className="px-6 md:px-20 pt-8 md:pt-12 pb-4 md:pb-6">
-          <p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.22em]" style={{ color: GOLD }}>Speaking</p>
+          <p className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.22em]" style={{ color: GOLD }}>Speaking</p>
         </div>
         {visibleEvents.map((ev, i) => (
           <SpeakingEventRow key={ev.key} ev={ev} isFirst={i === 0} isDark={isDark} fg={fg} sub={sub} brd={brd} stickyTop={headerHeight} />
@@ -2644,7 +2644,7 @@ function SpeakingDetailPage({
           )}
           {/* Label on image as in Figma */}
           <div className="absolute bottom-8 left-6 md:left-20">
-            <p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.2em] mb-1"
+            <p className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.2em] mb-1"
               style={{ color: "rgba(255,255,255,0.65)" }}>
               {ev.pageLabel}
             </p>
@@ -2655,7 +2655,7 @@ function SpeakingDetailPage({
       {/* Event metadata */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8"
         style={{ borderBottom: `1px solid ${ev.dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
-        <motion.p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.22em] mb-2"
+        <motion.p className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.22em] mb-2"
           style={{ color: GOLD }}
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {ev.year} · {ev.role} · {ev.location}
@@ -2699,7 +2699,7 @@ function SpeakingDetailPage({
       {/* Finalist card (Women in Digital only) */}
       {ev.additionalImg && (
         <div className="px-4 md:px-20 py-8 md:py-12">
-          <p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.2em] mb-4" style={{ color: DIM }}>
+          <p className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.2em] mb-4" style={{ color: DIM }}>
             The 2025 UX Leader of the Year Finalists
           </p>
           <div className="rounded-2xl overflow-hidden" style={{ boxShadow: "0 0 28px rgba(0,0,0,0.12)", maxWidth: 900 }}>
@@ -2748,7 +2748,7 @@ function BusinessCaseContent() {
         <dl className="grid gap-x-8 gap-y-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', margin: 0 }}>
           {META.map(([label, value]) => (
             <div key={label}>
-              <dt className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.18em]"
+              <dt className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.18em]"
                 style={{ color: sub }}>{label}</dt>
               <dd className="font-['Avenir',sans-serif]" style={{ color: body, margin: '6px 0 0' }}>{value}</dd>
             </div>
@@ -2767,19 +2767,19 @@ function BusinessCaseContent() {
 
           <div className="grid gap-8 md:grid-cols-2" style={{ marginTop: 32 }}>
             <div>
-              <h3 className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.18em]" style={{ color: sub }}>Background</h3>
+              <h3 className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>Background</h3>
               <p className="font-['Avenir',sans-serif]" style={{ color: body, marginTop: 8 }}>
                 <Figures>We had a 3× lower checkout rate compared to other similar players in the industry.</Figures>
               </p>
             </div>
             <div>
-              <h3 className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.18em]" style={{ color: sub }}>The brief</h3>
+              <h3 className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>The brief</h3>
               <p className="font-['Avenir',sans-serif]" style={{ color: body, marginTop: 8 }}>
                 Increase the checkout rate from the bag page.
               </p>
             </div>
             <div className="md:col-span-2">
-              <h3 className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.18em]" style={{ color: sub }}>My responsibilities</h3>
+              <h3 className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>My responsibilities</h3>
               <p className="font-['Avenir',sans-serif]" style={{ color: body, marginTop: 8 }}>
                 I led the user surveys and interviews to find the qualitative reason behind what the data showed. The reason was simple —
                 users are motivated to check out when they have a promo code to use.
@@ -2918,7 +2918,7 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
 
             <div className="flex flex-col gap-1" style={{ marginTop: 32 }}>
               <label
-                className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.18em]"
+                className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.18em]"
                 style={{ color: isDark ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.65)" }}>
                 PASSCODE *
               </label>

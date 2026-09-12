@@ -190,12 +190,15 @@ from `DarkModeCtx` and branch.
 
 - **Museo** (300) — headings. Editorial, generous, never bold.
 - **Avenir Book** (400) — body, and everything that reads as running text.
-- **Avenir Black** (900) — a display weight with exactly three jobs:
-  1. **Eyebrows and section labels** — the small uppercase, letterspaced kickers.
-  2. **Figures in metrics** — the number only (`7 → 22`, `3×`, `20%`), never the
+- **Avenir Black** (900) — a display weight with exactly two jobs:
+  1. **Figures in metrics** — the number only (`7 → 22`, `3×`, `20%`), never the
      sentence carrying it. The `Figures` helper in `App.tsx` does this; it leaves
      years and strings like `B2B` alone.
-  3. **The active item in navigation** — nav bars and the testimonial tabs.
+  2. **The active item in navigation** — nav bars and the testimonial tabs.
+
+  Eyebrows and section labels are *not* Black. They were tried at 900 and
+  reverted: at 12px, caps and letterspacing already carry them, and the weight
+  made them shout.
 
   Nothing else. Never on a run of running text longer than a few words, and
   never as a substitute for Museo on a heading.
@@ -211,14 +214,16 @@ Both are self-hosted in `public/fonts`.
 | `text-h3` | Avenir 400 | 1.25rem |
 | `text-body` | Avenir 400 | 1rem, 1.6 line-height |
 | `text-small` | Avenir 400 | 0.875rem |
-| `text-label` | Avenir 900 | 0.75rem, uppercase |
+| `text-label` | Avenir 400 | 0.75rem, uppercase |
 
 Use these. Do not reintroduce arbitrary bracket sizes — the site previously
 carried five different sizes inside a 4px band, which is noise, not hierarchy.
 
 Weights follow from the scale, so only two weight classes should ever appear:
-`font-light` on Museo, `font-black` on labels. Avenir body sits at its natural
-400 with no class. `font-medium` is never correct here — no 500-weight Avenir
+`font-light` on Museo, and `font-black` on the three things Avenir Black is for
+(metric figures and the active item in navigation — eyebrow labels are Book 400,
+carried by size, caps and letterspacing rather than weight). Avenir at 400 needs
+no class. `font-medium` is never correct here — no 500-weight Avenir
 is loaded, so it silently renders as 400.
 
 **Line length:** body copy caps at `68ch`. The About paragraph and the
