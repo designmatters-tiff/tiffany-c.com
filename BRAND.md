@@ -189,8 +189,8 @@ from `DarkModeCtx` and branch.
 ### Type
 
 - **Museo** (300) — headings. Editorial, generous, never bold.
-- **Avenir Book** (400) — body, and everything that reads as running text.
-- **Avenir Black** (900) — a display weight with exactly two jobs:
+- **Nunito Sans** (400) — body, and everything that reads as running text.
+- **Nunito Sans Black** (900) — a display weight with exactly two jobs:
   1. **Figures in metrics** — the number only (`7 → 22`, `3×`, `20%`), never the
      sentence carrying it. The `Figures` helper in `App.tsx` does this; it leaves
      years and strings like `B2B` alone.
@@ -211,19 +211,19 @@ Both are self-hosted in `public/fonts`.
 |---|---|---|
 | `text-display` / `md:text-display-lg` | Museo 300 | 3rem / 4rem |
 | `text-h2` / `md:text-h2-lg` | Museo 300 | 2rem / 2.5rem |
-| `text-h3` | Avenir 400 | 1.25rem |
-| `text-body` | Avenir 400 | 1rem, 1.6 line-height |
-| `text-small` | Avenir 400 | 0.875rem |
-| `text-label` | Avenir 400 | 0.75rem, uppercase |
+| `text-h3` | Nunito Sans 400 | 1.25rem |
+| `text-body` | Nunito Sans 400 | 1rem, 1.6 line-height |
+| `text-small` | Nunito Sans 400 | 0.875rem |
+| `text-label` | Nunito Sans 400 | 0.75rem, uppercase |
 
 Use these. Do not reintroduce arbitrary bracket sizes — the site previously
 carried five different sizes inside a 4px band, which is noise, not hierarchy.
 
 Weights follow from the scale, so only two weight classes should ever appear:
-`font-light` on Museo, and `font-black` on the three things Avenir Black is for
+`font-light` on Museo, and `font-black` on the two things the 900 weight is for
 (metric figures and the active item in navigation — eyebrow labels are Book 400,
-carried by size, caps and letterspacing rather than weight). Avenir at 400 needs
-no class. `font-medium` is never correct here — no 500-weight Avenir
+carried by size, caps and letterspacing rather than weight). Nunito Sans at 400
+needs no class. `font-medium` is never correct here — no 500 weight
 is loaded, so it silently renders as 400.
 
 **Line length:** body copy caps at `68ch`. The About paragraph and the

@@ -85,10 +85,10 @@
 
      display   Museo 300    3rem / 4rem md
      h2        Museo 300    2rem / 2.5rem md
-     h3        Avenir 400   1.25rem
-     body      Avenir 400   1rem, 1.6 line-height
-     small     Avenir 400   0.875rem
-     label     Avenir 400   0.75rem, uppercase
+     h3        Nunito Sans 400   1.25rem
+     body      Nunito Sans 400   1rem, 1.6 line-height
+     small     Nunito Sans 400   0.875rem
+     label     Nunito Sans 400   0.75rem, uppercase
 
    The -lg variants are the md: step for the two Museo sizes, e.g.
    `text-display md:text-display-lg`.

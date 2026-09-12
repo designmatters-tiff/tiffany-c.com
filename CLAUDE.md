@@ -89,7 +89,8 @@ Section accents: Work grey, Awards blue, Coaching purple, Connect pink.
 arbitrary values, not a theme config:
 
 - **Museo** (`font-['Museo',sans-serif]`) — headings, weight 300
-- **Avenir** (`font-['Avenir',sans-serif]`) — body
+- **Nunito Sans** (`font-['Nunito_Sans',sans-serif]`) — body. Note the
+  underscore: Tailwind arbitrary values turn `_` into a space.
 
 Styling is Tailwind utilities plus inline `style={{}}` for anything dynamic
 (dark mode, transitions, computed sizes). Follow that pattern — it's consistent
@@ -112,7 +113,7 @@ and branched inline. Every colour decision needs both branches.
 
 - `src/imports/` — Figma Make exports (photos, SVG components)
 - `src/work/` — case study images, organised by area
-- `public/fonts/` — Museo + Avenir files
+- `public/fonts/` — Museo + Nunito Sans files
 
 Import assets as ES modules (`import x from "@/work/..."`) so Vite fingerprints
 them. `@` aliases to `src/`. **Commit new image files** — they've been missed
