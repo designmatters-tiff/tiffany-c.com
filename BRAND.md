@@ -234,6 +234,35 @@ testimonial quotes are the two that run wide on a large display.
 Headings run large and light — the confidence comes from scale and space, not
 weight.
 
+### Naming the parts
+
+So the same thing gets called the same thing in a brief, a comment, or a
+conversation. An Awards or Speaking row has three lines:
+
+| Line | Call it | Built from | Treatment |
+|---|---|---|---|
+| `2025 · Australia` | **Meta** | `year` · `region` | Nunito Sans, `text-small`, DIM |
+| `UX Leader of the Year — Finalist` | **Title** | `topic` — `role` | Museo 300, fluid 1.1–1.5rem, gold |
+| `Women in Digital National Awards` | **Source** | `event` | Nunito Sans, `text-small`, DIM |
+
+Plus the **expand toggle** (the `+`) and, once open, the **expanded panel**
+holding the image or watch link.
+
+Two of these resist the obvious names:
+
+- The meta line is **not a subheader**. On mobile it stacks above the title, but
+  on desktop it moves to the right-hand end of the row. It is not above anything
+  there, so a name based on position would be wrong half the time.
+- The source line is **not a description**. It is never prose — it is the
+  awarding body or the event, a proper noun.
+
+Above the rows, at page level:
+
+- **Eyebrow** — the small uppercase kicker (`RECOGNITION & VOICE IN COMMUNITY`)
+- **Display** — the page heading (`Awards & Speaking`)
+- **Group label** — the eyebrow that divides one block of rows from the next
+  (`SPEAKING`)
+
 ### Motion
 
 Slow and intentional. Transitions land around **0.25–0.35s ease**. Page
