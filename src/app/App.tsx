@@ -621,6 +621,11 @@ function ContactItem({
 
 const AUTO_DURATION = 5000;
 
+// Horizontal padding inside the mobile nav bar, in px. Mirrors the `px-5`
+// class on it — the minimised width is computed from this, so the two have to
+// agree or the bar stops being symmetric.
+const NAV_PAD_X = 20;
+
 // Space the mobile hero leaves clear at the bottom of the slide, so the body
 // copy never runs under the floating nav. Built from the same terms as the
 // chrome stacked down there:
@@ -665,6 +670,22 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
   // it was expanded. Resets whenever the active section changes so a
   // stale "scrolled" state from a previous section can't carry over.
   const [navMinimized, setNavMinimized] = useState(false);
+  // Width of the minimised nav's only content — the hamburger and the name.
+  // Measured rather than assumed: the bar shrinks to fit it, and a hardcoded
+  // width leaves dead space on the right as soon as the name or the font
+  // metrics change. Seeded at the current measured value so the first frame
+  // is already close.
+  const navBtnRef = useRef<HTMLButtonElement | null>(null);
+  const [navBtnW, setNavBtnW] = useState(94);
+  useEffect(() => {
+    const el = navBtnRef.current;
+    if (!el) return;
+    const measure = () => setNavBtnW(Math.ceil(el.getBoundingClientRect().width));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const activeIdxRef = useRef(0);
   const wheeling     = useRef(false);
   const isPaused     = useRef(false);
@@ -1254,9 +1275,10 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           WebkitBackdropFilter: "none",
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}
-        animate={{ width: navShrunk ? 168 : "calc(100% - 48px)", height: navShrunk ? 36 : 56 }}
+        animate={{ width: navShrunk ? navBtnW + NAV_PAD_X * 2 : "calc(100% - 48px)", height: navShrunk ? 36 : 56 }}
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
         <button
+          ref={navBtnRef}
           onClick={() => setMenuOpen(true)}
           className="flex items-center gap-3"
           aria-label="Open navigation">
