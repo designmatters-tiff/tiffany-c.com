@@ -1836,6 +1836,14 @@ const TESTIMONIALS: {
     ],
   },
   {
+    key: "sebastian", group: "leadership",
+    name: "Sebastian Wang", title: "Sr. UIUX Designer, PlayStation",
+    source: "Reported to Tiffany", date: "13 January 2025",
+    quote: [
+      "As my Head of Design, Tiffany provided an environment that balanced creative freedom with the structure needed to execute ambitious ideas. What sets Tiffany apart is her innate ability to blend creativity with strategy. She knows when to challenge the status quo and when to refine an idea to perfection. Under her leadership, I grew not only as a designer but also as a strategic thinker.",
+    ],
+  },
+  {
     key: "junhoe", group: "leadership",
     name: "Junhoe W.", title: "Sr. Product Designer, BigPay",
     source: "Reported to Tiffany", date: null,
