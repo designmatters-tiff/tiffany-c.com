@@ -657,10 +657,6 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
   const [progress, setProgress]     = useState(0);
   const [menuOpen, setMenuOpen]     = useState(false);
-  // On mobile, the embedded Work/Award & Speaking pages are capped to one
-  // screen with a gradient fade + "View more" until expanded, so the
-  // persistent carousel indicator always has room.
-  const [mobileExpanded, setMobileExpanded] = useState<Record<string, boolean>>({});
   // Whether an embedded section's natural content height actually
   // exceeds the viewport — the "View more" cap should only ever kick
   // in for sections that genuinely overflow (e.g. Awards & Speaking's
@@ -837,21 +833,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
   // page that's been expanded past its mobile "View more" cap — this
   // makes the section vertically scrollable, which is the precondition
   // for the Safari-style nav shrink (see navMinimized) to apply.
-  const currentEmbedExpanded = isMobile && "embeds" in currentSection && currentSection.embeds && (mobileExpanded[currentSection.key] ?? false);
-  const navShrunk = currentEmbedExpanded && navMinimized;
+  const currentEmbedScrollable = isMobile && "embeds" in currentSection && Boolean(currentSection.embeds);
+  const navShrunk = currentEmbedScrollable && navMinimized;
 
   useEffect(() => { setNavMinimized(false); }, [activeIdx]);
 
-  // Expanding any row's accordion (a finalist photo, a speaking event's
-  // image/video) inside a still-capped Work/Award & Speaking section
-  // can grow taller than the one-screen cap allows — auto-lift the cap
-  // so that content isn't clipped with no way to scroll down and see it.
-  const { openId: openAccordionIdHome } = useContext(AccordionCtx);
-  useEffect(() => {
-    if (openAccordionIdHome && "embeds" in currentSection && currentSection.embeds) {
-      setMobileExpanded(m => (m[currentSection.key] ? m : { ...m, [currentSection.key]: true }));
-    }
-  }, [openAccordionIdHome, currentSection]);
 
   return (
     <div className="relative w-screen h-dvh overflow-hidden" style={{ background: "transparent" }}>
@@ -1047,50 +1033,28 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           // Work / Award & Speaking embed the real page directly so
           // scrolling horizontally into them glides straight into the
           // actual content (no stale preview text). Vertical scroll
-          // inside the slide lengthens it independently of the
-          // horizontal scroll-snap track. On mobile, that content is
-          // capped to one screen with a gradient fade + "View more"
-          // until expanded, so there's always room for the persistent
-          // carousel indicator instead of it disappearing into a long page.
+          // inside the slide lengthens it independently of the horizontal
+          // scroll-snap track, and scrolls from the outset. These used to be
+          // capped to one screen behind a "View more" that had to be tapped
+          // before the section would scroll at all — a swipe up on a long
+          // page did nothing, which reads as broken rather than as a control.
           if ("embeds" in section && section.embeds) {
-            const expanded = mobileExpanded[section.key] ?? false;
-            const overflows = sectionOverflows[section.key] ?? false;
-            const capped = isMobile && !expanded && overflows;
             return (
               <section key={section.key}
                 ref={(el) => { embedSectionRefs.current[section.key] = el; }}
                 className="flex-shrink-0 relative scrollbar-hide"
-                style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", overflowY: capped ? "hidden" : "auto", WebkitOverflowScrolling: "touch", touchAction: capped ? "pan-x" : "pan-y" }}
-                onScroll={!capped ? (e) => setNavMinimized(e.currentTarget.scrollTop > 24) : undefined}>
+                // No touchAction override: the browser routes a vertical drag
+                // to this section and a horizontal one to the deck behind it.
+                // Pinning it to pan-y scrolls the section but kills the swipe
+                // between sections; pan-x does the reverse.
+                style={{ width: "100vw", height: "100%", scrollSnapAlign: "start", overflowY: "auto", WebkitOverflowScrolling: "touch" }}
+                onScroll={(e) => setNavMinimized(e.currentTarget.scrollTop > 24)}>
                 {section.page === "work"
                   ? <WorkPage onNavigate={onNavigate} onOpenDetail={onOpenDetail} embedded isActive={isActive} compact={isActive && navShrunk} headerScrolled={isActive && navMinimized} />
                   : section.page === "testimonials"
                   ? <TestimonialsPage onNavigate={onNavigate} embedded isActive={isActive} compact={isActive && navShrunk} headerScrolled={isActive && navMinimized} />
                   : <AwardsSpeakingPage onNavigate={onNavigate} embedded isActive={isActive} compact={isActive && navShrunk} headerScrolled={isActive && navMinimized} />}
 
-                {capped && (
-                  <>
-                    {/* Frosted fade — same blurred/tinted treatment as the
-                        scrolled header, so the nav reads as a foreground
-                        layer with the list falling away behind it. The
-                        mask fades the blur in gradually rather than a
-                        hard edge. */}
-                    <div className="pointer-events-none absolute" style={{
-                      left: 0, right: 0, bottom: 0, height: 260, zIndex: 5,
-                      background: isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)",
-                      backdropFilter: "blur(8px)",
-                      WebkitBackdropFilter: "blur(8px)",
-                      maskImage: "linear-gradient(to bottom, transparent 0%, black 55%)",
-                      WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 55%)",
-                    }} />
-                    <button
-                      onClick={() => setMobileExpanded(m => ({ ...m, [section.key]: true }))}
-                      className="absolute left-1/2 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
-                      style={{ transform: "translateX(-50%)", bottom: "calc(5% + 56px + 34px + env(safe-area-inset-bottom))", color: GOLD, background: "none", border: "none", zIndex: 6 }}>
-                      View more
-                    </button>
-                  </>
-                )}
               </section>
             );
           }
@@ -2442,24 +2406,18 @@ function AwardsSpeakingPage({
       <div
         className="absolute inset-0 scrollbar-hide"
         style={{
-          overflowY: capped ? "hidden" : "auto",
+          // Always scrollable. "View more" below still governs how many events
+          // are listed, but it no longer gates whether the page moves at all.
+          overflowY: "auto",
           WebkitOverflowScrolling: "touch",
         }}
-        onScroll={!capped ? (e) => setSelfScrolled(e.currentTarget.scrollTop > 24) : undefined}
+        onScroll={(e) => setSelfScrolled(e.currentTarget.scrollTop > 24)}
       >
         {content}
       </div>
 
       {capped && (
         <>
-          <div className="pointer-events-none fixed inset-x-0 bottom-0" style={{
-            height: 260, zIndex: 25,
-            background: isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-            maskImage: "linear-gradient(to bottom, transparent 0%, black 55%)",
-            WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 55%)",
-          }} />
           <button
             onClick={() => setSelfExpanded(true)}
             className="fixed left-1/2 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
