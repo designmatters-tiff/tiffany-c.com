@@ -1928,12 +1928,15 @@ function TestimonialCard({ t, accent }: { t: (typeof TESTIMONIALS)[number]; acce
   const body = isDark ? "rgba(255,255,255,0.85)" : INK;
 
   return (
+    // No filled box. A tinted panel inside a four-sided border reads as a
+    // review widget, and BRAND.md allows no border that isn't separating
+    // something. The quote sits on the page ground like every other list on
+    // the site, with one hairline above it doing the separating.
     <figure
       className="flex flex-col"
       style={{
-        margin: 0, padding: '28px 26px', borderRadius: 2,
-        background: isDark ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.72)",
-        border: `1px solid ${isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.07)"}`,
+        margin: 0, padding: '22px 0 0',
+        borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.10)"}`,
         breakInside: 'avoid',
       }}>
       <blockquote
@@ -2076,7 +2079,7 @@ function TestimonialsPage({
           <div style={{ marginTop: 28, columnGap: 24 }}
             className="[column-count:1] md:[column-count:2]">
             {shown.map(t => (
-              <div key={t.key} style={{ breakInside: 'avoid', marginBottom: 20 }}>
+              <div key={t.key} style={{ breakInside: 'avoid', marginBottom: 44 }}>
                 <TestimonialCard t={t} accent={accent} />
               </div>
             ))}
