@@ -78,6 +78,45 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
+/* ── Type scale ────────────────────────────────────────────────────────
+   One explicit scale, roughly a 1.25 ratio. Use these tokens; do not
+   reintroduce arbitrary bracket sizes (text-[0.65rem] and friends) —
+   five sizes inside a 4px band is noise, not hierarchy.
+
+     display   Museo 300    3rem / 4rem md
+     h2        Museo 300    2rem / 2.5rem md
+     h3        Avenir 400   1.25rem
+     body      Avenir 400   1rem, 1.6 line-height
+     small     Avenir 400   0.875rem
+     label     Avenir 900   0.75rem, uppercase
+
+   The -lg variants are the md: step for the two Museo sizes, e.g.
+   `text-display md:text-display-lg`.
+   ──────────────────────────────────────────────────────────────────── */
+@theme {
+  --text-display: 3rem;
+  --text-display--line-height: 1.05;
+  --text-display-lg: 4rem;
+  --text-display-lg--line-height: 1.05;
+
+  --text-h2: 2rem;
+  --text-h2--line-height: 1.1;
+  --text-h2-lg: 2.5rem;
+  --text-h2-lg--line-height: 1.1;
+
+  --text-h3: 1.25rem;
+  --text-h3--line-height: 1.35;
+
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.55;
+
+  --text-label: 0.75rem;
+  --text-label--line-height: 1.2;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

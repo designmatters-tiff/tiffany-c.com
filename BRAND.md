@@ -200,11 +200,29 @@ from `DarkModeCtx` and branch.
   Nothing else. Never on a run of running text longer than a few words, and
   never as a substitute for Museo on a heading.
 
-Both are self-hosted in `public/fonts`. Applied inline via Tailwind arbitrary
-values, not a theme config.
+Both are self-hosted in `public/fonts`.
 
-`font-light` (300) is declared on most text nodes, but no 300-weight Avenir is
-loaded, so those render as Book 400 — it is a no-op, not a third weight.
+**The scale is defined once**, as Tailwind theme tokens in `src/styles/theme.css`:
+
+| Token | Face | Size |
+|---|---|---|
+| `text-display` / `md:text-display-lg` | Museo 300 | 3rem / 4rem |
+| `text-h2` / `md:text-h2-lg` | Museo 300 | 2rem / 2.5rem |
+| `text-h3` | Avenir 400 | 1.25rem |
+| `text-body` | Avenir 400 | 1rem, 1.6 line-height |
+| `text-small` | Avenir 400 | 0.875rem |
+| `text-label` | Avenir 900 | 0.75rem, uppercase |
+
+Use these. Do not reintroduce arbitrary bracket sizes — the site previously
+carried five different sizes inside a 4px band, which is noise, not hierarchy.
+
+Weights follow from the scale, so only two weight classes should ever appear:
+`font-light` on Museo, `font-black` on labels. Avenir body sits at its natural
+400 with no class. `font-medium` is never correct here — no 500-weight Avenir
+is loaded, so it silently renders as 400.
+
+**Line length:** body copy caps at `68ch`. The About paragraph and the
+testimonial quotes are the two that run wide on a large display.
 
 Headings run large and light — the confidence comes from scale and space, not
 weight.

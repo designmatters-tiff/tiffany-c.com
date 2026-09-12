@@ -180,7 +180,7 @@ function DarkModeToggle({
         <span ref={brightRef}
           onMouseEnter={() => setHoverWord("bright")}
           onMouseLeave={() => setHoverWord(null)}
-          className="font-['Avenir',sans-serif] font-light text-xs uppercase tracking-[0.1em]"
+          className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.1em]"
           style={{ color: (!isDark || hoverWord === "bright") ? activeColor : dimColor, transition: "color 0.3s" }}>
           Bright
         </span>
@@ -188,7 +188,7 @@ function DarkModeToggle({
         <span ref={darkRef}
           onMouseEnter={() => setHoverWord("dark")}
           onMouseLeave={() => setHoverWord(null)}
-          className="font-['Avenir',sans-serif] font-light text-xs uppercase tracking-[0.1em]"
+          className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.1em]"
           style={{ color: (isDark || hoverWord === "dark") ? activeColor : dimColor, transition: "color 0.3s" }}>
           Dark
         </span>
@@ -453,11 +453,11 @@ function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () =>
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
         <button onClick={onBack}
-          className="flex items-center gap-1.5 font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4 cursor-pointer"
+          className="flex items-center gap-1.5 font-['Avenir',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
           style={{ color: GOLD }}>
           <ChevronLeft size={12} strokeWidth={1.5} /> Connect
         </button>
-        <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]"
+        <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg"
           style={{ lineHeight: 1.05, color: GOLD, fontSize: headerScrolled ? "1.5rem" : undefined, transition: "font-size 0.35s ease" }}
           initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Speaking Inquiry
@@ -466,7 +466,7 @@ function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () =>
 
       <div className="px-6 md:px-20 pb-10" style={{ maxWidth: 760 }}>
         {status === "sent" ? (
-          <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: accent }}>
+          <p className="font-['Avenir',sans-serif] text-small" style={{ color: accent }}>
             ✓ Sent — Tiffany will be in touch soon.
           </p>
         ) : (
@@ -475,7 +475,7 @@ function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () =>
               <div key={f.name} className="flex flex-col gap-1">
                 <label
                   htmlFor={`sif-${f.name}`}
-                  className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.18em]"
+                  className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.18em]"
                   style={{ color: isDark ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.65)" }}
                 >
                   {f.label}{f.required && " *"}
@@ -504,13 +504,13 @@ function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () =>
         )}
 
         {showErrors && firstInvalid && status !== "sent" && (
-          <p className="font-['Avenir',sans-serif] font-light text-xs mt-4" style={{ color: "#E05C5C" }}>
+          <p className="font-['Avenir',sans-serif] text-label mt-4" style={{ color: "#E05C5C" }}>
             Please complete the required fields marked *.
           </p>
         )}
 
         {status === "error" && (
-          <p className="font-['Avenir',sans-serif] font-light text-xs mt-4" style={{ color: "#E05C5C" }}>
+          <p className="font-['Avenir',sans-serif] text-label mt-4" style={{ color: "#E05C5C" }}>
             Something went wrong — please email designmatters.tiff@gmail.com directly.
           </p>
         )}
@@ -608,7 +608,7 @@ function ContactItem({
       <a href="https://www.linkedin.com/in/tiffany-c/" target="_blank" rel="noopener noreferrer"
         className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
         <Linkedin size={16} strokeWidth={1} style={{ color: accent, flexShrink: 0 }} />
-        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: linkColor ?? itemColor }}>LinkedIn</span>
+        <span className="link-underline font-['Avenir',sans-serif] text-body" style={{ color: linkColor ?? itemColor }}>LinkedIn</span>
         <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
       </a>
     );
@@ -618,7 +618,7 @@ function ContactItem({
       <a href="https://www.instagram.com/tffny.c/" target="_blank" rel="noopener noreferrer"
         className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
         <Instagram size={16} strokeWidth={1} style={{ color: accent, flexShrink: 0 }} />
-        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: linkColor ?? itemColor }}>Instagram</span>
+        <span className="link-underline font-['Avenir',sans-serif] text-body" style={{ color: linkColor ?? itemColor }}>Instagram</span>
         <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
       </a>
     );
@@ -627,7 +627,7 @@ function ContactItem({
     return (
       <a href="mailto:designmatters.tiff@gmail.com"
         className="w-full flex items-center py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
-        <span className="link-underline font-['Avenir',sans-serif] font-light text-sm md:text-lg" style={{ color: linkColor ?? itemColor }}>{item}</span>
+        <span className="link-underline font-['Avenir',sans-serif] text-body" style={{ color: linkColor ?? itemColor }}>{item}</span>
       </a>
     );
   }
@@ -635,7 +635,7 @@ function ContactItem({
     return (
       <a href="https://topmate.io/tffnyc" target="_blank" rel="noopener noreferrer"
         className="w-full flex items-center gap-2 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
-        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: linkColor ?? itemColor }}>{item}</span>
+        <span className="link-underline font-['Avenir',sans-serif] text-body" style={{ color: linkColor ?? itemColor }}>{item}</span>
         <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
       </a>
     );
@@ -647,7 +647,7 @@ function ContactItem({
         onClick={() => onNavigate?.("speakingInquiry")}
       >
         <ChevronRight size={16} strokeWidth={1} style={{ color: accent, flexShrink: 0 }} />
-        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: linkColor ?? itemColor }}>
+        <span className="link-underline font-['Avenir',sans-serif] text-body" style={{ color: linkColor ?? itemColor }}>
           Speaking Inquiry
         </span>
       </button>
@@ -656,7 +656,7 @@ function ContactItem({
   return (
     <div className="flex items-center py-4 md:py-[18px]">
       {/* Plain label — goes nowhere, so it stays body text. */}
-      <span className="font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
+      <span className="font-['Avenir',sans-serif] text-body" style={{ color: itemColor }}>{item}</span>
     </div>
   );
 }
@@ -989,8 +989,8 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                   Hi, I'm a product &amp; design leader
                 </h1>
               </div>
-              <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
-                style={{ fontSize: "clamp(0.85rem, 3.8vw, 1.05rem)", color: bodyCol, maxWidth: "100%" }}>
+              <p className="font-['Avenir',sans-serif] leading-relaxed"
+                style={{ fontSize: "clamp(0.85rem, 3.8vw, 1.05rem)", color: bodyCol, maxWidth: "min(100%, 68ch)" }}>
                 I work with C-suites and product teams to shape design
                 functions that deliver. As a founder who built and
                 exited my own brand, and a leader across fintech, retail,
@@ -1045,8 +1045,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 minHeight 4vh for the same reason; this clamps it so the gap
                 can't fall under 28px on a short laptop. */}
             <div className="flex-1" style={{ minHeight: "clamp(28px, 4vh, 56px)" }} />
-            <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
-              style={{ fontSize: "clamp(1.05rem, 1.7vw, 1.4rem)", color: bodyCol, maxWidth: "60%" }}>
+            <p className="font-['Avenir',sans-serif] leading-relaxed"
+              // 60% of a 1920 viewport is 85ch — past the point where the eye
+              // loses the line. 68ch is the cap; the percentage still governs
+              // on narrower screens.
+              style={{ fontSize: "clamp(1.05rem, 1.7vw, 1.4rem)", color: bodyCol, maxWidth: "min(60%, 68ch)" }}>
               I work with C-suites and product teams to shape design
               functions that deliver. As an ex-founder who built and
               exited my own brand, and a leader across fintech, retail,
@@ -1114,7 +1117,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
               <div className="relative z-10 flex flex-col h-full px-6 md:px-20 pt-10 md:pt-14"
                 style={{ paddingBottom: "calc(64px + 8vh + 32px)" }}>
 
-                <motion.p className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.22em] mb-4 md:mb-6"
+                <motion.p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.22em] mb-4 md:mb-6"
                   style={{ color: (section as any).labelColor ?? section.accent }}
                   initial={false}
                   animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }}
@@ -1122,7 +1125,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                   {section.context}
                 </motion.p>
 
-                <motion.h2 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]"
+                <motion.h2 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg"
                   style={{ lineHeight: 1.05, maxWidth: "16ch", color: HEADING_COLOUR[section.key] ?? GOLD }}
                   initial={false}
                   animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }}
@@ -1248,7 +1251,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 {/* Weight carries the active state alongside the width and
                     opacity shifts. Avenir throughout so only the weight
                     changes between states, never the face. */}
-                <span className={`font-['Avenir',sans-serif] ${active ? 'font-black' : 'font-light'} text-[0.85rem] whitespace-nowrap overflow-hidden text-ellipsis text-white`}>
+                <span className={`font-['Avenir',sans-serif] ${active ? 'font-black' : ''} text-small whitespace-nowrap overflow-hidden text-ellipsis text-white`}>
                   {s.label}
                 </span>
               </span>
@@ -1303,7 +1306,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           className="flex items-center gap-3"
           aria-label="Open navigation">
           <HamburgerIcon color="white" />
-          <span className="font-['Avenir',sans-serif] font-light text-sm text-white whitespace-nowrap">
+          <span className="font-['Avenir',sans-serif] text-small text-white whitespace-nowrap">
             Tiffany C.
           </span>
         </button>
@@ -1311,7 +1314,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           <>
             <div className="flex-1" />
             {activeIdx > 0 && (
-              <span className="font-['Avenir',sans-serif] font-black text-sm text-white/75">
+              <span className="font-['Avenir',sans-serif] font-black text-small text-white/75">
                 {currentSection.label}
               </span>
             )}
@@ -1445,11 +1448,11 @@ function ExpertiseCard({ card, onOpen }: { card: typeof EXPERTISE_CARDS[0]; onOp
         <div style={{ width: 38, height: 38 }}><Illustration /></div>
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="font-['Avenir',sans-serif] font-medium"
+        <h3 className="font-['Avenir',sans-serif]"
           style={{ fontSize: "clamp(1rem, 1.6vw, 1.25rem)", color: titleColor }}>
           {card.title}
         </h3>
-        <p className="font-['Avenir',sans-serif] font-light text-sm leading-relaxed mt-1" style={{ color: isDark ? "rgba(255,255,255,0.55)" : DIM, maxWidth: 600 }}>
+        <p className="font-['Avenir',sans-serif] text-small leading-relaxed mt-1" style={{ color: isDark ? "rgba(255,255,255,0.55)" : DIM, maxWidth: 600 }}>
           {card.description}
         </p>
       </div>
@@ -1485,7 +1488,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
         <button onClick={onBack}
-          className="flex items-center gap-1.5 font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4 cursor-pointer"
+          className="flex items-center gap-1.5 font-['Avenir',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
           style={{ color: GOLD }}>
           <ChevronLeft size={12} strokeWidth={1.5} /> Work
         </button>
@@ -1494,7 +1497,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
             style={{ width: 56, height: 56, background: `${card.accent}1f` }}>
             <div style={{ width: 38, height: 38 }}><Illustration /></div>
           </div>
-          <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]" style={{ fontSize: compact ? '1.5rem' : undefined, lineHeight: 1.05, color: GOLD, transition: 'font-size 0.35s ease' }}
+          <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg" style={{ fontSize: compact ? '1.5rem' : undefined, lineHeight: 1.05, color: GOLD, transition: 'font-size 0.35s ease' }}
             initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
             {card.title}
           </motion.h1>
@@ -1502,7 +1505,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
       </div>
 
       <div className="px-6 md:px-20 pb-10" style={{ maxWidth: 760 }}>
-        <p className="font-['Avenir',sans-serif] font-light leading-relaxed" style={{ color: isDark ? "rgba(255,255,255,0.85)" : INK }}>
+        <p className="font-['Avenir',sans-serif] leading-relaxed" style={{ color: isDark ? "rgba(255,255,255,0.85)" : INK }}>
           {card.description}
         </p>
         <ul className="mt-6 space-y-2.5">
@@ -1510,7 +1513,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
               colour; a bullet that is just a statement reads as body text, so
               it sits in INK like the paragraph above it. */}
           {"resources" in card && (card as any).resources?.filter((r: any) => r.url).map((r: any) => (
-            <li key={r.label} className="font-['Avenir',sans-serif] font-light text-sm flex items-start gap-2" style={{ color: bodyText }}>
+            <li key={r.label} className="font-['Avenir',sans-serif] text-small flex items-start gap-2" style={{ color: bodyText }}>
               <span className="mt-0.5 flex-shrink-0">—</span>
               <a href={r.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1" style={{ color: linkColor }}>
                 <span className="link-underline">{r.label}</span>
@@ -1521,7 +1524,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
           {card.bullets.map(b => {
             const isSpecial = b === "eCommerce: Behavioural UX Design (passcode required)";
             return (
-              <li key={b} className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: bodyText }}>
+              <li key={b} className="font-['Avenir',sans-serif] text-small" style={{ color: bodyText }}>
                 {isSpecial ? (
                   <button onClick={() => onNavigate('businessCase')} className="link-underline" style={{ background: 'none', border: 'none', padding: 0, color: linkColor, cursor: 'pointer', textAlign: 'left', display: 'block', width: '100%' }}>
                     — {b}
@@ -1565,13 +1568,13 @@ function DetailBottomBar({
         style={{ background: navGradient(isDark) }}
         initial={{ height: 56 }} animate={{ height: 36 }} transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
         <HamburgerIcon />
-        <span className="font-['Avenir',sans-serif] font-light text-sm text-white whitespace-nowrap overflow-hidden text-ellipsis">
+        <span className="font-['Avenir',sans-serif] text-small text-white whitespace-nowrap overflow-hidden text-ellipsis">
           {parentLabel} / {itemLabel}
         </span>
       </motion.button>
       {cta && (
         <motion.button onClick={cta.onClick} disabled={cta.disabled}
-          className="gold-submit-btn px-6 flex-shrink-0 font-['Museo',sans-serif] font-light text-sm text-white cursor-pointer"
+          className="gold-submit-btn px-6 flex-shrink-0 font-['Museo',sans-serif] font-light text-small text-white cursor-pointer"
           style={{ opacity: cta.disabled ? 0.6 : 1 }}
           initial={{ height: 56 }} animate={{ height: 36 }} transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
           {cta.label}
@@ -1643,14 +1646,14 @@ function PageBottomNav({
             borderRight: "1px solid rgba(255,255,255,0.18)",
           }}>
           <HamburgerIcon />
-          <span className="font-['Avenir',sans-serif] font-light text-[0.85rem] text-white whitespace-nowrap overflow-hidden text-ellipsis">Tiffany C.</span>
+          <span className="font-['Avenir',sans-serif] text-small text-white whitespace-nowrap overflow-hidden text-ellipsis">Tiffany C.</span>
         </button>
         {NAV_ITEMS.map(item => (
           <button key={item.key}
             onMouseEnter={() => setHoveredNav(item.key)}
             onMouseLeave={() => setHoveredNav(null)}
             onClick={() => item.page && onNavigate(item.page)}
-            className={`flex items-center font-['Avenir',sans-serif] ${activePage === item.page ? 'font-black' : 'font-light'} text-[0.85rem] whitespace-nowrap overflow-hidden text-ellipsis text-white`}
+            className={`flex items-center font-['Avenir',sans-serif] ${activePage === item.page ? 'font-black' : ''} text-small whitespace-nowrap overflow-hidden text-ellipsis text-white`}
             style={{
               flex: activePage === item.page || hoveredNav === item.key ? "3 1 0%" : "1 1 0%",
               minWidth: 0, padding: "0 20px",
@@ -1668,10 +1671,10 @@ function PageBottomNav({
         style={{ background: navGradient(isDark), transition: 'height 0.25s ease' }}>
         <button onClick={() => setMenuOpen(true)} className="flex items-center gap-3" aria-label="Open navigation">
           <HamburgerIcon />
-          <span className={`font-['Avenir',sans-serif] font-medium ${compact ? 'text-sm' : 'text-base'} text-white`}>Tiffany C.</span>
+          <span className={`font-['Avenir',sans-serif] ${compact ? 'text-small' : 'text-body'} text-white`}>Tiffany C.</span>
         </button>
         <div className="flex-1" />
-        <span className={`font-['Avenir',sans-serif] font-black ${compact ? 'text-[0.75rem]' : 'text-sm'} text-white/75`} style={{ transition: 'font-size 0.25s ease' }}>
+        <span className={`font-['Avenir',sans-serif] font-black ${compact ? 'text-label' : 'text-small'} text-white/75`} style={{ transition: 'font-size 0.25s ease' }}>
           {detailLabel ? `Work / ${detailLabel}` : (NAV_ITEMS.find(n => n.page === activePage)?.label ?? "")}
         </span>
       </div>
@@ -1716,11 +1719,11 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           paddingBottom: compact ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
-        <motion.p className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: "#888880" }}
+        <motion.p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.22em] mb-2" style={{ color: "#888880" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Fintech · eCommerce · SaaS
         </motion.p>
-        <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]"
+        <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg"
           style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: HEADING_COLOUR.work, transition: "font-size 0.35s ease" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Work
@@ -1769,11 +1772,11 @@ function ContactListPage({
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       {/* Page heading */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
-        <motion.p className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: accent }}
+        <motion.p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.22em] mb-2" style={{ color: accent }}
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {eyebrow}
         </motion.p>
-        <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]" style={{ lineHeight: 1.05, color: headingColor ?? fg }}
+        <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg" style={{ lineHeight: 1.05, color: headingColor ?? fg }}
           initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
           {title}
         </motion.h1>
@@ -1986,14 +1989,14 @@ function TestimonialCard({ t, accent }: { t: (typeof TESTIMONIALS)[number]; acce
           ...(open ? {} : { display: '-webkit-box', WebkitLineClamp: CLAMP_LINES, WebkitBoxOrient: 'vertical' as const }),
         }}>
         {t.quote.map((para, i) => (
-          <p key={i} className="font-['Avenir',sans-serif] font-light leading-relaxed"
+          <p key={i} className="font-['Avenir',sans-serif] leading-relaxed max-w-[68ch]"
             style={{ margin: i === 0 ? 0 : '0.9em 0 0', fontSize: '0.95rem' }}>{para}</p>
         ))}
       </blockquote>
 
       {(overflows || open) && (
         <button onClick={() => setOpen(o => !o)}
-          className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.18em] cursor-pointer self-start"
+          className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.18em] cursor-pointer self-start"
           style={{ background: 'none', border: 'none', padding: '14px 0 0', color: accent }}>
           {open ? "Read less" : "Read more"}
         </button>
@@ -2005,9 +2008,9 @@ function TestimonialCard({ t, accent }: { t: (typeof TESTIMONIALS)[number]; acce
           <p className="font-['Museo',sans-serif] font-light" style={{ color: body, fontSize: '1rem', margin: 0 }}>{t.name}</p>
         )}
         {t.title && (
-          <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, margin: t.name ? '4px 0 0' : 0 }}>{t.title}</p>
+          <p className="font-['Avenir',sans-serif] text-small" style={{ color: sub, margin: t.name ? '4px 0 0' : 0 }}>{t.title}</p>
         )}
-        <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.16em]"
+        <p className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.16em]"
           style={{ color: sub, margin: '10px 0 0' }}>
           {[t.source, t.date].filter(Boolean).join(" · ")}
         </p>
@@ -2065,9 +2068,9 @@ function TestimonialsPage({
           paddingBottom: headerScrolled ? 6 : 10,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
-          <p className="font-['Avenir',sans-serif] font-black text-[0.65rem] uppercase tracking-[0.2em] mb-4"
+          <p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.2em] mb-4"
             style={{ color: accent }}>TESTIMONIAL</p>
-          <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]"
+          <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg"
             style={{ fontSize: shrunk ? "1.5rem" : undefined, lineHeight: 1.05, color: accent, margin: 0, transition: "font-size 0.35s ease" }}
             initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
             What they say
@@ -2076,7 +2079,7 @@ function TestimonialsPage({
           {/* The intro reads once, on arrival. It collapses as soon as the
               user scrolls so the pinned bar stays shallow — otherwise three
               stacked blocks would eat a third of a phone screen. */}
-          <p className="font-['Avenir',sans-serif] font-light" style={{
+          <p className="font-['Avenir',sans-serif]" style={{
             color: sub, maxWidth: '48ch', overflow: 'hidden',
             marginTop: headerScrolled ? 0 : 8,
             maxHeight: headerScrolled ? 0 : 160,
@@ -2096,7 +2099,7 @@ function TestimonialsPage({
               const count  = TESTIMONIALS.filter(t => t.group === g.key).length;
               return (
                 <button key={g.key} role="tab" aria-selected={active} onClick={() => setGroup(g.key)}
-                  className={`font-['Avenir',sans-serif] ${active ? 'font-black' : 'font-light'} text-[0.65rem] uppercase tracking-[0.18em] cursor-pointer`}
+                  className={`font-['Avenir',sans-serif] ${active ? 'font-black' : ''} text-label uppercase tracking-[0.18em] cursor-pointer`}
                   style={{
                     background: 'none', border: 'none', padding: '0 0 10px',
                     color: active ? accent : sub,
@@ -2116,8 +2119,13 @@ function TestimonialsPage({
               ones. Two columns rather than three — three drops the measure to
               ~45 characters, and once a long quote is expanded the balancing
               leaves a column empty. */}
-          <div style={{ marginTop: 28, columnGap: 24 }}
-            className="[column-count:1] md:[column-count:2]">
+          {/* Two columns of 68ch plus the gap. Capping the track rather than
+              only the paragraphs keeps the columns even — a bare cap on the
+              text would leave ragged dead space inside each column. The
+              Avenir class is here so `ch` resolves against the quote's own
+              font, not the inherited default. */}
+          <div style={{ marginTop: 28, columnGap: 24, maxWidth: "calc(68ch * 2 + 24px)" }}
+            className="font-['Avenir',sans-serif] [column-count:1] md:[column-count:2]">
             {shown.map(t => (
               <div key={t.key} style={{ breakInside: 'avoid', marginBottom: 44 }}>
                 <TestimonialCard t={t} accent={accent} />
@@ -2125,7 +2133,7 @@ function TestimonialsPage({
             ))}
           </div>
 
-          <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, marginTop: 32 }}>
+          <p className="font-['Avenir',sans-serif] text-small" style={{ color: sub, marginTop: 32 }}>
             Coaching reviews are published on{" "}
             <a href="https://topmate.io/tffnyc" target="_blank" rel="noopener noreferrer"
               className="link-underline" style={{ color: accent }}>Topmate</a>{" "}and{" "}
@@ -2230,13 +2238,13 @@ function SpeakingEventRow({
         )}
         <div className="flex-1 flex flex-col md:flex-row md:items-start md:justify-between gap-1 md:gap-6 min-w-0">
           <div className="flex flex-col gap-1 min-w-0">
-            <span className="md:hidden font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>{ev.year} · {ev.region}</span>
-            <p className="font-['Avenir',sans-serif] font-medium" style={{ fontSize: "clamp(0.95rem, 1.6vw, 1.4rem)", color: fg }}>
+            <span className="md:hidden font-['Avenir',sans-serif] text-small" style={{ color: sub }}>{ev.year} · {ev.region}</span>
+            <p className="font-['Avenir',sans-serif]" style={{ fontSize: "clamp(0.95rem, 1.6vw, 1.4rem)", color: fg }}>
               {ev.role} — {ev.event}
             </p>
-            <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub }}>{ev.topic}</p>
+            <p className="font-['Avenir',sans-serif] text-small" style={{ color: sub }}>{ev.topic}</p>
           </div>
-          <span className="hidden md:block flex-shrink-0 font-['Avenir',sans-serif] font-light text-[0.7rem] text-right" style={{ color: sub }}>{ev.year} · {ev.region}</span>
+          <span className="hidden md:block flex-shrink-0 font-['Avenir',sans-serif] text-small text-right" style={{ color: sub }}>{ev.year} · {ev.region}</span>
         </div>
       </button>
 
@@ -2288,7 +2296,7 @@ function SpeakingEventRow({
             )}
             {ev.link && (
               <a href={ev.link} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 mt-5 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
+                className="inline-flex items-center gap-2 mt-5 font-['Avenir',sans-serif] text-label uppercase tracking-[0.15em] cursor-pointer"
                 style={{ color: GOLD }}>
                 <span className="link-underline">Watch on YouTube</span>
                 <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
@@ -2331,13 +2339,13 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
         />
         <div className="flex-1 flex flex-col md:flex-row md:items-start md:justify-between gap-1 md:gap-6 min-w-0">
           <div className="flex flex-col gap-1 min-w-0">
-            <span className="md:hidden font-['Avenir',sans-serif] font-light text-[0.7rem]" style={{ color: sub }}>2025 · Australia</span>
+            <span className="md:hidden font-['Avenir',sans-serif] text-small" style={{ color: sub }}>2025 · Australia</span>
             <p className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.5rem)", color: fg }}>
               UX Leader of the Year — Finalist
             </p>
-            <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub }}>Women in Digital National Awards</p>
+            <p className="font-['Avenir',sans-serif] text-small" style={{ color: sub }}>Women in Digital National Awards</p>
           </div>
-          <span className="hidden md:block flex-shrink-0 font-['Avenir',sans-serif] font-light text-[0.7rem] text-right" style={{ color: sub }}>2025 · Australia</span>
+          <span className="hidden md:block flex-shrink-0 font-['Avenir',sans-serif] text-small text-right" style={{ color: sub }}>2025 · Australia</span>
         </div>
       </button>
 
@@ -2359,7 +2367,7 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
             </div>
           </div>
           <a href="https://womenindigital.org/women-in-digital-awards/women-in-digital-awards-2025-finalists/" target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 mt-5 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
+            className="inline-flex items-center gap-2 mt-5 font-['Avenir',sans-serif] text-label uppercase tracking-[0.15em] cursor-pointer"
             style={{ color: GOLD }}>
             <span className="link-underline">View official finalists page</span>
             <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
@@ -2432,11 +2440,11 @@ function AwardsSpeakingPage({
           paddingBottom: compact ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
-        <motion.p className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: "#5070A0" }}
+        <motion.p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.22em] mb-2" style={{ color: "#5070A0" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Recognition &amp; voice in community
         </motion.p>
-        <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]"
+        <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg"
           style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: HEADING_COLOUR.awards, transition: "font-size 0.35s ease" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Awards &amp; Speaking
@@ -2451,7 +2459,7 @@ function AwardsSpeakingPage({
       {/* Speaking events */}
       <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
         <div className="px-6 md:px-20 pt-8 md:pt-12 pb-4 md:pb-6">
-          <p className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.22em]" style={{ color: GOLD }}>Speaking</p>
+          <p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.22em]" style={{ color: GOLD }}>Speaking</p>
         </div>
         {visibleEvents.map((ev, i) => (
           <SpeakingEventRow key={ev.key} ev={ev} isFirst={i === 0} isDark={isDark} fg={fg} sub={sub} brd={brd} stickyTop={headerHeight} />
@@ -2489,7 +2497,7 @@ function AwardsSpeakingPage({
         <>
           <button
             onClick={() => setSelfExpanded(true)}
-            className="fixed left-1/2 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
+            className="fixed left-1/2 font-['Avenir',sans-serif] text-label uppercase tracking-[0.15em] cursor-pointer"
             style={{ transform: "translateX(-50%)", bottom: "calc(8% + env(safe-area-inset-bottom))", color: GOLD, background: "none", border: "none", zIndex: 26 }}>
             View more
           </button>
@@ -2601,7 +2609,7 @@ function SpeakingDetailPage({
         style={{ borderBottom: `1px solid ${ev.dark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"}` }}>
         <button
           onClick={onBack}
-          className="link-underline flex items-center gap-2 font-['Avenir',sans-serif] font-light text-sm uppercase tracking-widest ml-auto"
+          className="link-underline flex items-center gap-2 font-['Avenir',sans-serif] text-small uppercase tracking-widest ml-auto"
           style={{ color: GOLD }}>
           ← Awards &amp; Speaking
         </button>
@@ -2636,7 +2644,7 @@ function SpeakingDetailPage({
           )}
           {/* Label on image as in Figma */}
           <div className="absolute bottom-8 left-6 md:left-20">
-            <p className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.2em] mb-1"
+            <p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.2em] mb-1"
               style={{ color: "rgba(255,255,255,0.65)" }}>
               {ev.pageLabel}
             </p>
@@ -2647,17 +2655,17 @@ function SpeakingDetailPage({
       {/* Event metadata */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8"
         style={{ borderBottom: `1px solid ${ev.dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
-        <motion.p className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.22em] mb-2"
+        <motion.p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.22em] mb-2"
           style={{ color: GOLD }}
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {ev.year} · {ev.role} · {ev.location}
         </motion.p>
-        <motion.h1 className="font-['Museo',sans-serif] font-light mb-5 text-[3rem] md:text-[4rem]"
+        <motion.h1 className="font-['Museo',sans-serif] font-light mb-5 text-display md:text-display-lg"
           style={{ lineHeight: 1.05, color: textColor, maxWidth: "20ch" }}
           initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
           {ev.event}
         </motion.h1>
-        <p className="font-['Avenir',sans-serif] font-light"
+        <p className="font-['Avenir',sans-serif]"
           style={{ fontSize: "clamp(1rem, 2vw, 1.5rem)", color: subColor, maxWidth: 560, lineHeight: 1.5 }}>
           "{ev.topic}"
         </p>
@@ -2666,10 +2674,10 @@ function SpeakingDetailPage({
         {ev.link && !ev.finalistLink && (
           <div className="mt-8 rounded-2xl overflow-hidden flex flex-col items-center justify-center"
             style={{ maxWidth: 560, height: 200, background: ev.dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", border: `1px solid ${ev.dark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"}` }}>
-            <p className="font-['Avenir',sans-serif] font-light text-xs uppercase tracking-widest mb-4"
+            <p className="font-['Avenir',sans-serif] text-label uppercase tracking-widest mb-4"
               style={{ color: subColor }}>Watch the talk</p>
             <a href={ev.link} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 font-['Avenir',sans-serif] font-medium text-sm uppercase tracking-[0.15em] cursor-pointer"
+              className="inline-flex items-center gap-2 font-['Avenir',sans-serif] text-small uppercase tracking-[0.15em] cursor-pointer"
               style={{ color: GOLD }}>
               <span className="link-underline">Watch on YouTube</span>
               <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
@@ -2680,7 +2688,7 @@ function SpeakingDetailPage({
         {/* Finalist link */}
         {ev.finalistLink && (
           <a href={ev.finalistLink} target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 mt-6 font-['Avenir',sans-serif] font-medium text-xs uppercase tracking-[0.15em] cursor-pointer"
+            className="inline-flex items-center gap-2 mt-6 font-['Avenir',sans-serif] text-label uppercase tracking-[0.15em] cursor-pointer"
             style={{ color: GOLD }}>
             <span className="link-underline">View official finalists page</span>
             <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
@@ -2691,7 +2699,7 @@ function SpeakingDetailPage({
       {/* Finalist card (Women in Digital only) */}
       {ev.additionalImg && (
         <div className="px-4 md:px-20 py-8 md:py-12">
-          <p className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.2em] mb-4" style={{ color: DIM }}>
+          <p className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.2em] mb-4" style={{ color: DIM }}>
             The 2025 UX Leader of the Year Finalists
           </p>
           <div className="rounded-2xl overflow-hidden" style={{ boxShadow: "0 0 28px rgba(0,0,0,0.12)", maxWidth: 900 }}>
@@ -2740,9 +2748,9 @@ function BusinessCaseContent() {
         <dl className="grid gap-x-8 gap-y-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', margin: 0 }}>
           {META.map(([label, value]) => (
             <div key={label}>
-              <dt className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.18em]"
+              <dt className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.18em]"
                 style={{ color: sub }}>{label}</dt>
-              <dd className="font-['Avenir',sans-serif] font-light" style={{ color: body, margin: '6px 0 0' }}>{value}</dd>
+              <dd className="font-['Avenir',sans-serif]" style={{ color: body, margin: '6px 0 0' }}>{value}</dd>
             </div>
           ))}
         </dl>
@@ -2753,26 +2761,26 @@ function BusinessCaseContent() {
             style={{ color: fg, fontSize: 'clamp(1.5rem, 4vw, 2rem)', lineHeight: 1.2, maxWidth: '26ch', textWrap: 'balance', margin: 0 }}>
             From Google Analytics and Content Square, we saw the promo code component is most clicked
           </h2>
-          <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, marginTop: 12 }}>
+          <p className="font-['Avenir',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
             Excluding the checkout button, which is the bag page's main call to action.
           </p>
 
           <div className="grid gap-8 md:grid-cols-2" style={{ marginTop: 32 }}>
             <div>
-              <h3 className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.18em]" style={{ color: sub }}>Background</h3>
-              <p className="font-['Avenir',sans-serif] font-light" style={{ color: body, marginTop: 8 }}>
+              <h3 className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.18em]" style={{ color: sub }}>Background</h3>
+              <p className="font-['Avenir',sans-serif]" style={{ color: body, marginTop: 8 }}>
                 <Figures>We had a 3× lower checkout rate compared to other similar players in the industry.</Figures>
               </p>
             </div>
             <div>
-              <h3 className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.18em]" style={{ color: sub }}>The brief</h3>
-              <p className="font-['Avenir',sans-serif] font-light" style={{ color: body, marginTop: 8 }}>
+              <h3 className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.18em]" style={{ color: sub }}>The brief</h3>
+              <p className="font-['Avenir',sans-serif]" style={{ color: body, marginTop: 8 }}>
                 Increase the checkout rate from the bag page.
               </p>
             </div>
             <div className="md:col-span-2">
-              <h3 className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.18em]" style={{ color: sub }}>My responsibilities</h3>
-              <p className="font-['Avenir',sans-serif] font-light" style={{ color: body, marginTop: 8 }}>
+              <h3 className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.18em]" style={{ color: sub }}>My responsibilities</h3>
+              <p className="font-['Avenir',sans-serif]" style={{ color: body, marginTop: 8 }}>
                 I led the user surveys and interviews to find the qualitative reason behind what the data showed. The reason was simple —
                 users are motivated to check out when they have a promo code to use.
               </p>
@@ -2785,7 +2793,7 @@ function BusinessCaseContent() {
           <figure style={{ margin: 0 }}>
             <img src={foggModel} alt="The Fogg Behavior Model, annotated with the nudge and one-click voucher interventions"
               style={{ width: '100%', maxWidth: 760, display: 'block', borderRadius: 8 }} />
-            <figcaption className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, marginTop: 12 }}>
+            <figcaption className="font-['Avenir',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
               Image 1: Concept of human behaviour and UX design.
             </figcaption>
           </figure>
@@ -2794,7 +2802,7 @@ function BusinessCaseContent() {
             marginTop: 32, padding: '20px 24px', borderRadius: 8,
             background: isDark ? "rgba(255,255,255,0.06)" : "#1c1c1c",
           }}>
-            <p className="font-['Avenir',sans-serif] font-light" style={{ color: isDark ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.92)', margin: 0 }}>
+            <p className="font-['Avenir',sans-serif]" style={{ color: isDark ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.92)', margin: 0 }}>
               The design solution addresses a well-known broken flow: users leave the website to search for a code.
             </p>
           </div>
@@ -2804,10 +2812,10 @@ function BusinessCaseContent() {
         <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
           <h2 className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1.5rem', margin: 0 }}>AB testing</h2>
           <div className="grid gap-6 md:grid-cols-2" style={{ marginTop: 16 }}>
-            <p className="font-['Avenir',sans-serif] font-light" style={{ color: body, margin: 0 }}>
+            <p className="font-['Avenir',sans-serif]" style={{ color: body, margin: 0 }}>
               <span style={{ color: fg }}>Group A</span> — the old design, without login, and the promo code field hidden inside a collapsed container.
             </p>
-            <p className="font-['Avenir',sans-serif] font-light" style={{ color: body, margin: 0 }}>
+            <p className="font-['Avenir',sans-serif]" style={{ color: body, margin: 0 }}>
               <span style={{ color: fg }}>Group B</span> — the login surfaced, with selectors for the vouchers already available to that account.
             </p>
           </div>
@@ -2815,7 +2823,7 @@ function BusinessCaseContent() {
           <figure style={{ margin: '32px 0 0' }}>
             <img src={interventionImg} alt="Group B: the collapsed promo code field on the left, and the surfaced voucher selectors after logging in on the right"
               style={{ width: '100%', display: 'block', borderRadius: 8 }} />
-            <figcaption className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, marginTop: 12 }}>
+            <figcaption className="font-['Avenir',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
               Left: the new design where users have not logged in. Right: after logging in.
             </figcaption>
           </figure>
@@ -2823,7 +2831,7 @@ function BusinessCaseContent() {
 
         {/* ── Result ── */}
         <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
-          <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.18em]" style={{ color: sub }}>
+          <p className="font-['Avenir',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>
             Result from the tested group — voucher owners
           </p>
           <dl className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginTop: 20 }}>
@@ -2831,18 +2839,18 @@ function BusinessCaseContent() {
               <div key={label}>
                 <dd className="font-['Museo',sans-serif] font-light"
                   style={{ color: fg, fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', lineHeight: 1.1, margin: 0, fontVariantNumeric: 'tabular-nums' }}>{value}</dd>
-                <dt className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, marginTop: 6 }}>{label}</dt>
+                <dt className="font-['Avenir',sans-serif] text-small" style={{ color: sub, marginTop: 6 }}>{label}</dt>
               </div>
             ))}
           </dl>
-          <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, marginTop: 16 }}>
+          <p className="font-['Avenir',sans-serif] text-small" style={{ color: sub, marginTop: 16 }}>
             Measured from checkout entry to purchase.
           </p>
 
           <figure style={{ margin: '32px 0 0' }}>
             <img src={graphResult} alt="Google Analytics funnel: view bag, enter checkout at 70.1%, purchase at 79.6%"
               style={{ width: '100%', maxWidth: 760, display: 'block', borderRadius: 8 }} />
-            <figcaption className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: sub, marginTop: 12 }}>
+            <figcaption className="font-['Avenir',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
               Chart: Google Analytics funnel from bag to successful checkout.
             </figcaption>
           </figure>
@@ -2892,7 +2900,7 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
           <button onClick={onBack}
-            className="flex items-center gap-2 font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4 cursor-pointer"
+            className="flex items-center gap-2 font-['Avenir',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
             style={{ color: GOLD }}>
             <ChevronLeft size={12} strokeWidth={1.5} /> BUSINESS ACUMEN
           </button>
@@ -2906,11 +2914,11 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
           </>
         ) : (
           <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560 }}>
-            <p className="font-['Avenir',sans-serif] font-light" style={{ color: isDark ? 'rgba(255,255,255,0.85)' : INK }}>This page requires passcode</p>
+            <p className="font-['Avenir',sans-serif]" style={{ color: isDark ? 'rgba(255,255,255,0.85)' : INK }}>This page requires passcode</p>
 
             <div className="flex flex-col gap-1" style={{ marginTop: 32 }}>
               <label
-                className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.18em]"
+                className="font-['Avenir',sans-serif] font-black text-label uppercase tracking-[0.18em]"
                 style={{ color: isDark ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.65)" }}>
                 PASSCODE *
               </label>
@@ -2925,12 +2933,12 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
               />
             </div>
 
-            {error && <p className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: '#E05C5C', marginTop: 10 }}>{error}</p>}
+            {error && <p className="font-['Avenir',sans-serif] text-small" style={{ color: '#E05C5C', marginTop: 10 }}>{error}</p>}
 
             <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end' }}>
               <button
                 onClick={submit}
-                className="font-['Avenir',sans-serif] font-medium text-sm uppercase tracking-widest"
+                className="font-['Avenir',sans-serif] text-small uppercase tracking-widest"
                 style={{ background: GOLD, color: '#fff', border: 'none', padding: '12px 28px', cursor: 'pointer', borderRadius: 2 }}>
                 Submit
               </button>
