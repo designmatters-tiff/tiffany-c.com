@@ -690,7 +690,9 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
   const isDark = useContext(DarkModeCtx);
   const pageBg  = isDark ? "#282828" : "#f8f7f5";
   const fg      = isDark ? GOLD : INK;
-  const bodyCol = isDark ? "rgba(255,255,255,0.85)" : INK;
+  // Body copy sits one step down from INK. Full black reads heavy against the
+  // cream ground; INK is kept for names and card titles.
+  const bodyCol = isDark ? "rgba(255,255,255,0.72)" : DIM;
   const dimCol  = isDark ? "rgba(255,255,255,0.38)" : DIM;
   const border  = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
   const scrollEl  = useRef<HTMLDivElement>(null);
@@ -1475,7 +1477,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
   // A work detail page sits under Work, so its links wear Work's heading
   // colour; everything that isn't a link is body text.
   const linkColor = HEADING_COLOUR.work;
-  const bodyText  = isDark ? "rgba(255,255,255,0.85)" : INK;
+  const bodyText  = isDark ? "rgba(255,255,255,0.72)" : DIM;
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
@@ -1505,7 +1507,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
       </div>
 
       <div className="px-6 md:px-20 pb-10" style={{ maxWidth: 760 }}>
-        <p className="font-['Nunito_Sans',sans-serif] leading-relaxed" style={{ color: isDark ? "rgba(255,255,255,0.85)" : INK }}>
+        <p className="font-['Nunito_Sans',sans-serif] leading-relaxed" style={{ color: bodyText }}>
           {card.description}
         </p>
         <ul className="mt-6 space-y-2.5">
@@ -1968,7 +1970,9 @@ function TestimonialCard({ t, accent }: { t: (typeof TESTIMONIALS)[number]; acce
   }, [open]);
 
   const sub  = isDark ? "rgba(255,255,255,0.6)"  : DIM;
-  const body = isDark ? "rgba(255,255,255,0.85)" : INK;
+  const body = isDark ? "rgba(255,255,255,0.72)" : DIM;
+  // The name is the one thing in the card that outranks the quote.
+  const nameColor = isDark ? "white" : INK;
 
   return (
     // No filled box. A tinted panel inside a four-sided border reads as a
@@ -2005,12 +2009,16 @@ function TestimonialCard({ t, accent }: { t: (typeof TESTIMONIALS)[number]; acce
       <figcaption style={{ marginTop: 'auto', paddingTop: 22 }}>
         <div style={{ width: 24, height: 1, background: accent, opacity: 0.5, marginBottom: 14 }} />
         {t.name && (
-          <p className="font-['Museo',sans-serif] font-light" style={{ color: body, fontSize: '1rem', margin: 0 }}>{t.name}</p>
+          <p className="font-['Museo',sans-serif] font-light" style={{ color: nameColor, fontSize: '1rem', margin: 0 }}>{t.name}</p>
         )}
         {t.title && (
           <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, margin: t.name ? '4px 0 0' : 0 }}>{t.title}</p>
         )}
-        <p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.16em]"
+        {/* Footnote: provenance, not a label. Sentence case and no
+            letterspacing — the source strings are already written that way
+            ("Reported to Tiffany", "via Topmate"), so the caps were doing
+            nothing but adding volume to the quietest line in the card. */}
+        <p className="font-['Nunito_Sans',sans-serif] text-label"
           style={{ color: sub, margin: '10px 0 0' }}>
           {[t.source, t.date].filter(Boolean).join(" · ")}
         </p>
@@ -2063,10 +2071,13 @@ function TestimonialsPage({
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
-          // The tab row is the last thing in this block and carries its own
-          // 10px underline gap, so the bar needs little padding of its own.
-          paddingBottom: headerScrolled ? 6 : 10,
-          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
+          // No bottom padding: the tab row is the last thing in this block, so
+          // its own underline then lands exactly on the bar's bottom edge and
+          // reads as a tab indicator against the divider rather than floating
+          // above it. The gap between the label and its underline is the tab
+          // button's own 10px padding.
+          paddingBottom: 0,
+          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
           <p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4"
             style={{ color: accent }}>TESTIMONIAL</p>
@@ -2725,7 +2736,7 @@ function BusinessCaseContent() {
   const isDark = useContext(DarkModeCtx);
   const fg   = GOLD;
   const sub  = isDark ? "rgba(255,255,255,0.75)" : DIM;
-  const body = isDark ? "rgba(255,255,255,0.85)" : INK;
+  const body = isDark ? "rgba(255,255,255,0.72)" : DIM;
   const rule = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
 
   // Metadata reads as a definition list rather than run-on lines, matching the
@@ -2916,7 +2927,7 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
           </>
         ) : (
           <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560 }}>
-            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? 'rgba(255,255,255,0.85)' : INK }}>This page requires passcode</p>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>This page requires passcode</p>
 
             <div className="flex flex-col gap-1" style={{ marginTop: 32 }}>
               <label

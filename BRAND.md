@@ -246,6 +246,17 @@ conversation. An Awards or Speaking row has three lines:
 Plus the **expand toggle** (the `+`) and, once open, the **expanded panel**
 holding the image or watch link.
 
+The smallest size in the scale carries two different treatments — same
+`text-label` size, opposite volume:
+
+| Treatment | Case | Letterspacing | Used for |
+|---|---|---|---|
+| **Label** | ALL CAPS | wide (`0.16`–`0.22em`) | eyebrows, group labels, field labels |
+| **Footnote** | Sentence case | none | provenance and attribution, e.g. `Reported to Tiffany · 13 January 2025` |
+
+A footnote is the quietest line in a block. If it is set in caps it stops being
+quiet, which is why the testimonial provenance line is not a label.
+
 Two of these resist the obvious names:
 
 - The meta line is **not a subheader**. On mobile it stacks above the title, but
