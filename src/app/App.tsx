@@ -85,6 +85,12 @@ type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" 
 const DarkModeCtx = createContext(false);
 const DarkModeToggleCtx = createContext<() => void>(() => {});
 
+// Bright/dark is hidden until the bright theme is finished. Only the control
+// is gone — DarkModeCtx, the toggle component and every isDark branch stay
+// exactly as they are, so flipping this back to true reinstates the feature
+// with no other change.
+const THEME_TOGGLE_ENABLED = false;
+
 // ─── Shared accordion state ────────────────────────────────────────
 // One open item at a time across the whole site (Work page expertise
 // cards, Awards & Speaking event rows, Connect's Speaking Inquiry).
@@ -243,6 +249,9 @@ function MobileMenu({
   forceScroll?: boolean;
 }) {
   const isDark = useContext(DarkModeCtx);
+  // read unconditionally — the toggle below is behind a flag, and a hook
+  // must not sit inside that branch
+  const toggleDark = useContext(DarkModeToggleCtx);
   const itemActive = GOLD;
   const rowBorder  = isDark ? "rgba(255,255,255,0.15)" : "rgba(17,17,17,0.12)";
   const closeColor = isDark ? "white" : INK;
@@ -305,12 +314,15 @@ function MobileMenu({
 
       {/* Footer — close on the left, sitting where the hamburger that opened
           the menu sits in the collapsed nav, so the control doesn't jump
-          across the screen between states. Bright/dark takes the right. */}
+          across the screen between states. Bright/dark took the right until
+          THEME_TOGGLE_ENABLED was switched off. */}
       <div className="relative z-10 px-6 pb-8 flex items-center justify-between">
         <button onClick={onClose} aria-label="Close menu" style={{ background: "none", border: "none", padding: 0 }}>
           <X size={20} strokeWidth={1} color={closeColor} />
         </button>
-        <DarkModeToggle isDark={isDark} onToggle={useContext(DarkModeToggleCtx)} variant="inline" />
+        {THEME_TOGGLE_ENABLED && (
+          <DarkModeToggle isDark={isDark} onToggle={toggleDark} variant="inline" />
+        )}
       </div>
     </motion.div>
   );
@@ -2976,7 +2988,7 @@ export default function App() {
       {/* Flat ground — warm cream in light, near-black in dark. No mesh, and
           no per-section tinting: one colour behind the whole site. */}
       <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, background: isDark ? "#282828" : "#f8f7f5" }} />
-      <DarkModeToggle isDark={isDark} onToggle={toggleDark} />
+      {THEME_TOGGLE_ENABLED && <DarkModeToggle isDark={isDark} onToggle={toggleDark} />}
       <motion.div key={motionKey} className="absolute inset-0" style={{ zIndex: 1 }}
         initial={page === "workDetail" ? { opacity: 1, x: "100%" } : { opacity: 0, x: 0 }}
         animate={{ opacity: 1, x: 0 }}
