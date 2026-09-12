@@ -991,8 +991,8 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                   Hi, I'm a product &amp; design leader
                 </h1>
               </div>
-              <p className="font-['Nunito_Sans',sans-serif] leading-relaxed"
-                style={{ fontSize: "clamp(0.85rem, 3.8vw, 1.05rem)", color: bodyCol, maxWidth: "min(100%, 68ch)" }}>
+              <p className="font-['Nunito_Sans',sans-serif] text-body leading-relaxed"
+                style={{ color: bodyCol, maxWidth: "min(100%, 68ch)" }}>
                 I work with C-suites and product teams to shape design
                 functions that deliver. As a founder who built and
                 exited my own brand, and a leader across fintech, retail,
@@ -1047,11 +1047,15 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 minHeight 4vh for the same reason; this clamps it so the gap
                 can't fall under 28px on a short laptop. */}
             <div className="flex-1" style={{ minHeight: "clamp(28px, 4vh, 56px)" }} />
-            <p className="font-['Nunito_Sans',sans-serif] leading-relaxed"
+            {/* Body copy is one size everywhere: text-body, matching the
+                description on a Work detail page. This paragraph used to run
+                fluid up to 22.4px, which read as a different species of text
+                from the rest of the site. */}
+            <p className="font-['Nunito_Sans',sans-serif] text-body leading-relaxed"
               // 60% of a 1920 viewport is 85ch — past the point where the eye
               // loses the line. 68ch is the cap; the percentage still governs
               // on narrower screens.
-              style={{ fontSize: "clamp(1.05rem, 1.7vw, 1.4rem)", color: bodyCol, maxWidth: "min(60%, 68ch)" }}>
+              style={{ color: bodyCol, maxWidth: "min(60%, 68ch)" }}>
               I work with C-suites and product teams to shape design
               functions that deliver. As an ex-founder who built and
               exited my own brand, and a leader across fintech, retail,

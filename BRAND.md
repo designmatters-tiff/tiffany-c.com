@@ -231,6 +231,10 @@ carried by size, caps and letterspacing rather than weight). Nunito Sans at 400
 needs no class. `font-medium` is never correct here — no 500 weight
 is loaded, so it silently renders as 400.
 
+**One body size.** Body copy is `text-body` (1rem) everywhere, including the
+homepage hero paragraph — it used to run fluid up to 22.4px on a wide screen,
+which read as a different species of text from the rest of the site.
+
 **Line length:** body copy caps at `68ch`. The About paragraph and the
 testimonial quotes are the two that run wide on a large display.
 
