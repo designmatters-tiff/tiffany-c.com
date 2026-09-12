@@ -62,6 +62,31 @@ function gradientAt(t: number): string {
 }
 
 // Deck order — the same order the nav lists them in.
+// Avenir Black (900) is already downloaded on every page view. It earns its
+// place on three things only: eyebrow labels, the figures in metrics, and the
+// active item in navigation. Never on a run of running text — it is a display
+// weight, and Museo 300 remains the display face for headings.
+//
+// `Figures` picks the numbers out of a sentence so a proof point carries the
+// weight of its claim while the words around it stay at body weight.
+// The \b before the digit keeps it off the "2" in B2B/B2C, and a bare
+// four-digit number is a year, not a metric, so it stays at body weight too.
+const FIGURE = /([+-]?\b\d[\d.,]*(?:\s?[%×])?)/g;
+const isMetric = (s: string) => /[%×]/.test(s) || s.replace(/\D/g, "").length <= 3;
+
+function Figures({ children }: { children: string }) {
+  return (
+    <>
+      {children.split(FIGURE).map((part, i) =>
+        // split() with one capture group puts the matches at the odd indices
+        i % 2 === 1 && isMetric(part)
+          ? <span key={i} className="font-black">{part}</span>
+          : part,
+      )}
+    </>
+  );
+}
+
 const SECTION_ORDER = ["about", "work", "awards", "testimonials", "coaching", "connect"] as const;
 
 // The first half of the deck stays on GOLD. Sampled, those positions land in
@@ -450,7 +475,7 @@ function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () =>
               <div key={f.name} className="flex flex-col gap-1">
                 <label
                   htmlFor={`sif-${f.name}`}
-                  className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.18em]"
+                  className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.18em]"
                   style={{ color: isDark ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.65)" }}
                 >
                   {f.label}{f.required && " *"}
@@ -1089,7 +1114,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
               <div className="relative z-10 flex flex-col h-full px-6 md:px-20 pt-10 md:pt-14"
                 style={{ paddingBottom: "calc(64px + 8vh + 32px)" }}>
 
-                <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-4 md:mb-6"
+                <motion.p className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.22em] mb-4 md:mb-6"
                   style={{ color: (section as any).labelColor ?? section.accent }}
                   initial={false}
                   animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }}
@@ -1220,7 +1245,10 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
               }}>
               <span className="flex items-center gap-3 min-w-0">
                 {i === 0 && <HamburgerIcon color="white" />}
-                <span className="font-['Museo',sans-serif] font-light text-[0.85rem] whitespace-nowrap overflow-hidden text-ellipsis text-white">
+                {/* Weight carries the active state alongside the width and
+                    opacity shifts. Avenir throughout so only the weight
+                    changes between states, never the face. */}
+                <span className={`font-['Avenir',sans-serif] ${active ? 'font-black' : 'font-light'} text-[0.85rem] whitespace-nowrap overflow-hidden text-ellipsis text-white`}>
                   {s.label}
                 </span>
               </span>
@@ -1275,7 +1303,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           className="flex items-center gap-3"
           aria-label="Open navigation">
           <HamburgerIcon color="white" />
-          <span className="font-['Museo',sans-serif] font-light text-sm text-white whitespace-nowrap">
+          <span className="font-['Avenir',sans-serif] font-light text-sm text-white whitespace-nowrap">
             Tiffany C.
           </span>
         </button>
@@ -1283,7 +1311,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           <>
             <div className="flex-1" />
             {activeIdx > 0 && (
-              <span className="font-['Museo',sans-serif] font-light text-sm text-white/75">
+              <span className="font-['Avenir',sans-serif] font-black text-sm text-white/75">
                 {currentSection.label}
               </span>
             )}
@@ -1499,7 +1527,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
                     — {b}
                   </button>
                 ) : (
-                  <span className="flex items-start gap-2"><span className="mt-0.5 flex-shrink-0">—</span><span>{b}</span></span>
+                  <span className="flex items-start gap-2"><span className="mt-0.5 flex-shrink-0">—</span><span><Figures>{b}</Figures></span></span>
                 )}
               </li>
             );
@@ -1615,14 +1643,14 @@ function PageBottomNav({
             borderRight: "1px solid rgba(255,255,255,0.18)",
           }}>
           <HamburgerIcon />
-          <span className="font-['Museo',sans-serif] font-light text-[0.85rem] text-white whitespace-nowrap overflow-hidden text-ellipsis">Tiffany C.</span>
+          <span className="font-['Avenir',sans-serif] font-light text-[0.85rem] text-white whitespace-nowrap overflow-hidden text-ellipsis">Tiffany C.</span>
         </button>
         {NAV_ITEMS.map(item => (
           <button key={item.key}
             onMouseEnter={() => setHoveredNav(item.key)}
             onMouseLeave={() => setHoveredNav(null)}
             onClick={() => item.page && onNavigate(item.page)}
-            className="flex items-center font-['Museo',sans-serif] font-light text-[0.85rem] whitespace-nowrap overflow-hidden text-ellipsis text-white"
+            className={`flex items-center font-['Avenir',sans-serif] ${activePage === item.page ? 'font-black' : 'font-light'} text-[0.85rem] whitespace-nowrap overflow-hidden text-ellipsis text-white`}
             style={{
               flex: activePage === item.page || hoveredNav === item.key ? "3 1 0%" : "1 1 0%",
               minWidth: 0, padding: "0 20px",
@@ -1643,7 +1671,7 @@ function PageBottomNav({
           <span className={`font-['Avenir',sans-serif] font-medium ${compact ? 'text-sm' : 'text-base'} text-white`}>Tiffany C.</span>
         </button>
         <div className="flex-1" />
-        <span className={`font-['Avenir',sans-serif] font-light ${compact ? 'text-[0.75rem]' : 'text-sm'} text-white/75`} style={{ transition: 'font-size 0.25s ease' }}>
+        <span className={`font-['Avenir',sans-serif] font-black ${compact ? 'text-[0.75rem]' : 'text-sm'} text-white/75`} style={{ transition: 'font-size 0.25s ease' }}>
           {detailLabel ? `Work / ${detailLabel}` : (NAV_ITEMS.find(n => n.page === activePage)?.label ?? "")}
         </span>
       </div>
@@ -1688,7 +1716,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           paddingBottom: compact ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
-        <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: "#888880" }}
+        <motion.p className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: "#888880" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Fintech · eCommerce · SaaS
         </motion.p>
@@ -1741,7 +1769,7 @@ function ContactListPage({
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       {/* Page heading */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
-        <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: accent }}
+        <motion.p className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: accent }}
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {eyebrow}
         </motion.p>
@@ -2037,7 +2065,7 @@ function TestimonialsPage({
           paddingBottom: headerScrolled ? 6 : 10,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
-          <p className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em] mb-4"
+          <p className="font-['Avenir',sans-serif] font-black text-[0.65rem] uppercase tracking-[0.2em] mb-4"
             style={{ color: accent }}>TESTIMONIAL</p>
           <motion.h1 className="font-['Museo',sans-serif] font-light text-[3rem] md:text-[4rem]"
             style={{ fontSize: shrunk ? "1.5rem" : undefined, lineHeight: 1.05, color: accent, margin: 0, transition: "font-size 0.35s ease" }}
@@ -2068,7 +2096,7 @@ function TestimonialsPage({
               const count  = TESTIMONIALS.filter(t => t.group === g.key).length;
               return (
                 <button key={g.key} role="tab" aria-selected={active} onClick={() => setGroup(g.key)}
-                  className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.18em] cursor-pointer"
+                  className={`font-['Avenir',sans-serif] ${active ? 'font-black' : 'font-light'} text-[0.65rem] uppercase tracking-[0.18em] cursor-pointer`}
                   style={{
                     background: 'none', border: 'none', padding: '0 0 10px',
                     color: active ? accent : sub,
@@ -2404,7 +2432,7 @@ function AwardsSpeakingPage({
           paddingBottom: compact ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
-        <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: "#5070A0" }}
+        <motion.p className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.22em] mb-2" style={{ color: "#5070A0" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Recognition &amp; voice in community
         </motion.p>
@@ -2423,7 +2451,7 @@ function AwardsSpeakingPage({
       {/* Speaking events */}
       <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
         <div className="px-6 md:px-20 pt-8 md:pt-12 pb-4 md:pb-6">
-          <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em]" style={{ color: GOLD }}>Speaking</p>
+          <p className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.22em]" style={{ color: GOLD }}>Speaking</p>
         </div>
         {visibleEvents.map((ev, i) => (
           <SpeakingEventRow key={ev.key} ev={ev} isFirst={i === 0} isDark={isDark} fg={fg} sub={sub} brd={brd} stickyTop={headerHeight} />
@@ -2608,7 +2636,7 @@ function SpeakingDetailPage({
           )}
           {/* Label on image as in Figma */}
           <div className="absolute bottom-8 left-6 md:left-20">
-            <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] mb-1"
+            <p className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.2em] mb-1"
               style={{ color: "rgba(255,255,255,0.65)" }}>
               {ev.pageLabel}
             </p>
@@ -2619,7 +2647,7 @@ function SpeakingDetailPage({
       {/* Event metadata */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8"
         style={{ borderBottom: `1px solid ${ev.dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
-        <motion.p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.22em] mb-2"
+        <motion.p className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.22em] mb-2"
           style={{ color: GOLD }}
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {ev.year} · {ev.role} · {ev.location}
@@ -2663,7 +2691,7 @@ function SpeakingDetailPage({
       {/* Finalist card (Women in Digital only) */}
       {ev.additionalImg && (
         <div className="px-4 md:px-20 py-8 md:py-12">
-          <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.2em] mb-4" style={{ color: DIM }}>
+          <p className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.2em] mb-4" style={{ color: DIM }}>
             The 2025 UX Leader of the Year Finalists
           </p>
           <div className="rounded-2xl overflow-hidden" style={{ boxShadow: "0 0 28px rgba(0,0,0,0.12)", maxWidth: 900 }}>
@@ -2712,7 +2740,7 @@ function BusinessCaseContent() {
         <dl className="grid gap-x-8 gap-y-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', margin: 0 }}>
           {META.map(([label, value]) => (
             <div key={label}>
-              <dt className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.18em]"
+              <dt className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.18em]"
                 style={{ color: sub }}>{label}</dt>
               <dd className="font-['Avenir',sans-serif] font-light" style={{ color: body, margin: '6px 0 0' }}>{value}</dd>
             </div>
@@ -2731,19 +2759,19 @@ function BusinessCaseContent() {
 
           <div className="grid gap-8 md:grid-cols-2" style={{ marginTop: 32 }}>
             <div>
-              <h3 className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.18em]" style={{ color: sub }}>Background</h3>
+              <h3 className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.18em]" style={{ color: sub }}>Background</h3>
               <p className="font-['Avenir',sans-serif] font-light" style={{ color: body, marginTop: 8 }}>
-                We had a 3× lower checkout rate compared to other similar players in the industry.
+                <Figures>We had a 3× lower checkout rate compared to other similar players in the industry.</Figures>
               </p>
             </div>
             <div>
-              <h3 className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.18em]" style={{ color: sub }}>The brief</h3>
+              <h3 className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.18em]" style={{ color: sub }}>The brief</h3>
               <p className="font-['Avenir',sans-serif] font-light" style={{ color: body, marginTop: 8 }}>
                 Increase the checkout rate from the bag page.
               </p>
             </div>
             <div className="md:col-span-2">
-              <h3 className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.18em]" style={{ color: sub }}>My responsibilities</h3>
+              <h3 className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.18em]" style={{ color: sub }}>My responsibilities</h3>
               <p className="font-['Avenir',sans-serif] font-light" style={{ color: body, marginTop: 8 }}>
                 I led the user surveys and interviews to find the qualitative reason behind what the data showed. The reason was simple —
                 users are motivated to check out when they have a promo code to use.
@@ -2882,7 +2910,7 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
 
             <div className="flex flex-col gap-1" style={{ marginTop: 32 }}>
               <label
-                className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-[0.18em]"
+                className="font-['Avenir',sans-serif] font-black text-[0.6rem] uppercase tracking-[0.18em]"
                 style={{ color: isDark ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.65)" }}>
                 PASSCODE *
               </label>

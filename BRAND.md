@@ -189,10 +189,22 @@ from `DarkModeCtx` and branch.
 ### Type
 
 - **Museo** (300) — headings. Editorial, generous, never bold.
-- **Avenir** — body. Book weight for reading, Black used sparingly.
+- **Avenir Book** (400) — body, and everything that reads as running text.
+- **Avenir Black** (900) — a display weight with exactly three jobs:
+  1. **Eyebrows and section labels** — the small uppercase, letterspaced kickers.
+  2. **Figures in metrics** — the number only (`7 → 22`, `3×`, `20%`), never the
+     sentence carrying it. The `Figures` helper in `App.tsx` does this; it leaves
+     years and strings like `B2B` alone.
+  3. **The active item in navigation** — nav bars and the testimonial tabs.
+
+  Nothing else. Never on a run of running text longer than a few words, and
+  never as a substitute for Museo on a heading.
 
 Both are self-hosted in `public/fonts`. Applied inline via Tailwind arbitrary
 values, not a theme config.
+
+`font-light` (300) is declared on most text nodes, but no 300-weight Avenir is
+loaded, so those render as Book 400 — it is a no-op, not a third weight.
 
 Headings run large and light — the confidence comes from scale and space, not
 weight.
