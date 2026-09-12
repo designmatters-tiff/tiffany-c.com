@@ -553,12 +553,16 @@ function ContactItem({
   item,
   accent,
   itemColor,
+  linkColor,
   borderColor,
   onNavigate,
 }: {
   item: string;
   accent: string;
   itemColor: string;
+  // Rows that go somewhere wear the section's heading colour; a row that is
+  // just a label keeps itemColor, so colour always means "you can follow this".
+  linkColor?: string;
   borderColor: string;
   onNavigate?: (p: Page) => void;
 }) {
@@ -567,7 +571,7 @@ function ContactItem({
       <a href="https://www.linkedin.com/in/tiffany-c/" target="_blank" rel="noopener noreferrer"
         className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
         <Linkedin size={16} strokeWidth={1} style={{ color: accent, flexShrink: 0 }} />
-        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>LinkedIn</span>
+        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: linkColor ?? itemColor }}>LinkedIn</span>
         <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
       </a>
     );
@@ -577,7 +581,7 @@ function ContactItem({
       <a href="https://www.instagram.com/tffny.c/" target="_blank" rel="noopener noreferrer"
         className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
         <Instagram size={16} strokeWidth={1} style={{ color: accent, flexShrink: 0 }} />
-        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>Instagram</span>
+        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: linkColor ?? itemColor }}>Instagram</span>
         <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
       </a>
     );
@@ -586,7 +590,7 @@ function ContactItem({
     return (
       <a href="mailto:designmatters.tiff@gmail.com"
         className="w-full flex items-center py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
-        <span className="link-underline font-['Avenir',sans-serif] font-light text-sm md:text-lg" style={{ color: itemColor }}>{item}</span>
+        <span className="link-underline font-['Avenir',sans-serif] font-light text-sm md:text-lg" style={{ color: linkColor ?? itemColor }}>{item}</span>
       </a>
     );
   }
@@ -594,7 +598,7 @@ function ContactItem({
     return (
       <a href="https://topmate.io/tffnyc" target="_blank" rel="noopener noreferrer"
         className="w-full flex items-center gap-2 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
-        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
+        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: linkColor ?? itemColor }}>{item}</span>
         <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
       </a>
     );
@@ -606,7 +610,7 @@ function ContactItem({
         onClick={() => onNavigate?.("speakingInquiry")}
       >
         <ChevronRight size={16} strokeWidth={1} style={{ color: accent, flexShrink: 0 }} />
-        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>
+        <span className="link-underline font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: linkColor ?? itemColor }}>
           Speaking Inquiry
         </span>
       </button>
@@ -614,6 +618,7 @@ function ContactItem({
   }
   return (
     <div className="flex items-center py-4 md:py-[18px]">
+      {/* Plain label — goes nowhere, so it stays body text. */}
       <span className="font-['Avenir',sans-serif] font-light text-base md:text-lg" style={{ color: itemColor }}>{item}</span>
     </div>
   );
@@ -1099,7 +1104,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                           clipPath: isActive ? "inset(0 0 0% 0)" : "inset(0 0 100% 0)",
                           transition: `clip-path 0.55s cubic-bezier(0.4,0,0.2,1) ${0.22 + k * 0.09}s`,
                         }}>
-                          <ContactItem item={item} accent={section.accent} itemColor={itemColor} borderColor={border} onNavigate={onNavigate} />
+                          <ContactItem item={item} accent={section.accent} itemColor={itemColor} linkColor={HEADING_COLOUR[section.key]} borderColor={border} onNavigate={onNavigate} />
                         </div>
                       </div>
                     );
@@ -1424,6 +1429,10 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
   const card = EXPERTISE_CARDS.find(c => c.key === cardKey);
   if (!card) return null;
   const { Illustration } = card;
+  // A work detail page sits under Work, so its links wear Work's heading
+  // colour; everything that isn't a link is body text.
+  const linkColor = HEADING_COLOUR.work;
+  const bodyText  = isDark ? "rgba(255,255,255,0.85)" : INK;
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
@@ -1457,10 +1466,13 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
           {card.description}
         </p>
         <ul className="mt-6 space-y-2.5">
+          {/* Colour marks what you can follow. A link takes the page heading's
+              colour; a bullet that is just a statement reads as body text, so
+              it sits in INK like the paragraph above it. */}
           {"resources" in card && (card as any).resources?.filter((r: any) => r.url).map((r: any) => (
-            <li key={r.label} className="font-['Avenir',sans-serif] font-light text-sm flex items-start gap-2" style={{ color: card.accent }}>
+            <li key={r.label} className="font-['Avenir',sans-serif] font-light text-sm flex items-start gap-2" style={{ color: bodyText }}>
               <span className="mt-0.5 flex-shrink-0">—</span>
-              <a href={r.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1" style={{ color: card.accent }}>
+              <a href={r.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1" style={{ color: linkColor }}>
                 <span className="link-underline">{r.label}</span>
                 <ExternalLink size={11} strokeWidth={1.5} style={{ flexShrink: 0, opacity: 0.7 }} />
               </a>
@@ -1469,9 +1481,9 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
           {card.bullets.map(b => {
             const isSpecial = b === "eCommerce: Behavioural UX Design (passcode required)";
             return (
-              <li key={b} className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: card.accent }}>
+              <li key={b} className="font-['Avenir',sans-serif] font-light text-sm" style={{ color: bodyText }}>
                 {isSpecial ? (
-                  <button onClick={() => onNavigate('businessCase')} className="link-underline" style={{ background: 'none', border: 'none', padding: 0, color: card.accent, cursor: 'pointer', textAlign: 'left', display: 'block', width: '100%' }}>
+                  <button onClick={() => onNavigate('businessCase')} className="link-underline" style={{ background: 'none', border: 'none', padding: 0, color: linkColor, cursor: 'pointer', textAlign: 'left', display: 'block', width: '100%' }}>
                     — {b}
                   </button>
                 ) : (
@@ -1732,7 +1744,7 @@ function ContactListPage({
         <div style={{ borderTop: `1px solid ${brd}` }}>
           {items.map(item => (
             <div key={item} style={{ borderBottom: `1px solid ${brd}` }}>
-              <ContactItem item={item} accent={accent} itemColor={itemColor} borderColor={brd} onNavigate={onNavigate} />
+              <ContactItem item={item} accent={accent} itemColor={itemColor} linkColor={headingColor} borderColor={brd} onNavigate={onNavigate} />
             </div>
           ))}
         </div>
