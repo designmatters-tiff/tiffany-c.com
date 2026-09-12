@@ -249,8 +249,10 @@ Things that affect brand consistency and are still outstanding:
   and the tagline *"Clarity in design. Grounded in purpose."* as final. Neither is
   in the build. The shipped copy superseded them; noted in case the tagline is
   still wanted somewhere.
-- **Image weight** — several case study and event images exceed 2MB. Prefer `.avif`
-  for anything new.
+- ~~**Image weight**~~ — done. Every photo is `.avif`, sized from its measured
+  render box rather than shipped at camera resolution: 10.7MB to 1.2MB. Keep
+  new images `.avif`, and size them to what the page actually draws — a 4032px
+  photo in an 840px box is 20x the bytes for no visible gain.
 
 ---
 
