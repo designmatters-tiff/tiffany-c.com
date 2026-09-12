@@ -621,10 +621,12 @@ function ContactItem({
 
 const AUTO_DURATION = 5000;
 
-// Horizontal padding inside the mobile nav bar, in px. Mirrors the `px-5`
-// class on it — the minimised width is computed from this, so the two have to
-// agree or the bar stops being symmetric.
+// Padding inside the mobile nav bar, in px. NAV_PAD_X mirrors the `px-5` class
+// on it — the minimised width is computed from this, so the two have to agree
+// or the bar stops being symmetric. NAV_PAD_Y applies to the minimised state
+// only: the expanded bar keeps its fixed 56px height.
 const NAV_PAD_X = 20;
+const NAV_PAD_Y = 12;
 
 // Space the mobile hero leaves clear at the bottom of the slide, so the body
 // copy never runs under the floating nav. Built from the same terms as the
@@ -676,11 +678,17 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
   // metrics change. Seeded at the current measured value so the first frame
   // is already close.
   const navBtnRef = useRef<HTMLButtonElement | null>(null);
-  const [navBtnW, setNavBtnW] = useState(94);
+  const [navBtn, setNavBtn] = useState({ w: 94, h: 20 });
   useEffect(() => {
     const el = navBtnRef.current;
     if (!el) return;
-    const measure = () => setNavBtnW(Math.ceil(el.getBoundingClientRect().width));
+    const measure = () => {
+      const r = el.getBoundingClientRect();
+      setNavBtn(prev => {
+        const w = Math.ceil(r.width), h = Math.ceil(r.height);
+        return prev.w === w && prev.h === h ? prev : { w, h };
+      });
+    };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
@@ -1275,7 +1283,10 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           WebkitBackdropFilter: "none",
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}
-        animate={{ width: navShrunk ? navBtnW + NAV_PAD_X * 2 : "calc(100% - 48px)", height: navShrunk ? 36 : 56 }}
+        animate={{
+          width:  navShrunk ? navBtn.w + NAV_PAD_X * 2 : "calc(100% - 48px)",
+          height: navShrunk ? navBtn.h + NAV_PAD_Y * 2 : 56,
+        }}
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
         <button
           ref={navBtnRef}
