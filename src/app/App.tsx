@@ -1450,7 +1450,8 @@ function ExpertiseCard({ card, onOpen }: { card: typeof EXPERTISE_CARDS[0]; onOp
         <div style={{ width: 38, height: 38 }}><Illustration /></div>
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="font-['Nunito_Sans',sans-serif]"
+        {/* Title — Museo, matching the Awards and Speaking rows. */}
+        <h3 className="font-['Museo',sans-serif] font-light"
           style={{ fontSize: "clamp(1rem, 1.6vw, 1.25rem)", color: titleColor }}>
           {card.title}
         </h3>
@@ -2252,7 +2253,7 @@ function SpeakingEventRow({
         <div className="flex-1 flex flex-col md:flex-row md:items-start md:justify-between gap-1 md:gap-6 min-w-0">
           <div className="flex flex-col gap-1 min-w-0">
             <span className="md:hidden font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub }}>{ev.year} · {ev.region}</span>
-            <p className="font-['Nunito_Sans',sans-serif]" style={{ fontSize: "clamp(0.95rem, 1.6vw, 1.4rem)", color: fg }}>
+            <p className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(0.95rem, 1.6vw, 1.4rem)", color: fg }}>
               {ev.role} — {ev.event}
             </p>
             <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub }}>{ev.topic}</p>
