@@ -539,7 +539,7 @@ const SECTIONS = [
     key: "work",    label: "Work",             page: "work" as Page, embeds: true,
     accent: "#8A6E2E", labelColor: "#888880",
     tagline: "Design Strategy & Leadership",
-    context: "Fintech • eCommerce • Utility SaaS",
+    context: "Fintech · eCommerce · Utility SaaS",
     items: ["AI + UX DesignOps", "Business Acumen", "Product & UX Methods", "People & Process"],
   },
   {
@@ -565,7 +565,7 @@ const SECTIONS = [
     key: "coaching", label: "Coaching",        page: "coaching" as Page,
     accent: "#5070A0", labelColor: "#9B5A88",
     tagline: "UX Career Coaching",
-    context: "Portfolio • Positioning • Negotiation",
+    context: "Portfolio · Interview Strategies",
     items: [
       "1:1 Calls",
       "Priority DM",
