@@ -291,6 +291,11 @@ Nothing bounces, springs, pulses, or auto-advances. Motion acknowledges an
 action; it never performs for its own sake. If an animation draws attention to
 itself, it's wrong.
 
+The Work illustrations trace their own line work the first time they come into
+view, then stay put — a reveal on arrival, never a loop. Every resting value is
+authored as an SVG attribute, so a viewer who asks for reduced motion simply
+gets the finished mark.
+
 ### Space
 
 Generous whitespace is doing real work — it's what makes the site read as senior.
