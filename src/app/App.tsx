@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
-import type { ReactNode } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft } from "lucide-react";
 
 import awardsWomenDigital from "@/imports/AwardsSpeaking/WID-tiff2025.avif";
@@ -1344,128 +1343,58 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
 
 // ─── Work page illustrations ──────────────────────────────────────
 
-// ─── Work illustration motion ─────────────────────────────────────
-// Two layers, doing different jobs.
-//
-// 1. The line work traces itself in once, when the icon first comes into view.
-// 2. The whole mark then tilts continuously in 3D, so it reads as an object
-//    sitting in space rather than a flat glyph.
-//
-// The tilt oscillates rather than spinning a full turn: a complete rotation
-// puts a flat mark edge-on twice a cycle, where it collapses to a line and
-// vanishes. Swinging through ~±22° keeps the depth reading at all times.
-//
-// Every resting value stays on the element as an SVG attribute, so when a
-// viewer asks for reduced motion both layers drop out and the mark simply
-// renders as authored, still.
-const DRAW_VIEW = { once: true, amount: 0.5 } as const;
-const DRAW_EASE = [0.4, 0, 0.2, 1] as const;
-
-function Illo3D({ children }: { children: ReactNode }) {
-  const still = useReducedMotion();
-  return (
-    <motion.div
-      // the perspective goes too under reduced motion, so the element carries
-      // no transform at all rather than a static matrix3d that does nothing
-      style={still
-        ? { width: 38, height: 38 }
-        : { width: 38, height: 38, transformPerspective: 150, transformStyle: "preserve-3d" }}
-      animate={still ? undefined : { rotateY: [-22, 22, -22], rotateX: [9, -9, 9] }}
-      transition={still ? undefined : { duration: 9, repeat: Infinity, ease: "easeInOut" }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-function useDrawIn() {
-  const still = useReducedMotion();
-  return {
-    // trace a stroke; `f` is the resting fillOpacity for shapes that have both
-    draw: (i = 0, f?: number) => still ? {} : {
-      initial: { pathLength: 0, ...(f !== undefined && { fillOpacity: 0 }) },
-      whileInView: { pathLength: 1, ...(f !== undefined && { fillOpacity: f }) },
-      viewport: DRAW_VIEW,
-      transition: { duration: 0.85, delay: i * 0.1, ease: DRAW_EASE },
-    },
-    // fade a fill up to its resting value
-    fill: (to: number, delay = 0.5) => still ? {} : {
-      initial: { fillOpacity: 0, scale: 0.9 },
-      whileInView: { fillOpacity: to, scale: 1 },
-      viewport: DRAW_VIEW,
-      transition: { duration: 0.45, delay, ease: DRAW_EASE },
-      style: { transformOrigin: "60px 60px" },
-    },
-    // fade a stroke that cannot be traced
-    fadeStroke: (to: number, delay: number) => still ? {} : {
-      initial: { strokeOpacity: 0 },
-      whileInView: { strokeOpacity: to },
-      viewport: DRAW_VIEW,
-      transition: { duration: 0.5, delay, ease: DRAW_EASE },
-    },
-  };
-}
-
 function IllustrationAI() {
-  const { draw, fill } = useDrawIn();
   return (
     <svg viewBox="0 0 120 120" fill="none" className="w-full h-full">
-      <motion.circle cx="60" cy="60" r="52" stroke={GOLD} strokeWidth="1" strokeOpacity="0.3" {...draw(0)} />
-      <motion.circle cx="60" cy="60" r="28" stroke={GOLD} strokeWidth="1.5" strokeOpacity="0.6" {...draw(1)} />
+      <circle cx="60" cy="60" r="52" stroke={GOLD} strokeWidth="1" strokeOpacity="0.3" />
+      <circle cx="60" cy="60" r="28" stroke={GOLD} strokeWidth="1.5" strokeOpacity="0.6" />
       {[0, 60, 120, 180, 240, 300].map((a, i) => {
         const r = (a * Math.PI) / 180;
         return (
           <g key={a}>
-            <motion.line x1="60" y1="60" x2={60 + 52 * Math.cos(r)} y2={60 + 52 * Math.sin(r)}
-              stroke={GOLD} strokeWidth="1" strokeOpacity="0.35" {...draw(2 + i * 0.4)} />
-            <motion.circle cx={60 + 52 * Math.cos(r)} cy={60 + 52 * Math.sin(r)} r="4" fill={GOLD} fillOpacity="0.7"
-              {...fill(0.7, 0.75 + i * 0.05)} />
+            <line x1="60" y1="60" x2={60 + 52 * Math.cos(r)} y2={60 + 52 * Math.sin(r)}
+              stroke={GOLD} strokeWidth="1" strokeOpacity="0.35" />
+            <circle cx={60 + 52 * Math.cos(r)} cy={60 + 52 * Math.sin(r)} r="4" fill={GOLD} fillOpacity="0.7" />
           </g>
         );
       })}
-      <motion.circle cx="60" cy="60" r="5" fill={GOLD} {...fill(1, 1.05)} />
+      <circle cx="60" cy="60" r="5" fill={GOLD} />
     </svg>
   );
 }
 
 function IllustrationBusiness() {
-  const { draw, fill, fadeStroke } = useDrawIn();
   return (
     <svg viewBox="0 0 120 120" fill="none" className="w-full h-full">
-      <motion.polygon points="60,12 108,100 12,100" stroke="#8A6E2E" strokeWidth="1.5" fill="none" strokeOpacity="0.7" {...draw(0)} />
-      <motion.polygon points="60,30 94,88 26,88" fill="#8A6E2E" fillOpacity="0.12" stroke="#8A6E2E" strokeWidth="1" {...draw(1, 0.12)} />
-      <motion.polygon points="60,48 78,78 42,78" fill="#8A6E2E" fillOpacity="0.28" {...fill(0.28, 0.8)} />
-      <motion.line x1="60" y1="12" x2="60" y2="100" stroke="#8A6E2E" strokeWidth="1" strokeOpacity="0.25" strokeDasharray="4 3"
-        {...fadeStroke(0.25, 1)} />
+      <polygon points="60,12 108,100 12,100" stroke="#8A6E2E" strokeWidth="1.5" fill="none" strokeOpacity="0.7" />
+      <polygon points="60,30 94,88 26,88" fill="#8A6E2E" fillOpacity="0.12" stroke="#8A6E2E" strokeWidth="1" />
+      <polygon points="60,48 78,78 42,78" fill="#8A6E2E" fillOpacity="0.28" />
+      <line x1="60" y1="12" x2="60" y2="100" stroke="#8A6E2E" strokeWidth="1" strokeOpacity="0.25" strokeDasharray="4 3" />
     </svg>
   );
 }
 
 function IllustrationUX() {
-  const { draw, fill } = useDrawIn();
   return (
     <svg viewBox="0 0 120 120" fill="none" className="w-full h-full">
-      <motion.circle cx="44" cy="60" r="34" stroke="#5070A0" strokeWidth="1.5" fill="#5070A0" fillOpacity="0.08" {...draw(0, 0.08)} />
-      <motion.circle cx="76" cy="60" r="34" stroke="#5070A0" strokeWidth="1.5" fill="#5070A0" fillOpacity="0.08" {...draw(1, 0.08)} />
-      {/* the overlap is the point of the mark, so it lands last */}
-      <motion.path d="M60 28.4C69.6 35.6 75.6 47.2 75.6 60C75.6 72.8 69.6 84.4 60 91.6C50.4 84.4 44.4 72.8 44.4 60C44.4 47.2 50.4 35.6 60 28.4Z"
-        fill="#5070A0" fillOpacity="0.22" {...fill(0.22, 0.9)} />
-      <motion.rect x="36" y="36" width="48" height="48" stroke="#5070A0" strokeWidth="1" strokeOpacity="0.25" rx="2" {...draw(2)} />
+      <circle cx="44" cy="60" r="34" stroke="#5070A0" strokeWidth="1.5" fill="#5070A0" fillOpacity="0.08" />
+      <circle cx="76" cy="60" r="34" stroke="#5070A0" strokeWidth="1.5" fill="#5070A0" fillOpacity="0.08" />
+      <path d="M60 28.4C69.6 35.6 75.6 47.2 75.6 60C75.6 72.8 69.6 84.4 60 91.6C50.4 84.4 44.4 72.8 44.4 60C44.4 47.2 50.4 35.6 60 28.4Z"
+        fill="#5070A0" fillOpacity="0.22" />
+      <rect x="36" y="36" width="48" height="48" stroke="#5070A0" strokeWidth="1" strokeOpacity="0.25" rx="2" />
     </svg>
   );
 }
 
 function IllustrationPeople() {
-  const { draw, fill } = useDrawIn();
   return (
     <svg viewBox="0 0 120 120" fill="none" className="w-full h-full">
-      <motion.circle cx="60" cy="60" r="48" stroke="#5070A0" strokeWidth="1.5" fill="none" strokeOpacity="0.5" {...draw(0)} />
-      <motion.circle cx="60" cy="60" r="32" stroke="#5070A0" strokeWidth="2" fill="#5070A0" fillOpacity="0.08" {...draw(1, 0.08)} />
-      <motion.circle cx="60" cy="60" r="14" fill="#5070A0" fillOpacity="0.3" {...fill(0.3, 0.85)} />
+      <circle cx="60" cy="60" r="48" stroke="#5070A0" strokeWidth="1.5" fill="none" strokeOpacity="0.5" />
+      <circle cx="60" cy="60" r="32" stroke="#5070A0" strokeWidth="2" fill="#5070A0" fillOpacity="0.08" />
+      <circle cx="60" cy="60" r="14" fill="#5070A0" fillOpacity="0.3" />
       {[45, 135, 225, 315].map((a, i) => {
         const r = (a * Math.PI) / 180;
-        return <motion.circle key={a} cx={60 + 32 * Math.cos(r)} cy={60 + 32 * Math.sin(r)} r="5" fill="#5070A0" fillOpacity="0.8"
-          {...fill(0.8, 1 + i * 0.07)} />;
+        return <circle key={a} cx={60 + 32 * Math.cos(r)} cy={60 + 32 * Math.sin(r)} r="5" fill="#5070A0" fillOpacity="0.8" />;
       })}
     </svg>
   );
@@ -1526,7 +1455,7 @@ function ExpertiseCard({ card, onOpen }: { card: typeof EXPERTISE_CARDS[0]; onOp
           like every other element here. */}
       <div className="flex-shrink-0 flex items-center justify-center"
         style={{ width: 56, height: 56 }}>
-        <Illo3D><Illustration /></Illo3D>
+        <div style={{ width: 38, height: 38 }}><Illustration /></div>
       </div>
       <div className="flex-1 min-w-0">
         {/* Title — Museo, matching the Awards and Speaking rows. */}
@@ -1577,7 +1506,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
         <div className="flex items-center gap-5 mb-2">
           <div className="flex-shrink-0 flex items-center justify-center"
             style={{ width: 56, height: 56 }}>
-            <Illo3D><Illustration /></Illo3D>
+            <div style={{ width: 38, height: 38 }}><Illustration /></div>
           </div>
           <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg" style={{ fontSize: compact ? '1.5rem' : undefined, lineHeight: 1.05, color: GOLD, transition: 'font-size 0.35s ease' }}
             initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
