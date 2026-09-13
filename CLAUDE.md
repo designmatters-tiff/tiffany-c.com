@@ -134,8 +134,9 @@ case study images.
 
 Don't "fix" these as drive-by changes — they're known:
 
-- `SPEAKING_FORM_ENDPOINT` is the placeholder `"https://formspree.io/f/YOUR_FORM_ID"`.
-  The speaking inquiry form does not submit anywhere real yet.
+- `SPEAKING_FORM_ENDPOINT` now points at a real Formspree form. Formspree only
+  starts forwarding once the registered address is confirmed, so one live
+  submission still needs sending to check it reaches the inbox.
 - The business case passcode (`PASSCODE` in `BusinessCasePage`) is a hardcoded
   client-side string. It's obfuscation for a portfolio piece, not security — the
   case study content ships in the JS bundle regardless. Fine as-is, but don't put

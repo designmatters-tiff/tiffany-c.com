@@ -370,26 +370,32 @@ const FORM_FIELDS: { name: string; label: string; type?: string; required?: bool
   { name: "email",       label: "Email",          type: "email",  required: true  },
 ];
 
-// Speaking Inquiry is a full 2nd-level page (not an inline accordion) —
-// drilling in from Connect minimises the bottom nav to a breadcrumb
-// strip with a docked "Submit" CTA, leaving the full viewport for the
-// form. See DetailBottomBar.
-function SpeakingInquiryContainer({ onBack }: { onBack: () => void }) {
+// Speaking Inquiry is a full 2nd-level page (not an inline accordion).
+// It carries the same gradient bottom nav as every other page, shown as
+// "Connect / Speaking Inquiry" and shrinking on scroll — see StickyPageNav.
+function SpeakingInquiryContainer({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
   const [headerScrolled, setHeaderScrolled] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   return (
-    <div className="absolute inset-0 overflow-y-auto" onScroll={e => setHeaderScrolled(e.currentTarget.scrollTop > 24)}>
-      <SpeakingInquiryPage onBack={onBack} headerScrolled={headerScrolled} />
+    <div ref={scrollRef} className="absolute inset-0 overflow-y-auto"
+      onScroll={e => setHeaderScrolled(e.currentTarget.scrollTop > 24)}>
+      <SpeakingInquiryPage onBack={onBack} onNavigate={onNavigate} headerScrolled={headerScrolled}
+        scrollToTop={() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })} />
     </div>
   );
 }
 
-function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () => void; headerScrolled?: boolean }) {
+function SpeakingInquiryPage({ onBack, onNavigate, headerScrolled = false, scrollToTop }: { onBack: () => void; onNavigate: (p: Page) => void; headerScrolled?: boolean; scrollToTop?: () => void }) {
   const isDark = useContext(DarkModeCtx);
   const accent = "#9B5A88";
   const itemColor = isDark ? "white" : INK;
+  const sub = isDark ? "rgba(255,255,255,0.72)" : DIM;
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [fields, setFields] = useState<Record<string, string>>({});
+  // Held separately so the confirmation can name what was sent after the
+  // fields themselves have been cleared for a second inquiry.
+  const [sentSummary, setSentSummary] = useState<{ topic: string; event: string }>({ topic: "", event: "" });
 
   const inputBase: React.CSSProperties = {
     width: "100%",
@@ -435,10 +441,24 @@ function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () =>
         body: JSON.stringify({ _subject: `Speaking Inquiry: ${fields.topic ?? ""}`, ...fields }),
       });
       setStatus(res.ok ? "sent" : "error");
-      if (res.ok) setTimeout(() => { onBack(); setStatus("idle"); setFields({}); }, 2500);
+      if (res.ok) setSentSummary({ topic: (fields.topic ?? "").trim() || "your talk", event: (fields.event ?? "").trim() });
+      // The Submit button sits at the foot of a form the visitor has
+      // scrolled through, so the confirmation has to be brought to them —
+      // otherwise the fields vanish and the acknowledgement is left
+      // somewhere off-screen above. Nothing navigates on its own: leaving
+      // the page is the visitor's choice, not a timer's.
+      if (res.ok) scrollToTop?.();
     } catch {
       setStatus("error");
     }
+  };
+
+  const sent = status === "sent";
+
+  const resetForm = () => {
+    setFields({});
+    setShowErrors(false);
+    setStatus("idle");
   };
 
   return (
@@ -465,10 +485,40 @@ function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () =>
       </div>
 
       <div className="px-6 md:px-20 pb-10" style={{ maxWidth: 760 }}>
-        {status === "sent" ? (
-          <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: accent }}>
-            ✓ Sent — Tiffany will be in touch soon.
-          </p>
+        {sent ? (
+          /* Confirmation replaces the form in place. It has to carry its own
+             weight — a single grey line where eight fields used to be reads
+             as the page having emptied, not as a send having succeeded. */
+          <div style={{ maxWidth: '52ch' }}>
+            <p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em]"
+              style={{ color: DIM, margin: 0 }}>Inquiry sent</p>
+            <h2 className="font-['Museo',sans-serif] font-light text-h2 md:text-h2-lg"
+              style={{ color: accent, lineHeight: 1.15, margin: '12px 0 0' }}>
+              Thank you — this is on its way.
+            </h2>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: sub, marginTop: 16 }}>
+              Your inquiry about <strong style={{ color: itemColor, fontWeight: 600 }}>{sentSummary.topic}</strong>
+              {sentSummary.event ? <> for <strong style={{ color: itemColor, fontWeight: 600 }}>{sentSummary.event}</strong></> : null}
+              {" "}has landed in my inbox. I read every one myself and usually reply within a few days.
+            </p>
+            <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
+              If it's time-sensitive, or you'd rather talk it through, email me directly at{" "}
+              <a href="mailto:designmatters.tiff@gmail.com"
+                className="link-underline" style={{ color: accent }}>designmatters.tiff@gmail.com</a>.
+            </p>
+            <div className="flex flex-wrap gap-3" style={{ marginTop: 28 }}>
+              <button onClick={onBack}
+                className="gold-submit-btn px-6 font-['Museo',sans-serif] font-light text-small text-white cursor-pointer"
+                style={{ height: 44, border: 'none' }}>
+                Back to Connect
+              </button>
+              <button onClick={resetForm}
+                className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em] cursor-pointer"
+                style={{ background: 'none', border: 'none', padding: '0 4px', color: DIM }}>
+                Send another inquiry
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
             {FORM_FIELDS.map(f => (
@@ -503,7 +553,7 @@ function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () =>
           </div>
         )}
 
-        {showErrors && firstInvalid && status !== "sent" && (
+        {showErrors && firstInvalid && !sent && (
           <p className="font-['Nunito_Sans',sans-serif] text-label mt-4" style={{ color: "#E05C5C" }}>
             Please complete the required fields marked *.
           </p>
@@ -515,18 +565,23 @@ function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () =>
           </p>
         )}
 
-        {/* Bottom spacer so content clears the floating detail nav */}
-        <div style={{ height: 96 }} />
+        {/* Submit sits at the foot of the fields it sends, where a form is
+            read to end. The bottom nav is the site's menu on every other
+            page and stays that. */}
+        {!sent && (
+          <button onClick={handleSubmit} disabled={status === "sending"}
+            className="gold-submit-btn px-8 font-['Museo',sans-serif] font-light text-small text-white cursor-pointer"
+            style={{ height: 48, border: 'none', marginTop: 36, opacity: status === "sending" ? 0.6 : 1 }}>
+            {status === "sending" ? "Sending…" : "Submit"}
+          </button>
+        )}
+
+        {/* Bottom spacer so content clears the floating nav */}
+        <div style={{ height: 140 }} />
       </div>
 
-      <div className="fixed inset-x-3 md:inset-x-20 z-30" style={{ bottom: "calc(3% + env(safe-area-inset-bottom))" }}>
-        <DetailBottomBar
-          parentLabel="Connect"
-          itemLabel="Speaking Inquiry"
-          onBack={onBack}
-          cta={{ label: status === "sending" ? "Sending…" : "Submit", onClick: handleSubmit, disabled: status === "sending" || status === "sent" }}
-        />
-      </div>
+      <StickyPageNav activePage="connect" parentLabel="Connect" detailLabel="Speaking Inquiry"
+        compact={headerScrolled} onNavigate={onNavigate} />
     </div>
   );
 }
@@ -1560,47 +1615,12 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
 // form — the regular full-height PageBottomNav shrinks down to a
 // breadcrumb strip (parent / item) to leave more room for content,
 // with an optional CTA button (e.g. "Submit") docked beside it.
-function DetailBottomBar({
-  parentLabel,
-  itemLabel,
-  onBack,
-  cta,
-}: {
-  parentLabel: string;
-  itemLabel: string;
-  onBack: () => void;
-  cta?: { label: string; onClick: () => void; disabled?: boolean };
-}) {
-  const isDark = useContext(DarkModeCtx);
-  return (
-    <div className="flex items-stretch gap-2">
-      <motion.button onClick={onBack}
-        className="flex-1 min-w-0 flex items-center gap-3 px-5 cursor-pointer"
-        style={{ background: navGradient(isDark) }}
-        initial={{ height: 56 }} animate={{ height: 36 }} transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
-        <HamburgerIcon />
-        <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap overflow-hidden text-ellipsis">
-          {parentLabel} / {itemLabel}
-        </span>
-      </motion.button>
-      {cta && (
-        <motion.button onClick={cta.onClick} disabled={cta.disabled}
-          className="gold-submit-btn px-6 flex-shrink-0 font-['Museo',sans-serif] font-light text-small text-white cursor-pointer"
-          style={{ opacity: cta.disabled ? 0.6 : 1 }}
-          initial={{ height: 56 }} animate={{ height: 36 }} transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
-          {cta.label}
-        </motion.button>
-      )}
-    </div>
-  );
-}
-
 // ─── Shared gradient bottom nav (Work / Awards pages) ─────────────
 
 // Wraps PageBottomNav with a full-width fade scrim behind it, so content
 // scrolling up from underneath fades into the page background before it
 // would otherwise be visible peeking past the nav's side margins/edges.
-function StickyPageNav({ activePage, detailLabel, compact, onNavigate }: { activePage: Page; detailLabel?: string; compact?: boolean; onNavigate: (p: Page) => void }) {
+function StickyPageNav({ activePage, detailLabel, parentLabel, compact, onNavigate }: { activePage: Page; detailLabel?: string; parentLabel?: string; compact?: boolean; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
   const pageBg = isDark ? "#181410" : "#f8f7f5";
   return (
@@ -1609,7 +1629,7 @@ function StickyPageNav({ activePage, detailLabel, compact, onNavigate }: { activ
         style={{ height: 180, background: `linear-gradient(to bottom, ${pageBg}00 0%, ${pageBg} 65%)` }} />
       <div className="fixed inset-x-6 md:inset-x-20 z-30 overflow-hidden"
         style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
-        <PageBottomNav activePage={activePage} detailLabel={detailLabel} compact={compact} onNavigate={onNavigate} />
+        <PageBottomNav activePage={activePage} detailLabel={detailLabel} parentLabel={parentLabel} compact={compact} onNavigate={onNavigate} />
       </div>
     </>
   );
@@ -1618,11 +1638,13 @@ function StickyPageNav({ activePage, detailLabel, compact, onNavigate }: { activ
 function PageBottomNav({
   activePage,
   detailLabel,
+  parentLabel,
   compact,
   onNavigate,
 }: {
   activePage: Page;
   detailLabel?: string;
+  parentLabel?: string;
   compact?: boolean;
   onNavigate: (p: Page) => void;
 }) {
@@ -1686,7 +1708,9 @@ function PageBottomNav({
         </button>
         <div className="flex-1" />
         <span className={`font-['Museo',sans-serif] font-light ${compact ? 'text-label' : 'text-small'} text-white/75`} style={{ transition: 'font-size 0.25s ease' }}>
-          {detailLabel ? `Work / ${detailLabel}` : (NAV_ITEMS.find(n => n.page === activePage)?.label ?? "")}
+          {detailLabel
+            ? `${parentLabel ?? NAV_ITEMS.find(n => n.page === activePage)?.label ?? ""} / ${detailLabel}`
+            : (NAV_ITEMS.find(n => n.page === activePage)?.label ?? "")}
         </span>
       </div>
 
@@ -3193,7 +3217,7 @@ export default function App() {
         {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={navigateGeneral} /></div>}
         {page === "connect"  && <div className="absolute inset-0 overflow-y-auto"><ConnectPage onNavigate={navigateGeneral} /></div>}
         {page === "speakingInquiry" && (
-          <SpeakingInquiryContainer onBack={() => {
+          <SpeakingInquiryContainer onNavigate={navigateGeneral} onBack={() => {
             const connectIdx = SECTIONS.findIndex(s => s.key === "connect");
             setHomeInitialIdx(connectIdx > 0 ? connectIdx : 0);
             setPage("home");
