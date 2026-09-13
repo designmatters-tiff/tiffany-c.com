@@ -476,7 +476,7 @@ function SpeakingInquiryPage({ onBack, headerScrolled = false }: { onBack: () =>
                 <label
                   htmlFor={`sif-${f.name}`}
                   className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]"
-                  style={{ color: isDark ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.65)" }}
+                  style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}
                 >
                   {f.label}{f.required && " *"}
                 </label>
@@ -1124,7 +1124,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 style={{ paddingBottom: "calc(64px + 8vh + 32px)" }}>
 
                 <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-4 md:mb-6"
-                  style={{ color: (section as any).labelColor ?? section.accent }}
+                  style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}
                   initial={false}
                   animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }}
                   transition={{ duration: 0.5 }}>
@@ -1730,7 +1730,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           paddingBottom: compact ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
-        <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-2" style={{ color: "#888880" }}
+        <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-2" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Fintech · eCommerce · SaaS
         </motion.p>
@@ -1783,7 +1783,7 @@ function ContactListPage({
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       {/* Page heading */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
-        <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-2" style={{ color: accent }}
+        <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-2" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {eyebrow}
         </motion.p>
@@ -2089,7 +2089,7 @@ function TestimonialsPage({
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
           <p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4"
-            style={{ color: accent }}>TESTIMONIAL</p>
+            style={{ color: sub }}>TESTIMONIAL</p>
           <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg"
             style={{ fontSize: shrunk ? "1.5rem" : undefined, lineHeight: 1.05, color: accent, margin: 0, transition: "font-size 0.35s ease" }}
             initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
@@ -2462,7 +2462,7 @@ function AwardsSpeakingPage({
           paddingBottom: compact ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
-        <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-2" style={{ color: "#5070A0" }}
+        <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-2" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Recognition &amp; voice in community
         </motion.p>
@@ -2481,7 +2481,7 @@ function AwardsSpeakingPage({
       {/* Speaking events */}
       <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
         <div className="px-6 md:px-20 pt-8 md:pt-12 pb-4 md:pb-6">
-          <p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em]" style={{ color: GOLD }}>Speaking</p>
+          <p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em]" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>Speaking</p>
         </div>
         {visibleEvents.map((ev, i) => (
           <SpeakingEventRow key={ev.key} ev={ev} isFirst={i === 0} isDark={isDark} fg={fg} sub={sub} brd={brd} stickyTop={headerHeight} />
@@ -2678,7 +2678,7 @@ function SpeakingDetailPage({
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8"
         style={{ borderBottom: `1px solid ${ev.dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
         <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-2"
-          style={{ color: GOLD }}
+          style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {ev.year} · {ev.role} · {ev.location}
         </motion.p>
@@ -2941,7 +2941,7 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
             <div className="flex flex-col gap-1" style={{ marginTop: 32 }}>
               <label
                 className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]"
-                style={{ color: isDark ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.65)" }}>
+                style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>
                 PASSCODE *
               </label>
               <input

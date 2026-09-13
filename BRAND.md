@@ -261,6 +261,11 @@ The smallest size in the scale carries two different treatments — same
 | Treatment | Case | Letterspacing | Used for |
 |---|---|---|---|
 | **Label** | ALL CAPS | wide (`0.16`–`0.22em`) | eyebrows, group labels, field labels |
+
+Labels are **always** `DIM` (`#666660`), the body-copy grey — never the section
+accent, never gold. Colour on this site marks what you can follow, and a label
+is not a link. The one exception is a label sitting on a photograph, which stays
+light so it survives the image behind it.
 | **Footnote** | Sentence case | none | provenance and attribution, e.g. `Reported to Tiffany · 13 January 2025` |
 
 A footnote is the quietest line in a block. If it is set in caps it stops being
