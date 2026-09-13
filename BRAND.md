@@ -291,10 +291,16 @@ Nothing bounces, springs, pulses, or auto-advances. Motion acknowledges an
 action; it never performs for its own sake. If an animation draws attention to
 itself, it's wrong.
 
-The Work illustrations trace their own line work the first time they come into
-view, then stay put — a reveal on arrival, never a loop. Every resting value is
-authored as an SVG attribute, so a viewer who asks for reduced motion simply
-gets the finished mark.
+The Work illustrations are the one deliberate exception to "nothing loops".
+The line work traces itself in once on arrival, and the mark then tilts
+continuously in 3D — about ±22°, a nine-second cycle — so it reads as an object
+in space rather than a flat glyph. It swings rather than spinning a full turn,
+because a complete rotation puts a flat mark edge-on twice a cycle, where it
+collapses to a line and disappears.
+
+Every resting value is authored as an SVG attribute and the perspective is
+dropped along with the animation, so a viewer who asks for reduced motion gets
+the finished mark, still, carrying no transform at all.
 
 ### Space
 

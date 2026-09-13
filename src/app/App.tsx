@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+import type { ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft } from "lucide-react";
 
@@ -1343,20 +1344,39 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
 
 // ─── Work page illustrations ──────────────────────────────────────
 
-// ─── Work illustration draw-in ────────────────────────────────────
-// The line work traces itself once, when the icon first comes into view.
-// A reveal on arrival, not a loop — BRAND.md: motion acknowledges an action,
-// it never performs for its own sake.
+// ─── Work illustration motion ─────────────────────────────────────
+// Two layers, doing different jobs.
 //
-// Strokes are traced with pathLength. Filled shapes cannot be traced, so they
-// fade up once the stroke enclosing them has landed, and the dashed line fades
-// too — animating pathLength would overwrite its strokeDasharray.
+// 1. The line work traces itself in once, when the icon first comes into view.
+// 2. The whole mark then tilts continuously in 3D, so it reads as an object
+//    sitting in space rather than a flat glyph.
 //
-// Every resting value stays on the element as an attribute, so when a viewer
-// asks for reduced motion the helpers return nothing and the mark simply
-// renders as authored.
+// The tilt oscillates rather than spinning a full turn: a complete rotation
+// puts a flat mark edge-on twice a cycle, where it collapses to a line and
+// vanishes. Swinging through ~±22° keeps the depth reading at all times.
+//
+// Every resting value stays on the element as an SVG attribute, so when a
+// viewer asks for reduced motion both layers drop out and the mark simply
+// renders as authored, still.
 const DRAW_VIEW = { once: true, amount: 0.5 } as const;
 const DRAW_EASE = [0.4, 0, 0.2, 1] as const;
+
+function Illo3D({ children }: { children: ReactNode }) {
+  const still = useReducedMotion();
+  return (
+    <motion.div
+      // the perspective goes too under reduced motion, so the element carries
+      // no transform at all rather than a static matrix3d that does nothing
+      style={still
+        ? { width: 38, height: 38 }
+        : { width: 38, height: 38, transformPerspective: 150, transformStyle: "preserve-3d" }}
+      animate={still ? undefined : { rotateY: [-22, 22, -22], rotateX: [9, -9, 9] }}
+      transition={still ? undefined : { duration: 9, repeat: Infinity, ease: "easeInOut" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 function useDrawIn() {
   const still = useReducedMotion();
@@ -1506,7 +1526,7 @@ function ExpertiseCard({ card, onOpen }: { card: typeof EXPERTISE_CARDS[0]; onOp
           like every other element here. */}
       <div className="flex-shrink-0 flex items-center justify-center"
         style={{ width: 56, height: 56 }}>
-        <div style={{ width: 38, height: 38 }}><Illustration /></div>
+        <Illo3D><Illustration /></Illo3D>
       </div>
       <div className="flex-1 min-w-0">
         {/* Title — Museo, matching the Awards and Speaking rows. */}
@@ -1557,7 +1577,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
         <div className="flex items-center gap-5 mb-2">
           <div className="flex-shrink-0 flex items-center justify-center"
             style={{ width: 56, height: 56 }}>
-            <div style={{ width: 38, height: 38 }}><Illustration /></div>
+            <Illo3D><Illustration /></Illo3D>
           </div>
           <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg" style={{ fontSize: compact ? '1.5rem' : undefined, lineHeight: 1.05, color: GOLD, transition: 'font-size 0.35s ease' }}
             initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
