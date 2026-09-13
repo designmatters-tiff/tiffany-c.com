@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, createContext, useContext } from "react";
 import { motion } from "motion/react";
 import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft } from "lucide-react";
 
@@ -2064,13 +2064,23 @@ function TestimonialsPage({
   const sub    = isDark ? "rgba(255,255,255,0.72)" : DIM;
   const shown  = TESTIMONIALS.filter(t => t.group === group);
 
-  useEffect(() => {
+  // The page always opens at the top. Leaving and coming back used to land
+  // here with the browser's restored scroll offset but a freshly-mounted
+  // `selfScrolled` of false, so the full-height header painted itself over
+  // quotes that were already scrolled past. Reset the column before paint,
+  // reset again on the next frame in case the browser restores after this
+  // runs, and from then on take the flag from the real scrollTop so the two
+  // can never disagree.
+  useLayoutEffect(() => {
     if (embedded) return;
     const el = scrollRef.current;
     if (!el) return;
+    el.scrollTop = 0;
+    setSelfScrolled(false);
     const onScroll = () => setSelfScrolled(el.scrollTop > 24);
+    const raf = requestAnimationFrame(() => { el.scrollTop = 0; onScroll(); });
     el.addEventListener('scroll', onScroll, { passive: true });
-    return () => el.removeEventListener('scroll', onScroll);
+    return () => { cancelAnimationFrame(raf); el.removeEventListener('scroll', onScroll); };
   }, [embedded]);
 
   const content = (
@@ -3150,6 +3160,11 @@ export default function App() {
   // Address bar -> router state, so back and forward move through the site
   // instead of leaving it.
   useEffect(() => {
+    // Pages own their own scroll position — every route opens at the top.
+    // Left on, the browser restores the previous offset of a scroll container
+    // it recognises while React remounts the page with fresh state, and the
+    // header then renders for the top of a page that isn't at the top.
+    if ("scrollRestoration" in window.history) window.history.scrollRestoration = "manual";
     const onPop = () => {
       const r = routeOf(window.location.pathname);
       setPage(r.page);
