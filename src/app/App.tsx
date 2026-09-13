@@ -1402,22 +1402,22 @@ function IllustrationPeople() {
 
 const EXPERTISE_CARDS = [
   {
-    key: "ai", title: "AI + UX", accent: GOLD, Illustration: IllustrationAI,
+    key: "ai", slug: "ai-ux", title: "AI + UX", accent: GOLD, Illustration: IllustrationAI,
     description: "Designing and iterating AI-native workflows and infrastructure from the ground up.",
     bullets: ["Reduced trilingual UX copy turnaround by 20% through AI tooling", "AI-native hiring standards & team norms at Cotton On Group", "Automated design system governance & DesignOps maturity frameworks"],
   },
   {
-    key: "business", title: "Business Acumen", accent: "#8A6E2E", Illustration: IllustrationBusiness,
+    key: "business", slug: "business-acumen", title: "Business Acumen", accent: "#8A6E2E", Illustration: IllustrationBusiness,
     description: "Aligning product design with measurable revenue growth and user outcomes.",
     bullets: ["eCommerce: Behavioural UX Design (passcode required)"],
   },
   {
-    key: "ux", title: "Product & UX Strategies", accent: "#5070A0", Illustration: IllustrationUX,
+    key: "ux", slug: "product-ux-strategies", title: "Product & UX Strategies", accent: "#5070A0", Illustration: IllustrationUX,
     description: "Led 0-to-1 enterprise SaaS and scaled global platforms used by millions daily.",
     bullets: ["Built UX Research function & company-wide NPS benchmarks from scratch", "Multi-platform, multi-brand design system adhering to accessibility standards", "End-to-end product design: discovery → delivery across fintech, retail & SaaS"],
   },
   {
-    key: "people", title: "People & Process", accent: "#5070A0", Illustration: IllustrationPeople,
+    key: "people", slug: "people-process", title: "People & Process", accent: "#5070A0", Illustration: IllustrationPeople,
     description: "Built high-performing multidisciplinary teams and cross-unit prioritisation frameworks.",
     bullets: ["Team growth: 7 → 22 designers across B2C, B2B & Research", "Coaching Responsibility Agreements & design culture building", "Chapter Lead — Ladies that UX, Kuala Lumpur (2022–2024)"],
     resources: [
@@ -2678,7 +2678,9 @@ function SpeakingDetailPage({
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8"
         style={{ borderBottom: `1px solid ${ev.dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
         <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-2"
-          style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}
+          // subColor, not isDark: this page can sit on a dark hero of its own
+          // (ev.dark) independently of the site theme
+          style={{ color: subColor }}
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {ev.year} · {ev.role} · {ev.location}
         </motion.p>
@@ -2973,11 +2975,104 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
   );
 }
 
+// ─── URLs ──────────────────────────────────────────────────────────
+// The router is still a `Page` union held in useState — no library, no file
+// split — but every state now has a real path, pushed through the History
+// API. That buys three things the single-URL design could not give:
+// a link you can send someone, a working back button, and a set of paths
+// the prerender step turns into static HTML for search engines.
+//
+// The deck on `/` is the homepage experience; a deep link opens the
+// standalone page for that section instead, which is the better landing.
+
+const EVENT_KEYS = new Set(SPEAKING_EVENTS.map(e => e.key));
+
+function pathOf(page: Page, detailKey?: string | null): string {
+  switch (page) {
+    case "home":            return "/";
+    case "work":            return "/work";
+    case "workDetail":      return `/work/${EXPERTISE_CARDS.find(c => c.key === detailKey)?.slug ?? ""}`;
+    case "businessCase":    return "/work/business-acumen/ecommerce";
+    case "awards":          return "/awards";
+    case "speaking":        return `/awards/${detailKey ?? ""}`;
+    case "testimonials":    return "/testimonials";
+    case "coaching":        return "/coaching";
+    case "connect":         return "/connect";
+    case "speakingInquiry": return "/connect/speaking-inquiry";
+    default:                return "/";
+  }
+}
+
+function routeOf(pathname: string): { page: Page; detailKey: string | null } {
+  const seg = pathname.split("/").filter(Boolean).map(x => decodeURIComponent(x).toLowerCase());
+  const at = (p: Page, k: string | null = null) => ({ page: p, detailKey: k });
+  if (!seg.length) return at("home");
+
+  if (seg[0] === "work") {
+    if (!seg[1]) return at("work");
+    if (seg[1] === "business-acumen" && seg[2] === "ecommerce") return at("businessCase");
+    const card = EXPERTISE_CARDS.find(c => c.slug === seg[1]);
+    // an unknown child falls back to the section rather than a dead end
+    return card ? at("workDetail", card.key) : at("work");
+  }
+  if (seg[0] === "awards") {
+    if (!seg[1]) return at("awards");
+    return EVENT_KEYS.has(seg[1]) ? at("speaking", seg[1]) : at("awards");
+  }
+  if (seg[0] === "connect") return seg[1] === "speaking-inquiry" ? at("speakingInquiry") : at("connect");
+  if (seg[0] === "testimonials" || seg[0] === "coaching") return at(seg[0] as Page);
+  return at("home");
+}
+
+const SITE_TITLE = "Tiffany Chew — Product & Design Leader";
+const SITE_DESC  = "Product and design leader in Melbourne. I work with C-suites and product teams to shape design functions that deliver — across fintech, retail and SaaS.";
+
+// Each route describes itself. The prerender step reads these off the rendered
+// page rather than keeping a second copy of the copy, so search results and
+// link previews can't drift from what the page actually says.
+function descriptionOf(page: Page, detailKey?: string | null): string {
+  const card = EXPERTISE_CARDS.find(c => c.key === detailKey);
+  const ev = SPEAKING_EVENTS.find(e => e.key === detailKey);
+  switch (page) {
+    case "home":         return SITE_DESC;
+    case "work":         return "Design leadership across fintech, eCommerce and SaaS — AI and UX, business acumen, product and UX strategy, and building the teams and process behind them.";
+    case "workDetail":   return card?.description ?? SITE_DESC;
+    case "businessCase": return "A behavioural UX case study: lifting checkout rate from the bag page at Cotton On Group.";
+    case "awards":       return "UX Leader of the Year finalist, with speaking and panel appearances across Australia, Europe and Asia.";
+    case "speaking":     return ev ? `${ev.role} at ${ev.event}, ${ev.year} — ${ev.topic}` : SITE_DESC;
+    case "testimonials": return "What senior colleagues, the designers I have led, and coaching clients say about working with Tiffany Chew.";
+    case "coaching":     return "UX career coaching — portfolio reviews, positioning and interview strategies for designers and researchers.";
+    case "connect":      return "Get in touch about design leadership roles, fractional and consulting work, speaking or coaching.";
+    case "speakingInquiry": return "Invite Tiffany Chew to speak at your event or join a panel.";
+    default:             return SITE_DESC;
+  }
+}
+
+
+function titleOf(page: Page, detailKey?: string | null): string {
+  const card = EXPERTISE_CARDS.find(c => c.key === detailKey);
+  const ev = SPEAKING_EVENTS.find(e => e.key === detailKey);
+  switch (page) {
+    case "home":            return SITE_TITLE;
+    case "work":            return `Work — ${SITE_TITLE}`;
+    case "workDetail":      return card ? `${card.title} — Work — ${SITE_TITLE}` : `Work — ${SITE_TITLE}`;
+    case "businessCase":    return `eCommerce: Behavioural UX Design — ${SITE_TITLE}`;
+    case "awards":          return `Awards & Speaking — ${SITE_TITLE}`;
+    case "speaking":        return ev ? `${ev.role} — ${ev.event} — ${SITE_TITLE}` : `Awards & Speaking — ${SITE_TITLE}`;
+    case "testimonials":    return `Testimonials — ${SITE_TITLE}`;
+    case "coaching":        return `UX Career Coaching — ${SITE_TITLE}`;
+    case "connect":         return `Connect — ${SITE_TITLE}`;
+    case "speakingInquiry": return `Speaking Inquiry — ${SITE_TITLE}`;
+    default:                return SITE_TITLE;
+  }
+}
+
 // ─── Root ─────────────────────────────────────────────────────────
 
 export default function App() {
-  const [page, setPage]           = useState<Page>("home");
-  const [detailKey, setDetailKey] = useState<string | null>(null);
+  const first = typeof window === "undefined" ? { page: "home" as Page, detailKey: null } : routeOf(window.location.pathname);
+  const [page, setPage]           = useState<Page>(first.page);
+  const [detailKey, setDetailKey] = useState<string | null>(first.detailKey);
   const [isDark, setIsDark]       = useState(false);
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
 
@@ -3037,6 +3132,32 @@ export default function App() {
   }, [page]);
 
   const toggleDark = useCallback(() => setIsDark(d => !d), []);
+
+  // Router state -> address bar. The guard matters: without it the first
+  // render would push a duplicate entry, and a popstate-driven change would
+  // push the entry it just came from, trapping the back button.
+  useEffect(() => {
+    const next = pathOf(page, detailKey);
+    if (window.location.pathname !== next) window.history.pushState({}, "", next);
+    document.title = titleOf(page, detailKey);
+    // kept in the DOM so the prerender step can read each route's own
+    // description straight off the page
+    let m = document.querySelector('meta[name="description"]');
+    if (!m) { m = document.createElement("meta"); m.setAttribute("name", "description"); document.head.appendChild(m); }
+    m.setAttribute("content", descriptionOf(page, detailKey));
+  }, [page, detailKey]);
+
+  // Address bar -> router state, so back and forward move through the site
+  // instead of leaving it.
+  useEffect(() => {
+    const onPop = () => {
+      const r = routeOf(window.location.pathname);
+      setPage(r.page);
+      setDetailKey(r.detailKey);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   return (
     <DarkModeCtx.Provider value={isDark}>

@@ -59,8 +59,16 @@ Most of it is unused. Don't assume a component there is wired into the site.
 
 ### Routing
 
-Routing is a `useState` holding a `Page` union — **no react-router, no URLs, no
-history**. Navigation is `setPage(...)`, passed down as `onNavigate`.
+Routing is a `useState` holding a `Page` union — **no react-router** — but every
+state has a real URL, pushed through the History API. `pathOf()` maps state to a
+path, `routeOf()` maps a path back, and `titleOf()` / `descriptionOf()` give each
+route its own metadata. Navigation is still `setPage(...)`, passed down as
+`onNavigate`; the URL follows automatically.
+
+`npm run build` runs `scripts/prerender.mjs` after vite, which visits every route
+in a headless browser and writes `dist/<route>/index.html` with that page's title,
+description, canonical and share card, plus `sitemap.xml`. Without a usable
+browser it degrades to metadata-only shells rather than failing the build.
 
 ```ts
 type Page = "home" | "work" | "workDetail" | "awards" | "speaking"
