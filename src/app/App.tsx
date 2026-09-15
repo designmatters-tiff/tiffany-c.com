@@ -1004,7 +1004,14 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
             // when it genuinely overflows, so horizontal swipe keeps
             // ownership of the gesture on every phone where it does fit.
             overflowY: isMobile && heroOverflows ? "auto" : "hidden",
-            touchAction: isMobile && heroOverflows ? "pan-y" : undefined,
+            // No touchAction override, for the reason the embedded sections
+            // give below: the browser already routes a vertical drag to this
+            // section and a horizontal one to the deck behind it. Pinning it
+            // to pan-y took the horizontal gesture away entirely, so on any
+            // viewport short enough for the hero to overflow — which is every
+            // phone on first load, while the URL bar is still showing — the
+            // swipe to the next section did nothing.
+
             WebkitOverflowScrolling: "touch",
           }}
         >
