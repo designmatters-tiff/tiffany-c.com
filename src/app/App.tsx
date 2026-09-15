@@ -1609,8 +1609,16 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
             return (
               <li key={b} className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: bodyText }}>
                 {isSpecial ? (
-                  <button onClick={() => onNavigate('businessCase')} className="link-underline" style={{ background: 'none', border: 'none', padding: 0, color: linkColor, cursor: 'pointer', textAlign: 'left', display: 'block', width: '100%' }}>
-                    — {b}
+                  /* The dash sits outside the link and the sweep goes on the
+                     text span, so the underline is the width of the words —
+                     the same shape as the resource links above. On the button
+                     itself (display:block, width:100%) it drew a rule across
+                     the whole row. */
+                  <button onClick={() => onNavigate('businessCase')}
+                    className="flex items-start gap-2 text-left"
+                    style={{ background: 'none', border: 'none', padding: 0, color: linkColor, cursor: 'pointer', font: 'inherit' }}>
+                    <span className="mt-0.5 flex-shrink-0">—</span>
+                    <span className="link-underline">{b}</span>
                   </button>
                 ) : (
                   <span className="flex items-start gap-2"><span className="mt-0.5 flex-shrink-0">—</span><span><Figures>{b}</Figures></span></span>
