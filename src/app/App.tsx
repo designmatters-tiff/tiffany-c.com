@@ -1758,10 +1758,44 @@ function PageBottomNav({
 // case the homepage's own logomark/back-button and floating nav are
 // already on screen, so this component's copies are suppressed to
 // avoid duplicating them.
+// How long the row takes to open before the detail page takes over, and the
+// curve it moves on. Shared by the opening and the closing so the way back is
+// the way in, reversed.
+const OPEN_MS = 460;
+const OPEN_EASE: [number, number, number, number] = [0.42, 0, 0.58, 1];
+// How far the rows that aren't being opened travel as they clear the way.
+const OPEN_PUSH = 140;
+
 function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true, compact = false, headerScrolled = false }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; embedded?: boolean; isActive?: boolean; compact?: boolean; headerScrolled?: boolean }) {
   const isDark = useContext(DarkModeCtx);
   const bg = "transparent";
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
+
+  // Opening a card is an animation, not a jump: the chosen row's rules part —
+  // the one above it rising, the one below it dropping — while the rest of the
+  // list clears out of the way and the heading steps back. The detail page
+  // only takes over once that has played, so it reads as the row becoming the
+  // page rather than a new screen replacing the list.
+  const [opening, setOpening] = useState<string | null>(null);
+  const openIdx = opening ? EXPERTISE_CARDS.findIndex(c => c.key === opening) : -1;
+  const openTimer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(openTimer.current), []);
+
+  const reduceMotion = typeof window !== "undefined"
+    && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+  const openCard = (key: string) => {
+    if (opening) return;                       // one at a time
+    if (reduceMotion) { onOpenDetail?.(key); return; }
+    setOpening(key);
+    openTimer.current = window.setTimeout(() => onOpenDetail?.(key), OPEN_MS);
+  };
+
+  // Coming back, the list plays the same move in reverse — rows returning from
+  // where they were pushed and the heading growing back — so tapping "Work"
+  // reads as closing the page you opened. Only standalone: embedded in the
+  // homepage deck the list is a slide you swipe to, not somewhere you return.
+  const replay = !embedded;
   return (
     <div className="relative w-full" style={{ minHeight: embedded ? "100%" : "100dvh", background: bg }}>
       {/* Page heading — sticky so it stays visible while the rows below
@@ -1784,14 +1818,45 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           Fintech · eCommerce · SaaS
         </motion.p>
         <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg"
-          style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: HEADING_COLOUR.work, transition: "font-size 0.35s ease" }}
-          initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
+          style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: HEADING_COLOUR.work,
+                   transition: "font-size 0.35s ease", transformOrigin: "left center" }}
+          initial={replay ? { opacity: 0, scale: 0.74, y: -8 } : false}
+          animate={opening
+            ? { opacity: 0.5, scale: 0.74, y: -8 }
+            : { opacity: isActive ? 1 : 0, scale: 1, y: isActive ? 0 : -16 }}
+          transition={{ duration: opening ? OPEN_MS / 1000 : 0.55, ease: OPEN_EASE, delay: opening ? 0 : 0.06 }}>
           Work
         </motion.h1>
       </div>
 
       <div style={{ paddingTop: 24 }}>
-        {EXPERTISE_CARDS.map(card => <ExpertiseCard key={card.key} card={card} onOpen={() => onOpenDetail?.(card.key)} />)}
+        {EXPERTISE_CARDS.map((card, i) => {
+          const isOpening = opening === card.key;
+          const cleared   = openIdx >= 0 && !isOpening;
+          // Above the opened row they lift, below it they drop — which is what
+          // parts the two rules on either side of the row being opened.
+          const dir = i < openIdx ? -1 : 1;
+          return (
+            <motion.div key={card.key}
+              initial={replay ? { opacity: 0, y: i === 0 ? -OPEN_PUSH / 3 : OPEN_PUSH / 3 } : false}
+              animate={{
+                opacity: cleared ? 0 : 1,
+                y: cleared ? dir * OPEN_PUSH : 0,
+                // The opened row keeps its content still and grows the space
+                // around it, so its own rules travel apart rather than the
+                // text stretching.
+                paddingTop: isOpening ? 26 : 0,
+                paddingBottom: isOpening ? 26 : 0,
+              }}
+              transition={{
+                duration: OPEN_MS / 1000, ease: OPEN_EASE,
+                delay: opening ? Math.abs(i - openIdx) * 0.035 : (replay ? 0.08 + i * 0.05 : 0),
+              }}
+              style={{ willChange: "transform, opacity" }}>
+              <ExpertiseCard card={card} onOpen={() => openCard(card.key)} />
+            </motion.div>
+          );
+        })}
         {/* Bottom spacer so content clears the floating nav */}
         <div style={{ height: 96 }} />
       </div>
