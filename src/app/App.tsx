@@ -937,6 +937,16 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
 
   useEffect(() => { setNavMinimized(false); }, [activeIdx]);
 
+  // Swiping the deck is how most people read this site on a phone, so the
+  // section you're looking at owns the address bar: land on Awards and the
+  // URL says /awards, shareable and reloadable. replaceState rather than
+  // push — a swipe isn't a navigation, and one history entry per swipe would
+  // mean pressing back five times to leave the homepage.
+  useEffect(() => {
+    const target = (SECTIONS[activeIdx]?.page ?? "home") as Page;
+    applyRoute(target, null, "replace");
+  }, [activeIdx]);
+
 
   return (
     <div className="relative w-screen h-dvh overflow-hidden" style={{ background: "transparent" }}>
@@ -3044,6 +3054,24 @@ function pathOf(page: Page, detailKey?: string | null): string {
   }
 }
 
+// Writing a route into the document — URL, title, description. Shared by the
+// router effect (which pushes, because it's a navigation) and by the homepage
+// deck (which replaces, because swiping between sections isn't one).
+function applyRoute(page: Page, detailKey: string | null, mode: "push" | "replace") {
+  if (typeof window === "undefined") return;
+  const next = pathOf(page, detailKey);
+  if (window.location.pathname !== next) {
+    if (mode === "push") window.history.pushState({}, "", next);
+    else window.history.replaceState({}, "", next);
+  }
+  document.title = titleOf(page, detailKey);
+  // kept in the DOM so the prerender step can read each route's own
+  // description straight off the page
+  let m = document.querySelector('meta[name="description"]');
+  if (!m) { m = document.createElement("meta"); m.setAttribute("name", "description"); document.head.appendChild(m); }
+  m.setAttribute("content", descriptionOf(page, detailKey));
+}
+
 function routeOf(pathname: string): { page: Page; detailKey: string | null } {
   const seg = pathname.split("/").filter(Boolean).map(x => decodeURIComponent(x).toLowerCase());
   const at = (p: Page, k: string | null = null) => ({ page: p, detailKey: k });
@@ -3178,14 +3206,7 @@ export default function App() {
   // render would push a duplicate entry, and a popstate-driven change would
   // push the entry it just came from, trapping the back button.
   useEffect(() => {
-    const next = pathOf(page, detailKey);
-    if (window.location.pathname !== next) window.history.pushState({}, "", next);
-    document.title = titleOf(page, detailKey);
-    // kept in the DOM so the prerender step can read each route's own
-    // description straight off the page
-    let m = document.querySelector('meta[name="description"]');
-    if (!m) { m = document.createElement("meta"); m.setAttribute("name", "description"); document.head.appendChild(m); }
-    m.setAttribute("content", descriptionOf(page, detailKey));
+    applyRoute(page, detailKey, "push");
   }, [page, detailKey]);
 
   // Address bar -> router state, so back and forward move through the site
