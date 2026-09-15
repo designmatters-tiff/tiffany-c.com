@@ -2808,6 +2808,11 @@ function BusinessCaseContent() {
   const sub  = isDark ? "rgba(255,255,255,0.75)" : DIM;
   const body = isDark ? "rgba(255,255,255,0.72)" : DIM;
   const rule = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
+  // The page spans 80% of the viewport so the metadata band, stats and
+  // screenshots use the desk it's read on. Running prose doesn't follow it —
+  // past roughly 70 characters the eye loses the start of the next line — so
+  // every paragraph that would otherwise span the full band is capped here.
+  const MEASURE = '68ch';
 
   // Metadata reads as a definition list rather than run-on lines, matching the
   // labelled columns the case study has always had.
@@ -2826,7 +2831,13 @@ function BusinessCaseContent() {
 
   return (
     <div className="relative w-full" style={{ minHeight: '100dvh', background: 'transparent' }}>
-      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10" style={{ maxWidth: 900 }}>
+      {/* Width grows to 80% of the viewport, so the metadata band, the AB-test
+          screenshots and the results row use the width of a desk instead of
+          stopping two-thirds of the way across. `max()` rather than a
+          breakpoint: 80% only wins once it beats the old 900px cap (past
+          ~1125px), so phones and tablets are left exactly as they were —
+          80% of a phone would strand a quarter of the screen. */}
+      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10" style={{ maxWidth: 'max(900px, 80%)' }}>
 
         <dl className="grid gap-x-8 gap-y-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', margin: 0 }}>
           {META.map(([label, value]) => (
@@ -2844,11 +2855,11 @@ function BusinessCaseContent() {
             style={{ color: fg, fontSize: 'clamp(1.5rem, 4vw, 2rem)', lineHeight: 1.2, maxWidth: '26ch', textWrap: 'balance', margin: 0 }}>
             From Google Analytics and Content Square, we saw the promo code component is most clicked
           </h2>
-          <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
+          <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
             Excluding the checkout button, which is the bag page's main call to action.
           </p>
 
-          <div className="grid gap-8 md:grid-cols-2" style={{ marginTop: 32 }}>
+          <div className="grid gap-8 md:grid-cols-2" style={{ marginTop: 32, maxWidth: `calc(${MEASURE} * 2)` }}>
             <div>
               <h3 className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>Background</h3>
               <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
@@ -2863,7 +2874,7 @@ function BusinessCaseContent() {
             </div>
             <div className="md:col-span-2">
               <h3 className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>My responsibilities</h3>
-              <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+              <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
                 I led the user surveys and interviews to find the qualitative reason behind what the data showed. The reason was simple —
                 users are motivated to check out when they have a promo code to use.
               </p>
@@ -2875,14 +2886,14 @@ function BusinessCaseContent() {
         <section style={{ marginTop: 48 }}>
           <figure style={{ margin: 0 }}>
             <img src={foggModel} alt="The Fogg Behavior Model, annotated with the nudge and one-click voucher interventions"
-              style={{ width: '100%', maxWidth: 760, display: 'block', borderRadius: 8 }} />
+              style={{ width: '100%', maxWidth: 1000, display: 'block', borderRadius: 8 }} />
             <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
               Image 1: Concept of human behaviour and UX design.
             </figcaption>
           </figure>
 
           <div style={{
-            marginTop: 32, padding: '20px 24px', borderRadius: 8,
+            marginTop: 32, padding: '20px 24px', borderRadius: 8, maxWidth: MEASURE,
             background: isDark ? "rgba(255,255,255,0.06)" : "#1c1c1c",
           }}>
             <p className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.92)', margin: 0 }}>
@@ -2894,7 +2905,7 @@ function BusinessCaseContent() {
         {/* ── Intervention ── */}
         <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
           <h2 className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1.5rem', margin: 0 }}>AB testing</h2>
-          <div className="grid gap-6 md:grid-cols-2" style={{ marginTop: 16 }}>
+          <div className="grid gap-6 md:grid-cols-2" style={{ marginTop: 16, maxWidth: `calc(${MEASURE} * 2)` }}>
             <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, margin: 0 }}>
               <span style={{ color: fg }}>Group A</span> — the old design, without login, and the promo code field hidden inside a collapsed container.
             </p>
@@ -2932,7 +2943,7 @@ function BusinessCaseContent() {
 
           <figure style={{ margin: '32px 0 0' }}>
             <img src={graphResult} alt="Google Analytics funnel: view bag, enter checkout at 70.1%, purchase at 79.6%"
-              style={{ width: '100%', maxWidth: 760, display: 'block', borderRadius: 8 }} />
+              style={{ width: '100%', maxWidth: 1000, display: 'block', borderRadius: 8 }} />
             <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
               Chart: Google Analytics funnel from bag to successful checkout.
             </figcaption>
