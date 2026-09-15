@@ -72,6 +72,7 @@ const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 // Try for a real browser; carry on without one if there isn't a usable install.
 let browser = null, page = null;
 try {
+  if (process.env.PRERENDER_NO_BROWSER) throw new Error('browser disabled by PRERENDER_NO_BROWSER');
   const { chromium } = await import('playwright');
   for (const opts of [{ executablePath: process.env.PRERENDER_CHROMIUM }, { executablePath: '/opt/pw-browsers/chromium' }, {}]) {
     if (opts.executablePath === undefined && 'executablePath' in opts) continue;
@@ -92,6 +93,9 @@ const done = [];
 
 for (const route of ROUTES) {
   let meta, html;
+  const routeName = route.path === '/' ? '' : route.path.split('/').filter(Boolean).pop()
+    .replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) + ' — ';
+  const fallbackTitle = `${routeName}Tiffany Chew — Product & Design Leader`;
   if (page) {
     await page.goto(`http://localhost:${PORT}${route.path}`, { waitUntil: 'networkidle' });
     await page.waitForTimeout(1200);
@@ -104,11 +108,12 @@ for (const route of ROUTES) {
     html = await page.content();
   } else {
     // titleOf() lives in App.tsx; without a browser fall back to the route name
-    const name = route.path === '/' ? '' : route.path.split('/').filter(Boolean).pop()
-      .replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) + ' — ';
-    meta = { title: `${name}Tiffany Chew — Product & Design Leader`, desc: '' };
+    meta = { title: fallbackTitle, desc: '' };
     html = SHELL;
   }
+  // A page that rendered but reported no title means the render failed; ship
+  // the route's own name rather than a blank <title>.
+  if (!meta.title.trim()) meta.title = fallbackTitle;
   const description = meta.desc || FALLBACK_DESC;
 
   // replace the shell's head metadata with this page's own
@@ -140,7 +145,7 @@ for (const route of ROUTES) {
   console.log(`  ${route.path.padEnd(34)} ${String(html.length).padStart(8)} b   ${meta.title.slice(0, 40)}`);
 }
 
-await browser.close();
+if (browser) await browser.close();
 server.close();
 
 const indexed = done.filter(r => r.index !== false);
