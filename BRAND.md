@@ -306,6 +306,24 @@ Generous whitespace is doing real work — it's what makes the site read as seni
 Resist filling it. No drop shadows, no decorative effects, no borders that aren't
 separating something.
 
+### Case study metadata
+
+Every case study opens with the same six fields, in this order, as one band
+across the top:
+
+1. **Year**
+2. **Client**
+3. **Goal**
+4. **Scope**
+5. **Role**
+6. **Team size**
+
+Team size reads last — it's the detail a hiring manager looks for once the
+rest has landed, not the thing to lead with. The client's website is the
+client's own name made a link, not a seventh column, so nothing displaces
+team size from the end. Labels take the label treatment; values are body
+text.
+
 ---
 
 ## What this brand is not

@@ -2977,17 +2977,20 @@ function BusinessCaseContent() {
 
   // Metadata reads as a definition list rather than run-on lines, matching the
   // labelled columns the case study has always had.
+  // The case study metadata order, fixed for every case study from here on:
+  // Year, Client, Goal, Scope, Role, Team size — team size reads last.
+  // The client's site is the client's own name made a link rather than a
+  // seventh column, which would otherwise push team size out of last place.
   const META: [string, React.ReactNode][] = [
-    ["Goal", "Increase checkout rate"],
     ["Year", "Designed and tested in 2025"],
-    ["Client", "Cotton On Group"],
-    ["My role", "Product Design Lead"],
-    ["Team", "1"],
-    ["Scope of work", "Design workshop facilitation, research analysis"],
-    ["Business website", (
+    ["Client", (
       <a href="https://cottonon.com" target="_blank" rel="noopener noreferrer"
-        className="link-underline" style={{ color: fg }}>Cotton On</a>
+        className="link-underline" style={{ color: fg }}>Cotton On Group</a>
     )],
+    ["Goal", "Increase checkout rate"],
+    ["Scope", "Design workshop facilitation, research analysis"],
+    ["Role", "Product Design Lead"],
+    ["Team size", "1"],
   ];
 
   return (
@@ -3000,7 +3003,9 @@ function BusinessCaseContent() {
           80% of a phone would strand a quarter of the screen. */}
       <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10" style={{ maxWidth: 'max(900px, 80%)' }}>
 
-        <dl id="overview" className="grid gap-x-8 gap-y-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', margin: 0, scrollMarginTop: 140 }}>
+        {/* Six equal tracks once there's room for them, so the row reads as one
+            band with team size in the last column; below that it wraps. */}
+        <dl id="overview" className="grid gap-x-6 gap-y-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(128px, 1fr))', margin: 0, scrollMarginTop: 140 }}>
           {META.map(([label, value]) => (
             <div key={label}>
               <dt className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]"
