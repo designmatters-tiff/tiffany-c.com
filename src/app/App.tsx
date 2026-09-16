@@ -2,6 +2,12 @@ import { useState, useEffect, useLayoutEffect, useRef, useCallback, createContex
 import { motion } from "motion/react";
 import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft } from "lucide-react";
 
+import ahPersona from "@/work/case/applehealth/userpersona.avif";
+import ahProblem from "@/work/case/applehealth/health problem.avif";
+import ahValues from "@/work/case/applehealth/new values.avif";
+import ahUserflow from "@/work/case/applehealth/userflow.avif";
+import ahPriority from "@/work/case/applehealth/Prioritisation.avif";
+
 import kaiHero from "@/work/case/kai/kai-mobile-01-hero.avif";
 import kaiPersona from "@/work/case/kai/kai-mobile-02-persona-mr-tan.avif";
 import kaiJourney from "@/work/case/kai/kai-mobile-03-whiteboard-user-feedback.avif";
@@ -122,7 +128,7 @@ const HEADING_COLOUR: Record<string, string> = Object.fromEntries(
   ]),
 );
 
-type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "kaiCase" | "testimonials";
+type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "kaiCase" | "appleHealthCase" | "testimonials";
 
 // ─── Dark mode context ────────────────────────────────────────────
 const DarkModeCtx = createContext(false);
@@ -1655,9 +1661,17 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
           {card.bullets.map(b => {
             const isSpecial = b === "eCommerce: Behavioural UX Design (passcode required)";
             const isKai = b === "KAI — Mobile app for IoT device control";
+            const isApple = b === "Apple Health — Design Challenge";
             return (
               <li key={b} className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: bodyText }}>
-                {isKai ? (
+                {isApple ? (
+                  <button onClick={() => onNavigate('appleHealthCase')}
+                    className="flex items-start gap-2 text-left"
+                    style={{ background: 'none', border: 'none', padding: 0, color: linkColor, cursor: 'pointer', font: 'inherit' }}>
+                    <span className="mt-0.5 flex-shrink-0">—</span>
+                    <span className="link-underline">{b}</span>
+                  </button>
+                ) : isKai ? (
                   <button onClick={() => onNavigate('kaiCase')}
                     className="flex items-start gap-2 text-left"
                     style={{ background: 'none', border: 'none', padding: 0, color: linkColor, cursor: 'pointer', font: 'inherit' }}>
@@ -2185,6 +2199,363 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
         <div style={{ height: 96 }} />
       </div>
       <CaseSectionRail scrollRef={scrollRef} sections={KAI_SECTIONS} />
+      <StickyPageNav activePage="work" onNavigate={onNavigate} />
+    </div>
+  );
+}
+
+
+// ─── Apple Health case study ──────────────────────────────────────
+
+const AH_SECTIONS: { id: string; label: string }[] = [
+  { id: "ah-overview",  label: "Overview" },
+  { id: "ah-solution",  label: "The Solution" },
+  { id: "ah-research",  label: "Research" },
+  { id: "ah-design",    label: "Design Solutions" },
+  { id: "ah-priority",  label: "Prioritisation" },
+  { id: "ah-takeaways", label: "Key Takeaways" },
+];
+
+// The prototype, as an embed. Same rules as the eCommerce one: embed.figma.com
+// rather than the www share link, and no session-bound token.
+const AH_PROTO_EMBED =
+  "https://embed.figma.com/proto/xH7YB09Mu6lSEsrD7WoYLs" +
+  "?node-id=115-160&page-id=50%3A526&scaling=scale-down&embed-host=share";
+
+function AppleHealthContent() {
+  const isDark = useContext(DarkModeCtx);
+  const fg   = GOLD;
+  const sub  = isDark ? "rgba(255,255,255,0.75)" : DIM;
+  const body = isDark ? "rgba(255,255,255,0.72)" : DIM;
+  const rule = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
+  const ink  = isDark ? "white" : INK;
+  const MEASURE = '68ch';
+  const FIGURE_MAX = 760;
+
+  // No client and no team: this was a self-directed challenge, so those two
+  // fields are replaced by the one fact that does the same work — how long
+  // there was to do it.
+  const META: [string, React.ReactNode][] = [
+    ["Year", "2021"],
+    ["Duration", "5 working days"],
+    ["Goal", "Drive daily active users"],
+    ["Scope", "Research, design strategy, UX, UI design"],
+    ["Role", "End-to-end design process"],
+  ];
+
+  const Fig = ({ src, alt, caption, max = FIGURE_MAX }: { src: string; alt: string; caption?: string; max?: number }) => (
+    <figure style={{ margin: '28px 0 0' }}>
+      <img src={src} alt={alt} loading="lazy"
+        style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
+      {caption && (
+        <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+          {caption}
+        </figcaption>
+      )}
+    </figure>
+  );
+
+  const Label = ({ children }: { children: React.ReactNode }) => (
+    <h3 className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{children}</h3>
+  );
+
+  const Bullets = ({ items }: { items: string[] }) => (
+    <ul className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE, listStyle: 'none', padding: 0 }}>
+      {items.map(t => (
+        <li key={t} className="flex items-start gap-2" style={{ marginTop: 6 }}>
+          <span className="flex-shrink-0" style={{ marginTop: 2 }}>—</span><span>{t}</span>
+        </li>
+      ))}
+    </ul>
+  );
+
+  return (
+    <div className="relative w-full" style={{ minHeight: '100dvh', background: 'transparent' }}>
+      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10" style={{ maxWidth: 'max(900px, 80%)' }}>
+
+        <dl id="ah-overview" className="grid gap-x-6 gap-y-6"
+          style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(128px, 1fr))', margin: 0, scrollMarginTop: 140 }}>
+          {META.map(([label, value]) => (
+            <div key={label}>
+              <dt className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{label}</dt>
+              <dd className="font-['Nunito_Sans',sans-serif]" style={{ color: body, margin: '6px 0 0' }}>{value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        {/* ── Brief & solution ── */}
+        <section id="ah-solution" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+          <h2 className="font-['Museo',sans-serif] font-light"
+            style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.5rem)', lineHeight: 1.15, margin: 0 }}>
+            Apple Health aggregates health data. Its users wanted a tool.
+          </h2>
+
+          <div className="grid gap-8 md:grid-cols-2" style={{ marginTop: 32, maxWidth: `calc(${MEASURE} * 2)` }}>
+            <div>
+              <Label>The brief</Label>
+              <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                Reposition or redesign the Apple Health app into a strong product in the Apple ecosystem — new
+                features, or a whole new experience — to drive overall daily active users.
+              </p>
+            </div>
+            <div>
+              <Label>The solution</Label>
+              <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                Qualitative research in this project found aggregation isn't enough: users compare Apple Health to
+                the fitness apps on the market and expect it to be a tool. The prototype re-engages existing iPhone
+                users as an assistant for improving health, starting from small daily habits.
+              </p>
+            </div>
+          </div>
+
+          <figure style={{ margin: '32px 0 0' }}>
+            <div style={{
+              width: '100%', maxWidth: 420, aspectRatio: '9 / 16', borderRadius: 8, overflow: 'hidden',
+              border: `1px solid ${rule}`, background: isDark ? 'rgba(255,255,255,0.03)' : '#fff',
+            }}>
+              <iframe src={AH_PROTO_EMBED} title="Apple Health prototype" loading="lazy" allowFullScreen
+                style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} />
+            </div>
+            <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+              Prototype: from the morning alarm into building a daily habit.
+            </figcaption>
+          </figure>
+        </section>
+
+        {/* ── Research ── */}
+        <section id="ah-research" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+          <h2 className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1.5rem', margin: 0 }}>The story</h2>
+          <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 12, maxWidth: MEASURE }}>
+            It began with user research. The persona summarises the attitude towards health — what users think, feel,
+            do and say — and that scoped the challenge.
+          </p>
+          <Fig src={ahPersona} alt="Xune, 32, sales executive — the Apple Health user persona"
+            caption="Xune, 32, sales executive. She wants to be as healthy as possible by improving her daily lifestyle — and is held back by work, tiredness and a lack of motivation." />
+
+          <div style={{ marginTop: 40 }}>
+            <Label>Research</Label>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
+              Qualitative and quantitative research tested one hypothesis: that health and daily habits are
+              correlated, and that people want a nudge to reach a goal.
+            </p>
+          </div>
+
+          <div style={{ marginTop: 40 }}>
+            <Label>The problem</Label>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
+              People find it hard to stay healthy. Across 24 respondents, two challenges dominate: being time poor,
+              and laziness.
+            </p>
+            <Fig src={ahProblem} alt="Word cloud from 24 respondents — lazy, time, work, health"
+              caption="Word cloud from 24 respondents. The two largest terms are the two biggest obstacles." />
+          </div>
+
+          <div style={{ marginTop: 40 }}>
+            <Label>Insights &amp; findings</Label>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
+              The research asked about attitude and behaviour towards health, and about the product — how people see
+              Apple Health, and what they expect from a health app.
+            </p>
+            <dl className="grid gap-8" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', marginTop: 28, maxWidth: `calc(${MEASURE} * 2)` }}>
+              {[
+                ["100%", "agreed a healthy lifestyle is formed by daily good habits"],
+                ["85%", "believed they do better when reminders, prompts and motivation are there"],
+                ["7 / 12", "of those who find it hard to stay active want to improve a daily routine — sleep, food, water"],
+                ["10 / 11", "use the alarm or clock on their phone every day"],
+              ].map(([value, note]) => (
+                <div key={value}>
+                  <dd className="font-['Museo',sans-serif] font-light"
+                    style={{ color: fg, fontSize: 'clamp(1.75rem, 4vw, 2.25rem)', lineHeight: 1.1, margin: 0, fontVariantNumeric: 'tabular-nums' }}>{value}</dd>
+                  <dt className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 8 }}>{note}</dt>
+                </div>
+              ))}
+            </dl>
+            <div style={{
+              marginTop: 32, padding: '20px 24px', borderRadius: 8, maxWidth: MEASURE,
+              background: isDark ? "rgba(255,255,255,0.06)" : "#1c1c1c",
+            }}>
+              <p className="font-['Nunito_Sans',sans-serif]" style={{ color: 'rgba(255,255,255,0.92)', margin: 0 }}>
+                Motivation is progress. People move when they can see a goal advancing — which is exactly what
+                laziness needs to be overcome.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 40 }}>
+            <Label>Synthesis with secondary research</Label>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
+              Being time poor turned out to be an excuse for laziness. Secondary research into what the experts
+              advise gave five consistent answers:
+            </p>
+            <Bullets items={[
+              "Make goals manageable — smaller and attainable, rather than overloaded",
+              "Don't expect to be perfect",
+              "Reward yourself",
+              "Recognise accomplishments along the way",
+              "Get a partner — someone to go to the gym with",
+            ]} />
+          </div>
+        </section>
+
+        {/* ── Design solutions ── */}
+        <section id="ah-design" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+          <h2 className="font-['Museo',sans-serif] font-light"
+            style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.5rem)', lineHeight: 1.15, margin: 0 }}>
+            Design solutions
+          </h2>
+          <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 12, maxWidth: MEASURE }}>
+            Connecting the dots: integrate daily habits into Apple Health, so it can intelligently suggest a user
+          </p>
+          <Bullets items={[
+            "Down-size a goal, or take a break from it — so easy you can't say no",
+            "Get rewarded for being consistent, with the app recommending cheat days",
+            "Track progress by streaking off days, with a streak you set a duration for rather than one that never ends",
+            "Share progress with friends, to encourage partnering and social connection",
+          ]} />
+
+          <div style={{ marginTop: 40 }}>
+            <Label>Design direction</Label>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
+              To make maintaining health feel less like a chore, the work anchors on the project's tagline.
+            </p>
+            <Fig src={ahValues} alt="Apple Health — Humanising Health &amp; Growth: being better is your second nature"
+              caption="The tagline the design direction anchors on." />
+          </div>
+
+          <div style={{ marginTop: 40 }}>
+            <Label>User story</Label>
+            <div style={{
+              marginTop: 12, padding: '20px 24px', borderRadius: 8, maxWidth: MEASURE,
+              borderLeft: `2px solid ${fg}`, background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.025)",
+            }}>
+              <p className="font-['Nunito_Sans',sans-serif]" style={{ color: ink, margin: 0 }}>
+                As an iPhone user, I'd like to see how Apple Health helps me improve my overall wellbeing — so that
+                I'd use Apple Health as a tool to build my daily good habits.
+              </p>
+            </div>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 20, maxWidth: MEASURE }}>
+              The flow is confined to discovering the new features on the iPhone again, as a daily alarm clock user,
+              and starting to integrate Apple Health into the day.
+            </p>
+            <Fig src={ahUserflow} alt="Apple Health user flow — from alarm through to setting and saving a habit goal"
+              caption="The user flow, from the morning alarm through to setting and saving a goal." />
+          </div>
+        </section>
+
+        {/* ── Prioritisation ── */}
+        <section id="ah-priority" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+          <h2 className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1.5rem', margin: 0 }}>
+            Feature prioritisation
+          </h2>
+          <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 12, maxWidth: MEASURE }}>
+            An effort–impact mapping found the must-haves for making over the app and winning daily active users.
+          </p>
+          <Fig src={ahPriority} alt="Effort and impact mapping of the proposed features"
+            caption="Effort against impact, with each feature marked must-have, should-have or could-have." />
+
+          <div style={{ marginTop: 40 }}>
+            <Label>Defining impact</Label>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
+              Agreeing this across functions matters. A product design leader can advise how much effort goes to the
+              must-haves, should-haves and could-haves — and name the won't-haves. Here impact is the objective
+              itself: increase daily active users.
+            </p>
+            <div style={{ marginTop: 24, maxWidth: `calc(${MEASURE} * 1.6)`, borderRadius: 8, overflow: 'hidden' }}>
+              {[
+                { tier: "Must-haves", pct: "60%", accent: "#8A6E2E", items: [
+                  "Goal setting and progress — the two have to go hand in hand",
+                  "Improve the alarm experience, to lead users back to the app daily",
+                  "Share progress — low effort, and it gets people noticing the app again",
+                ]},
+                { tier: "Should-haves", pct: "30%", accent: "#5070A0", items: [
+                  "Widgets integration", "Reminders integration", "Weather suggestion",
+                ]},
+                { tier: "Could-haves", pct: "10%", accent: "#9B5A88", items: [
+                  "Decluttering Apple Health's in-app information and data",
+                ]},
+              ].map(row => (
+                <div key={row.tier} className="flex flex-col md:flex-row">
+                  <div className="md:w-1/3 flex-shrink-0" style={{ background: row.accent, padding: '20px 22px' }}>
+                    <p className="font-['Museo',sans-serif] font-light" style={{ color: '#fff', fontSize: '1.05rem', margin: 0 }}>{row.tier}</p>
+                    <p className="font-['Museo',sans-serif] font-light" style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1.5rem', margin: '6px 0 0', fontVariantNumeric: 'tabular-nums' }}>{row.pct}</p>
+                    <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: 'rgba(255,255,255,0.75)', margin: '6px 0 0', fontStyle: 'italic' }}>of effort</p>
+                  </div>
+                  <div className="md:w-2/3" style={{ background: isDark ? `${row.accent}33` : `${row.accent}1f`, padding: '20px 22px' }}>
+                    <ol className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? 'rgba(255,255,255,0.86)' : INK, margin: 0, paddingLeft: '1.2em' }}>
+                      {row.items.map(it => <li key={it} style={{ marginTop: 4 }}>{it}</li>)}
+                    </ol>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Takeaways ── */}
+        <section id="ah-takeaways" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+          <h2 className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1.5rem', margin: 0 }}>Key takeaways</h2>
+          <ol className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 16, maxWidth: MEASURE, paddingLeft: '1.2em' }}>
+            {[
+              "The design process matters as much as the story-telling. Planning how a case study is presented is as critical as crafting the solution.",
+              "Looking further as a product designer means product thinking — prioritising features not only for desirability, but for feasibility and viability. The right features for the right users, and clarity on must-, should-, could- and won't-haves.",
+              "Applied to real practice, it's always worth proposing multiple scenarios, to weigh which features matter to the user's outcome and to the goal of the update.",
+              "To evaluate whether the outcome succeeded, start from the brief — including the business problem, the objectives and the constraints. That informs a lot of the decisions along the way.",
+            ].map(t => <li key={t} style={{ marginTop: 10 }}>{t}</li>)}
+          </ol>
+
+          <a href="https://www.dropbox.com/s/k70uwb3jr5pw9g9/Apple%20Health-Tiff.pdf?dl=0" target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 mt-8 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.15em] cursor-pointer"
+            style={{ color: fg }}>
+            <span className="link-underline">Process deck</span>
+            <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
+          </a>
+        </section>
+
+        <div style={{ height: 96 }} />
+      </div>
+    </div>
+  );
+}
+
+function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
+  const isDark = useContext(DarkModeCtx);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+      <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
+          backdropFilter: headerScrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
+          borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
+          paddingBottom: headerScrolled ? 16 : 24,
+          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
+        }}>
+          <button onClick={onBack}
+            className="flex items-center gap-2 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
+            style={{ color: GOLD }}>
+            <ChevronLeft size={12} strokeWidth={1.5} /> CASE STUDIES
+          </button>
+          <h1 className="font-['Museo',sans-serif] font-light"
+            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: GOLD, margin: 0, transition: 'font-size 0.3s ease' }}>
+            Apple Health: Design Challenge
+          </h1>
+        </div>
+
+        <AppleHealthContent />
+        <div style={{ height: 96 }} />
+      </div>
+      <CaseSectionRail scrollRef={scrollRef} sections={AH_SECTIONS} />
       <StickyPageNav activePage="work" onNavigate={onNavigate} />
     </div>
   );
@@ -3904,6 +4275,7 @@ function pathOf(page: Page, detailKey?: string | null): string {
     case "workDetail":      return `/work/${EXPERTISE_CARDS.find(c => c.key === detailKey)?.slug ?? ""}`;
     case "businessCase":    return "/work/business-acumen/ecommerce";
     case "kaiCase":         return "/work/case-studies/kai";
+    case "appleHealthCase": return "/work/case-studies/apple-health";
     case "awards":          return "/awards";
     case "speaking":        return `/awards/${detailKey ?? ""}`;
     case "testimonials":    return "/testimonials";
@@ -3941,6 +4313,7 @@ function routeOf(pathname: string): { page: Page; detailKey: string | null } {
     if (!seg[1]) return at("work");
     if (seg[1] === "business-acumen" && seg[2] === "ecommerce") return at("businessCase");
     if (seg[1] === "case-studies" && seg[2] === "kai") return at("kaiCase");
+    if (seg[1] === "case-studies" && seg[2] === "apple-health") return at("appleHealthCase");
     const card = EXPERTISE_CARDS.find(c => c.slug === seg[1]);
     // an unknown child falls back to the section rather than a dead end
     return card ? at("workDetail", card.key) : at("work");
@@ -3968,6 +4341,7 @@ function descriptionOf(page: Page, detailKey?: string | null): string {
     case "work":         return "Design leadership across fintech, eCommerce and SaaS — AI and UX, business acumen, product and UX strategy, and building the teams and process behind them.";
     case "workDetail":   return card?.description ?? SITE_DESC;
     case "businessCase": return "A behavioural UX case study: lifting checkout rate from the bag page at Cotton On Group.";
+    case "appleHealthCase": return "A five-day design challenge: repositioning Apple Health as a daily habit tool to drive daily active users.";
     case "kaiCase": return "A design sprint case study: KAI, a mobile app for controlling a building's IoT machines and cutting Maximum Demand charges.";
     case "awards":       return "UX Leader of the Year finalist, with speaking and panel appearances across Australia, Europe and Asia.";
     case "speaking":     return ev ? `${ev.role} at ${ev.event}, ${ev.year} — ${ev.topic}` : SITE_DESC;
@@ -3989,6 +4363,7 @@ function titleOf(page: Page, detailKey?: string | null): string {
     case "workDetail":      return card ? `${card.title} — Work — ${SITE_TITLE}` : `Work — ${SITE_TITLE}`;
     case "businessCase":    return `eCommerce: Behavioural UX Design — ${SITE_TITLE}`;
     case "kaiCase":         return `KAI: Mobile app for IoT devices control — ${SITE_TITLE}`;
+    case "appleHealthCase": return `Apple Health: Design Challenge — ${SITE_TITLE}`;
     case "awards":          return `Awards & Speaking — ${SITE_TITLE}`;
     case "speaking":        return ev ? `${ev.role} — ${ev.event} — ${SITE_TITLE}` : `Awards & Speaking — ${SITE_TITLE}`;
     case "testimonials":    return `Testimonials — ${SITE_TITLE}`;
@@ -4060,7 +4435,7 @@ export default function App() {
   const motionKey = page === "speaking" ? `speaking:${detailKey}` : page === "workDetail" ? `workDetail:${detailKey}` : page;
   // Case-study pages are a drill-in from the Work list; they animate as an
   // expansion of the row rather than as a new screen sliding in.
-  const drillIn = page === "workDetail" || page === "businessCase" || page === "kaiCase";
+  const drillIn = page === "workDetail" || page === "businessCase" || page === "kaiCase" || page === "appleHealthCase";
 
   useEffect(() => {
     if (page !== "workDetail") setDetailHeaderScrolled(false);
@@ -4142,6 +4517,9 @@ export default function App() {
         )}
         {page === "kaiCase" && (
           <KaiCasePage onBack={() => { setDetailKey("cases"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
+        )}
+        {page === "appleHealthCase" && (
+          <AppleHealthPage onBack={() => { setDetailKey("cases"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
       </motion.div>
       {(page === "work" || page === "workDetail") && (
