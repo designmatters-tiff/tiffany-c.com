@@ -266,6 +266,20 @@ function LogoMark({ size = 70, color = GOLD }: { size?: number; color?: string }
   );
 }
 
+
+// The mark, top right of a page header, on the eyebrow's line. Homepage keeps
+// its own large one in the hero; every other page gets this. 40px tall inside
+// a 40x40 target — the mark is 1:1.4, so height is what's held to 40.
+function HeaderLogo({ onNavigate, color = GOLD }: { onNavigate: (p: Page) => void; color?: string }) {
+  return (
+    <button onClick={() => onNavigate("home")} aria-label="Tiffany C. — home"
+      className="absolute right-6 md:right-20 top-10 md:top-14 flex items-start justify-end cursor-pointer z-10"
+      style={{ background: "none", border: "none", padding: 0, width: 40, height: 40 }}>
+      <LogoMark size={28} color={color} />
+    </button>
+  );
+}
+
 function HamburgerIcon({ color = "white" }: { color?: string }) {
   return (
     <svg width="22" height="9" viewBox="0 0 22 9" fill="none" className="flex-shrink-0">
@@ -506,6 +520,7 @@ function SpeakingInquiryPage({ onBack, onNavigate, headerScrolled = false, scrol
           paddingBottom: headerScrolled ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
+          <HeaderLogo onNavigate={onNavigate} color={GOLD} />
         <button onClick={onBack}
           className="flex items-center gap-1.5 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
           style={{ color: GOLD }}>
@@ -1626,6 +1641,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
           paddingBottom: compact ? 16 : undefined,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
+          <HeaderLogo onNavigate={onNavigate} color={GOLD} />
         <button onClick={onBack}
           className="flex items-center gap-1.5 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
           style={{ color: GOLD }}>
@@ -2340,13 +2356,21 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
         <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
-          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
+          background: headerScrolled
+            // A 20% black tint under the frost while the heading is white,
+            // so the words have something to sit against rather than
+            // relying on whatever happens to be passing beneath.
+            ? (onDark
+                ? "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), rgba(248,247,245,0.55)"
+                : isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)")
+            : "transparent",
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
           paddingBottom: headerScrolled ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
+          <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
           <button onClick={onBack}
             className="flex items-center gap-2 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
             style={{ color: headingColor, transition: "color 0.3s ease" }}>
@@ -2702,13 +2726,21 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
         <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
-          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
+          background: headerScrolled
+            // A 20% black tint under the frost while the heading is white,
+            // so the words have something to sit against rather than
+            // relying on whatever happens to be passing beneath.
+            ? (onDark
+                ? "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), rgba(248,247,245,0.55)"
+                : isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)")
+            : "transparent",
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
           paddingBottom: headerScrolled ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
+          <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
           <button onClick={onBack}
             className="flex items-center gap-2 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
             style={{ color: onDark ? "#fff" : GOLD, transition: "color 0.3s ease" }}>
@@ -2745,7 +2777,7 @@ function StickyPageNav({ activePage, detailLabel, parentLabel, compact, onNaviga
   return (
     <>
       <div className="fixed inset-x-0 bottom-0 z-20 pointer-events-none"
-        style={{ height: 180, background: `linear-gradient(to bottom, ${pageBg}00 0%, ${pageBg} 65%)` }} />
+        style={{ height: 90, background: `linear-gradient(to bottom, ${pageBg}00 0%, ${pageBg} 65%)` }} />
       <div className="fixed inset-x-6 md:inset-x-20 z-30 overflow-hidden"
         style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
         <PageBottomNav activePage={activePage} detailLabel={detailLabel} parentLabel={parentLabel} compact={compact} onNavigate={onNavigate} />
@@ -2907,6 +2939,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           paddingBottom: compact ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
+          {!embedded && <HeaderLogo onNavigate={onNavigate} color={HEADING_COLOUR.work} />}
         <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-2" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Fintech · eCommerce · SaaS
@@ -2990,7 +3023,8 @@ function ContactListPage({
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       {/* Page heading */}
-      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
+      <div className="relative px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
+        <HeaderLogo onNavigate={onNavigate} color={headingColor} />
         <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-2" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {eyebrow}
@@ -3306,6 +3340,7 @@ function TestimonialsPage({
           paddingBottom: 0,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
+          {!embedded && <HeaderLogo onNavigate={onNavigate} color={accent} />}
           <p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4"
             style={{ color: sub }}>TESTIMONIAL</p>
           <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg"
@@ -3747,6 +3782,7 @@ function AwardsSpeakingPage({
           paddingBottom: compact ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
+          {!embedded && <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : HEADING_COLOUR.awards} />}
         <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-2" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
           Recognition &amp; voice in community
@@ -4362,13 +4398,21 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
         <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
-          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
+          background: headerScrolled
+            // A 20% black tint under the frost while the heading is white,
+            // so the words have something to sit against rather than
+            // relying on whatever happens to be passing beneath.
+            ? (onDark
+                ? "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), rgba(248,247,245,0.55)"
+                : isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)")
+            : "transparent",
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
           paddingBottom: headerScrolled ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
+          <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
           <button onClick={onBack}
             className="flex items-center gap-2 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
             style={{ color: onDark ? "#fff" : GOLD, transition: "color 0.3s ease" }}>
