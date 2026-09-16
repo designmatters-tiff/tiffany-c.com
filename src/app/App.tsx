@@ -3013,7 +3013,11 @@ function BusinessCaseContent() {
         {/* ── Problem ── */}
         <section id="background" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
           <h2 className="font-['Museo',sans-serif] font-light"
-            style={{ color: fg, fontSize: 'clamp(1.5rem, 4vw, 2rem)', lineHeight: 1.2, maxWidth: '26ch', textWrap: 'balance', margin: 0 }}>
+            /* No measure cap: this heading runs the full width of the page's
+               80% band, like everything else here. It's a display line, not
+               running prose — read in one or two passes, not line after line
+               — so the reason to hold body copy to ~68ch doesn't apply. */
+            style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.5rem)', lineHeight: 1.15, margin: 0 }}>
             From Google Analytics and Content Square, we saw the promo code component is most clicked
           </h2>
           <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
@@ -3159,7 +3163,7 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
             style={{ color: GOLD }}>
             <ChevronLeft size={12} strokeWidth={1.5} /> BUSINESS ACUMEN
           </button>
-          <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: headerScrolled ? '1.5rem' : '2.25rem', lineHeight: 1.05, color: GOLD, margin: 0, transition: 'font-size 0.3s ease' }}>eCommerce: Behavioural UX Design</h1>
+          <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: GOLD, margin: 0, transition: 'font-size 0.3s ease' }}>eCommerce: Behavioural UX Design</h1>
         </div>
 
         {unlocked ? (
