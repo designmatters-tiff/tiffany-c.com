@@ -2517,11 +2517,11 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
 
       <div className="overflow-hidden" style={{ maxHeight: open ? 820 : 0, opacity: open ? 1 : 0, transition: "max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease" }}>
         <div className="px-6 md:px-20 pb-8">
-            <div className="relative w-full" style={{ height: "clamp(320px, 55vw, 620px)" }}>
-            {/* Base layer: portrait photo, fit to height — not cropped/zoomed */}
+          {/* Mobile: the two images layer, because side by side would leave
+              each of them too small to read on a phone. */}
+          <div className="lg:hidden relative w-full" style={{ height: "clamp(320px, 55vw, 620px)" }}>
             <img src={awardsWomenDigital} alt="Tiffany Chew at Women in Digital Awards 2025"
               className="absolute inset-0 w-full h-full object-contain" style={{ background: "transparent", zIndex: 1 }} />
-            {/* Overlay layer: finalist-list card, floated on top per Figma layout */}
             <div className="absolute left-1/2"
               style={{
                 bottom: "5%", transform: "translateX(-50%)",
@@ -2530,6 +2530,28 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
                 boxShadow: "0 12px 36px rgba(0,0,0,0.3)",
               }}>
               <img src={awardsFinalistCard} alt="The 2025 UX Leader of the Year Finalists" className="w-full" style={{ borderRadius: 10, display: "block" }} />
+            </div>
+          </div>
+
+          {/* Desktop: side by side. The portrait is tall and narrow, so
+              stretched across the full row it occupied barely a third of the
+              width and the finalist card had nowhere to sit but on top of it,
+              covering the photo and staying too small to read. Giving each its
+              own column uses the row and lets the card grow to legible size.
+              From `lg` only: at tablet widths two columns leave the card too
+              narrow to read, so those keep the layered treatment above. The
+              photo takes a share of the row rather than a fixed height, so it
+              can't crowd the card out on the narrower desktop sizes. */}
+          <div className="hidden lg:flex items-center gap-10">
+            <img src={awardsWomenDigital} alt="Tiffany Chew at Women in Digital Awards 2025"
+              className="flex-shrink-0" style={{ width: "36%", maxWidth: 465, height: "auto", borderRadius: 10, display: "block" }} />
+            <div style={{
+              flex: 1, minWidth: 0,
+              background: "white", borderRadius: 16, padding: 12,
+              boxShadow: "0 12px 36px rgba(0,0,0,0.18)",
+            }}>
+              <img src={awardsFinalistCard} alt="The 2025 UX Leader of the Year Finalists"
+                className="w-full" style={{ borderRadius: 10, display: "block" }} />
             </div>
           </div>
           <a href="https://womenindigital.org/women-in-digital-awards/women-in-digital-awards-2025-finalists/" target="_blank" rel="noopener noreferrer"
