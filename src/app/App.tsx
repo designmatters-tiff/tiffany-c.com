@@ -1524,7 +1524,7 @@ const EXPERTISE_CARDS = [
     key: "cases", slug: "case-studies", title: "Case Studies", accent: GOLD, Illustration: IllustrationCases,
     description: "Product design taken end to end — the individual-contributor work the rest is built on.",
     bullets: [
-      "Apple Health",
+      "Apple Health — Design Challenge",
       "KAI — Mobile app for IoT device control",
       "Source — Energy performance monitoring dashboard",
     ],
