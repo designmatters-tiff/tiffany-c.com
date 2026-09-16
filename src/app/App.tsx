@@ -1758,10 +1758,44 @@ function PageBottomNav({
 // case the homepage's own logomark/back-button and floating nav are
 // already on screen, so this component's copies are suppressed to
 // avoid duplicating them.
+// How long the row takes to open before the detail page takes over, and the
+// curve it moves on. Shared by the opening and the closing so the way back is
+// the way in, reversed.
+const OPEN_MS = 460;
+const OPEN_EASE: [number, number, number, number] = [0.42, 0, 0.58, 1];
+// How far the rows that aren't being opened travel as they clear the way.
+const OPEN_PUSH = 140;
+
 function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true, compact = false, headerScrolled = false }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; embedded?: boolean; isActive?: boolean; compact?: boolean; headerScrolled?: boolean }) {
   const isDark = useContext(DarkModeCtx);
   const bg = "transparent";
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
+
+  // Opening a card is an animation, not a jump: the chosen row's rules part —
+  // the one above it rising, the one below it dropping — while the rest of the
+  // list clears out of the way and the heading steps back. The detail page
+  // only takes over once that has played, so it reads as the row becoming the
+  // page rather than a new screen replacing the list.
+  const [opening, setOpening] = useState<string | null>(null);
+  const openIdx = opening ? EXPERTISE_CARDS.findIndex(c => c.key === opening) : -1;
+  const openTimer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(openTimer.current), []);
+
+  const reduceMotion = typeof window !== "undefined"
+    && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+  const openCard = (key: string) => {
+    if (opening) return;                       // one at a time
+    if (reduceMotion) { onOpenDetail?.(key); return; }
+    setOpening(key);
+    openTimer.current = window.setTimeout(() => onOpenDetail?.(key), OPEN_MS);
+  };
+
+  // Coming back, the list plays the same move in reverse — rows returning from
+  // where they were pushed and the heading growing back — so tapping "Work"
+  // reads as closing the page you opened. Only standalone: embedded in the
+  // homepage deck the list is a slide you swipe to, not somewhere you return.
+  const replay = !embedded;
   return (
     <div className="relative w-full" style={{ minHeight: embedded ? "100%" : "100dvh", background: bg }}>
       {/* Page heading — sticky so it stays visible while the rows below
@@ -1784,14 +1818,45 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           Fintech · eCommerce · SaaS
         </motion.p>
         <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg"
-          style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: HEADING_COLOUR.work, transition: "font-size 0.35s ease" }}
-          initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
+          style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: HEADING_COLOUR.work,
+                   transition: "font-size 0.35s ease", transformOrigin: "left center" }}
+          initial={replay ? { opacity: 0, scale: 0.74, y: -8 } : false}
+          animate={opening
+            ? { opacity: 0.5, scale: 0.74, y: -8 }
+            : { opacity: isActive ? 1 : 0, scale: 1, y: isActive ? 0 : -16 }}
+          transition={{ duration: opening ? OPEN_MS / 1000 : 0.55, ease: OPEN_EASE, delay: opening ? 0 : 0.06 }}>
           Work
         </motion.h1>
       </div>
 
       <div style={{ paddingTop: 24 }}>
-        {EXPERTISE_CARDS.map(card => <ExpertiseCard key={card.key} card={card} onOpen={() => onOpenDetail?.(card.key)} />)}
+        {EXPERTISE_CARDS.map((card, i) => {
+          const isOpening = opening === card.key;
+          const cleared   = openIdx >= 0 && !isOpening;
+          // Above the opened row they lift, below it they drop — which is what
+          // parts the two rules on either side of the row being opened.
+          const dir = i < openIdx ? -1 : 1;
+          return (
+            <motion.div key={card.key}
+              initial={replay ? { opacity: 0, y: i === 0 ? -OPEN_PUSH / 3 : OPEN_PUSH / 3 } : false}
+              animate={{
+                opacity: cleared ? 0 : 1,
+                y: cleared ? dir * OPEN_PUSH : 0,
+                // The opened row keeps its content still and grows the space
+                // around it, so its own rules travel apart rather than the
+                // text stretching.
+                paddingTop: isOpening ? 26 : 0,
+                paddingBottom: isOpening ? 26 : 0,
+              }}
+              transition={{
+                duration: OPEN_MS / 1000, ease: OPEN_EASE,
+                delay: opening ? Math.abs(i - openIdx) * 0.035 : (replay ? 0.08 + i * 0.05 : 0),
+              }}
+              style={{ willChange: "transform, opacity" }}>
+              <ExpertiseCard card={card} onOpen={() => openCard(card.key)} />
+            </motion.div>
+          );
+        })}
         {/* Bottom spacer so content clears the floating nav */}
         <div style={{ height: 96 }} />
       </div>
@@ -2802,12 +2867,116 @@ function SpeakingDetailPage({
 // Passcode-protected business case page
 // Migrate the Wix project content into a local React component so it
 // can be rendered inline after the passcode is entered.
+// The case study's sections, in reading order. One list drives both the
+// anchors in the content and the dot rail beside it, so a renamed or
+// reordered section can't leave the two disagreeing.
+const CASE_SECTIONS: { id: string; label: string }[] = [
+  { id: "overview",   label: "Overview" },
+  { id: "background", label: "Background & Insights" },
+  { id: "rationale",  label: "Rationale" },
+  { id: "ab-testing", label: "AB Testing" },
+  { id: "results",    label: "Results" },
+];
+
+// Section rail — the dotted in-page nav down the right edge. Hollow dot per
+// section, filled with its name spelled out when it's the one being read.
+// The label sits to the LEFT of its dot: the rail is right-aligned, so a
+// label on the outside would run off the screen.
+function CaseSectionRail({ scrollRef }: { scrollRef: React.RefObject<HTMLDivElement | null> }) {
+  const isDark = useContext(DarkModeCtx);
+  const [active, setActive] = useState(CASE_SECTIONS[0].id);
+  const [hovered, setHovered] = useState<string | null>(null);
+
+  // Active section is read straight off the scroll position: the last section
+  // whose top has passed the reading line. An IntersectionObserver band was
+  // the first attempt and it skipped Background entirely — a tall section
+  // starting above the band beats the one actually on screen, whichever way
+  // you rank the entries. Measuring is unambiguous.
+  useEffect(() => {
+    const root = scrollRef.current;
+    if (!root) return;
+    const LINE = 180; // just below the sticky header
+    const pick = () => {
+      const rootTop = root.getBoundingClientRect().top;
+      let current = CASE_SECTIONS[0].id;
+      for (const sec of CASE_SECTIONS) {
+        const el = document.getElementById(sec.id);
+        if (el && el.getBoundingClientRect().top - rootTop <= LINE) current = sec.id;
+      }
+      // The last section is often too short to reach the line; once the page
+      // is scrolled to the end it is unambiguously the one being read.
+      if (root.scrollHeight - root.scrollTop - root.clientHeight < 80) {
+        current = CASE_SECTIONS[CASE_SECTIONS.length - 1].id;
+      }
+      setActive(current);
+    };
+    pick();
+    root.addEventListener("scroll", pick, { passive: true });
+    window.addEventListener("resize", pick);
+    return () => { root.removeEventListener("scroll", pick); window.removeEventListener("resize", pick); };
+  }, [scrollRef]);
+
+  const go = (id: string) => {
+    const el = document.getElementById(id);
+    const root = scrollRef.current;
+    if (!el || !root) return;
+    const top = el.getBoundingClientRect().top - root.getBoundingClientRect().top + root.scrollTop - 140;
+    root.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    setActive(id);
+  };
+
+  // Inactive dots are solid grey, the same grey the labels and eyebrows use;
+  // only the section being read is gold.
+  const idle = isDark ? "rgba(255,255,255,0.45)" : DIM;
+
+  return (
+    <nav aria-label="Sections of this case study"
+      className="hidden xl:flex fixed z-30 flex-col items-end"
+      // Right edge lines up with the bottom nav bar's, which sits at
+      // inset-x-20 — so the rail and the menu share one margin.
+      style={{ right: 80, top: "50%", transform: "translateY(-50%)", gap: 28 }}>
+      {CASE_SECTIONS.map(sec => {
+        const on = sec.id === active;
+        const show = on || hovered === sec.id;
+        return (
+          <button key={sec.id} onClick={() => go(sec.id)}
+            onMouseEnter={() => setHovered(sec.id)} onMouseLeave={() => setHovered(null)}
+            aria-current={on ? "true" : undefined}
+            className="flex items-center justify-end gap-4 cursor-pointer"
+            style={{ background: "none", border: "none", padding: 0 }}>
+            <span className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em] whitespace-nowrap"
+              style={{
+                color: on ? GOLD : idle,
+                opacity: show ? 1 : 0,
+                transform: show ? "translateX(0)" : "translateX(8px)",
+                transition: "opacity 0.3s ease, transform 0.3s ease, color 0.3s ease",
+                pointerEvents: "none",
+              }}>
+              {sec.label}
+            </span>
+            <span style={{
+              width: 4, height: 4, borderRadius: "50%", flexShrink: 0,
+              background: on ? GOLD : idle,
+              transition: "background 0.3s ease",
+            }} />
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
 function BusinessCaseContent() {
   const isDark = useContext(DarkModeCtx);
   const fg   = GOLD;
   const sub  = isDark ? "rgba(255,255,255,0.75)" : DIM;
   const body = isDark ? "rgba(255,255,255,0.72)" : DIM;
   const rule = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
+  // The page spans 80% of the viewport so the metadata band, stats and
+  // screenshots use the desk it's read on. Running prose doesn't follow it —
+  // past roughly 70 characters the eye loses the start of the next line — so
+  // every paragraph that would otherwise span the full band is capped here.
+  const MEASURE = '68ch';
 
   // Metadata reads as a definition list rather than run-on lines, matching the
   // labelled columns the case study has always had.
@@ -2826,9 +2995,15 @@ function BusinessCaseContent() {
 
   return (
     <div className="relative w-full" style={{ minHeight: '100dvh', background: 'transparent' }}>
-      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10" style={{ maxWidth: 900 }}>
+      {/* Width grows to 80% of the viewport, so the metadata band, the AB-test
+          screenshots and the results row use the width of a desk instead of
+          stopping two-thirds of the way across. `max()` rather than a
+          breakpoint: 80% only wins once it beats the old 900px cap (past
+          ~1125px), so phones and tablets are left exactly as they were —
+          80% of a phone would strand a quarter of the screen. */}
+      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10" style={{ maxWidth: 'max(900px, 80%)' }}>
 
-        <dl className="grid gap-x-8 gap-y-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', margin: 0 }}>
+        <dl id="overview" className="grid gap-x-8 gap-y-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', margin: 0, scrollMarginTop: 140 }}>
           {META.map(([label, value]) => (
             <div key={label}>
               <dt className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]"
@@ -2839,16 +3014,16 @@ function BusinessCaseContent() {
         </dl>
 
         {/* ── Problem ── */}
-        <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+        <section id="background" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
           <h2 className="font-['Museo',sans-serif] font-light"
             style={{ color: fg, fontSize: 'clamp(1.5rem, 4vw, 2rem)', lineHeight: 1.2, maxWidth: '26ch', textWrap: 'balance', margin: 0 }}>
             From Google Analytics and Content Square, we saw the promo code component is most clicked
           </h2>
-          <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
+          <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
             Excluding the checkout button, which is the bag page's main call to action.
           </p>
 
-          <div className="grid gap-8 md:grid-cols-2" style={{ marginTop: 32 }}>
+          <div className="grid gap-8 md:grid-cols-2" style={{ marginTop: 32, maxWidth: `calc(${MEASURE} * 2)` }}>
             <div>
               <h3 className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>Background</h3>
               <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
@@ -2863,7 +3038,7 @@ function BusinessCaseContent() {
             </div>
             <div className="md:col-span-2">
               <h3 className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>My responsibilities</h3>
-              <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+              <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
                 I led the user surveys and interviews to find the qualitative reason behind what the data showed. The reason was simple —
                 users are motivated to check out when they have a promo code to use.
               </p>
@@ -2872,17 +3047,17 @@ function BusinessCaseContent() {
         </section>
 
         {/* ── Rationale ── */}
-        <section style={{ marginTop: 48 }}>
+        <section id="rationale" style={{ scrollMarginTop: 140, marginTop: 48 }}>
           <figure style={{ margin: 0 }}>
             <img src={foggModel} alt="The Fogg Behavior Model, annotated with the nudge and one-click voucher interventions"
-              style={{ width: '100%', maxWidth: 760, display: 'block', borderRadius: 8 }} />
+              style={{ width: '100%', maxWidth: 1000, display: 'block', borderRadius: 8 }} />
             <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
               Image 1: Concept of human behaviour and UX design.
             </figcaption>
           </figure>
 
           <div style={{
-            marginTop: 32, padding: '20px 24px', borderRadius: 8,
+            marginTop: 32, padding: '20px 24px', borderRadius: 8, maxWidth: MEASURE,
             background: isDark ? "rgba(255,255,255,0.06)" : "#1c1c1c",
           }}>
             <p className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.92)', margin: 0 }}>
@@ -2892,9 +3067,9 @@ function BusinessCaseContent() {
         </section>
 
         {/* ── Intervention ── */}
-        <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+        <section id="ab-testing" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
           <h2 className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1.5rem', margin: 0 }}>AB testing</h2>
-          <div className="grid gap-6 md:grid-cols-2" style={{ marginTop: 16 }}>
+          <div className="grid gap-6 md:grid-cols-2" style={{ marginTop: 16, maxWidth: `calc(${MEASURE} * 2)` }}>
             <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, margin: 0 }}>
               <span style={{ color: fg }}>Group A</span> — the old design, without login, and the promo code field hidden inside a collapsed container.
             </p>
@@ -2913,7 +3088,7 @@ function BusinessCaseContent() {
         </section>
 
         {/* ── Result ── */}
-        <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+        <section id="results" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
           <p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>
             Result from the tested group — voucher owners
           </p>
@@ -2932,7 +3107,7 @@ function BusinessCaseContent() {
 
           <figure style={{ margin: '32px 0 0' }}>
             <img src={graphResult} alt="Google Analytics funnel: view bag, enter checkout at 70.1%, purchase at 79.6%"
-              style={{ width: '100%', maxWidth: 760, display: 'block', borderRadius: 8 }} />
+              style={{ width: '100%', maxWidth: 1000, display: 'block', borderRadius: 8 }} />
             <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
               Chart: Google Analytics funnel from bag to successful checkout.
             </figcaption>
@@ -3005,14 +3180,19 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
                 style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>
                 PASSCODE *
               </label>
+              {/* Masked, like any passcode field. The dots are set a little
+                  larger and widely tracked so they read as a deliberate row
+                  of marks rather than cramped default bullets. */}
               <input
+                type="password"
                 aria-label="Passcode"
+                autoComplete="off"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && submit()}
                 placeholder=""
                 className="w-full"
-                style={{ background: 'transparent', border: 'none', borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.18)"}`, outline: 'none', padding: '8px 0', fontSize: '0.9rem', fontFamily: "'Nunito Sans', sans-serif", fontWeight: 300, color: isDark ? 'white' : INK, transition: 'border-color 0.2s' }}
+                style={{ background: 'transparent', border: 'none', borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.18)"}`, outline: 'none', padding: '8px 0', fontSize: '1.05rem', letterSpacing: value ? '0.35em' : 'normal', fontFamily: "'Nunito Sans', sans-serif", fontWeight: 300, color: isDark ? 'white' : INK, transition: 'border-color 0.2s, letter-spacing 0.2s' }}
               />
             </div>
 
@@ -3029,6 +3209,7 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
           </div>
         )}
       </div>
+      {unlocked && <CaseSectionRail scrollRef={scrollRef} />}
       <StickyPageNav activePage="work" onNavigate={onNavigate} />
     </div>
   );
@@ -3203,6 +3384,9 @@ export default function App() {
   const [detailHeaderScrolled, setDetailHeaderScrolled] = useState(false);
   const detailLabel = page === "workDetail" && detailKey ? EXPERTISE_CARDS.find(c => c.key === detailKey)?.title : undefined;
   const motionKey = page === "speaking" ? `speaking:${detailKey}` : page === "workDetail" ? `workDetail:${detailKey}` : page;
+  // Case-study pages are a drill-in from the Work list; they animate as an
+  // expansion of the row rather than as a new screen sliding in.
+  const drillIn = page === "workDetail" || page === "businessCase";
 
   useEffect(() => {
     if (page !== "workDetail") setDetailHeaderScrolled(false);
@@ -3243,10 +3427,17 @@ export default function App() {
           no per-section tinting: one colour behind the whole site. */}
       <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, background: isDark ? "#282828" : "#f8f7f5" }} />
       {THEME_TOGGLE_ENABLED && <DarkModeToggle isDark={isDark} onToggle={toggleDark} />}
-      <motion.div key={motionKey} className="absolute inset-0" style={{ zIndex: 1 }}
-        initial={page === "workDetail" ? { opacity: 1, x: "100%" } : { opacity: 0, x: 0 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: page === "workDetail" ? 0.4 : 0.45, ease: [0.4, 0, 0.2, 1] }}>
+      {/* Drilling into a case study used to slide in from the right, which read
+          as a separate screen arriving over the top of the list. These pages
+          are the row you just opened, so they unfold instead: a slight scale
+          up from the top edge, where the accordion row sits, easing in and
+          out so it settles rather than snaps. Everything else stays a plain
+          cross-fade. */}
+      <motion.div key={motionKey} className="absolute inset-0"
+        style={{ zIndex: 1, transformOrigin: "50% 0%" }}
+        initial={drillIn ? { opacity: 0, scale: 0.965, y: 18 } : { opacity: 0, x: 0 }}
+        animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
+        transition={{ duration: drillIn ? 0.5 : 0.45, ease: [0.42, 0, 0.58, 1] }}>
         {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} />}
         {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} /></div>}
         {page === "awards"   && <div className="absolute inset-0"><AwardsSpeakingPage onNavigate={navigateGeneral} /></div>}
