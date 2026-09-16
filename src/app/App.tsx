@@ -595,7 +595,7 @@ const SECTIONS = [
     accent: "#8A6E2E", labelColor: "#888880",
     tagline: "Design Strategy & Leadership",
     context: "Fintech · eCommerce · Utility SaaS",
-    items: ["AI + UX DesignOps", "Business Acumen", "Product & UX Methods", "People & Process"],
+    items: ["AI + UX DesignOps", "Business Acumen", "Product & UX Methods", "People & Process", "Case Studies"],
   },
   {
     key: "awards",  label: "Awards & Speaking", page: "awards" as Page, embeds: true,
@@ -1472,11 +1472,25 @@ function IllustrationPeople() {
   );
 }
 
+// Three stacked frames: the case studies themselves, one behind the other.
+function IllustrationCases() {
+  return (
+    <svg viewBox="0 0 120 120" fill="none" className="w-full h-full">
+      <rect x="18" y="20" width="64" height="72" rx="3" stroke={GOLD} strokeWidth="1" strokeOpacity="0.28" />
+      <rect x="28" y="28" width="64" height="72" rx="3" stroke={GOLD} strokeWidth="1" strokeOpacity="0.5" fill={GOLD} fillOpacity="0.05" />
+      <rect x="38" y="36" width="64" height="72" rx="3" stroke={GOLD} strokeWidth="1.5" fill={GOLD} fillOpacity="0.12" />
+      <line x1="48" y1="52" x2="92" y2="52" stroke={GOLD} strokeWidth="1.5" strokeOpacity="0.75" />
+      <line x1="48" y1="64" x2="82" y2="64" stroke={GOLD} strokeWidth="1" strokeOpacity="0.45" />
+      <line x1="48" y1="76" x2="88" y2="76" stroke={GOLD} strokeWidth="1" strokeOpacity="0.45" />
+    </svg>
+  );
+}
+
 const EXPERTISE_CARDS = [
   {
     key: "ai", slug: "ai-ux", title: "AI + UX", accent: GOLD, Illustration: IllustrationAI,
     description: "Designing and iterating AI-native workflows and infrastructure from the ground up.",
-    bullets: ["Reduced trilingual UX copy turnaround by 20% through AI tooling", "AI-native hiring standards & team norms at Cotton On Group", "Automated design system governance & DesignOps maturity frameworks"],
+    bullets: ["Reduced trilingual UX copy turnaround by 20% through AI tooling", "AI-native hiring standards & team norms at Cotton On Group"],
   },
   {
     key: "business", slug: "business-acumen", title: "Business Acumen", accent: "#8A6E2E", Illustration: IllustrationBusiness,
@@ -1504,6 +1518,15 @@ const EXPERTISE_CARDS = [
         url: null,
         comingSoon: true,
       },
+    ],
+  },
+  {
+    key: "cases", slug: "case-studies", title: "Case Studies", accent: GOLD, Illustration: IllustrationCases,
+    description: "Product design taken end to end — the individual-contributor work the rest is built on.",
+    bullets: [
+      "Apple Health",
+      "KAI — Mobile app for IoT device control",
+      "Source — Energy performance monitoring dashboard",
     ],
   },
 ];

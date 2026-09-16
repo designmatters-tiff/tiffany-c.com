@@ -34,6 +34,7 @@ const ROUTES = [
   { path: '/work/business-acumen' },
   { path: '/work/product-ux-strategies' },
   { path: '/work/people-process' },
+  { path: '/work/case-studies' },
   // passcode-gated, so it gets a URL but stays out of the index
   { path: '/work/business-acumen/ecommerce', index: false },
   { path: '/awards' },
