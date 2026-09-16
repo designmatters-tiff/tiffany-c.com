@@ -1554,7 +1554,6 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
   const isMobile = useIsMobile();
   const card = EXPERTISE_CARDS.find(c => c.key === cardKey);
   if (!card) return null;
-  const { Illustration } = card;
   // A work detail page sits under Work, so its links wear Work's heading
   // colour; everything that isn't a link is body text.
   const linkColor = HEADING_COLOUR.work;
@@ -1575,16 +1574,14 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
           style={{ color: GOLD }}>
           <ChevronLeft size={12} strokeWidth={1.5} /> Work
         </button>
-        <div className="flex items-center gap-5 mb-2">
-          <div className="flex-shrink-0 flex items-center justify-center"
-            style={{ width: 56, height: 56 }}>
-            <div style={{ width: 38, height: 38 }}><Illustration /></div>
-          </div>
-          <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg" style={{ fontSize: compact ? '1.5rem' : undefined, lineHeight: 1.05, color: GOLD, transition: 'font-size 0.35s ease' }}
-            initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
-            {card.title}
-          </motion.h1>
-        </div>
+        {/* No mark beside the title here. The illustration identifies a row in
+            the Work list, where it sits among three others; on the page itself
+            there is nothing to tell apart, and it pushed the heading off the
+            same left edge every other page's heading starts from. */}
+        <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg mb-2" style={{ fontSize: compact ? '1.5rem' : undefined, lineHeight: 1.05, color: GOLD, transition: 'font-size 0.35s ease' }}
+          initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
+          {card.title}
+        </motion.h1>
       </div>
 
       <div className="px-6 md:px-20 pb-10" style={{ maxWidth: 760 }}>
