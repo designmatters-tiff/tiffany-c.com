@@ -2925,12 +2925,16 @@ function CaseSectionRail({ scrollRef }: { scrollRef: React.RefObject<HTMLDivElem
     setActive(id);
   };
 
-  const idle = isDark ? "rgba(255,255,255,0.38)" : "#8a8a84";
+  // Inactive dots are solid grey, the same grey the labels and eyebrows use;
+  // only the section being read is gold.
+  const idle = isDark ? "rgba(255,255,255,0.45)" : DIM;
 
   return (
     <nav aria-label="Sections of this case study"
       className="hidden xl:flex fixed z-30 flex-col items-end"
-      style={{ right: 40, top: "50%", transform: "translateY(-50%)", gap: 28 }}>
+      // Right edge lines up with the bottom nav bar's, which sits at
+      // inset-x-20 — so the rail and the menu share one margin.
+      style={{ right: 80, top: "50%", transform: "translateY(-50%)", gap: 28 }}>
       {CASE_SECTIONS.map(sec => {
         const on = sec.id === active;
         const show = on || hovered === sec.id;
@@ -2940,9 +2944,8 @@ function CaseSectionRail({ scrollRef }: { scrollRef: React.RefObject<HTMLDivElem
             aria-current={on ? "true" : undefined}
             className="flex items-center justify-end gap-4 cursor-pointer"
             style={{ background: "none", border: "none", padding: 0 }}>
-            <span className="font-['Museo',sans-serif] font-light whitespace-nowrap"
+            <span className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em] whitespace-nowrap"
               style={{
-                fontSize: "1rem",
                 color: on ? GOLD : idle,
                 opacity: show ? 1 : 0,
                 transform: show ? "translateX(0)" : "translateX(8px)",
@@ -2952,10 +2955,9 @@ function CaseSectionRail({ scrollRef }: { scrollRef: React.RefObject<HTMLDivElem
               {sec.label}
             </span>
             <span style={{
-              width: 14, height: 14, borderRadius: "50%", flexShrink: 0,
-              background: on ? GOLD : "transparent",
-              border: `2px solid ${on ? GOLD : idle}`,
-              transition: "background 0.3s ease, border-color 0.3s ease",
+              width: 10, height: 10, borderRadius: "50%", flexShrink: 0,
+              background: on ? GOLD : idle,
+              transition: "background 0.3s ease",
             }} />
           </button>
         );
