@@ -362,6 +362,16 @@ function MobileMenu({
 // forwarding, so the first real submission is worth sending yourself.
 const SPEAKING_FORM_ENDPOINT = "https://formspree.io/f/xzebweln";
 
+// The eCommerce prototype, as an embed. Figma serves embeds from
+// embed.figma.com — the www.figma.com share link renders its own UI and
+// refuses to frame. The `t=` share token from the copied link is deliberately
+// left off: it's tied to a session, so the embed relies on the prototype's own
+// "anyone with the link can view" setting instead of an expiring token.
+const ECOMMERCE_PROTO_EMBED =
+  "https://embed.figma.com/proto/hy4NQmlE9WX1sCHaVD9aNh/Portfolio-2026" +
+  "?node-id=25-521&starting-point-node-id=25%3A521&page-id=25%3A519" +
+  "&scaling=min-zoom&content-scaling=fixed&embed-host=share";
+
 const FORM_FIELDS: { name: string; label: string; type?: string; required?: boolean }[] = [
   { name: "topic",       label: "Topic",          required: true  },
   { name: "event",       label: "Event",          required: true  },
@@ -3074,6 +3084,13 @@ function BusinessCaseContent() {
   // past roughly 70 characters the eye loses the start of the next line — so
   // every paragraph that would otherwise span the full band is capped here.
   const MEASURE = '68ch';
+  // Figures are 2x assets, so rendering them at their natural pixel width
+  // shows them at twice the size they were drawn for — and the intervention
+  // shot was being pushed past its natural width entirely (1376px from a
+  // 997px file, upscaled and soft). Capped so every figure sits comfortably
+  // below its own resolution and reads as a figure in a document rather than
+  // a full-bleed image.
+  const FIGURE_MAX = 760;
 
   // Metadata reads as a definition list rather than run-on lines, matching the
   // labelled columns the case study has always had.
@@ -3154,13 +3171,38 @@ function BusinessCaseContent() {
 
         {/* ── Rationale ── */}
         <section id="rationale" style={{ scrollMarginTop: 140, marginTop: 48 }}>
-          <figure style={{ margin: 0 }}>
-            <img src={foggModel} alt="The Fogg Behavior Model, annotated with the nudge and one-click voucher interventions"
-              style={{ width: '100%', maxWidth: 1000, display: 'block', borderRadius: 8 }} />
-            <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
-              Image 1: Concept of human behaviour and UX design.
-            </figcaption>
-          </figure>
+          {/* Prototype beside the model it came from: the thinking on the
+              right, the thing it produced on the left. Stacked on a phone with
+              the prototype first, where a side-by-side would leave both too
+              small to use. */}
+          <div className="flex flex-col md:flex-row gap-6 md:gap-8 md:items-start"
+            style={{ maxWidth: `calc(${FIGURE_MAX}px * 2 + 32px)` }}>
+            <figure className="w-full md:w-1/2" style={{ margin: 0 }}>
+              <div style={{
+                width: '100%', aspectRatio: '4 / 3', borderRadius: 8, overflow: 'hidden',
+                border: `1px solid ${rule}`, background: isDark ? 'rgba(255,255,255,0.03)' : '#fff',
+              }}>
+                <iframe
+                  src={ECOMMERCE_PROTO_EMBED}
+                  title="eCommerce bag page prototype"
+                  loading="lazy"
+                  allowFullScreen
+                  style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                />
+              </div>
+              <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
+                Prototype: the bag page flow, clickable.
+              </figcaption>
+            </figure>
+
+            <figure className="w-full md:w-1/2" style={{ margin: 0 }}>
+              <img src={foggModel} alt="The Fogg Behavior Model, annotated with the nudge and one-click voucher interventions"
+                style={{ width: '100%', display: 'block', borderRadius: 8 }} />
+              <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
+                Image 1: Concept of human behaviour and UX design.
+              </figcaption>
+            </figure>
+          </div>
 
           <div style={{
             marginTop: 32, padding: '20px 24px', borderRadius: 8, maxWidth: MEASURE,
@@ -3186,7 +3228,7 @@ function BusinessCaseContent() {
 
           <figure style={{ margin: '32px 0 0' }}>
             <img src={interventionImg} alt="Group B: the collapsed promo code field on the left, and the surfaced voucher selectors after logging in on the right"
-              style={{ width: '100%', display: 'block', borderRadius: 8 }} />
+              style={{ width: '100%', maxWidth: FIGURE_MAX, display: 'block', borderRadius: 8 }} />
             <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
               Left: the new design where users have not logged in. Right: after logging in.
             </figcaption>
@@ -3213,7 +3255,7 @@ function BusinessCaseContent() {
 
           <figure style={{ margin: '32px 0 0' }}>
             <img src={graphResult} alt="Google Analytics funnel: view bag, enter checkout at 70.1%, purchase at 79.6%"
-              style={{ width: '100%', maxWidth: 1000, display: 'block', borderRadius: 8 }} />
+              style={{ width: '100%', maxWidth: FIGURE_MAX, display: 'block', borderRadius: 8 }} />
             <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
               Chart: Google Analytics funnel from bag to successful checkout.
             </figcaption>
