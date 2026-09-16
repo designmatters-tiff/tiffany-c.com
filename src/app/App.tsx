@@ -2254,10 +2254,10 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const onDark = useOnDarkBackdrop(scrollRef, headerRef);
-  // Over dark content the header takes a dark surface and the brighter gold —
-  // the same pair dark mode already uses — so the heading keeps its contrast
-  // instead of sinking into whatever is passing underneath.
-  const headingColor = onDark || isDark ? GOLD_BRIGHT : GOLD;
+  // Nothing about the header's surface changes — the frosted backdrop already
+  // darkens on its own when a dark image passes under it. Only the text
+  // switches, to white, so it stays legible against that darkened band.
+  const headingColor = onDark ? "#ffffff" : isDark ? GOLD_BRIGHT : GOLD;
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -2271,12 +2271,10 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
         <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
-          background: headerScrolled
-            ? (onDark ? "rgba(24,20,16,0.62)" : isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)")
-            : "transparent",
+          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
-          borderBottom: `1px solid ${headerScrolled ? (onDark || isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)") : "transparent"}`,
+          borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
           paddingBottom: headerScrolled ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
