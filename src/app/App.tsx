@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef, useCallback, createContext, useContext } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, createContext, useContext, Fragment } from "react";
 import { motion } from "motion/react";
 import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft } from "lucide-react";
 
@@ -1821,10 +1821,26 @@ function KaiCaseContent() {
             <div>
               <Label>The process</Label>
               <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
-                Design Sprint 2.0, run over four days: define the challenge; solution sketch, user flow and
-                storyboarding; prototype; user testing.
+                Design Sprint 2.0, run over four days.
               </p>
             </div>
+          </div>
+
+          {/* The four steps as a row of boxes, the way the original reads. */}
+          <div className="flex flex-wrap items-stretch gap-2" style={{ marginTop: 28 }}>
+            {["Define the challenge", "Solution, user test flow & storyboarding", "Prototyping", "User testing"].map((step, i, arr) => (
+              <Fragment key={step}>
+                <div className="font-['Nunito_Sans',sans-serif] text-small flex-1"
+                  style={{ color: body, border: `1px solid ${rule}`, borderRadius: 4, padding: '14px 16px', minWidth: 140 }}>
+                  <span style={{ color: fg, marginRight: 6 }}>{i + 1}.</span>{step}
+                </div>
+                {i < arr.length - 1 && (
+                  <div className="hidden md:flex items-center flex-shrink-0" style={{ color: sub }} aria-hidden="true">
+                    <ChevronRight size={16} strokeWidth={1.25} />
+                  </div>
+                )}
+              </Fragment>
+            ))}
           </div>
 
           {/* 1 — define the challenge */}
@@ -1834,8 +1850,46 @@ function KaiCaseContent() {
               We used the customer journey, built on a user persona, to set the scope. The pain reliever — and the
               sprint's goal — was savings for the building.
             </p>
-            <Fig src={kaiPersona} alt="Mr Tan, 57, business owner of a cold storage warehouse — the KAI user persona"
-              caption="Mr Tan, 57 — business owner of a cold storage warehouse. His goal is to keep operating costs low: reduce Maximum Demand charges, and control machines remotely so fewer people are needed on site. His pain is the premium the national provider charges industrial users during peak hours." />
+            {/* The persona reads as a card — a small round headshot and who he
+                is on the left, what he wants on the right. The photo is a
+                headshot, so it is sized like one. */}
+            <div className="flex flex-col md:flex-row gap-6 md:gap-10"
+              style={{ marginTop: 28, background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.025)",
+                       borderRadius: 8, padding: '28px 24px', maxWidth: `calc(${MEASURE} * 1.5)` }}>
+              <div className="flex-shrink-0 md:w-48">
+                <img src={kaiPersona} alt="Mr Tan, the KAI user persona" loading="lazy"
+                  style={{ width: 112, height: 112, objectFit: 'cover', objectPosition: 'center 20%', borderRadius: '50%', display: 'block' }} />
+                <p className="font-['Museo',sans-serif] font-light" style={{ color: ink, margin: '16px 0 0', fontSize: '1.05rem' }}>Mr Tan</p>
+                <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, margin: '4px 0 0' }}>
+                  Business owner of a cold storage warehouse
+                </p>
+                <div style={{ borderTop: `1px solid ${rule}`, margin: '12px 0', width: 48 }} />
+                <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, margin: 0 }}>57, male</p>
+              </div>
+              <div className="min-w-0">
+                <Label>Goal</Label>
+                <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                  Keep operating costs as low as possible, on the energy side:
+                </p>
+                <ol className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 6, paddingLeft: '1.2em' }}>
+                  <li>Reduce Maximum Demand charges</li>
+                  <li style={{ marginTop: 4 }}>Control machines remotely, so fewer people are needed on site</li>
+                </ol>
+                <div style={{ marginTop: 20 }}>
+                  <Label>Behaviour &amp; attitude</Label>
+                  <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                    Open to new ideas; needs simple interactions; learning new technology to help his business.
+                  </p>
+                </div>
+                <div style={{ marginTop: 20 }}>
+                  <Label>Pain points</Label>
+                  <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                    The premium the national energy provider charges industrial users for high consumption during
+                    peak hours.
+                  </p>
+                </div>
+              </div>
+            </div>
             <Fig src={kaiJourney} alt="User journey mapping on a whiteboard"
               caption="On the user journey map, “use” and “goal” directed the next step — the user test flow." />
           </div>
@@ -1881,40 +1935,61 @@ function KaiCaseContent() {
             usability — ease of use, satisfaction, and effectiveness at completing a task — through a role-play scenario.
           </p>
 
-          <dl className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginTop: 28, maxWidth: `calc(${MEASURE} * 1.4)` }}>
-            {[["Ease of use", "68/100"], ["Overall experience", "2.8/5"]].map(([label, value]) => (
-              <div key={label}>
-                <dd className="font-['Museo',sans-serif] font-light"
-                  style={{ color: fg, fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', lineHeight: 1.1, margin: 0, fontVariantNumeric: 'tabular-nums' }}>{value}</dd>
-                <dt className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 6 }}>{label}</dt>
+          {/* Two scores as rings, as on the original — the arc carries the
+              number rather than the number sitting on its own. */}
+          <div className="flex flex-col md:flex-row gap-8 md:gap-12" style={{ marginTop: 28, maxWidth: `calc(${MEASURE} * 1.6)` }}>
+            {[
+              { label: "Ease of use", value: "68/100", pct: 68,
+                note: "Testers found the prototype easy enough to navigate, and understood the information shown for each device." },
+              { label: "Overall experience", value: "2.8/5", pct: 56,
+                note: "More features would be handy — and there was more potential in the app than we were making use of." },
+            ].map(r => (
+              <div key={r.label} className="flex items-center gap-5 flex-1">
+                <div className="relative flex-shrink-0" style={{ width: 96, height: 96 }} aria-hidden="true">
+                  <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke={rule} strokeWidth="2.6" />
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke={fg} strokeWidth="2.6" strokeLinecap="round"
+                      strokeDasharray={`${r.pct} ${100 - r.pct}`} />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <span className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '0.95rem', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{r.value}</span>
+                  </div>
+                </div>
+                <div className="min-w-0">
+                  <p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub, margin: 0 }}>{r.label}</p>
+                  <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: body, margin: '8px 0 0' }}>{r.note}</p>
+                </div>
               </div>
             ))}
-          </dl>
-          <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 16, maxWidth: MEASURE }}>
-            Testers found the prototype easy enough to navigate and understood the device information. More features
-            would be handy — and there was more potential in the app than we were using.
-          </p>
+          </div>
 
           <div style={{ marginTop: 40 }}>
             <Label>Conclusion</Label>
             <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
               What the testers wanted depended on the job they did.
             </p>
-            <div style={{ marginTop: 20, maxWidth: `calc(${MEASURE} * 1.5)` }}>
+            {/* Banded rows, as on the original — but in this site's accents
+                rather than its navy and orange: Work's deep gold, Awards'
+                blue, Coaching's purple. Solid label cell, tinted body cell. */}
+            <div style={{ marginTop: 20, maxWidth: `calc(${MEASURE} * 1.6)`, borderRadius: 8, overflow: 'hidden' }}>
               {[
-                ["01", "Functionality", "Operations & maintenance", "Features for team collaboration — share an action or an alert over WhatsApp, generate a report, set reminders to reverse an action."],
-                ["02", "User acquisition strategy", "Sales & business development", "Free to use. Lower the barrier to adoption so it can be introduced to other businesses."],
-                ["03", "Ecosystem stickiness", "Senior management", "KAI reads as disconnected from the SOURCE ecosystem. That's a product strategy problem, not an interface one."],
-              ].map(([n, title, who, text]) => (
-                <div key={n} className="flex flex-col md:flex-row gap-2 md:gap-6"
-                  style={{ borderTop: `1px solid ${rule}`, padding: '18px 0' }}>
-                  <div className="md:w-1/3 flex-shrink-0">
-                    <p className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1.05rem', margin: 0 }}>
-                      <span style={{ opacity: 0.55, marginRight: 8 }}>{n}</span>{title}
-                    </p>
-                    <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 4 }}>{who}</p>
+                { n: "01", title: "Functionality", who: "Operations & maintenance", accent: "#8A6E2E",
+                  text: "Features for team collaboration — share an action or an alert over WhatsApp, generate a report, set reminders to reverse an action." },
+                { n: "02", title: "User acquisition strategy", who: "Sales & business development", accent: "#5070A0",
+                  text: "Free to use. Lower the barrier to adoption so it can be introduced to other businesses." },
+                { n: "03", title: "Ecosystem stickiness", who: "Senior management", accent: "#9B5A88",
+                  text: "KAI reads as disconnected from the SOURCE ecosystem. That's a product strategy problem, not an interface one." },
+              ].map(row => (
+                <div key={row.n} className="flex flex-col md:flex-row">
+                  <div className="md:w-1/3 flex-shrink-0" style={{ background: row.accent, padding: '20px 22px' }}>
+                    <p className="font-['Nunito_Sans',sans-serif] text-label" style={{ color: 'rgba(255,255,255,0.7)', margin: 0 }}>{row.n}</p>
+                    <p className="font-['Museo',sans-serif] font-light" style={{ color: '#fff', fontSize: '1.05rem', margin: '4px 0 0' }}>{row.title}</p>
+                    <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: 'rgba(255,255,255,0.75)', margin: '10px 0 0', fontStyle: 'italic' }}>{row.who}</p>
                   </div>
-                  <p className="font-['Nunito_Sans',sans-serif] md:w-2/3" style={{ color: body, margin: 0 }}>{text}</p>
+                  <div className="md:w-2/3 flex items-center"
+                    style={{ background: isDark ? `${row.accent}33` : `${row.accent}1f`, padding: '20px 22px' }}>
+                    <p className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? 'rgba(255,255,255,0.86)' : INK, margin: 0 }}>{row.text}</p>
+                  </div>
                 </div>
               ))}
             </div>
