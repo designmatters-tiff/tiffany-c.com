@@ -1709,73 +1709,134 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
 
 // Is the sticky header currently sitting over something dark?
 //
-// The header's backdrop is only part-opaque, so a dark image scrolling under
-// it drags the surface down with it and the gold heading loses its contrast.
-// Rather than guess, this measures: every image on the page is sampled once
-// into a tiny canvas (they're same-origin, so the pixels are readable) and
-// tagged with its own luminance. On scroll, if a dark one overlaps the header
-// band, the header flips to a dark surface and the brighter gold.
+// The header's backdrop is part-opaque, so a dark image scrolling under it
+// drags the surface down with it and a gold heading loses its contrast.
+//
+// It measures the strip of image that is actually behind the header, not the
+// image as a whole. A phone screenshot is a black UI on a white surround: dark
+// on average, but the part under the header is the white margin — averaging
+// the whole thing turned the heading white against white.
 function useOnDarkBackdrop(headerRef: React.RefObject<HTMLDivElement | null>) {
   const [onDark, setOnDark] = useState(false);
 
   useEffect(() => {
-    // Walk up from the header to whatever is actually doing the scrolling —
-    // some pages own their scroll container, others get one from the router.
     const findScrollParent = (el: HTMLElement | null): HTMLElement | null => {
       for (let n = el?.parentElement ?? null; n; n = n.parentElement) {
         const o = getComputedStyle(n).overflowY;
         // Identify the container by how it's styled, not by whether it happens
-        // to overflow yet — at mount the images haven't laid out, and an
-        // early return here would leave the hook dead for the page's life.
+        // to overflow yet — at mount the images haven't laid out, and an early
+        // return here would leave the hook dead for the page's life.
         if (o === "auto" || o === "scroll") return n;
       }
       return null;
     };
     const root = findScrollParent(headerRef.current);
     if (!root) return;
+
+    // The frosted bar's own opacity, and the page colour behind it.
+    const HEADER_TINT_ALPHA = 0.55;
+    const pageLum = getComputedStyle(document.documentElement)
+      .getPropertyValue("color-scheme").includes("dark") ? 0.16 : 0.968;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 12; canvas.height = 12;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
     let raf = 0;
 
-    const luminanceOf = (img: HTMLImageElement): number | null => {
-      if (!img.naturalWidth) return null;
+    // Mean luminance of just the part of `img` inside `hr`, or null if they
+    // don't overlap or the pixels can't be read.
+    const luminanceBehind = (img: HTMLImageElement, hr: DOMRect): number | null => {
+      if (!ctx || !img.naturalWidth) return null;
+      const r = img.getBoundingClientRect();
+      const x1 = Math.max(hr.left, r.left), x2 = Math.min(hr.right, r.right);
+      const y1 = Math.max(hr.top, r.top),   y2 = Math.min(hr.bottom, r.bottom);
+      if (x2 - x1 < 1 || y2 - y1 < 1) return null;
+
+      // Where the pixels sit inside the element box depends on object-fit.
+      const { naturalWidth: nw, naturalHeight: nh } = img;
+      const fit = getComputedStyle(img).objectFit;
+      let dw = r.width, dh = r.height, dx = r.left, dy = r.top;
+      if (fit === "contain" || fit === "cover") {
+        const sc = fit === "contain"
+          ? Math.min(r.width / nw, r.height / nh)
+          : Math.max(r.width / nw, r.height / nh);
+        dw = nw * sc; dh = nh * sc;
+        dx = r.left + (r.width - dw) / 2;
+        dy = r.top + (r.height - dh) / 2;
+      }
+      const sx = Math.max(0, (x1 - dx) / dw * nw);
+      const sy = Math.max(0, (y1 - dy) / dh * nh);
+      const sw = Math.min(nw - sx, (x2 - x1) / dw * nw);
+      const sh = Math.min(nh - sy, (y2 - y1) / dh * nh);
+      if (sw < 1 || sh < 1) return null;
+
       try {
-        const c = document.createElement("canvas");
-        c.width = 8; c.height = 8;
-        const ctx = c.getContext("2d", { willReadFrequently: true });
-        if (!ctx) return null;
-        ctx.drawImage(img, 0, 0, 8, 8);
-        const { data } = ctx.getImageData(0, 0, 8, 8);
-        let sum = 0;
+        ctx.clearRect(0, 0, 12, 12);
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, 12, 12);
+        const { data } = ctx.getImageData(0, 0, 12, 12);
+        let sum = 0, n = 0;
         for (let i = 0; i < data.length; i += 4) {
+          if (data[i + 3] < 8) continue;           // skip anything transparent
           sum += 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+          n++;
         }
-        return sum / (data.length / 4) / 255;
+        return n ? sum / n / 255 : null;
       } catch {
-        // A tainted canvas would throw; treat it as unknown rather than dark.
-        return null;
+        return null;                                // tainted canvas: unknown
       }
     };
 
-    const tag = (img: HTMLImageElement) => {
-      if (img.dataset.lum) return;
-      const l = luminanceOf(img);
-      if (l !== null) img.dataset.lum = l.toFixed(3);
+    // What of the element is actually on screen. A collapsed accordion clips
+    // its contents to nothing, but the image inside still reports its full
+    // rect — so without this a hidden photo votes on the heading's colour.
+    const visibleRect = (el: HTMLElement): DOMRect | null => {
+      let r = el.getBoundingClientRect();
+      let l = r.left, t = r.top, rt = r.right, b = r.bottom;
+      for (let n = el.parentElement; n; n = n.parentElement) {
+        const cs = getComputedStyle(n);
+        if (cs.overflow === "visible" && cs.overflowY === "visible" && cs.overflowX === "visible") continue;
+        const c = n.getBoundingClientRect();
+        l = Math.max(l, c.left); t = Math.max(t, c.top);
+        rt = Math.min(rt, c.right); b = Math.min(b, c.bottom);
+        if (rt - l < 1 || b - t < 1) return null;
+      }
+      return new DOMRect(l, t, rt - l, b - t);
     };
 
     const measure = () => {
       const header = headerRef.current;
       if (!header) return;
-      const hr = header.getBoundingClientRect();
+      // Measure behind the heading itself, not the whole bar. The bar is tall
+      // and the text sits low in it, so an image covering the bar's top while
+      // the words sit over page colour was flipping them white against cream.
+      const target = (header.querySelector("h1") as HTMLElement | null) ?? header;
+      const hr = target.getBoundingClientRect();
+      if (hr.height < 4) return;
       let dark = false;
       root.querySelectorAll("img").forEach(el => {
+        if (dark) return;
         const img = el as HTMLImageElement;
-        tag(img);
-        const l = img.dataset.lum ? parseFloat(img.dataset.lum) : null;
-        if (l === null || l > 0.42) return;          // light enough to ignore
-        const r = img.getBoundingClientRect();
-        // Overlaps the header band, and covers enough of it to matter.
+        const cs = getComputedStyle(img);
+        if (cs.visibility === "hidden" || cs.display === "none" || parseFloat(cs.opacity) < 0.5) return;
+        const r = visibleRect(img);
+        if (!r) return;
+        // The image has to be most of the band, not merely in it. A 300px
+        // phone mock in a 430px header leaves the rest of the row cream —
+        // and the heading spans the whole width, so white text would cross
+        // from the dark mock onto the light page and disappear. Gold holds up
+        // on both, so only a backdrop that is dark end to end earns the flip.
         const covered = Math.min(hr.bottom, r.bottom) - Math.max(hr.top, r.top);
         const across  = Math.min(hr.right, r.right) - Math.max(hr.left, r.left);
-        if (covered > hr.height * 0.4 && across > hr.width * 0.3) dark = true;
+        if (covered < hr.height * 0.6 || across < hr.width * 0.85) return;
+        const l = luminanceBehind(img, hr);
+        if (l === null) return;
+        // What the eye actually gets is the image seen through the header's
+        // part-opaque backdrop, which lifts it a long way towards the page
+        // colour: a near-black image composites to about 0.58, not 0.11.
+        // Threshold on that composite, or white text gets used on backdrops
+        // where gold was the better read.
+        const composite = HEADER_TINT_ALPHA * pageLum + (1 - HEADER_TINT_ALPHA) * l;
+        if (composite < 0.62) dark = true;
       });
       setOnDark(dark);
     };
@@ -1785,7 +1846,6 @@ function useOnDarkBackdrop(headerRef: React.RefObject<HTMLDivElement | null>) {
       raf = requestAnimationFrame(measure);
     };
 
-    // Images decode after first paint, so measure again as they arrive.
     const imgs = Array.from(root.querySelectorAll("img"));
     imgs.forEach(i => i.addEventListener("load", onScroll));
     const t = window.setTimeout(measure, 300);
