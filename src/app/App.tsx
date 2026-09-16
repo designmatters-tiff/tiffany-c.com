@@ -2955,7 +2955,7 @@ function CaseSectionRail({ scrollRef }: { scrollRef: React.RefObject<HTMLDivElem
               {sec.label}
             </span>
             <span style={{
-              width: 10, height: 10, borderRadius: "50%", flexShrink: 0,
+              width: 4, height: 4, borderRadius: "50%", flexShrink: 0,
               background: on ? GOLD : idle,
               transition: "background 0.3s ease",
             }} />
@@ -3180,14 +3180,19 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
                 style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>
                 PASSCODE *
               </label>
+              {/* Masked, like any passcode field. The dots are set a little
+                  larger and widely tracked so they read as a deliberate row
+                  of marks rather than cramped default bullets. */}
               <input
+                type="password"
                 aria-label="Passcode"
+                autoComplete="off"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && submit()}
                 placeholder=""
                 className="w-full"
-                style={{ background: 'transparent', border: 'none', borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.18)"}`, outline: 'none', padding: '8px 0', fontSize: '0.9rem', fontFamily: "'Nunito Sans', sans-serif", fontWeight: 300, color: isDark ? 'white' : INK, transition: 'border-color 0.2s' }}
+                style={{ background: 'transparent', border: 'none', borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.18)"}`, outline: 'none', padding: '8px 0', fontSize: '1.05rem', letterSpacing: value ? '0.35em' : 'normal', fontFamily: "'Nunito Sans', sans-serif", fontWeight: 300, color: isDark ? 'white' : INK, transition: 'border-color 0.2s, letter-spacing 0.2s' }}
               />
             </div>
 
