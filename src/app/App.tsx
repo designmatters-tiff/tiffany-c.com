@@ -1,6 +1,21 @@
-import { useState, useEffect, useLayoutEffect, useRef, useCallback, createContext, useContext } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, createContext, useContext, Fragment } from "react";
 import { motion } from "motion/react";
 import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft } from "lucide-react";
+
+import kaiHero from "@/work/case/kai/kai-mobile-01-hero.avif";
+import kaiPersona from "@/work/case/kai/kai-mobile-02-persona-mr-tan.avif";
+import kaiJourney from "@/work/case/kai/kai-mobile-03-whiteboard-user-feedback.avif";
+import kaiSketch from "@/work/case/kai/kai-mobile-04-solution-sketch-selected.avif";
+import kaiHeatmap from "@/work/case/kai/kai-mobile-05-heatmap-vote.avif";
+import kaiTestFlow from "@/work/case/kai/kai-mobile-06-user-testing-flow.avif";
+import kaiProto1 from "@/work/case/kai/kai-mobile-07-proto-1.avif";
+import kaiProto2 from "@/work/case/kai/kai-mobile-08-proto-2.avif";
+import kaiTesterNotes from "@/work/case/kai/kai-mobile-09-tester-whiteboard-notes.avif";
+import kaiZoneFlow from "@/work/case/kai/kai-mobile-10-create-zone-flow.avif";
+import kaiHomeScreen from "@/work/case/kai/kai-mobile-11-home-screen.avif";
+import kaiHome from "@/work/case/kai/kai-mobile-12-home.avif";
+import kaiControls from "@/work/case/kai/kai-mobile-13-machine-controls.avif";
+import kaiSchedule from "@/work/case/kai/kai-mobile-14-schedule-chart.avif";
 
 import awardsWomenDigital from "@/imports/AwardsSpeaking/WID-tiff2025.avif";
 import awardsFinalistCard from "@/imports/AwardsSpeaking/WID-2.avif";
@@ -107,7 +122,7 @@ const HEADING_COLOUR: Record<string, string> = Object.fromEntries(
   ]),
 );
 
-type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "testimonials";
+type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "kaiCase" | "testimonials";
 
 // ─── Dark mode context ────────────────────────────────────────────
 const DarkModeCtx = createContext(false);
@@ -1639,9 +1654,17 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
           ))}
           {card.bullets.map(b => {
             const isSpecial = b === "eCommerce: Behavioural UX Design (passcode required)";
+            const isKai = b === "KAI — Mobile app for IoT device control";
             return (
               <li key={b} className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: bodyText }}>
-                {isSpecial ? (
+                {isKai ? (
+                  <button onClick={() => onNavigate('kaiCase')}
+                    className="flex items-start gap-2 text-left"
+                    style={{ background: 'none', border: 'none', padding: 0, color: linkColor, cursor: 'pointer', font: 'inherit' }}>
+                    <span className="mt-0.5 flex-shrink-0">—</span>
+                    <span className="link-underline">{b}</span>
+                  </button>
+                ) : isSpecial ? (
                   /* The dash sits outside the link and the sweep goes on the
                      text span, so the underline is the width of the words —
                      the same shape as the resource links above. On the button
@@ -1664,6 +1687,505 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
         {/* Bottom spacer so content clears the floating detail nav */}
         <div style={{ height: 96 }} />
       </div>
+    </div>
+  );
+}
+
+
+// ─── KAI case study ───────────────────────────────────────────────
+
+const KAI_SECTIONS: { id: string; label: string }[] = [
+  { id: "kai-overview",  label: "Overview" },
+  { id: "kai-brief",     label: "Background & Brief" },
+  { id: "kai-sprint",    label: "Design Sprint" },
+  { id: "kai-testing",   label: "User Testing" },
+  { id: "kai-solutions", label: "Design Solutions" },
+  { id: "kai-review",    label: "Stakeholders" },
+];
+
+function KaiCaseContent() {
+  const isDark = useContext(DarkModeCtx);
+  const fg   = GOLD;
+  const sub  = isDark ? "rgba(255,255,255,0.75)" : DIM;
+  const body = isDark ? "rgba(255,255,255,0.72)" : DIM;
+  const rule = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
+  const ink  = isDark ? "white" : INK;
+  const MEASURE = '68ch';
+  const FIGURE_MAX = 760;
+
+  const META: [string, React.ReactNode][] = [
+    ["Year", "August – October 2019"],
+    ["Client", (
+      <a href="https://edge.plus-solar.com.my/kai" target="_blank" rel="noopener noreferrer"
+        className="link-underline" style={{ color: fg }}>Plus Xnergy Edge</a>
+    )],
+    ["Goal", "Monitor and manage energy use in real time"],
+    ["Scope", "Design sprint facilitation, design strategy, UX & UI design"],
+    ["Role", "Design Innovation Manager"],
+    ["Team size", "2 designers"],
+  ];
+
+  const Fig = ({ src, alt, caption, max = FIGURE_MAX }: { src: string; alt: string; caption?: string; max?: number }) => (
+    <figure style={{ margin: '28px 0 0' }}>
+      <img src={src} alt={alt} loading="lazy"
+        style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
+      {caption && (
+        <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+          {caption}
+        </figcaption>
+      )}
+    </figure>
+  );
+
+  const Label = ({ children }: { children: React.ReactNode }) => (
+    <h3 className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{children}</h3>
+  );
+
+  return (
+    <div className="relative w-full" style={{ minHeight: '100dvh', background: 'transparent' }}>
+      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10" style={{ maxWidth: 'max(900px, 80%)' }}>
+
+        <dl id="kai-overview" className="grid gap-x-6 gap-y-6"
+          style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(128px, 1fr))', margin: 0, scrollMarginTop: 140 }}>
+          {META.map(([label, value]) => (
+            <div key={label}>
+              <dt className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{label}</dt>
+              <dd className="font-['Nunito_Sans',sans-serif]" style={{ color: body, margin: '6px 0 0' }}>{value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        {/* ── Background & brief ── */}
+        <section id="kai-brief" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+          <h2 className="font-['Museo',sans-serif] font-light"
+            style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.5rem)', lineHeight: 1.15, margin: 0 }}>
+            <Figures>Helped businesses save up to 20% on Maximum Demand charges</Figures>
+          </h2>
+          <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+            “Extremely user friendly” — KAI's mobile user feedback.
+          </p>
+
+          <Fig src={kaiHero} alt="KAI: monitor and manage energy usage in real time" />
+
+          <div className="grid gap-8 md:grid-cols-2" style={{ marginTop: 32, maxWidth: `calc(${MEASURE} * 2)` }}>
+            <div>
+              <Label>Background</Label>
+              <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                Value adding to the SOURCE ecosystem — an energy performance management system — which made energy
+                data visible to the eyes of building owners.
+              </p>
+            </div>
+            <div>
+              <Label>The brief</Label>
+              <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                Design a mobile app that helps users take real-time action on building energy. It collects every
+                smart device in the building to provide analytical data for energy optimisation.
+              </p>
+            </div>
+            <div className="md:col-span-2">
+              <Label>My responsibilities</Label>
+              <ul className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE, listStyle: 'none', padding: 0 }}>
+                {[
+                  "Proposed a 4-day design sprint to align which features would ship in the first version, across every collaborating department",
+                  "Prototyping through to final UI development, with a junior designer",
+                  "Design QA for release",
+                ].map(t => (
+                  <li key={t} className="flex items-start gap-2" style={{ marginTop: 6 }}>
+                    <span className="flex-shrink-0" style={{ marginTop: 2 }}>—</span><span>{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Design sprint ── */}
+        <section id="kai-sprint" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+          <h2 className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1.5rem', margin: 0 }}>Design Sprint</h2>
+          <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 12, maxWidth: MEASURE }}>
+            I aligned with the product owner — also the decider — on what the sprint was for before it started.
+          </p>
+
+          <div className="grid gap-8 md:grid-cols-2" style={{ marginTop: 28, maxWidth: `calc(${MEASURE} * 2)` }}>
+            <div>
+              <Label>The goal</Label>
+              <ul className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, listStyle: 'none', padding: 0 }}>
+                {["Discover users' pain points and the key features for the product",
+                  "Put ownership of the product in the team's hands — hardware engineers, designers and developers"].map(t => (
+                  <li key={t} className="flex items-start gap-2" style={{ marginTop: 6 }}>
+                    <span className="flex-shrink-0" style={{ marginTop: 2 }}>—</span><span>{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <Label>The process</Label>
+              <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                Design Sprint 2.0, run over four days.
+              </p>
+            </div>
+          </div>
+
+          {/* The four steps as a row of boxes, the way the original reads. */}
+          <div className="flex flex-wrap items-stretch gap-2" style={{ marginTop: 28 }}>
+            {["Define the challenge", "Solution, user test flow & storyboarding", "Prototyping", "User testing"].map((step, i, arr) => (
+              <Fragment key={step}>
+                <div className="font-['Nunito_Sans',sans-serif] text-small flex-1"
+                  style={{ color: body, border: `1px solid ${rule}`, borderRadius: 4, padding: '14px 16px', minWidth: 140 }}>
+                  <span style={{ color: fg, marginRight: 6 }}>{i + 1}.</span>{step}
+                </div>
+                {i < arr.length - 1 && (
+                  <div className="hidden md:flex items-center flex-shrink-0" style={{ color: sub }} aria-hidden="true">
+                    <ChevronRight size={16} strokeWidth={1.25} />
+                  </div>
+                )}
+              </Fragment>
+            ))}
+          </div>
+
+          {/* 1 — define the challenge */}
+          <div style={{ marginTop: 40 }}>
+            <Label>1 · Define the challenge</Label>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
+              We used the customer journey, built on a user persona, to set the scope. The pain reliever — and the
+              sprint's goal — was savings for the building.
+            </p>
+            {/* The persona reads as a card — a small round headshot and who he
+                is on the left, what he wants on the right. The photo is a
+                headshot, so it is sized like one. */}
+            <div className="flex flex-col md:flex-row gap-6 md:gap-10"
+              style={{ marginTop: 28, background: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.025)",
+                       borderRadius: 8, padding: '28px 24px', maxWidth: `calc(${MEASURE} * 1.5)` }}>
+              <div className="flex-shrink-0 md:w-48">
+                <img src={kaiPersona} alt="Mr Tan, the KAI user persona" loading="lazy"
+                  style={{ width: 112, height: 112, objectFit: 'cover', objectPosition: 'center 20%', borderRadius: '50%', display: 'block' }} />
+                <p className="font-['Museo',sans-serif] font-light" style={{ color: ink, margin: '16px 0 0', fontSize: '1.05rem' }}>Mr Tan</p>
+                <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, margin: '4px 0 0' }}>
+                  Business owner of a cold storage warehouse
+                </p>
+                <div style={{ borderTop: `1px solid ${rule}`, margin: '12px 0', width: 48 }} />
+                <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, margin: 0 }}>57, male</p>
+              </div>
+              <div className="min-w-0">
+                <Label>Goal</Label>
+                <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                  Keep operating costs as low as possible, on the energy side:
+                </p>
+                <ol className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 6, paddingLeft: '1.2em' }}>
+                  <li>Reduce Maximum Demand charges</li>
+                  <li style={{ marginTop: 4 }}>Control machines remotely, so fewer people are needed on site</li>
+                </ol>
+                <div style={{ marginTop: 20 }}>
+                  <Label>Behaviour &amp; attitude</Label>
+                  <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                    Open to new ideas; needs simple interactions; learning new technology to help his business.
+                  </p>
+                </div>
+                <div style={{ marginTop: 20 }}>
+                  <Label>Pain points</Label>
+                  <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                    The premium the national energy provider charges industrial users for high consumption during
+                    peak hours.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <Fig src={kaiJourney} alt="User journey mapping on a whiteboard"
+              caption="On the user journey map, “use” and “goal” directed the next step — the user test flow." />
+          </div>
+
+          {/* 2 — solution sketch */}
+          <div style={{ marginTop: 40 }}>
+            <Label>2 · Solution sketch, user flow & storyboarding</Label>
+            <Fig src={kaiSketch} alt="The selected solution sketch"
+              caption="My solution sketch was selected as the main direction for design development." />
+            <Fig src={kaiHeatmap} alt="Participants casting heat map votes on the solution sketches"
+              caption="Every participant read all the solution sketches, then cast a heat map vote." />
+            <Fig src={kaiTestFlow} alt="The voted user test flow"
+              caption="The voting outcome for the user test flow, approved by the decider — this determined the prototype." />
+          </div>
+
+          {/* 3 — prototype */}
+          <div style={{ marginTop: 40 }}>
+            <Label>3 · Prototype</Label>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
+              On day three the prototype was co-created with the engineers. We tested overriding a schedule when a
+              Maximum Demand limit trips an alert — the user has to act to keep the building optimised.
+            </p>
+            <div className="flex flex-wrap items-start gap-4" style={{ marginTop: 28 }}>
+              <img src={kaiProto1} alt="KAI prototype — alert screen" loading="lazy"
+                style={{ width: '46%', maxWidth: 328, display: 'block', borderRadius: 8 }} />
+              <img src={kaiProto2} alt="KAI prototype — schedule override" loading="lazy"
+                style={{ width: '46%', maxWidth: 328, display: 'block', borderRadius: 8 }} />
+            </div>
+            <a href="https://marvelapp.com/prototype/igha0g9" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 mt-5 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.15em] cursor-pointer"
+              style={{ color: fg }}>
+              <span className="link-underline">Launch prototype</span>
+              <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
+            </a>
+          </div>
+        </section>
+
+        {/* ── User testing ── */}
+        <section id="kai-testing" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+          <h2 className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1.5rem', margin: 0 }}>4 · User testing</h2>
+          <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 12, maxWidth: MEASURE }}>
+            Testing ran remotely and in person. At the end of day three I led the writing of the questions, built on
+            usability — ease of use, satisfaction, and effectiveness at completing a task — through a role-play scenario.
+          </p>
+
+          {/* Two scores as rings, as on the original — the arc carries the
+              number rather than the number sitting on its own. */}
+          <div className="flex flex-col md:flex-row gap-8 md:gap-12" style={{ marginTop: 28, maxWidth: `calc(${MEASURE} * 1.6)` }}>
+            {[
+              { label: "Ease of use", value: "68/100", pct: 68,
+                note: "Testers found the prototype easy enough to navigate, and understood the information shown for each device." },
+              { label: "Overall experience", value: "2.8/5", pct: 56,
+                note: "More features would be handy — and there was more potential in the app than we were making use of." },
+            ].map(r => (
+              <div key={r.label} className="flex items-center gap-5 flex-1">
+                <div className="relative flex-shrink-0" style={{ width: 96, height: 96 }} aria-hidden="true">
+                  <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke={rule} strokeWidth="2.6" />
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke={fg} strokeWidth="2.6" strokeLinecap="round"
+                      strokeDasharray={`${r.pct} ${100 - r.pct}`} />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <span className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '0.95rem', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{r.value}</span>
+                  </div>
+                </div>
+                <div className="min-w-0">
+                  <p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub, margin: 0 }}>{r.label}</p>
+                  <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: body, margin: '8px 0 0' }}>{r.note}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 40 }}>
+            <Label>Conclusion</Label>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
+              What the testers wanted depended on the job they did.
+            </p>
+            {/* Banded rows, as on the original — but in this site's accents
+                rather than its navy and orange: Work's deep gold, Awards'
+                blue, Coaching's purple. Solid label cell, tinted body cell. */}
+            <div style={{ marginTop: 20, maxWidth: `calc(${MEASURE} * 1.6)`, borderRadius: 8, overflow: 'hidden' }}>
+              {[
+                { n: "01", title: "Functionality", who: "Operations & maintenance", accent: "#8A6E2E",
+                  text: "Features for team collaboration — share an action or an alert over WhatsApp, generate a report, set reminders to reverse an action." },
+                { n: "02", title: "User acquisition strategy", who: "Sales & business development", accent: "#5070A0",
+                  text: "Free to use. Lower the barrier to adoption so it can be introduced to other businesses." },
+                { n: "03", title: "Ecosystem stickiness", who: "Senior management", accent: "#9B5A88",
+                  text: "KAI reads as disconnected from the SOURCE ecosystem. That's a product strategy problem, not an interface one." },
+              ].map(row => (
+                <div key={row.n} className="flex flex-col md:flex-row">
+                  <div className="md:w-1/3 flex-shrink-0" style={{ background: row.accent, padding: '20px 22px' }}>
+                    <p className="font-['Nunito_Sans',sans-serif] text-label" style={{ color: 'rgba(255,255,255,0.7)', margin: 0 }}>{row.n}</p>
+                    <p className="font-['Museo',sans-serif] font-light" style={{ color: '#fff', fontSize: '1.05rem', margin: '4px 0 0' }}>{row.title}</p>
+                    <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: 'rgba(255,255,255,0.75)', margin: '10px 0 0', fontStyle: 'italic' }}>{row.who}</p>
+                  </div>
+                  <div className="md:w-2/3 flex items-center"
+                    style={{ background: isDark ? `${row.accent}33` : `${row.accent}1f`, padding: '20px 22px' }}>
+                    <p className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? 'rgba(255,255,255,0.86)' : INK, margin: 0 }}>{row.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Fig src={kaiTesterNotes} alt="Whiteboard record of the user testing questions and responses"
+              caption="The questions and the testers' responses, recorded on a whiteboard for the sprint post-mortem." />
+          </div>
+
+          <div style={{ marginTop: 40 }}>
+            <Label>Reflection</Label>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
+              Everything the testers raised was worth reviewing — those insights shaped the longer-term product
+              strategy and how complete the app had to be to actually relieve the pain. One feature went untested:
+              Zone, which categorises smart devices, needed a follow-up plan.
+            </p>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 12, maxWidth: MEASURE }}>
+              And we didn't invite a real user to the testing, so we may not have identified what users would put
+              first. That's a real risk to solving the actual problem.
+            </p>
+          </div>
+        </section>
+
+        {/* ── Design solutions ── */}
+        <section id="kai-solutions" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+          <h2 className="font-['Museo',sans-serif] font-light"
+            style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.5rem)', lineHeight: 1.15, margin: 0 }}>
+            Design solutions (UX &amp; UI)
+          </h2>
+          <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 12, maxWidth: MEASURE }}>
+            With the prototype insights in hand, the user flow for the whole app was the first thing to settle. We
+            launched as an MVP with one goal.
+          </p>
+
+          <div style={{
+            marginTop: 28, padding: '20px 24px', borderRadius: 8, maxWidth: MEASURE,
+            background: isDark ? "rgba(255,255,255,0.06)" : "#1c1c1c",
+          }}>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: 'rgba(255,255,255,0.92)', margin: 0 }}>
+              To make scheduling and overriding machines convenient.
+            </p>
+          </div>
+
+          <div style={{ marginTop: 40 }}>
+            <Label>User flow</Label>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
+              <Figures>The prototype's ease of use score — 68/100 — was the thing to fix. Every task was mapped so it
+              takes no more than five steps. Creating a zone is one example.</Figures>
+            </p>
+            <Fig src={kaiZoneFlow} alt="Three-step user flow for creating a zone"
+              caption="A three-step flow for creating a zone, in a minimum of four taps." />
+          </div>
+
+          <div style={{ marginTop: 40 }}>
+            <Label>Convenience for the user</Label>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
+              The UI pays most of its attention to helping someone act quickly.
+            </p>
+
+            <div className="flex flex-col md:flex-row gap-8 md:gap-10 md:items-start" style={{ marginTop: 28 }}>
+              <img src={kaiHomeScreen} alt="KAI home screen — building data and connected devices" loading="lazy"
+                style={{ width: '100%', maxWidth: 300, display: 'block', borderRadius: 8 }} />
+              <div style={{ maxWidth: MEASURE }}>
+                <div>
+                  <Label>Overview of building data</Label>
+                  <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                    Every crucial number on the first screen after launch — what a building owner cares about most.
+                    Building data and connected IoT devices are split into two tabs.
+                  </p>
+                </div>
+                <div style={{ marginTop: 20 }}>
+                  <Label>The colour of the ring chart</Label>
+                  <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                    A percentage marks the level of alarm: the closer to the limit, the more alarming the colour —
+                    green, yellow, orange, red.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-8 md:gap-10 md:items-start" style={{ marginTop: 40 }}>
+              <img src={kaiControls} alt="KAI machine controls — on/off toggles and schedule icons" loading="lazy"
+                style={{ width: '100%', maxWidth: 300, display: 'block', borderRadius: 8 }} />
+              <div style={{ maxWidth: MEASURE }}>
+                <div>
+                  <Label>On/off toggles</Label>
+                  <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                    Quick toggles, because the managers using this are busy and the alarms are urgent.
+                  </p>
+                </div>
+                <div style={{ marginTop: 20 }}>
+                  <Label>Schedule icon</Label>
+                  <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                    You need to see which machines are on schedule and which aren't, to decide what to put back.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-8 md:gap-10 md:items-start" style={{ marginTop: 40 }}>
+              <img src={kaiSchedule} alt="KAI schedule chart — daily and weekly machine scheduling" loading="lazy"
+                style={{ width: '100%', maxWidth: 300, display: 'block', borderRadius: 8 }} />
+              <div style={{ maxWidth: MEASURE }}>
+                <div>
+                  <Label>Daily / weekly schedule</Label>
+                  <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                    Plan by the day or by the week.
+                  </p>
+                </div>
+                <div style={{ marginTop: 20 }}>
+                  <Label>Running current time</Label>
+                  <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                    A moving red line marks now, so the eye can catch which machines are scheduled or already running.
+                  </p>
+                </div>
+                <div style={{ marginTop: 20 }}>
+                  <Label>Individual machine</Label>
+                  <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8 }}>
+                    Tap a line by its label to see that device's info, settings and energy data in detail.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <Fig src={kaiHome} alt="KAI home screen in context" max={300} />
+          </div>
+        </section>
+
+        {/* ── Stakeholders ── */}
+        <section id="kai-review" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+          <h2 className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1.5rem', margin: 0 }}>Stakeholders review</h2>
+          <div className="mt-8" style={{ columnGap: 24, maxWidth: `calc(${MEASURE} * 2 + 24px)` }}>
+            {[
+              ["Starting the project with a design sprint was a saver of time, cost and process. Going from ideation to execution had much more clarity, and went more smoothly, than previous experience. The product turned out to be worth more than its initial requirements.",
+               "Ryan", "Product Owner"],
+              ["SOURCE (KAI) has helped my business save up to 20% of maximum demand with their monitoring system, which is crucial in the current economy. It's easy to use and extremely user friendly — best of all, it's affordable. It has helped me monitor and manage the energy usage of my premises, and the data lets me better distribute and plan that usage.",
+               "Business Owner, Tan Kian Huat Fishery", "KAI user"],
+              ["Tiffany successfully guided the design team towards a clear design goal. She carried strong design thinking, and led the design innovation, technical and engineering teams through the sprint. She taught me a lot about user interface and user experience while we worked on KAI. As my design manager she could use design to sell the idea to clients and partners with real credibility — and that built confidence for her team.",
+               "Junhoe", "UI/UX Designer"],
+            ].map(([quote, name, role]) => (
+              <figure key={name} className="flex flex-col"
+                style={{ margin: '0 0 32px', padding: '22px 0 0', borderTop: `1px solid ${rule}`, breakInside: 'avoid', maxWidth: MEASURE }}>
+                <blockquote className="font-['Nunito_Sans',sans-serif]" style={{ color: body, margin: 0 }}>{quote}</blockquote>
+                <figcaption style={{ marginTop: 16 }}>
+                  <p className="font-['Museo',sans-serif] font-light" style={{ color: ink, margin: 0 }}>{name}</p>
+                  <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, margin: '2px 0 0' }}>{role}</p>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+
+        <div style={{ height: 96 }} />
+      </div>
+    </div>
+  );
+}
+
+function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
+  const isDark = useContext(DarkModeCtx);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+      <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
+          backdropFilter: headerScrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
+          borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
+          paddingBottom: headerScrolled ? 16 : 24,
+          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
+        }}>
+          <button onClick={onBack}
+            className="flex items-center gap-2 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
+            style={{ color: GOLD }}>
+            <ChevronLeft size={12} strokeWidth={1.5} /> CASE STUDIES
+          </button>
+          <h1 className="font-['Museo',sans-serif] font-light"
+            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: GOLD, margin: 0, transition: 'font-size 0.3s ease' }}>
+            KAI: Mobile app for IoT devices control
+          </h1>
+        </div>
+
+        <KaiCaseContent />
+        <div style={{ height: 96 }} />
+      </div>
+      <CaseSectionRail scrollRef={scrollRef} sections={KAI_SECTIONS} />
+      <StickyPageNav activePage="work" onNavigate={onNavigate} />
     </div>
   );
 }
@@ -2989,9 +3511,9 @@ const CASE_SECTIONS: { id: string; label: string }[] = [
 // section, filled with its name spelled out when it's the one being read.
 // The label sits to the LEFT of its dot: the rail is right-aligned, so a
 // label on the outside would run off the screen.
-function CaseSectionRail({ scrollRef }: { scrollRef: React.RefObject<HTMLDivElement | null> }) {
+function CaseSectionRail({ scrollRef, sections = CASE_SECTIONS }: { scrollRef: React.RefObject<HTMLDivElement | null>; sections?: { id: string; label: string }[] }) {
   const isDark = useContext(DarkModeCtx);
-  const [active, setActive] = useState(CASE_SECTIONS[0].id);
+  const [active, setActive] = useState(sections[0].id);
   const [hovered, setHovered] = useState<string | null>(null);
 
   // Active section is read straight off the scroll position: the last section
@@ -3006,14 +3528,14 @@ function CaseSectionRail({ scrollRef }: { scrollRef: React.RefObject<HTMLDivElem
     const pick = () => {
       const rootTop = root.getBoundingClientRect().top;
       let current = CASE_SECTIONS[0].id;
-      for (const sec of CASE_SECTIONS) {
+      for (const sec of sections) {
         const el = document.getElementById(sec.id);
         if (el && el.getBoundingClientRect().top - rootTop <= LINE) current = sec.id;
       }
       // The last section is often too short to reach the line; once the page
       // is scrolled to the end it is unambiguously the one being read.
       if (root.scrollHeight - root.scrollTop - root.clientHeight < 80) {
-        current = CASE_SECTIONS[CASE_SECTIONS.length - 1].id;
+        current = sections[sections.length - 1].id;
       }
       setActive(current);
     };
@@ -3021,7 +3543,7 @@ function CaseSectionRail({ scrollRef }: { scrollRef: React.RefObject<HTMLDivElem
     root.addEventListener("scroll", pick, { passive: true });
     window.addEventListener("resize", pick);
     return () => { root.removeEventListener("scroll", pick); window.removeEventListener("resize", pick); };
-  }, [scrollRef]);
+  }, [scrollRef, sections]);
 
   const go = (id: string) => {
     const el = document.getElementById(id);
@@ -3042,7 +3564,7 @@ function CaseSectionRail({ scrollRef }: { scrollRef: React.RefObject<HTMLDivElem
       // Right edge lines up with the bottom nav bar's, which sits at
       // inset-x-20 — so the rail and the menu share one margin.
       style={{ right: 80, top: "50%", transform: "translateY(-50%)", gap: 28 }}>
-      {CASE_SECTIONS.map(sec => {
+      {sections.map(sec => {
         const on = sec.id === active;
         const show = on || hovered === sec.id;
         return (
@@ -3381,6 +3903,7 @@ function pathOf(page: Page, detailKey?: string | null): string {
     case "work":            return "/work";
     case "workDetail":      return `/work/${EXPERTISE_CARDS.find(c => c.key === detailKey)?.slug ?? ""}`;
     case "businessCase":    return "/work/business-acumen/ecommerce";
+    case "kaiCase":         return "/work/case-studies/kai";
     case "awards":          return "/awards";
     case "speaking":        return `/awards/${detailKey ?? ""}`;
     case "testimonials":    return "/testimonials";
@@ -3417,6 +3940,7 @@ function routeOf(pathname: string): { page: Page; detailKey: string | null } {
   if (seg[0] === "work") {
     if (!seg[1]) return at("work");
     if (seg[1] === "business-acumen" && seg[2] === "ecommerce") return at("businessCase");
+    if (seg[1] === "case-studies" && seg[2] === "kai") return at("kaiCase");
     const card = EXPERTISE_CARDS.find(c => c.slug === seg[1]);
     // an unknown child falls back to the section rather than a dead end
     return card ? at("workDetail", card.key) : at("work");
@@ -3444,6 +3968,7 @@ function descriptionOf(page: Page, detailKey?: string | null): string {
     case "work":         return "Design leadership across fintech, eCommerce and SaaS — AI and UX, business acumen, product and UX strategy, and building the teams and process behind them.";
     case "workDetail":   return card?.description ?? SITE_DESC;
     case "businessCase": return "A behavioural UX case study: lifting checkout rate from the bag page at Cotton On Group.";
+    case "kaiCase": return "A design sprint case study: KAI, a mobile app for controlling a building's IoT machines and cutting Maximum Demand charges.";
     case "awards":       return "UX Leader of the Year finalist, with speaking and panel appearances across Australia, Europe and Asia.";
     case "speaking":     return ev ? `${ev.role} at ${ev.event}, ${ev.year} — ${ev.topic}` : SITE_DESC;
     case "testimonials": return "What senior colleagues, the designers I have led, and coaching clients say about working with Tiffany Chew.";
@@ -3463,6 +3988,7 @@ function titleOf(page: Page, detailKey?: string | null): string {
     case "work":            return `Work — ${SITE_TITLE}`;
     case "workDetail":      return card ? `${card.title} — Work — ${SITE_TITLE}` : `Work — ${SITE_TITLE}`;
     case "businessCase":    return `eCommerce: Behavioural UX Design — ${SITE_TITLE}`;
+    case "kaiCase":         return `KAI: Mobile app for IoT devices control — ${SITE_TITLE}`;
     case "awards":          return `Awards & Speaking — ${SITE_TITLE}`;
     case "speaking":        return ev ? `${ev.role} — ${ev.event} — ${SITE_TITLE}` : `Awards & Speaking — ${SITE_TITLE}`;
     case "testimonials":    return `Testimonials — ${SITE_TITLE}`;
@@ -3534,7 +4060,7 @@ export default function App() {
   const motionKey = page === "speaking" ? `speaking:${detailKey}` : page === "workDetail" ? `workDetail:${detailKey}` : page;
   // Case-study pages are a drill-in from the Work list; they animate as an
   // expansion of the row rather than as a new screen sliding in.
-  const drillIn = page === "workDetail" || page === "businessCase";
+  const drillIn = page === "workDetail" || page === "businessCase" || page === "kaiCase";
 
   useEffect(() => {
     if (page !== "workDetail") setDetailHeaderScrolled(false);
@@ -3613,6 +4139,9 @@ export default function App() {
         )}
         {page === "businessCase" && (
           <BusinessCasePage onBack={() => setPage('work')} onNavigate={navigateGeneral} />
+        )}
+        {page === "kaiCase" && (
+          <KaiCasePage onBack={() => { setDetailKey("cases"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
       </motion.div>
       {(page === "work" || page === "workDetail") && (
