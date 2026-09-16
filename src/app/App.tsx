@@ -2503,7 +2503,10 @@ function AppleHealthContent() {
             ].map(t => <li key={t} style={{ marginTop: 10 }}>{t}</li>)}
           </ol>
 
-          <a href="https://www.dropbox.com/s/k70uwb3jr5pw9g9/Apple%20Health-Tiff.pdf?dl=0" target="_blank" rel="noopener noreferrer"
+          {/* Served from this site rather than Dropbox, which is being
+              sunset — and the copy in the repo was the 38MB export, so it is
+              re-encoded at the deck's own 1920x1080 and lives in public/. */}
+          <a href="/deck/apple-health-process-deck.pdf" target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-2 mt-8 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.15em] cursor-pointer"
             style={{ color: fg }}>
             <span className="link-underline">Process deck</span>
