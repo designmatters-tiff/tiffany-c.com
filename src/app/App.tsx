@@ -4,6 +4,9 @@ import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft }
 
 import awardsWomenDigital from "@/imports/AwardsSpeaking/WID-tiff2025.avif";
 import awardsFinalistCard from "@/imports/AwardsSpeaking/WID-2.avif";
+// Desktop gets a far larger capture of the same finalists page — the mobile
+// one is 799px wide and was being upscaled past legibility in the wide column.
+import awardsFinalistCardWide from "@/imports/AwardsSpeaking/WID-finalists-desktop.avif";
 import awardsFuseConPanelist from "@/imports/AwardsSpeaking/FuseCon_panelist.avif";
 import awardsFuseCon from "@/imports/AwardsSpeaking/Fusecon2025.avif";
 import awardsTaipei from "@/imports/AwardsSpeaking/LTUX Taipei.avif";
@@ -2568,7 +2571,7 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
               background: "white", borderRadius: 16, padding: 12,
               boxShadow: "0 12px 36px rgba(0,0,0,0.18)",
             }}>
-              <img src={awardsFinalistCard} alt="The 2025 UX Leader of the Year Finalists"
+              <img src={awardsFinalistCardWide} alt="The 2025 UX Leader of the Year Finalists"
                 className="w-full" style={{ borderRadius: 10, display: "block" }} />
             </div>
           </div>
