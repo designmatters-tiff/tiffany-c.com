@@ -2436,15 +2436,22 @@ function SpeakingEventRow({
           <div className="overflow-hidden" style={{ maxHeight: open ? 1400 : 0, opacity: open ? 1 : 0, transition: "max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease" }}>
           <div className="px-6 md:px-20 pb-8 md:pb-8">
             {ev.img && ev.img2 ? (
-              // Two images side by side (stacked on mobile) — portrait shots
-              // use object-contain so they fit the row height instead of
-              // being cropped/zoomed into.
-              <div className="flex flex-col md:flex-row gap-0">
-                <div className="relative w-full md:w-2/5 h-[200px] md:h-[340px] overflow-hidden flex-shrink-0">
-                  <img src={ev.img} alt={`${ev.event} — ${ev.topic}`} className="absolute inset-0 w-full h-full object-cover" />
+              // Two images side by side on desktop, stacked on a phone. The
+              // comment here used to promise object-contain while the code did
+              // object-cover, and the pair is a portrait beside a landscape —
+              // so the portrait was forced into a wide, short box and lost the
+              // head off the top. Each now keeps its own proportions and sets
+              // its width from its height, which is what stops the crop.
+              // Mobile still fills its box, but from the upper part of the
+              // frame, where the faces are.
+              <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-5">
+                <div className="relative w-full h-[220px] md:h-[340px] md:w-auto overflow-hidden flex-shrink-0">
+                  <img src={ev.img} alt={`${ev.event} — ${ev.topic}`}
+                    className="absolute inset-0 w-full h-full object-cover object-[center_20%] md:static md:inset-auto md:w-auto md:h-full md:max-w-full md:object-contain" />
                 </div>
-                <div className="relative w-full md:w-3/5 h-[200px] md:h-[340px] overflow-hidden">
-                  <img src={ev.img2} alt={`${ev.event} panel discussion`} className="absolute inset-0 w-full h-full object-cover" />
+                <div className="relative w-full h-[220px] md:h-[340px] md:w-auto overflow-hidden min-w-0">
+                  <img src={ev.img2} alt={`${ev.event} panel discussion`}
+                    className="absolute inset-0 w-full h-full object-cover object-[center_20%] md:static md:inset-auto md:w-auto md:h-full md:max-w-full md:object-contain" />
                 </div>
               </div>
             ) : ev.img && (
@@ -2626,7 +2633,10 @@ function AwardsSpeakingPage({
     const el = listRef.current;
     if (!el) return;
     const check = () => {
-      if (el.scrollHeight <= el.clientHeight + 8) setSelfExpanded(true);
+      // Not just "doesn't scroll" — "doesn't scroll far enough to be worth
+      // scrolling". A capped page 20px taller than the viewport has no runway
+      // to reveal anything, and leaves the button as the only way on.
+      if (el.scrollHeight - el.clientHeight < 120) setSelfExpanded(true);
     };
     const t = window.setTimeout(check, 250);
     window.addEventListener("resize", check);
@@ -2720,7 +2730,7 @@ function AwardsSpeakingPage({
           // Reaching the end of a capped list is the request to see the rest:
           // lift the cap there so the next row is already coming up, rather
           // than making the reader stop and press a button to continue.
-          if (el.scrollTop > 40) setSelfExpanded(true);
+          if (el.scrollTop > 8) setSelfExpanded(true);
         }}
       >
         {content}
