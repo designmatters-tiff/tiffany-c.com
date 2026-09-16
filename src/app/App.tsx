@@ -1706,6 +1706,94 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
 }
 
 
+
+// Is the sticky header currently sitting over something dark?
+//
+// The header's backdrop is only part-opaque, so a dark image scrolling under
+// it drags the surface down with it and the gold heading loses its contrast.
+// Rather than guess, this measures: every image on the page is sampled once
+// into a tiny canvas (they're same-origin, so the pixels are readable) and
+// tagged with its own luminance. On scroll, if a dark one overlaps the header
+// band, the header flips to a dark surface and the brighter gold.
+function useOnDarkBackdrop(
+  scrollRef: React.RefObject<HTMLDivElement | null>,
+  headerRef: React.RefObject<HTMLDivElement | null>,
+) {
+  const [onDark, setOnDark] = useState(false);
+
+  useEffect(() => {
+    const root = scrollRef.current;
+    if (!root) return;
+    let raf = 0;
+
+    const luminanceOf = (img: HTMLImageElement): number | null => {
+      if (!img.naturalWidth) return null;
+      try {
+        const c = document.createElement("canvas");
+        c.width = 8; c.height = 8;
+        const ctx = c.getContext("2d", { willReadFrequently: true });
+        if (!ctx) return null;
+        ctx.drawImage(img, 0, 0, 8, 8);
+        const { data } = ctx.getImageData(0, 0, 8, 8);
+        let sum = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          sum += 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+        }
+        return sum / (data.length / 4) / 255;
+      } catch {
+        // A tainted canvas would throw; treat it as unknown rather than dark.
+        return null;
+      }
+    };
+
+    const tag = (img: HTMLImageElement) => {
+      if (img.dataset.lum) return;
+      const l = luminanceOf(img);
+      if (l !== null) img.dataset.lum = l.toFixed(3);
+    };
+
+    const measure = () => {
+      const header = headerRef.current;
+      if (!header) return;
+      const hr = header.getBoundingClientRect();
+      let dark = false;
+      root.querySelectorAll("img").forEach(el => {
+        const img = el as HTMLImageElement;
+        tag(img);
+        const l = img.dataset.lum ? parseFloat(img.dataset.lum) : null;
+        if (l === null || l > 0.42) return;          // light enough to ignore
+        const r = img.getBoundingClientRect();
+        // Overlaps the header band, and covers enough of it to matter.
+        const covered = Math.min(hr.bottom, r.bottom) - Math.max(hr.top, r.top);
+        const across  = Math.min(hr.right, r.right) - Math.max(hr.left, r.left);
+        if (covered > hr.height * 0.4 && across > hr.width * 0.3) dark = true;
+      });
+      setOnDark(dark);
+    };
+
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(measure);
+    };
+
+    // Images decode after first paint, so measure again as they arrive.
+    const imgs = Array.from(root.querySelectorAll("img"));
+    imgs.forEach(i => i.addEventListener("load", onScroll));
+    const t = window.setTimeout(measure, 300);
+    root.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(t);
+      imgs.forEach(i => i.removeEventListener("load", onScroll));
+      root.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [scrollRef, headerRef]);
+
+  return onDark;
+}
+
 // ─── KAI case study ───────────────────────────────────────────────
 
 const KAI_SECTIONS: { id: string; label: string }[] = [
@@ -2164,6 +2252,12 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
   const isDark = useContext(DarkModeCtx);
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const onDark = useOnDarkBackdrop(scrollRef, headerRef);
+  // Over dark content the header takes a dark surface and the brighter gold —
+  // the same pair dark mode already uses — so the heading keeps its contrast
+  // instead of sinking into whatever is passing underneath.
+  const headingColor = onDark || isDark ? GOLD_BRIGHT : GOLD;
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -2176,21 +2270,23 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
-          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
+        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+          background: headerScrolled
+            ? (onDark ? "rgba(24,20,16,0.62)" : isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)")
+            : "transparent",
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
-          borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
+          borderBottom: `1px solid ${headerScrolled ? (onDark || isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)") : "transparent"}`,
           paddingBottom: headerScrolled ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
           <button onClick={onBack}
             className="flex items-center gap-2 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
-            style={{ color: GOLD }}>
+            style={{ color: headingColor, transition: "color 0.3s ease" }}>
             <ChevronLeft size={12} strokeWidth={1.5} /> CASE STUDIES
           </button>
           <h1 className="font-['Museo',sans-serif] font-light"
-            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: GOLD, margin: 0, transition: 'font-size 0.3s ease' }}>
+            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: headingColor, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
             KAI: Mobile app for IoT devices control
           </h1>
         </div>
