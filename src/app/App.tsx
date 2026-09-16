@@ -1715,14 +1715,23 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
 // into a tiny canvas (they're same-origin, so the pixels are readable) and
 // tagged with its own luminance. On scroll, if a dark one overlaps the header
 // band, the header flips to a dark surface and the brighter gold.
-function useOnDarkBackdrop(
-  scrollRef: React.RefObject<HTMLDivElement | null>,
-  headerRef: React.RefObject<HTMLDivElement | null>,
-) {
+function useOnDarkBackdrop(headerRef: React.RefObject<HTMLDivElement | null>) {
   const [onDark, setOnDark] = useState(false);
 
   useEffect(() => {
-    const root = scrollRef.current;
+    // Walk up from the header to whatever is actually doing the scrolling —
+    // some pages own their scroll container, others get one from the router.
+    const findScrollParent = (el: HTMLElement | null): HTMLElement | null => {
+      for (let n = el?.parentElement ?? null; n; n = n.parentElement) {
+        const o = getComputedStyle(n).overflowY;
+        // Identify the container by how it's styled, not by whether it happens
+        // to overflow yet — at mount the images haven't laid out, and an
+        // early return here would leave the hook dead for the page's life.
+        if (o === "auto" || o === "scroll") return n;
+      }
+      return null;
+    };
+    const root = findScrollParent(headerRef.current);
     if (!root) return;
     let raf = 0;
 
@@ -1789,7 +1798,7 @@ function useOnDarkBackdrop(
       root.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, [scrollRef, headerRef]);
+  }, [headerRef]);
 
   return onDark;
 }
@@ -2253,7 +2262,7 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
-  const onDark = useOnDarkBackdrop(scrollRef, headerRef);
+  const onDark = useOnDarkBackdrop(headerRef);
   // Nothing about the header's surface changes — the frosted backdrop already
   // darkens on its own when a dark image passes under it. Only the text
   // switches, to white, so it stays legible against that darkened band.
@@ -2618,6 +2627,8 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
   const isDark = useContext(DarkModeCtx);
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const onDark = useOnDarkBackdrop(headerRef);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -2630,7 +2641,7 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
           background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
@@ -2640,11 +2651,11 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
         }}>
           <button onClick={onBack}
             className="flex items-center gap-2 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
-            style={{ color: GOLD }}>
+            style={{ color: onDark ? "#fff" : GOLD, transition: "color 0.3s ease" }}>
             <ChevronLeft size={12} strokeWidth={1.5} /> CASE STUDIES
           </button>
           <h1 className="font-['Museo',sans-serif] font-light"
-            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: GOLD, margin: 0, transition: 'font-size 0.3s ease' }}>
+            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: onDark ? '#fff' : GOLD, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
             Apple Health: Design Challenge
           </h1>
         </div>
@@ -3646,6 +3657,7 @@ function AwardsSpeakingPage({
   const visibleEvents = capped ? SPEAKING_EVENTS.slice(0, 3) : SPEAKING_EVENTS;
 
   const headerRef = useRef<HTMLDivElement>(null);
+  const onDark = useOnDarkBackdrop(headerRef);
   const [headerHeight, setHeaderHeight] = useState(0);
   useEffect(() => {
     const el = headerRef.current;
@@ -3680,7 +3692,7 @@ function AwardsSpeakingPage({
           Recognition &amp; voice in community
         </motion.p>
         <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg"
-          style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: HEADING_COLOUR.awards, transition: "font-size 0.35s ease" }}
+          style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: onDark ? "#fff" : HEADING_COLOUR.awards, transition: "font-size 0.35s ease, color 0.3s ease" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Awards &amp; Speaking
         </motion.h1>
@@ -4266,6 +4278,8 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const PASSCODE = "tifffolio";
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const onDark = useOnDarkBackdrop(headerRef);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -4287,7 +4301,7 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
           background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
@@ -4297,10 +4311,10 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
         }}>
           <button onClick={onBack}
             className="flex items-center gap-2 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
-            style={{ color: GOLD }}>
+            style={{ color: onDark ? "#fff" : GOLD, transition: "color 0.3s ease" }}>
             <ChevronLeft size={12} strokeWidth={1.5} /> BUSINESS ACUMEN
           </button>
-          <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: GOLD, margin: 0, transition: 'font-size 0.3s ease' }}>eCommerce: Behavioural UX Design</h1>
+          <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: onDark ? '#fff' : GOLD, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>eCommerce: Behavioural UX Design</h1>
         </div>
 
         {unlocked ? (
