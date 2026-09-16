@@ -2368,9 +2368,24 @@ function SpeakingEventRow({
 }) {
   const { open, toggle } = useAccordionItem(`speaking-event:${ev.key}`);
   const expandable = Boolean(ev.img || ev.link || ev.youtubeId);
+  const rowRef = useRef<HTMLDivElement | null>(null);
+
+  // Opening a row deep in the list used to leave it where it was, so the panel
+  // unfolded below the fold and the next row was nowhere near the screen.
+  // Bringing the row's heading up to the top gives the panel the whole screen
+  // beneath it, which is what puts the following row back in view.
+  useEffect(() => {
+    if (!open) return;
+    const el = rowRef.current;
+    if (!el) return;
+    const t = window.setTimeout(() => {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
+    return () => window.clearTimeout(t);
+  }, [open]);
 
   return (
-    <div style={{ borderTop: isFirst ? "none" : `1px solid ${brd}` }}>
+    <div ref={rowRef} style={{ borderTop: isFirst ? "none" : `1px solid ${brd}`, scrollMarginTop: stickyTop }}>
       <button
         onClick={() => expandable && toggle()}
         className="relative w-full flex items-start gap-3 text-left px-6 md:px-20 py-3 md:py-7"
@@ -2422,10 +2437,10 @@ function SpeakingEventRow({
               // use object-contain so they fit the row height instead of
               // being cropped/zoomed into.
               <div className="flex flex-col md:flex-row gap-0">
-                <div className="relative w-full md:w-2/5 h-[260px] md:h-[420px] overflow-hidden flex-shrink-0">
+                <div className="relative w-full md:w-2/5 h-[200px] md:h-[340px] overflow-hidden flex-shrink-0">
                   <img src={ev.img} alt={`${ev.event} — ${ev.topic}`} className="absolute inset-0 w-full h-full object-cover" />
                 </div>
-                <div className="relative w-full md:w-3/5 h-[260px] md:h-[420px] overflow-hidden">
+                <div className="relative w-full md:w-3/5 h-[200px] md:h-[340px] overflow-hidden">
                   <img src={ev.img2} alt={`${ev.event} panel discussion`} className="absolute inset-0 w-full h-full object-cover" />
                 </div>
               </div>
@@ -2434,7 +2449,10 @@ function SpeakingEventRow({
               // natural aspect ratio (object-contain, auto width) instead
               // of being cropped to fill — mobile keeps the original
               // clamp()-based crop/cover treatment.
-              <div className="relative w-full overflow-hidden h-[clamp(220px,40vw,480px)] md:h-[70vh] md:flex md:items-center md:justify-center" style={{ background: "transparent" }}>
+              /* 70vh left an open row taller than the screen, so the next
+                 row's heading sat below the fold and the list read as having
+                 ended. Sized to leave the following row in view. */
+              <div className="relative w-full overflow-hidden h-[clamp(220px,40vw,480px)] md:h-[46vh] md:flex md:items-center md:justify-center" style={{ background: "transparent" }}>
                 <img src={ev.img} alt={`${ev.event} — ${ev.topic}`}
                   className={`absolute inset-0 w-full h-full ${ev.portrait ? "object-contain" : "object-cover"} md:static md:inset-auto md:w-auto md:h-full md:max-w-full md:object-contain`}
                   style={ev.portrait ? undefined : { objectPosition: ev.dark ? "center 30%" : "center" }} />
@@ -2448,7 +2466,7 @@ function SpeakingEventRow({
                 reaching Awards & Speaking, let alone opening the row.
                 nocookie keeps that to people who actually press play. */}
             {ev.youtubeId && open && (
-              <div className="relative w-full overflow-hidden mt-5 md:w-auto md:h-[70vh] md:mx-auto md:max-w-full" style={{ aspectRatio: "16 / 9", background: "#000" }}>
+              <div className="relative w-full overflow-hidden mt-5 md:w-auto md:h-[46vh] md:mx-auto md:max-w-full" style={{ aspectRatio: "16 / 9", background: "#000" }}>
                 <iframe
                   src={`https://www.youtube-nocookie.com/embed/${ev.youtubeId}`}
                   title={`${ev.event} — ${ev.topic}`}
@@ -2593,8 +2611,24 @@ function AwardsSpeakingPage({
   // header + footer nav only switch on once the user actually scrolls.
   // (Embedded/mobile homepage capping is handled one level up in HomePage.)
   const [selfExpanded, setSelfExpanded] = useState(false);
+  const listRef = useRef<HTMLDivElement | null>(null);
   const [selfScrolled, setSelfScrolled] = useState(false);
   const capped = !embedded && !selfExpanded;
+
+  // On a tall screen the capped list can be shorter than the viewport, so
+  // there is no scrolling to reveal the rest with — and the reader is left
+  // with a button as the only way on. If nothing can scroll, show everything.
+  useEffect(() => {
+    if (embedded || selfExpanded) return;
+    const el = listRef.current;
+    if (!el) return;
+    const check = () => {
+      if (el.scrollHeight <= el.clientHeight + 8) setSelfExpanded(true);
+    };
+    const t = window.setTimeout(check, 250);
+    window.addEventListener("resize", check);
+    return () => { window.clearTimeout(t); window.removeEventListener("resize", check); };
+  }, [embedded, selfExpanded]);
   const scrolled = embedded ? headerScrolled : selfScrolled;
   const visibleEvents = capped ? SPEAKING_EVENTS.slice(0, 3) : SPEAKING_EVENTS;
 
@@ -2669,6 +2703,7 @@ function AwardsSpeakingPage({
   return (
     <div className="relative w-full h-full" style={{ background: bg }}>
       <div
+        ref={listRef}
         className="absolute inset-0 scrollbar-hide"
         style={{
           // Always scrollable. "View more" below still governs how many events
@@ -2676,7 +2711,14 @@ function AwardsSpeakingPage({
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",
         }}
-        onScroll={(e) => setSelfScrolled(e.currentTarget.scrollTop > 24)}
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          setSelfScrolled(el.scrollTop > 24);
+          // Reaching the end of a capped list is the request to see the rest:
+          // lift the cap there so the next row is already coming up, rather
+          // than making the reader stop and press a button to continue.
+          if (el.scrollTop > 40) setSelfExpanded(true);
+        }}
       >
         {content}
       </div>
@@ -2692,12 +2734,12 @@ function AwardsSpeakingPage({
         </>
       )}
 
-      {/* Footer nav only switches on once the user has scrolled past the
-          heading — kept hidden (rather than unmounted) before that so it
-          fades in instead of popping in abruptly. */}
-      <div style={{ opacity: scrolled ? 1 : 0, pointerEvents: scrolled ? "auto" : "none", transition: "opacity 0.3s ease" }}>
-        <StickyPageNav activePage="awards" onNavigate={onNavigate} />
-      </div>
+      {/* The nav used to fade in only once scrollTop passed 24, which meant
+          collapsing an accordion could take it away: the page gets shorter,
+          the browser pulls the scroll position back to the top, and the menu
+          silently left with it. Every other page shows its nav unconditionally
+          and this one now does too. */}
+      <StickyPageNav activePage="awards" onNavigate={onNavigate} />
     </div>
   );
 }
