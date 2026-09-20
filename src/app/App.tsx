@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback, createContext, useContext, Fragment } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft, PiggyBank, Heart, LineChart, Users, Layers } from "lucide-react";
 
 import ahPersona from "@/work/case/applehealth/userpersona.avif";
@@ -1141,19 +1141,62 @@ const RAIL_W = `${RAIL_GUTTER + RAIL_MARK}px`;
 
 function IdentityRail({ onNavigate, visible = true }: { onNavigate: (p: Page) => void; visible?: boolean }) {
   const goHome = useContext(GoHomeCtx);
+  // The homepage's mark is content inside slide 0 — it scrolls away with the
+  // deck — so it cannot be this element. Instead this one starts life exactly
+  // on top of it and flies to the rail as you leave home, cross-fading with
+  // the hero's copy so the handoff reads as one mark travelling rather than
+  // two marks swapping.
+  //
+  // The hero mark is right-aligned inside the hero's px-20, so its left edge
+  // is viewport - 80 - 70. Everything else here is a fixed delta from the
+  // rail's own position, which is why the viewport width is the only thing
+  // that has to be measured.
+  const reduceMotion = useReducedMotion();
+  const [vw, setVw] = useState(typeof window === "undefined" ? 1440 : window.innerWidth);
+  useEffect(() => {
+    const onResize = () => setVw(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const homeX = vw - (RAIL_GUTTER + HERO_MARK.desktop.w) - RAIL_GUTTER;
+  const homeY = 64 - RAIL_MARK_TOP;
+  // Drawn at the rail's size and scaled up for the hero end, rather than
+  // re-rendered at a new size: an SVG scales cleanly, and animating a width
+  // would relayout every frame.
+  const homeScale = HERO_MARK.desktop.w / RAIL_MARK;
   return (
-    // Never unmounted — only faded. It is the one element that stays put while
-    // pages slide underneath, and an unmount would make it something each page
-    // draws for itself.
+    // Never unmounted — it is the one element that stays put while pages slide
+    // underneath, and an unmount would make it something each page draws for
+    // itself.
     <div className="hidden lg:block fixed top-0 bottom-0 left-0 z-20 pointer-events-none"
-      style={{ width: "var(--rail-w)", opacity: visible ? 1 : 0,
-               transition: "opacity 0.35s ease", visibility: visible ? "visible" : "hidden" }}>
-      <button onClick={() => (goHome ? goHome() : onNavigate("home"))}
+      style={{ width: "var(--rail-w)" }}>
+      <motion.button onClick={() => (goHome ? goHome() : onNavigate("home"))}
         aria-label="Tiffany C. — home"
-        className="absolute pointer-events-auto cursor-pointer"
-        style={{ left: RAIL_GUTTER, top: RAIL_MARK_TOP, background: "none", border: "none", padding: 0 }}>
+        className="absolute cursor-pointer"
+        // Off on the homepage: the hero's own mark is the one you can click
+        // there, and two hit targets stacked on the same spot is one too many.
+        style={{ left: RAIL_GUTTER, top: RAIL_MARK_TOP, background: "none", border: "none", padding: 0,
+                 transformOrigin: "top left", pointerEvents: visible ? "auto" : "none" }}
+        initial={false}
+        animate={visible
+          ? { x: 0, y: 0, scale: 1, opacity: 1 }
+          : { x: homeX, y: homeY, scale: homeScale, opacity: 0 }}
+        // Eased out rather than in-and-out: this travels most of the screen,
+        // and a symmetric curve spends that distance at one speed and stops
+        // dead. Out, it leaves quickly and settles into the rail.
+        //
+        // Opacity runs on its own, much shorter tween. Sharing the position's
+        // duration left the mark at 6% opacity a hundred pixels into the
+        // flight — invisible for the part of the journey that has to read as
+        // the same mark continuing.
+        //
+        // With reduced motion the mark does not fly at all: it is where it
+        // belongs on each page and only cross-fades.
+        transition={reduceMotion
+          ? { duration: 0 }
+          : { duration: 0.55, ease: [0.22, 1, 0.36, 1], opacity: { duration: 0.2, ease: "easeOut" } }}>
         <LogoMark size={RAIL_MARK} />
-      </button>
+      </motion.button>
     </div>
   );
 }
