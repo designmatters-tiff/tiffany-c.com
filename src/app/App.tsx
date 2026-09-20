@@ -235,10 +235,10 @@ function DarkModeToggle({
 // ─── useIsMobile ──────────────────────────────────────────────────
 function useIsMobile() {
   const [mobile, setMobile] = useState(
-    typeof window !== "undefined" ? window.matchMedia("(max-width: 767px)").matches : false
+    typeof window !== "undefined" ? window.matchMedia("(max-width: 1023px)").matches : false
   );
   useEffect(() => {
-    const mql = window.matchMedia("(max-width: 767px)");
+    const mql = window.matchMedia("(max-width: 1023px)");
     const h = (e: MediaQueryListEvent) => setMobile(e.matches);
     mql.addEventListener("change", h);
     return () => mql.removeEventListener("change", h);
@@ -1311,7 +1311,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
 
           {/* Mobile layout — min-height rather than inset-0 so the block can
               grow past one screen and scroll instead of being clipped. */}
-          <div className="md:hidden relative flex flex-col px-6 pt-14"
+          <div className="lg:hidden relative flex flex-col px-6 pt-14"
             style={{ minHeight: "100%", paddingBottom: HERO_BOTTOM_RESERVE }}>
             <span className="self-end" style={{ width: HERO_MARK.mobile.w, height: HERO_MARK.mobile.h }}>
               <LogoMark size={HERO_MARK.mobile.w} className="w-full h-full" />
@@ -1367,49 +1367,56 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           {/* Desktop layout — top-aligned stack (logo, heading, body) with
               fixed gaps, matching the Figma reference exactly, rather than
               vertically centering the whole block. */}
-          <div className="hidden md:flex absolute inset-0 flex-col px-20"
+          <div className="hidden lg:flex absolute inset-0 flex-col px-20"
             style={{ paddingTop: 64, paddingBottom: "calc(64px + 5vh + 64px)" }}>
             <span className="self-end" style={{ width: HERO_MARK.desktop.w, height: HERO_MARK.desktop.h }}>
               <LogoMark size={HERO_MARK.desktop.w} className="w-full h-full" />
             </span>
-            {/* Heading */}
-            <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "4rem", lineHeight: 1.05, color: GOLD, marginTop: 48 }}>
-              Hello, I'm Tiff —<br />
-              a product &amp; design leader
-            </h1>
-            {/* Photo + body copy row */}
+            {/* Photo left + right column (heading, body, swipe cue). Row is
+                full-width; text column is capped at ~55% so the right 40%
+                stays naturally empty. */}
             <div className="flex items-start gap-12" style={{ marginTop: 48, flex: 1, minHeight: 0 }}>
               <img
                 src={profilePhoto}
                 alt="Tiffany Chew"
                 className="rounded-full object-cover flex-shrink-0"
                 style={{
-                  width: "18vw",
-                  height: "18vw",
-                  maxWidth: 240,
-                  maxHeight: 240,
+                  width: "15vw",
+                  height: "15vw",
+                  maxWidth: 200,
+                  maxHeight: 200,
                   border: `1px solid ${GOLD}`,
                 }}
               />
-              <p className="font-['Nunito_Sans',sans-serif] text-body leading-relaxed"
-                style={{ color: bodyCol, paddingTop: 8 }}>
-                I work with C-suites and product teams to shape design
-                functions that deliver. As an ex-founder who built and
-                exited my own brand, and a leader across fintech, retail,
-                and SaaS, I bring an entrepreneurial and outcomes-focused
-                lens to design leadership.
-                <br /><br />
-                My forte is connecting strategy to craft, breaking it into
-                tangible wins toward an ultimate company vision. Because the
-                clarity between a big decision and a small win is where
-                sustainable growth lives.
-              </p>
+              <div className="flex flex-col gap-6" style={{ maxWidth: "55%" }}>
+                <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "4rem", lineHeight: 1.05, color: GOLD, margin: 0 }}>
+                  Hello, I'm Tiff&nbsp;—<br />
+                  a product &amp; design leader
+                </h1>
+                <p className="font-['Nunito_Sans',sans-serif] text-body leading-relaxed"
+                  style={{ color: bodyCol }}>
+                  I work with C-suites and product teams to shape design
+                  functions that deliver. As an ex-founder who built and
+                  exited my own brand, and a leader across fintech, retail,
+                  and SaaS, I bring an entrepreneurial and outcomes-focused
+                  lens to design leadership.
+                  <br /><br />
+                  My forte is connecting strategy to craft, breaking it into
+                  tangible wins toward an ultimate company vision. Because the
+                  clarity between a big decision and a small win is where
+                  sustainable growth lives.
+                </p>
+                <p className="font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest"
+                  style={{ color: dimCol }}>
+                  swipe to explore
+                </p>
+              </div>
             </div>
           </div>
           {/* Hairline above the nav. The pulsing "scroll" cue that used to sit
               at its right-hand end is gone, for the same reason as the mobile
               "swipe to explore" label — the hero's words come first. */}
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <div className="absolute" style={{ bottom: "calc(64px + 5vh + 40px)", left: "7%", right: "7%", height: 1, background: "rgba(178,147,59,0.25)" }} />
           </div>
         </section>
@@ -1502,13 +1509,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
         })}
       </div>
 
-      {activeIdx === 0 && (
+      {activeIdx === 0 && isMobile && (
         <p className="absolute z-30 font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest"
           style={{
-            bottom: isMobile
-              ? "calc(5% + 56px + 14px + env(safe-area-inset-bottom))"
-              : "calc(64px + 5vh + 8px)",
-            left: isMobile ? 24 : "7%",
+            bottom: "calc(5% + 56px + 14px + env(safe-area-inset-bottom))",
+            left: 24,
             color: dimCol,
           }}>
           swipe to explore
