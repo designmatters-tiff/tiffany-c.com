@@ -139,6 +139,18 @@ on, anything added in the meantime will need its dark half written then.
   layout element; inside an incoming page it rides that page's cross-fade, so
   it spent most of its travel near-transparent and read as a pop. It fades
   with its page like everything else.
+- **Client credits link out.** The Client field in a case study's META grid
+  is a link to the client, in `GOLD` with the site's underline sweep, opened
+  in a new tab with `rel="noopener noreferrer"`. The ones in use:
+
+  | Client | URL |
+  |---|---|
+  | Plus Xnergy | `https://www.plusxnergy.com/` |
+  | TNG Digital (TNG eWallet) | `https://www.tngdigital.com.my/` |
+
+  This covers the client credit only. A mention inside a testimonial stays
+  plain — those are someone else's words, not a credit — and a client name
+  inside a Work card bullet is already a link to the case study itself.
 - **Contact lists take nested arrays.** An entry in `ContactListPage`'s
   `items` (or a `SECTIONS` entry's) can be `["LinkedIn", "Instagram"]` to put
   several destinations on one row. Both the standalone page and the homepage

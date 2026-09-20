@@ -4683,7 +4683,10 @@ function BrandPerceptionContent() {
 
   const META: [string, React.ReactNode][] = [
     ["Year", "January – December 2024"],
-    ["Client", "TNG Digital (TNG eWallet)"],
+    ["Client", (
+      <a href="https://www.tngdigital.com.my/" target="_blank" rel="noopener noreferrer"
+        className="link-underline" style={{ color: fg }}>TNG Digital (TNG eWallet)</a>
+    )],
     ["Goal", "Shift perception beyond payments and tolls"],
     ["Scope", "Brand perception framework, UX strategy, cross-functional roadmap, measurement design"],
     ["Role", "Head of Product Design & UX Research"],
