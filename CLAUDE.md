@@ -139,11 +139,13 @@ on, anything added in the meantime will need its dark half written then.
   layout element; inside an incoming page it rides that page's cross-fade, so
   it spent most of its travel near-transparent and read as a pop. It fades
   with its page like everything else.
-- **The footer's legal clauses belong on the work itself.** Every page shows
-  the credit line; only an actual case study adds a clause —
-  `variant="work"` where content is shared with permission, `variant="nda"`
-  on the passcode-gated client work. The category listings under `/work`
-  take the plain credit.
+- **The credit and the NDA notice are different things, and they sit
+  differently.** `SiteCredit` is the byline — desktop pages carry it at the
+  end; on mobile it appears once, in the menu, on the row that closes it, and
+  on no page. `NdaNotice` is a term of showing the work, so it rides with the
+  work at every width, on the two passcode-gated client pages only. Both use
+  `quietText()`, and neither takes a variant — an earlier `variant` prop on
+  `SiteFooter` outlived the clauses it rendered.
 - **Client credits link out.** The Client field in a case study's META grid
   is a link to the client, in `GOLD` with the site's underline sweep, opened
   in a new tab with `rel="noopener noreferrer"`. The ones in use:

@@ -976,22 +976,39 @@ function ContactRow({ row, accent, itemColor, linkColor, borderColor, onNavigate
 // `gutter={false}` where the page already wraps its content in the px-6
 // md:px-20 inset — without it the line indents twice and stops lining up
 // with the copy above it.
+// The quietest text on the page in either theme: DIM at 45%, and a white
+// barely above the background in dark. Shared by the credit and the notice.
+const quietText = (isDark: boolean): React.CSSProperties => ({
+  fontSize: 11,
+  fontWeight: 400,
+  lineHeight: 1.5,
+  maxWidth: 620,
+  color: isDark ? "rgba(255,255,255,0.35)" : "rgba(102,102,96,0.45)",
+});
+
+// The terms under which the gated client work is shown. It rides with the
+// work at every width, unlike the credit, which moves into the menu on a
+// phone — this is a condition of showing the case study, not a byline, so it
+// belongs with the case study wherever you read it.
+function NdaNotice() {
+  const isDark = useContext(DarkModeCtx);
+  return (
+    <div className="px-6 md:px-20" style={{ marginTop: 24 }}>
+      <p className="font-['Nunito_Sans',sans-serif]" style={quietText(isDark)}>
+        Shared under NDA for review purposes only, not for redistribution.
+        Client data and trademarks remain the property of their respective owners.
+      </p>
+    </div>
+  );
+}
+
 // The line itself, so the page footer and the mobile menu cannot drift apart.
 function SiteCredit({ align = "left" }: { align?: "left" | "right" }) {
   const isDark = useContext(DarkModeCtx);
   const year = new Date().getFullYear();
   return (
     <p className="font-['Nunito_Sans',sans-serif] whitespace-nowrap"
-      style={{
-        fontSize: 11,
-        fontWeight: 400,
-        lineHeight: 1.5,
-        maxWidth: 620,
-        textAlign: align,
-        // The quietest thing on the page in either theme: DIM at 45%, and a
-        // white barely above the background in dark.
-        color: isDark ? "rgba(255,255,255,0.35)" : "rgba(102,102,96,0.45)",
-      }}>
+      style={{ ...quietText(isDark), textAlign: align }}>
       Designed and built by Tiffany Chew · © {year}
     </p>
   );
@@ -1000,8 +1017,7 @@ function SiteCredit({ align = "left" }: { align?: "left" | "right" }) {
 // Desktop only. On a phone the credit lives in the menu, on the row that
 // closes it — the two viewports carry it differently on purpose, so a small
 // screen does not spend its last line on a credit.
-function SiteFooter({ variant, gutter = true }: { variant?: "work" | "nda"; gutter?: boolean }) {
-  void variant;
+function SiteFooter({ gutter = true }: { gutter?: boolean }) {
   return (
     <div className={`hidden md:block${gutter ? " px-6 md:px-20" : ""}`} style={{ marginTop: 24 }}>
       <SiteCredit />
@@ -2697,7 +2713,7 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
         </div>
 
         <KaiCaseContent />
-        <SiteFooter variant="work" />
+        <SiteFooter />
         <NavClearance />
       </div>
       <CaseSectionRail scrollRef={scrollRef} sections={KAI_SECTIONS} />
@@ -3064,7 +3080,7 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
         </div>
 
         <AppleHealthContent />
-        <SiteFooter variant="work" />
+        <SiteFooter />
         <NavClearance />
       </div>
       <CaseSectionRail scrollRef={scrollRef} sections={AH_SECTIONS} />
@@ -5084,7 +5100,8 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
         {unlocked ? (
           <>
             <BusinessCaseContent />
-            <SiteFooter variant="nda" />
+            <NdaNotice />
+            <SiteFooter />
             <NavClearance />
           </>
         ) : (
@@ -5191,7 +5208,8 @@ function BrandPerceptionPage({ onBack, onNavigate }: { onBack: () => void; onNav
         {unlocked ? (
           <>
             <BrandPerceptionContent />
-            <SiteFooter variant="nda" />
+            <NdaNotice />
+            <SiteFooter />
             <NavClearance />
           </>
         ) : (
