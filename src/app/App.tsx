@@ -4246,7 +4246,9 @@ function StickyPageNav({ activePage, tint, onNavigate, isDeepPage = false }: { a
           to the rail's edge and the left column reads as a separate panel
           rather than as part of the page. Crossing it ties the two back
           together. */}
-      <div className={`fixed overflow-hidden ${isDeepPage ? "left-6 right-auto md:left-20 md:right-20" : "left-0 right-0 md:left-20 md:right-20"}`}
+      {/* Narrow whenever the phone is showing the pill rather than the bar —
+          open, the × has to sit where the pill sat, not at the screen edge. */}
+      <div className={`fixed overflow-hidden ${isDeepPage || menuOpen ? "left-6 right-auto md:left-20 md:right-20" : "left-0 right-0 md:left-20 md:right-20"}`}
         style={{
           zIndex: menuOpen ? 60 : 30,
           bottom: "calc(3% + env(safe-area-inset-bottom))",
@@ -4256,7 +4258,10 @@ function StickyPageNav({ activePage, tint, onNavigate, isDeepPage = false }: { a
         }}>
         <PageBottomNav activePage={activePage} tint={tint} onNavigate={onNavigate} menuOpen={menuOpen} setMenuOpen={setMenuOpen} isDeepPage={isDeepPage} />
       </div>
-      {isDeepPage && (
+      {/* Reachable from the pill on deep pages and from the bar everywhere
+          else, so it is no longer conditional. menuOpen can only be set on a
+          phone, so desktop never sees it. */}
+      {(
         <MobileMenu
           open={menuOpen}
           hideClose
@@ -4311,9 +4316,19 @@ function PageBottomNav({
 
   return (
     <>
-      {/* Full gradient bar — always visible on 1st-level pages, desktop-only on deep pages */}
-      <div className={`${isDeepPage ? "hidden md:flex" : "flex"} items-stretch h-16 overflow-hidden`}
-        style={{ background: navGradient(isDark) }}>
+      {/* Full gradient bar — always visible on 1st-level pages, desktop-only on deep pages.
+          On a phone the whole bar is one control that opens the menu, not six
+          small ones: at 390px a six-way split gives each about 60px, which is
+          under the 44px floor once padding is taken off, and the labels past
+          the edge could not be reached at all. Tapping anywhere opens the full
+          list, which is where the navigating happens. Desktop keeps its six
+          separate targets, where there is room for them. */}
+      <div className={`${isDeepPage || menuOpen ? "hidden md:flex" : "flex"} items-stretch h-16 overflow-hidden`}
+        onClick={isPhone ? () => setMenuOpen(true) : undefined}
+        role={isPhone ? "button" : undefined}
+        aria-label={isPhone ? "Open navigation" : undefined}
+        aria-expanded={isPhone ? menuOpen : undefined}
+        style={{ background: navGradient(isDark), cursor: isPhone ? "pointer" : undefined }}>
         <button
           className="flex items-center gap-3 overflow-hidden"
           onMouseEnter={() => setHoveredNav("about")}
@@ -4322,6 +4337,7 @@ function PageBottomNav({
           style={{
             flex: isPhone ? "0 0 auto" : hoveredNav === "about" ? "3 1 0%" : "1 1 0%",
             position: isPhone ? "sticky" : "static", left: 0, zIndex: 1,
+            pointerEvents: isPhone ? "none" : undefined,
             minWidth: 0, padding: isPhone ? "0 16px" : "0 20px",
             opacity: hoveredNav === "about" ? 1 : 0.52,
             transition: "flex 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease",
@@ -4335,7 +4351,8 @@ function PageBottomNav({
             view otherwise carried it off-screen. `md:contents` dissolves this
             wrapper above the breakpoint, so the desktop row is untouched. */}
         <div ref={barRef}
-          className="flex items-stretch min-w-0 overflow-x-auto scrollbar-hide md:contents">
+          className="flex items-stretch min-w-0 overflow-x-auto scrollbar-hide md:contents"
+          style={{ pointerEvents: isPhone ? "none" : undefined }}>
         {NAV_ITEMS.map(item => (
           <button key={item.key}
             onMouseEnter={() => setHoveredNav(item.key)}
@@ -4356,10 +4373,13 @@ function PageBottomNav({
         </div>
       </div>
 
-      {/* Hamburger pill — only on deep (3rd-level) pages on mobile */}
+      {/* The pill: the nav on deep pages, and the close control everywhere
+          else once the bar has opened the menu. One × in one place, morphing
+          from the same icon, with the credit on its row — rather than a second
+          close button that the menu would have had to grow for this case. */}
       <button onClick={() => setMenuOpen(!menuOpen)}
         aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen}
-        className={`${isDeepPage ? "md:hidden flex" : "hidden"} items-center justify-center`}
+        className={`${isDeepPage || menuOpen ? "md:hidden flex" : "hidden"} items-center justify-center`}
         style={{
           // One flat colour, the page's own heading colour — at 44px square
           // the full nav gradient was a five-stop sweep compressed into a
