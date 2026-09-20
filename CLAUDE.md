@@ -139,6 +139,11 @@ on, anything added in the meantime will need its dark half written then.
   layout element; inside an incoming page it rides that page's cross-fade, so
   it spent most of its travel near-transparent and read as a pop. It fades
   with its page like everything else.
+- **The footer's legal clauses belong on the work itself.** Every page shows
+  the credit line; only an actual case study adds a clause —
+  `variant="work"` where content is shared with permission, `variant="nda"`
+  on the passcode-gated client work. The category listings under `/work`
+  take the plain credit.
 - **Client credits link out.** The Client field in a case study's META grid
   is a link to the client, in `GOLD` with the site's underline sweep, opened
   in a new tab with `rel="noopener noreferrer"`. The ones in use:

@@ -1973,7 +1973,9 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
           })}
         </ul>
 
-        <SiteFooter variant="work" gutter={false} />
+        {/* Plain credit: this is the category listing, not a case study. The
+            permission and NDA clauses belong on the work itself. */}
+        <SiteFooter gutter={false} />
         <NavClearance />
       </div>
     </div>
