@@ -248,6 +248,19 @@ function useIsMobile() {
 
 // ─── Shared atoms ─────────────────────────────────────────────────
 
+// The header mark and the homepage hero mark are the same object as far as
+// the page transition is concerned: navigating home animates the small one
+// into the large one's place rather than cross-fading between two marks.
+// Only ever one of them may be mounted at a time, which is why the hero's
+// two breakpoint blocks render theirs behind useIsMobile rather than letting
+// CSS hide one — a hidden duplicate would still claim the id.
+const LOGO_LAYOUT_ID = "site-logomark";
+
+// Clicking the mark goes to the top of the homepage, not to the slide the
+// page you were on corresponds to: it is the brand mark, and it's the hero's
+// mark it grows into. The rest of the nav stays section-aware.
+const GoHomeCtx = createContext<(() => void) | null>(null);
+
 // `className` is how a caller makes the mark responsive: the width/height
 // attributes are the default, and Tailwind sizing classes override them.
 function LogoMark({ size = 70, color = GOLD, className }: { size?: number; color?: string; className?: string }) {
@@ -284,18 +297,20 @@ function LogoMark({ size = 70, color = GOLD, className }: { size?: number; color
 // The responsive sizes are CSS, not JS, so there is no first-paint flash at
 // the wrong size: --logo-size carries the per-page desktop value into the
 // md: classes.
+const LOGO_FLIGHT = { duration: 0.55, ease: [0.42, 0, 0.58, 1] as [number, number, number, number] };
 const EYEBROW_LINE = 16;   // a text-label line: 0.75rem at 1.2, plus the breadcrumb's padding
 const MOBILE_MARK = 24;
 const MOBILE_HIT = 44;     // the tap target, larger than the mark it holds
 function HeaderLogo({ onNavigate, color = GOLD, size = 40, ring = 48 }: { onNavigate: (p: Page) => void; color?: string; size?: number; ring?: number }) {
   const [active, setActive] = useState(false);
+  const goHome = useContext(GoHomeCtx);
   // Circumference of the drawn circle — the stroke sits on the path, so the
   // radius is half the ring less half the 1px stroke.
   const r = (ring - 1) / 2;
   const circumference = 2 * Math.PI * r;
   // rotate(-90) starts the draw at twelve o'clock rather than three.
   return (
-    <button onClick={() => onNavigate("home")} aria-label="Tiffany C. — home"
+    <button onClick={() => (goHome ? goHome() : onNavigate("home"))} aria-label="Tiffany C. — home"
       onMouseEnter={() => setActive(true)} onMouseLeave={() => setActive(false)}
       onFocus={() => setActive(true)} onBlur={() => setActive(false)}
       className="absolute right-6 md:right-20 top-[var(--logo-top)] md:top-14 flex items-center md:items-start justify-end cursor-pointer z-10
@@ -309,8 +324,9 @@ function HeaderLogo({ onNavigate, color = GOLD, size = 40, ring = 48 }: { onNavi
         // content's top edge, where the page's own padding puts it.
         ["--logo-top" as string]: `calc(2.5rem + ${EYEBROW_LINE / 2}px - ${MOBILE_HIT / 2}px)`,
       }}>
-      <span className="relative flex items-center justify-center
-                       w-[17px] h-6 md:w-[calc(var(--logo-size)/1.4)] md:h-[var(--logo-size)]">
+      <motion.span layoutId={LOGO_LAYOUT_ID} transition={LOGO_FLIGHT}
+        className="relative flex items-center justify-center
+                   w-[17px] h-6 md:w-[calc(var(--logo-size)/1.4)] md:h-[var(--logo-size)]">
         {/* No hover on a phone, so nothing would ever draw the ring there. */}
         <svg className="logo-ring absolute pointer-events-none hidden md:block" width={ring} height={ring} viewBox={`0 0 ${ring} ${ring}`}
           aria-hidden="true" style={{ left: "50%", top: "50%", marginLeft: -ring / 2, marginTop: -ring / 2, overflow: "visible" }}>
@@ -320,9 +336,8 @@ function HeaderLogo({ onNavigate, color = GOLD, size = 40, ring = 48 }: { onNavi
             style={{ transition: "stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1)" }} />
         </svg>
         {/* The mark is 1:1.4, so height is what's held to the given size. */}
-        <LogoMark size={Math.round(MOBILE_MARK / 1.4)} color={color}
-          className="w-[17px] h-6 md:w-[calc(var(--logo-size)/1.4)] md:h-[var(--logo-size)]" />
-      </span>
+        <LogoMark size={Math.round(MOBILE_MARK / 1.4)} color={color} className="w-full h-full" />
+      </motion.span>
     </button>
   );
 }
@@ -406,7 +421,7 @@ function MobileMenu({
       <div className="absolute inset-0" style={{ background: menuBg }} />
 
       {/* Header row */}
-      <div className="relative z-10 flex items-center px-6 pt-10 pb-6">
+      <div className="relative z-10 flex items-center justify-end px-6 pt-10 pb-6">
         <LogoMark size={44} color={itemActive} />
       </div>
 
@@ -1155,7 +1170,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
               grow past one screen and scroll instead of being clipped. */}
           <div className="md:hidden relative flex flex-col px-6 pt-14"
             style={{ minHeight: "100%", paddingBottom: HERO_BOTTOM_RESERVE }}>
-            <LogoMark size={52} />
+            {isMobile && (
+              <motion.span layoutId={LOGO_LAYOUT_ID} transition={LOGO_FLIGHT} className="self-end" style={{ width: 52, height: 73 }}>
+                <LogoMark size={52} className="w-full h-full" />
+              </motion.span>
+            )}
             {/* Auto margins, not justify-center: a centred flex child that
                 overflows spills past BOTH ends, putting the heading out of
                 reach even once the slide scrolls. Auto margins centre only
@@ -1207,7 +1226,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
               vertically centering the whole block. */}
           <div className="hidden md:flex absolute inset-0 flex-col px-20"
             style={{ paddingTop: 64, paddingBottom: "calc(64px + 5vh + 96px)" }}>
-            <LogoMark size={70} />
+            {!isMobile && (
+              <motion.span layoutId={LOGO_LAYOUT_ID} transition={LOGO_FLIGHT} className="self-end" style={{ width: 70, height: 98 }}>
+                <LogoMark size={70} className="w-full h-full" />
+              </motion.span>
+            )}
             <div className="relative" style={{ marginTop: 64 }}>
               <img
                 src={profilePhoto}
@@ -2427,7 +2450,11 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
   }, []);
 
   return (
-    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+    // The case study reads as a white document laid on the site's cream,
+    // rather than as more of the page it came from. The whole page takes the
+    // white, header band included — white content under a cream heading puts
+    // a seam across the top of every scroll.
+    <div className="relative w-full" style={{ minHeight: "100dvh", background: isDark ? "transparent" : "#ffffff" }}>
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
         <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
           background: headerScrolled
@@ -2435,8 +2462,8 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
             // so the words have something to sit against rather than
             // relying on whatever happens to be passing beneath.
             ? (onDark
-                ? "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), rgba(248,247,245,0.55)"
-                : isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)")
+                ? "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), rgba(255,255,255,0.55)"
+                : isDark ? "rgba(40,40,40,0.55)" : "rgba(255,255,255,0.55)")
             : "transparent",
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
@@ -4756,9 +4783,16 @@ export default function App() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
+  // The mark always lands on the hero, whose own mark it grows into.
+  const goHome = useCallback(() => {
+    setHomeInitialIdx(0);
+    setPage("home");
+  }, []);
+
   return (
     <DarkModeCtx.Provider value={isDark}>
     <DarkModeToggleCtx.Provider value={toggleDark}>
+    <GoHomeCtx.Provider value={goHome}>
     <AccordionCtx.Provider value={{ openId: openAccordionId, setOpenId: setOpenAccordionId }}>
     <div className="relative w-screen h-dvh overflow-hidden" style={{ background: isDark ? "#282828" : "#f8f7f5" }}>
       {/* Flat ground — warm cream in light, near-black in dark. No mesh, and
@@ -4817,6 +4851,7 @@ export default function App() {
       )}
     </div>
     </AccordionCtx.Provider>
+    </GoHomeCtx.Provider>
     </DarkModeToggleCtx.Provider>
     </DarkModeCtx.Provider>
   );
