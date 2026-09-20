@@ -195,7 +195,7 @@ function DarkModeToggle({
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       className={
         variant === "floating"
-          ? "fixed top-5 right-5 z-[60] hidden md:flex items-center"
+          ? "fixed top-5 right-5 z-[60] hidden items-center"
           : "flex items-center"
       }
       style={{ background: "none", border: "none", padding: 0 }}
@@ -1366,64 +1366,43 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
               fixed gaps, matching the Figma reference exactly, rather than
               vertically centering the whole block. */}
           <div className="hidden md:flex absolute inset-0 flex-col px-20"
-            style={{ paddingTop: 64, paddingBottom: "calc(64px + 5vh + 96px)" }}>
+            style={{ paddingTop: 64, paddingBottom: "calc(64px + 5vh + 64px)" }}>
             <span className="self-end" style={{ width: HERO_MARK.desktop.w, height: HERO_MARK.desktop.h }}>
               <LogoMark size={HERO_MARK.desktop.w} className="w-full h-full" />
             </span>
-            <div className="relative" style={{ marginTop: 64 }}>
+            {/* Heading */}
+            <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "4rem", lineHeight: 1.05, color: GOLD, marginTop: 48 }}>
+              Hello, I'm Tiff —<br />
+              a product &amp; design leader
+            </h1>
+            {/* Photo + body copy row */}
+            <div className="flex items-start gap-12" style={{ marginTop: 48, flex: 1, minHeight: 0 }}>
               <img
                 src={profilePhoto}
                 alt="Tiffany Chew"
-                className="rounded-full object-cover absolute"
+                className="rounded-full object-cover flex-shrink-0"
                 style={{
-                  width: "24vw",
-                  height: "24vw",
-                  maxWidth: 315,
-                  maxHeight: 315,
-                  right: 0,
-                  top: "-14%",
+                  width: "18vw",
+                  height: "18vw",
+                  maxWidth: 240,
+                  maxHeight: 240,
                   border: `1px solid ${GOLD}`,
                 }}
               />
-              {/* Same words as the mobile block above. The two breakpoints
-                  are separate elements, so this is the one line that has to
-                  be kept in step with it. */}
-              {/* Fluid, like the mobile block. At a fixed 4rem this wrapped to
-                  three lines on a small laptop and pushed the closing
-                  paragraph out of the slide, which clips — the section doesn't
-                  scroll on desktop. */}
-              <h1 className="font-['Museo',sans-serif] font-light"
-                style={{ fontSize: "clamp(2.75rem, 4.6vw, 4rem)", lineHeight: 1.05, color: GOLD, maxWidth: "52%" }}>
-                Hi, I'm a product &amp; design leader
-              </h1>
+              <p className="font-['Nunito_Sans',sans-serif] text-body leading-relaxed"
+                style={{ color: bodyCol, paddingTop: 8 }}>
+                I work with C-suites and product teams to shape design
+                functions that deliver. As an ex-founder who built and
+                exited my own brand, and a leader across fintech, retail,
+                and SaaS, I bring an entrepreneurial and outcomes-focused
+                lens to design leadership.
+                <br /><br />
+                My forte is connecting strategy to craft, breaking it into
+                tangible wins toward an ultimate company vision. Because the
+                clarity between a big decision and a small win is where
+                sustainable growth lives.
+              </p>
             </div>
-            {/* Pushes the body copy toward the bottom on a tall screen, but
-                with a floor: flex-1 collapses to nothing once the viewport is
-                short enough, and the heading was landing flush against the
-                paragraph — 0px at 1280×800 and below. The other sections use
-                minHeight 4vh for the same reason; this clamps it so the gap
-                can't fall under 28px on a short laptop. */}
-            <div className="flex-1" style={{ minHeight: "clamp(28px, 4vh, 56px)" }} />
-            {/* Body copy is one size everywhere: text-body, matching the
-                description on a Work detail page. This paragraph used to run
-                fluid up to 22.4px, which read as a different species of text
-                from the rest of the site. */}
-            <p className="font-['Nunito_Sans',sans-serif] text-body leading-relaxed"
-              // 60% of a 1920 viewport is 85ch — past the point where the eye
-              // loses the line. 68ch is the cap; the percentage still governs
-              // on narrower screens.
-              style={{ color: bodyCol, maxWidth: "min(60%, 68ch)" }}>
-              I work with C-suites and product teams to shape design
-              functions that deliver. As an ex-founder who built and
-              exited my own brand, and a leader across fintech, retail,
-              and SaaS, I bring an entrepreneurial and outcomes-focused
-              lens to design leadership.
-              <br /><br />
-              My forte is connecting strategy to craft, breaking it into
-              tangible wins toward an ultimate company vision. Because the
-              clarity between a big decision and a small win is where
-              sustainable growth lives.
-            </p>
           </div>
           {/* Hairline above the nav. The pulsing "scroll" cue that used to sit
               at its right-hand end is gone, for the same reason as the mobile
