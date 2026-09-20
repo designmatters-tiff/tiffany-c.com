@@ -248,14 +248,16 @@ function useIsMobile() {
 
 // ─── Shared atoms ─────────────────────────────────────────────────
 
-function LogoMark({ size = 70, color = GOLD }: { size?: number; color?: string }) {
+// `className` is how a caller makes the mark responsive: the width/height
+// attributes are the default, and Tailwind sizing classes override them.
+function LogoMark({ size = 70, color = GOLD, className }: { size?: number; color?: string; className?: string }) {
   return (
     // flexShrink: 0 — the mark sits as a flex child in the hero and the mobile
     // menu, and without this a short viewport squeezes it: measured 70x98 at
     // 1440x900 but 70x17 at 1280x760, i.e. the logo silently flattening to a
     // sliver on smaller laptops.
     <svg width={size} height={Math.round(size * 1.4)} viewBox="0 0 80 112" fill="none"
-      style={{ flexShrink: 0 }}>
+      className={className} style={{ flexShrink: 0 }}>
       <clipPath id="tiff-clip"><rect width="80" height="112" /></clipPath>
       <g clipPath="url(#tiff-clip)">
         <path d={T_PATH} fill={color} />
@@ -268,15 +270,24 @@ function LogoMark({ size = 70, color = GOLD }: { size?: number; color?: string }
 
 
 // The mark, top right of a page header, on the eyebrow's line. Homepage keeps
-// its own large one in the hero; every other page gets this. 40px tall inside
-// a 40x40 target — the mark is 1:1.4, so height is what's held to 40.
+// its own large one in the hero; every other page gets this.
 //
-// On hover a hairline ring draws itself around the mark over a second, from
-// twelve o'clock clockwise, and unwinds the same way on the way out. The mark
-// alone doesn't read as a control; the ring says "this is a button" without
-// putting a permanent box in the corner. `ring` is a fixed 40 whatever the
-// mark's size, so a smaller mark simply sits in more air.
-function HeaderLogo({ onNavigate, color = GOLD, size = 40, ring = 40 }: { onNavigate: (p: Page) => void; color?: string; size?: number; ring?: number }) {
+// The two breakpoints want different things. On desktop the mark is `size`
+// tall and hangs from the top of the content, and on hover a hairline ring
+// draws itself around it over a second, from twelve o'clock clockwise,
+// unwinding the same way on the way out — the mark alone doesn't read as a
+// control, and the ring says "this is a button" without putting a permanent
+// box in the corner. On mobile there is no hover to reveal anything, so the
+// ring is left off; the mark drops to 24 and sits centred on the eyebrow's
+// line rather than hanging past it, which at that size read as adrift.
+//
+// The responsive sizes are CSS, not JS, so there is no first-paint flash at
+// the wrong size: --logo-size carries the per-page desktop value into the
+// md: classes.
+const EYEBROW_LINE = 16;   // a text-label line: 0.75rem at 1.2, plus the breadcrumb's padding
+const MOBILE_MARK = 24;
+const MOBILE_HIT = 44;     // the tap target, larger than the mark it holds
+function HeaderLogo({ onNavigate, color = GOLD, size = 40, ring = 48 }: { onNavigate: (p: Page) => void; color?: string; size?: number; ring?: number }) {
   const [active, setActive] = useState(false);
   // Circumference of the drawn circle — the stroke sits on the path, so the
   // radius is half the ring less half the 1px stroke.
@@ -287,18 +298,30 @@ function HeaderLogo({ onNavigate, color = GOLD, size = 40, ring = 40 }: { onNavi
     <button onClick={() => onNavigate("home")} aria-label="Tiffany C. — home"
       onMouseEnter={() => setActive(true)} onMouseLeave={() => setActive(false)}
       onFocus={() => setActive(true)} onBlur={() => setActive(false)}
-      className="absolute right-6 md:right-20 top-10 md:top-14 flex items-start justify-end cursor-pointer z-10"
-      style={{ background: "none", border: "none", padding: 0, width: size, height: size }}>
-      {/* The mark is 1:1.4, so height is what's held to the given size. */}
-      <span className="relative flex items-center justify-center" style={{ width: Math.round(size / 1.4), height: size }}>
-        <svg className="logo-ring absolute pointer-events-none" width={ring} height={ring} viewBox={`0 0 ${ring} ${ring}`}
+      className="absolute right-6 md:right-20 top-[var(--logo-top)] md:top-14 flex items-center md:items-start justify-end cursor-pointer z-10
+                 w-[var(--hit)] h-[var(--hit)] md:w-[var(--logo-size)] md:h-[var(--logo-size)]"
+      style={{
+        background: "none", border: "none", padding: 0,
+        ["--hit" as string]: `${MOBILE_HIT}px`,
+        ["--logo-size" as string]: `${size}px`,
+        // Mobile: the hit area is centred on the eyebrow, so the mark inside it
+        // is too. Desktop (md:top-14) keeps the mark's top edge on the
+        // content's top edge, where the page's own padding puts it.
+        ["--logo-top" as string]: `calc(2.5rem + ${EYEBROW_LINE / 2}px - ${MOBILE_HIT / 2}px)`,
+      }}>
+      <span className="relative flex items-center justify-center
+                       w-[17px] h-6 md:w-[calc(var(--logo-size)/1.4)] md:h-[var(--logo-size)]">
+        {/* No hover on a phone, so nothing would ever draw the ring there. */}
+        <svg className="logo-ring absolute pointer-events-none hidden md:block" width={ring} height={ring} viewBox={`0 0 ${ring} ${ring}`}
           aria-hidden="true" style={{ left: "50%", top: "50%", marginLeft: -ring / 2, marginTop: -ring / 2, overflow: "visible" }}>
           <circle cx={ring / 2} cy={ring / 2} r={r} fill="none" stroke={color} strokeWidth={1}
             strokeDasharray={circumference} strokeDashoffset={active ? 0 : circumference} strokeLinecap="round"
             transform={`rotate(-90 ${ring / 2} ${ring / 2})`}
             style={{ transition: "stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1)" }} />
         </svg>
-        <LogoMark size={Math.round(size / 1.4)} color={color} />
+        {/* The mark is 1:1.4, so height is what's held to the given size. */}
+        <LogoMark size={Math.round(MOBILE_MARK / 1.4)} color={color}
+          className="w-[17px] h-6 md:w-[calc(var(--logo-size)/1.4)] md:h-[var(--logo-size)]" />
       </span>
     </button>
   );
