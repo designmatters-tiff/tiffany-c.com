@@ -641,7 +641,7 @@ function SpeakingInquiryPage({ onBack, onNavigate, headerScrolled = false, scrol
   };
 
   return (
-    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+    <div className="relative w-full flex flex-col" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
         style={{
           background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
@@ -664,7 +664,7 @@ function SpeakingInquiryPage({ onBack, onNavigate, headerScrolled = false, scrol
         </motion.h1>
       </div>
 
-      <div className="px-6 md:px-20 pb-10" style={{ maxWidth: 760 }}>
+      <div className="px-6 md:px-20 flex-1 flex flex-col" style={{ maxWidth: 760 }}>
         {sent ? (
           /* Confirmation replaces the form in place. It has to carry its own
              weight — a single grey line where eight fields used to be reads
@@ -756,6 +756,9 @@ function SpeakingInquiryPage({ onBack, onNavigate, headerScrolled = false, scrol
           </button>
         )}
 
+        {/* Fills whatever the content leaves, so the credit line lands on
+            the nav rather than stopping wherever the copy happens to end. */}
+        <div className="flex-1" />
         <SiteFooter gutter={false} />
         <NavClearance />
       </div>
@@ -1878,7 +1881,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
   const linkColor = HEADING_COLOUR.work;
   const bodyText  = isDark ? "rgba(255,255,255,0.72)" : DIM;
   return (
-    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+    <div className="relative w-full flex flex-col" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
         style={{
           background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
@@ -1904,7 +1907,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
         </motion.h1>
       </div>
 
-      <div className="px-6 md:px-20 pb-10" style={{ maxWidth: 760 }}>
+      <div className="px-6 md:px-20 flex-1 flex flex-col" style={{ maxWidth: 760 }}>
         <p className="font-['Nunito_Sans',sans-serif] leading-relaxed" style={{ color: bodyText }}>
           {card.description}
         </p>
@@ -1971,6 +1974,9 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
 
         {/* Plain credit: this is the category listing, not a case study. The
             permission and NDA clauses belong on the work itself. */}
+        {/* Fills whatever the content leaves, so the credit line lands on
+            the nav rather than stopping wherever the copy happens to end. */}
+        <div className="flex-1" />
         <SiteFooter gutter={false} />
         <NavClearance />
       </div>
@@ -4260,7 +4266,7 @@ function SpeakingDetailPage({
   const subColor = (ev.dark || globalDark) ? "rgba(255,255,255,0.55)" : DIM;
 
   return (
-    <div className="relative w-full" style={{ minHeight: "100dvh", background: bg }}>
+    <div className="relative w-full flex flex-col" style={{ minHeight: "100dvh", background: bg }}>
 
       {/* Back bar */}
       <div className="relative flex items-center gap-4 px-6 md:px-20 pt-8 pb-6"
@@ -4368,6 +4374,7 @@ function SpeakingDetailPage({
         </div>
       )}
 
+      <div className="flex-1" />
       <SiteFooter />
       <NavClearance />
     </div>
