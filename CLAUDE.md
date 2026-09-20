@@ -169,6 +169,11 @@ have each been walked back once already.
   hover to reveal it.
 - **44px is the floor for anything tappable**, however small the thing inside
   it looks.
+- **Returning home lands on the hero, not on a matching slide.** The homepage
+  is a deck you swipe through; landing on the slide matching the page you left
+  put you at the end of the track when you came from Connect or Coaching, with
+  the forward swipe dead on arrival. That reads as a broken gesture. Both the
+  logomark and the menu's "Tiffany C." go to slide 0.
 - **Keep the hero above the fold.** `HERO_BOTTOM_RESERVE` accounts for the
   floating nav, its offset and the safe-area inset. Anything added to the hero
   competes with the body copy for the same screen — check it at 375x667 before

@@ -3011,6 +3011,7 @@ function StickyPageNav({ activePage, onNavigate }: { activePage: Page; onNavigat
   // overlay: the control has to climb above it to stay the thing you press
   // to close, and the container is what carries the z-index.
   const [menuOpen, setMenuOpen] = useState(false);
+  const goHome = useContext(GoHomeCtx);
   return (
     <>
       <div className="fixed inset-x-0 bottom-0 z-20 pointer-events-none"
@@ -3038,7 +3039,13 @@ function StickyPageNav({ activePage, onNavigate }: { activePage: Page; onNavigat
         hideClose
         activeIdx={SECTIONS.findIndex(s => s.page === activePage)}
         onClose={() => setMenuOpen(false)}
-        onGoTo={() => { onNavigate("home"); setMenuOpen(false); }}
+        // The homepage is a deck you swipe through, and this lands you at its
+        // start. It used to land on the slide matching the page you left,
+        // which from Connect or Coaching — the last two sections — put you at
+        // the end of the track with the forward swipe dead on arrival. That
+        // reads as a broken gesture, not as "you are at the end". Same rule
+        // the logomark already follows.
+        onGoTo={() => { (goHome ?? (() => onNavigate("home")))(); setMenuOpen(false); }}
         onNavigate={(p) => { onNavigate(p); setMenuOpen(false); }}
       />
     </>
