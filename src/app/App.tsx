@@ -3165,6 +3165,7 @@ function PageBottomNav({
   onNavigate,
   menuOpen,
   setMenuOpen,
+  isDeepPage = false,
 }: {
   activePage: Page;
   // The page's own heading colour, where that differs from its nav
@@ -3173,6 +3174,7 @@ function PageBottomNav({
   onNavigate: (p: Page) => void;
   menuOpen: boolean;
   setMenuOpen: (v: boolean) => void;
+  isDeepPage?: boolean;
 }) {
   const isDark = useContext(DarkModeCtx);
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
