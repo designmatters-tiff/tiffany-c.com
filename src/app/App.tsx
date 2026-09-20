@@ -1265,7 +1265,7 @@ const HERO_BOTTOM_RESERVE = "calc(5% + 80px + env(safe-area-inset-bottom))";
 
 // ─── Homepage ─────────────────────────────────────────────────────
 
-export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number }) {
+export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onSlideChange }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number; onSlideChange?: (idx: number) => void }) {
   const isDark = useContext(DarkModeCtx);
   const pageBg  = isDark ? "#282828" : "#f8f7f5";
   const fg      = isDark ? GOLD : INK;
@@ -1460,6 +1460,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
   const navShrunk = currentEmbedScrollable && navMinimized;
 
   useEffect(() => { setNavMinimized(false); }, [activeIdx]);
+  // The deck is the one place where the page does not change but the section
+  // does. The rail needs to know, because past the hero the mark belongs in it
+  // — slide 0's own mark has scrolled off with the slide, and without this the
+  // deck runs from Work to Connect with no mark on screen at all.
+  useEffect(() => { onSlideChange?.(activeIdx); }, [activeIdx, onSlideChange]);
 
   // Swiping the deck is how most people read this site on a phone, so the
   // section you're looking at owns the address bar: land on Awards and the
@@ -1681,7 +1686,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
             return (
               <section key={section.key}
                 ref={(el) => { embedSectionRefs.current[section.key] = el; }}
-                className="flex-shrink-0 relative scrollbar-hide"
+                // The slide stays a viewport wide — it is the deck's track and
+                // narrowing it would break the snap — so the rail's room is
+                // padding inside it, not width taken off it. The embedded page
+                // brings its own px-20, which lands under the mark otherwise.
+                className="flex-shrink-0 relative scrollbar-hide lg:pl-[var(--rail-w)]"
                 // No touchAction override: the browser routes a vertical drag
                 // to this section and a horizontal one to the deck behind it.
                 // Pinning it to pan-y scrolls the section but kills the swipe
@@ -1708,7 +1717,12 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 touchAction: "pan-x",
               }}>
 
-              <div className="relative z-10 flex flex-col h-full px-6 md:px-20 pt-10 md:pt-14"
+              {/* On desktop these slides start after the rail, exactly as every
+                  other page does — the mark is chrome over the deck here, and
+                  at the page's own px-20 it landed on top of the heading. The
+                  hero is the exception: its own mark is the one on screen
+                  there, so it keeps the full width it was designed in. */}
+              <div className="relative z-10 flex flex-col h-full px-6 md:px-20 pt-10 md:pt-14 lg:pl-[calc(var(--rail-w)+80px)]"
                 style={{ paddingBottom: "calc(64px + 8vh + 32px)" }}>
 
                 <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-4 md:mb-6"
@@ -6507,6 +6521,7 @@ export default function App() {
   const [workDetailOrigin, setWorkDetailOrigin] = useState<Page>("work");
   const workSectionIdx = SECTIONS.findIndex(s => s.key === "work");
   const [homeInitialIdx, setHomeInitialIdx] = useState(0);
+  const [homeSlide, setHomeSlide] = useState(0);
 
   const navigateToWorkDetail = (key: string) => {
     setWorkDetailOrigin(page === "home" ? "home" : "work");
@@ -6550,9 +6565,17 @@ export default function App() {
   // study read as the whole window reloading. It now lives out here, mounted
   // once, and only its active item changes as the route does — the bar itself
   // never moves. The homepage is the exception; its nav travels with the deck.
-  // The rail is desktop chrome for every page but the homepage, whose deck
-  // owns the full width.
-  const railOn = page !== "home";
+  // The rail is desktop chrome everywhere except the homepage's first slide,
+  // which is where the mark is introduced and still carries its own. Swiping
+  // the deck past that slide is a section change without a page change, so it
+  // has to count: otherwise the deck runs from Work to Connect with the hero's
+  // mark scrolled off and the rail's not yet shown.
+  const railOn = page !== "home" || homeSlide > 0;
+  // The mark showing and the page making room for it are different questions.
+  // The homepage deck is a full-bleed track whose slides are each a viewport
+  // wide; insetting it mid-swipe shoved it 126px sideways and narrowed every
+  // slide. On the deck the mark simply sits over it, as chrome.
+  const railInset = page !== "home";
   // The strip the rail occupies is root, not page, so it has to take the
   // page's own colour or the mark sits on a band of the wrong one beside the
   // content. Two pages set their own: the KAI case is a white document, and
@@ -6614,6 +6637,7 @@ export default function App() {
   // The mark always lands on the hero, whose own mark it grows into.
   const goHome = useCallback(() => {
     setHomeInitialIdx(0);
+    setHomeSlide(0);
     setPage("home");
   }, []);
 
@@ -6643,13 +6667,13 @@ export default function App() {
           do the same in one line, but the pages whose roots are absolutely
           positioned ignore it. */}
       <AnimatePresence initial={false} custom={pageMotion}>
-      <motion.div key={motionKey} className={`absolute inset-0${railOn ? " lg:left-[var(--rail-w)]" : ""}`}
+      <motion.div key={motionKey} className={`absolute inset-0${railInset ? " lg:left-[var(--rail-w)]" : ""}`}
         style={{ zIndex: 1, transformOrigin: "50% 0%" }}
         custom={pageMotion}
         variants={pageVariants}
         initial="enter" animate="center" exit="exit"
         transition={{ duration: drillIn ? 0.5 : 0.45, ease: [0.42, 0, 0.58, 1] }}>
-        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} />}
+        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} onSlideChange={setHomeSlide} />}
         {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} /></div>}
         {page === "awards"   && <div className="absolute inset-0"><AwardsSpeakingPage onNavigate={navigateGeneral} /></div>}
         {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={navigateGeneral} /></div>}
