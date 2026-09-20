@@ -204,7 +204,8 @@
   @media (prefers-reduced-motion: reduce) {
     .link-underline::after,
     a:not(.no-link-underline):not(:has(.link-underline))::after,
-    .crumb-chevron {
+    .crumb-chevron,
+    .logo-ring circle {
       transition: none;
     }
     .crumb:hover .crumb-chevron,

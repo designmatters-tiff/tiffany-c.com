@@ -270,13 +270,36 @@ function LogoMark({ size = 70, color = GOLD }: { size?: number; color?: string }
 // The mark, top right of a page header, on the eyebrow's line. Homepage keeps
 // its own large one in the hero; every other page gets this. 40px tall inside
 // a 40x40 target — the mark is 1:1.4, so height is what's held to 40.
-function HeaderLogo({ onNavigate, color = GOLD, size = 40 }: { onNavigate: (p: Page) => void; color?: string; size?: number }) {
+//
+// On hover a hairline ring draws itself around the mark over a second, from
+// twelve o'clock clockwise, and unwinds the same way on the way out. The mark
+// alone doesn't read as a control; the ring says "this is a button" without
+// putting a permanent box in the corner. `ring` is a fixed 40 whatever the
+// mark's size, so a smaller mark simply sits in more air.
+function HeaderLogo({ onNavigate, color = GOLD, size = 40, ring = 40 }: { onNavigate: (p: Page) => void; color?: string; size?: number; ring?: number }) {
+  const [active, setActive] = useState(false);
+  // Circumference of the drawn circle — the stroke sits on the path, so the
+  // radius is half the ring less half the 1px stroke.
+  const r = (ring - 1) / 2;
+  const circumference = 2 * Math.PI * r;
+  // rotate(-90) starts the draw at twelve o'clock rather than three.
   return (
     <button onClick={() => onNavigate("home")} aria-label="Tiffany C. — home"
+      onMouseEnter={() => setActive(true)} onMouseLeave={() => setActive(false)}
+      onFocus={() => setActive(true)} onBlur={() => setActive(false)}
       className="absolute right-6 md:right-20 top-10 md:top-14 flex items-start justify-end cursor-pointer z-10"
       style={{ background: "none", border: "none", padding: 0, width: size, height: size }}>
       {/* The mark is 1:1.4, so height is what's held to the given size. */}
-      <LogoMark size={Math.round(size / 1.4)} color={color} />
+      <span className="relative flex items-center justify-center" style={{ width: Math.round(size / 1.4), height: size }}>
+        <svg className="logo-ring absolute pointer-events-none" width={ring} height={ring} viewBox={`0 0 ${ring} ${ring}`}
+          aria-hidden="true" style={{ left: "50%", top: "50%", marginLeft: -ring / 2, marginTop: -ring / 2, overflow: "visible" }}>
+          <circle cx={ring / 2} cy={ring / 2} r={r} fill="none" stroke={color} strokeWidth={1}
+            strokeDasharray={circumference} strokeDashoffset={active ? 0 : circumference} strokeLinecap="round"
+            transform={`rotate(-90 ${ring / 2} ${ring / 2})`}
+            style={{ transition: "stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1)" }} />
+        </svg>
+        <LogoMark size={Math.round(size / 1.4)} color={color} />
+      </span>
     </button>
   );
 }
@@ -447,12 +470,16 @@ const FORM_FIELDS: { name: string; label: string; type?: string; required?: bool
 // Speaking Inquiry is a full 2nd-level page (not an inline accordion).
 // It carries the same gradient bottom nav as every other page, shown as
 // "Connect / Speaking Inquiry" and shrinking on scroll — see StickyPageNav.
-function SpeakingInquiryContainer({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
+function SpeakingInquiryContainer({ onBack, onNavigate, onScrolledChange }: { onBack: () => void; onNavigate: (p: Page) => void; onScrolledChange?: (v: boolean) => void }) {
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   return (
     <div ref={scrollRef} className="absolute inset-0 overflow-y-auto"
-      onScroll={e => setHeaderScrolled(e.currentTarget.scrollTop > 24)}>
+      onScroll={e => {
+        const v = e.currentTarget.scrollTop > 24;
+        setHeaderScrolled(v);
+        onScrolledChange?.(v);
+      }}>
       <SpeakingInquiryPage onBack={onBack} onNavigate={onNavigate} headerScrolled={headerScrolled}
         scrollToTop={() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })} />
     </div>
@@ -655,8 +682,6 @@ function SpeakingInquiryPage({ onBack, onNavigate, headerScrolled = false, scrol
         <div style={{ height: 140 }} />
       </div>
 
-      <StickyPageNav activePage="connect" parentLabel="Connect" detailLabel="Speaking Inquiry"
-        compact={headerScrolled} onNavigate={onNavigate} />
     </div>
   );
 }
@@ -2396,7 +2421,7 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
           paddingBottom: headerScrolled ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
-          <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} size={24} />
+          <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} size={28} />
           <Breadcrumbs color={headingColor} items={[
             { label: "Work", onClick: () => onNavigate("work") },
             { label: "Case Studies", onClick: onBack },
@@ -2411,7 +2436,6 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
         <div style={{ height: 96 }} />
       </div>
       <CaseSectionRail scrollRef={scrollRef} sections={KAI_SECTIONS} />
-      <StickyPageNav activePage="work" onNavigate={onNavigate} />
     </div>
   );
 }
@@ -2780,7 +2804,6 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
         <div style={{ height: 96 }} />
       </div>
       <CaseSectionRail scrollRef={scrollRef} sections={AH_SECTIONS} />
-      <StickyPageNav activePage="work" onNavigate={onNavigate} />
     </div>
   );
 }
@@ -3027,7 +3050,6 @@ function ContactListPage({
   items,
   accent,
   headingColor,
-  activePage,
   onNavigate,
 }: {
   eyebrow: string;
@@ -3037,7 +3059,6 @@ function ContactListPage({
   // Coaching and Connect share this shell but sit at different points along
   // the nav gradient, so the heading colour comes in per page.
   headingColor?: string;
-  activePage: Page;
   onNavigate: (p: Page) => void;
 }) {
   const isDark = useContext(DarkModeCtx);
@@ -3071,7 +3092,6 @@ function ContactListPage({
       </div>
 
       <div style={{ height: 96 }} />
-      <StickyPageNav activePage={activePage} onNavigate={onNavigate} />
     </div>
   );
 }
@@ -3084,7 +3104,6 @@ function CoachingPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       items={["1:1 Calls", "Priority DM", "Package (1-1 Coaching Service)"]}
       accent="#9B5A88"
       headingColor={HEADING_COLOUR.coaching}
-      activePage="coaching"
       onNavigate={onNavigate}
     />
   );
@@ -3098,7 +3117,6 @@ function ConnectPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       items={["Speaking Inquiry", "linkedin", "instagram", "designmatters.tiff@gmail.com"]}
       accent="#9B5A88"
       headingColor={HEADING_COLOUR.connect}
-      activePage="connect"
       onNavigate={onNavigate}
     />
   );
@@ -3460,7 +3478,6 @@ function TestimonialsPage({
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
         {content}
       </div>
-      <StickyPageNav activePage="testimonials" onNavigate={onNavigate} />
     </div>
   );
 }
@@ -3879,12 +3896,6 @@ function AwardsSpeakingPage({
         </>
       )}
 
-      {/* The nav used to fade in only once scrollTop passed 24, which meant
-          collapsing an accordion could take it away: the page gets shorter,
-          the browser pulls the scroll position back to the top, and the menu
-          silently left with it. Every other page shows its nav unconditionally
-          and this one now does too. */}
-      <StickyPageNav activePage="awards" onNavigate={onNavigate} />
     </div>
   );
 }
@@ -4086,7 +4097,6 @@ function SpeakingDetailPage({
       )}
 
       <div style={{ height: 96 }} />
-      <StickyPageNav activePage="awards" onNavigate={onNavigate} />
     </div>
   );
 }
@@ -4489,7 +4499,6 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
         )}
       </div>
       {unlocked && <CaseSectionRail scrollRef={scrollRef} />}
-      <StickyPageNav activePage="work" onNavigate={onNavigate} />
     </div>
   );
 }
@@ -4676,8 +4685,27 @@ export default function App() {
   const drillIn = page === "workDetail" || page === "businessCase" || page === "kaiCase" || page === "appleHealthCase";
 
   useEffect(() => {
-    if (page !== "workDetail") setDetailHeaderScrolled(false);
-  }, [page]);
+    setDetailHeaderScrolled(false);
+  }, [page, detailKey]);
+
+  // The bottom nav is site chrome, not page content. It used to be rendered
+  // inside each page, which put it inside the page transition: every
+  // navigation faded and scaled it back in, so drilling from Work into a case
+  // study read as the whole window reloading. It now lives out here, mounted
+  // once, and only its active item changes as the route does — the bar itself
+  // never moves. The homepage is the exception; its nav travels with the deck.
+  const navActive: Page | null =
+      page === "home" ? null
+    : page === "work" || page === "workDetail" || page === "businessCase"
+      || page === "kaiCase" || page === "appleHealthCase" ? "work"
+    : page === "awards" || page === "speaking" ? "awards"
+    : page === "speakingInquiry" ? "connect"
+    : page;
+  const navParentLabel = page === "speakingInquiry" ? "Connect" : undefined;
+  const navDetailLabel = page === "speakingInquiry" ? "Speaking Inquiry" : detailLabel;
+  // Only the two pages with a shrink-on-scroll header ask the bar to shrink
+  // with them.
+  const navCompact = (page === "workDetail" || page === "speakingInquiry") && detailHeaderScrolled;
 
   const toggleDark = useCallback(() => setIsDark(d => !d), []);
 
@@ -4731,7 +4759,7 @@ export default function App() {
         {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={navigateGeneral} /></div>}
         {page === "connect"  && <div className="absolute inset-0 overflow-y-auto"><ConnectPage onNavigate={navigateGeneral} /></div>}
         {page === "speakingInquiry" && (
-          <SpeakingInquiryContainer onNavigate={navigateGeneral} onBack={() => {
+          <SpeakingInquiryContainer onNavigate={navigateGeneral} onScrolledChange={setDetailHeaderScrolled} onBack={() => {
             const connectIdx = SECTIONS.findIndex(s => s.key === "connect");
             setHomeInitialIdx(connectIdx > 0 ? connectIdx : 0);
             setPage("home");
@@ -4760,8 +4788,9 @@ export default function App() {
           <AppleHealthPage onBack={() => { setDetailKey("cases"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
       </motion.div>
-      {(page === "work" || page === "workDetail") && (
-        <StickyPageNav activePage="work" detailLabel={detailLabel} compact={page === "workDetail" && detailHeaderScrolled} onNavigate={navigateGeneral} />
+      {navActive && (
+        <StickyPageNav activePage={navActive} parentLabel={navParentLabel} detailLabel={navDetailLabel}
+          compact={navCompact} onNavigate={navigateGeneral} />
       )}
     </div>
     </AccordionCtx.Provider>
