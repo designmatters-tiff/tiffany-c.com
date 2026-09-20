@@ -25,6 +25,9 @@ light-mode-only, a different palette). They've been replaced by `BRAND.md`.
 - **motion** (Framer Motion v12) for animation
 - **lucide-react** for icons
 - Deployed to Vercel; domain via Porkbun
+- **`main-v2` is the working branch and the repo default.** `main` is frozen as
+  a backup. Vercel's Production Branch is a separate setting from GitHub's
+  default — if the live site looks stale, check it points at `main-v2`.
 
 Commands:
 
@@ -73,6 +76,7 @@ browser it degrades to metadata-only shells rather than failing the build.
 ```ts
 type Page = "home" | "work" | "workDetail" | "awards" | "speaking"
           | "coaching" | "connect" | "speakingInquiry" | "businessCase"
+          | "kaiCase" | "appleHealthCase" | "testimonials"
 ```
 
 Detail pages (`workDetail`, `speaking`) also read `detailKey` to know which card
@@ -110,12 +114,31 @@ and branched inline. Every colour decision needs both branches.
 ## Conventions that recur
 
 - **Shrink-on-scroll headers.** Detail pages track `scrollTop > 24` and pass a
-  `compact` / `headerScrolled` flag down to shrink the header and bottom nav
-  together. If you add a detail page, match this.
+  `headerScrolled` flag down to shrink the header. The bottom nav no longer
+  shrinks with it — see below.
+- **The bottom nav is site chrome, not page content.** `App` renders one
+  `StickyPageNav` outside the page-transition layer; pages must not render
+  their own. Inside the transition it faded and scaled back in on every
+  navigation, which read as the whole window reloading.
+- **Mobile chrome is deliberately bare.** The nav is a 44px hamburger pill,
+  bottom left — no name, no page label — and `Breadcrumbs` renders on desktop
+  only. It still emits its empty line on mobile, because the header logomark
+  sits on that line and the heading rides up under the mark without it.
 - **Mobile vs desktop** are often two sibling blocks (`md:hidden` and
-  `hidden md:flex`) rather than one responsive block. Change both.
+  `hidden md:flex`) rather than one responsive block. Change both. The header
+  logomark is the exception: its sizes are CSS custom properties so there is
+  no first-paint flash at the wrong size.
 - **Transitions** are inline, typically `0.25s`–`0.35s ease`.
 - `useIsMobile()` exists for logic that CSS can't express.
+- **The logomark does not animate between pages.** It was briefly a shared
+  layout element; inside an incoming page it rides that page's cross-fade, so
+  it spent most of its travel near-transparent and read as a pop. It fades
+  with its page like everything else.
+- **Contact lists take nested arrays.** An entry in `ContactListPage`'s
+  `items` (or a `SECTIONS` entry's) can be `["LinkedIn", "Instagram"]` to put
+  several destinations on one row. Both the standalone page and the homepage
+  deck render through the same `ContactRow` — they had already drifted apart
+  once when only one was updated.
 
 ## Assets
 
