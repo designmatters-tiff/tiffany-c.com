@@ -129,11 +129,6 @@ on, anything added in the meantime will need its dark half written then.
   `StickyPageNav` outside the page-transition layer; pages must not render
   their own. Inside the transition it faded and scaled back in on every
   navigation, which read as the whole window reloading.
-- **Mobile chrome is deliberately bare.** The nav is a 44px hamburger pill,
-  bottom left — no name, no page label. `Breadcrumbs` does show at every
-  width, on the third-level pages that use it. Whatever occupies that line,
-  something has to: the header logomark sits on it, and the heading rides up
-  under the mark if the row collapses.
 - **Mobile vs desktop** are often two sibling blocks (`md:hidden` and
   `hidden md:flex`) rather than one responsive block. Change both. The header
   logomark is the exception: its sizes are CSS custom properties so there is
@@ -149,6 +144,51 @@ on, anything added in the meantime will need its dark half written then.
   several destinations on one row. Both the standalone page and the homepage
   deck render through the same `ContactRow` — they had already drifted apart
   once when only one was updated.
+
+## Mobile rules
+
+The phone layout is not the desktop one reflowed; several of these decisions
+have each been walked back once already.
+
+- **360px is the narrowest width to check.** Not 390. The tight cases — the
+  eCommerce breadcrumb, the paired social row on Connect — only bite there.
+  375x667 (iPhone SE) is worth a look too: the hero genuinely overflows at
+  that height and the slide scrolls. That is by design, not a bug to fix.
+- **Chrome is deliberately bare.** The bottom nav is a 44px hamburger pill at
+  bottom left — no name, no page label. Both only repeated what the page
+  already said, and cost the full width of the screen to do it.
+- **The eyebrow line is shared, and something must hold it open.** The header
+  logomark sits on that line, centred on it. Whatever else is there —
+  breadcrumbs on a third-level page, a `text-label` eyebrow elsewhere — the
+  row has to keep its height, or the heading rides up underneath the mark.
+  When the breadcrumbs were briefly desktop-only, mobile needed an empty 18px
+  spacer in their place for exactly this reason.
+- **The logomark is 24px on mobile, 28px on desktop.** Mobile centres it on
+  the eyebrow's line rather than hanging it from the top; the tap target stays
+  44px around it. The hover ring is desktop-only — nothing on a phone can
+  hover to reveal it.
+- **44px is the floor for anything tappable**, however small the thing inside
+  it looks.
+- **Keep the hero above the fold.** `HERO_BOTTOM_RESERVE` accounts for the
+  floating nav, its offset and the safe-area inset. Anything added to the hero
+  competes with the body copy for the same screen — check it at 375x667 before
+  assuming it fits.
+
+## Analytics
+
+Vercel Web Analytics, wired in `src/main.tsx` via `<Analytics />` from
+`@vercel/analytics/react`. The component only injects Vercel's own
+`/_vercel/insights/script.js`; that script does the counting, and follows
+`pushState` by itself, so the hand-rolled router needs no wiring.
+
+The tag also ends up in every prerendered HTML file, because `prerender.mjs`
+serialises the live DOM. That is not a double count — `inject()` checks
+`document.head` for an existing tag before adding one, and appends there.
+
+If the dashboard ever shows no pageviews, suspect the catch-all rewrite in
+`vercel.json` (`/(.*)` -> `/index.html`) swallowing the script path. Vercel
+handles `/_vercel/*` ahead of user rewrites, so it should not, but the fix
+would be to exclude it: `"source": "/((?!_vercel/).*)"`.
 
 ## Assets
 
