@@ -976,6 +976,23 @@ function SiteFooter({ variant, gutter = true }: { variant?: "work" | "nda"; gutt
   );
 }
 
+// The fade the site uses wherever content runs under the floating nav: a
+// translucent wash of the page colour with a blur behind it, masked so it
+// dissolves upward into the content. Long pages slide under the bar instead
+// of being cut off at it, and the blur keeps whatever is passing beneath
+// from competing with the nav's own labels.
+//
+// It reaches 24px above the bar, so the dissolve has somewhere to happen.
+const NAV_FADE_MASK = "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)";
+const NAV_FADE_LEAD = 24;
+const navFade = (isDark: boolean): React.CSSProperties => ({
+  backdropFilter: "blur(8px)",
+  WebkitBackdropFilter: "blur(8px)",
+  background: isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)",
+  maskImage: NAV_FADE_MASK,
+  WebkitMaskImage: NAV_FADE_MASK,
+});
+
 // Sits under a page's last line so the copyright clears the floating nav by
 // 16px. Two blocks rather than one: the bar is 64 tall on desktop and a 44px
 // pill on mobile, and a media query cannot be written inline. The 3dvh mirrors
@@ -1565,13 +1582,9 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           left: 80,
           right: 80,
           // Span from slightly above the nav (24px) down to the viewport bottom
-          top: "calc(100% - (5% + 64px + 24px))",
+          top: `calc(100% - (5% + ${64 + NAV_FADE_LEAD}px))`,
           bottom: 0,
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
-          background: isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)",
-          maskImage: "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)",
-          WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)",
+          ...navFade(isDark),
         }} />
 
       <nav className="fixed z-30 hidden md:flex items-stretch h-16 overflow-hidden"
@@ -1636,13 +1649,9 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           left: 0,
           right: 0,
           // Span from slightly above the mobile nav (24px) down to the viewport bottom
-          top: "calc(100% - (5% + env(safe-area-inset-bottom) + 56px + 24px))",
+          top: `calc(100% - (5% + env(safe-area-inset-bottom) + ${56 + NAV_FADE_LEAD}px))`,
           bottom: 0,
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
-          background: isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)",
-          maskImage: "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)",
-          WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)",
+          ...navFade(isDark),
         }} />
 
       {/* While the menu is open the bar collapses to its control and climbs
@@ -3042,7 +3051,6 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
 // would otherwise be visible peeking past the nav's side margins/edges.
 function StickyPageNav({ activePage, tint, onNavigate }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
-  const pageBg = isDark ? "#181410" : "#f8f7f5";
   // Held here rather than in PageBottomNav because the open menu is a z-50
   // overlay: the control has to climb above it to stay the thing you press
   // to close, and the container is what carries the z-index.
@@ -3050,8 +3058,22 @@ function StickyPageNav({ activePage, tint, onNavigate }: { activePage: Page; tin
   const goHome = useContext(GoHomeCtx);
   return (
     <>
-      <div className="fixed inset-x-0 bottom-0 z-20 pointer-events-none"
-        style={{ height: 90, background: `linear-gradient(to bottom, ${pageBg}00 0%, ${pageBg} 65%)` }} />
+      {/* Mobile and desktop separately: the bar is a 44px pill at one
+          breakpoint and a 64px band at the other, and the fade starts from
+          whichever it is. */}
+      <div className="fixed inset-x-0 z-20 pointer-events-none md:hidden"
+        style={{
+          top: `calc(100% - (3% + env(safe-area-inset-bottom) + ${MOBILE_NAV_PILL + NAV_FADE_LEAD}px))`,
+          bottom: 0,
+          ...navFade(isDark),
+        }} />
+      <div className="fixed z-20 pointer-events-none hidden md:block"
+        style={{
+          left: 80, right: 80,
+          top: `calc(100% - (3% + ${64 + NAV_FADE_LEAD}px))`,
+          bottom: 0,
+          ...navFade(isDark),
+        }} />
       {/* Desktop spans the content width; mobile is only as wide as the one
           control it holds, so `right` is released at that breakpoint. */}
       <div className="fixed left-6 right-auto md:left-20 md:right-20 overflow-hidden"
