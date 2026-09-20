@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback, createContext, useContext, Fragment } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft, PiggyBank, Heart, LineChart, Users, Layers } from "lucide-react";
 
 import ahPersona from "@/work/case/applehealth/userpersona.avif";
@@ -18,8 +18,8 @@ import srcScreenMap from "@/work/case/source/source-07-screen-map.avif";
 import srcScreenDash from "@/work/case/source/source-08-screen-dashboard.avif";
 import srcScreenDisplay from "@/work/case/source/source-09-screen-display.avif";
 import srcBright from "@/work/case/source/source-10-bright-theme.avif";
-import srcProduction from "@/work/case/source/source-11-in-production.avif";
 import srcProductionVideo from "@/work/case/source/source-12-in-production.mp4";
+import srcVideoPoster from "@/work/case/source/source-13-video-poster.avif";
 import ftAccount from "@/work/business/FinTech/fintech-01-goplus-account.avif";
 import ftGrowth from "@/work/business/FinTech/fintech-02-aum-growth-2023.avif";
 import ftReviews from "@/work/business/FinTech/fintech-03-appstore-reviews.avif";
@@ -1098,19 +1098,60 @@ function SiteFooter({ gutter = true }: { gutter?: boolean }) {
 //
 // It starts at lg, not md: at 768 a sidebar takes a quarter of the screen
 // from the content, so those widths keep today's layout.
+// Page transition. The mark does not move between pages — it is a fixed layer
+// and the page travels under it — so the page has to carry the motion, or the
+// mark reads as re-drawn on each load rather than as the one thing that
+// stayed. 140px is far enough to read as travel and short enough that neither
+// page is mostly off-screen mid-flight; a full-width slide turns a cross-fade
+// into a carousel, and the two pages are stacked, not sequential.
+//
+// Defined out here, and driven by `custom` rather than by a closure, because
+// the leaving page needs the direction of the move that is leaving it. Read
+// from a closure it gets the value from its own last render, which is the
+// direction of the *previous* navigation — in practice 0, so it stood still
+// and only faded while the incoming page slid in over it.
+const PAGE_SLIDE = 140;
+type PageMotion = { dir: number; drill: boolean };
+const pageVariants = {
+  enter: (c: PageMotion) => c.drill
+    ? { opacity: 0, scale: 0.965, y: 18, x: 0 }
+    : { opacity: 0, scale: 1, y: 0, x: c.dir * PAGE_SLIDE },
+  center: { opacity: 1, scale: 1, y: 0, x: 0 },
+  exit: (c: PageMotion) => c.drill
+    ? { opacity: 0, scale: 1, y: 0, x: 0 }
+    : { opacity: 0, scale: 1, y: 0, x: -c.dir * PAGE_SLIDE },
+};
+
 const RAIL_GUTTER = 80;   // matches the md:px-20 every page starts from
-const RAIL_MARK = 70;
+// The mark is sized and placed off the page heading, not chosen: it stands as
+// tall as the heading's em box and sits on the heading's own baseline, so the
+// two read as one line rather than as a mark floating beside a title.
+//
+// 64px is the heading size on the pages that set the site's rhythm — Work,
+// Awards, Coaching, Connect — and 129px is where their baseline falls. Case
+// study headings are smaller (52px), so their baseline lands at 131 and
+// Testimonials at 137; measured across 1280, 1440 and 1728 the spread is
+// 127–137, close enough that one position serves all of them.
+const RAIL_HEADING_SIZE = 64;
+const RAIL_HEADING_BASELINE = 129;
+// LogoMark draws at 80x112, so its height is 1.4x the width it is given.
+const RAIL_MARK = Math.round(RAIL_HEADING_SIZE / 1.4);
+const RAIL_MARK_TOP = RAIL_HEADING_BASELINE - RAIL_HEADING_SIZE;
 const RAIL_W = `${RAIL_GUTTER + RAIL_MARK}px`;
 
-function IdentityRail({ onNavigate }: { onNavigate: (p: Page) => void }) {
+function IdentityRail({ onNavigate, visible = true }: { onNavigate: (p: Page) => void; visible?: boolean }) {
   const goHome = useContext(GoHomeCtx);
   return (
+    // Never unmounted — only faded. It is the one element that stays put while
+    // pages slide underneath, and an unmount would make it something each page
+    // draws for itself.
     <div className="hidden lg:block fixed top-0 bottom-0 left-0 z-20 pointer-events-none"
-      style={{ width: "var(--rail-w)" }}>
+      style={{ width: "var(--rail-w)", opacity: visible ? 1 : 0,
+               transition: "opacity 0.35s ease", visibility: visible ? "visible" : "hidden" }}>
       <button onClick={() => (goHome ? goHome() : onNavigate("home"))}
         aria-label="Tiffany C. — home"
         className="absolute pointer-events-auto cursor-pointer"
-        style={{ left: RAIL_GUTTER, top: 56, background: "none", border: "none", padding: 0 }}>
+        style={{ left: RAIL_GUTTER, top: RAIL_MARK_TOP, background: "none", border: "none", padding: 0 }}>
         <LogoMark size={RAIL_MARK} />
       </button>
     </div>
@@ -1982,7 +2023,7 @@ const EXPERTISE_CARDS = [
   },
   {
     key: "cases", slug: "case-studies", title: "Case Studies", accent: GOLD, Illustration: IllustrationCases,
-    description: "Product design taken end to end — the individual-contributor work the rest is built on.",
+    description: "Hands-on product design: research, design sprints, prototyping, shipped work.",
     bullets: [
       "Apple Health — Design Challenge",
       "KAI — Mobile app for IoT device control",
@@ -3166,14 +3207,15 @@ function SourceCaseContent() {
             demand management and process automation. SOURCE 1.0 became the version every later one was built on.
           </P>
           {/* The result is the thing moving, not a still of it: the product
-              walkthrough, with the production screen as its poster so the
-              section still reads before anyone presses play. Controls rather
-              than autoplay — it runs nearly two minutes, and it is the last
-              thing on the page rather than something to scroll past. */}
+              walkthrough, postered on the video's own backdrop so the frame
+              belongs to what plays rather than showing an unrelated slide.
+              Controls rather than autoplay — it runs nearly two minutes, and
+              it is the last thing on the page rather than something to scroll
+              past. */}
           <figure style={{ margin: '28px 0 0' }}>
             <video
               src={srcProductionVideo}
-              poster={srcProduction}
+              poster={srcVideoPoster}
               controls
               playsInline
               preload="metadata"
@@ -6454,6 +6496,7 @@ export default function App() {
   const drillIn = page === "workDetail" || page === "businessCase" || page === "kaiCase"
     || page === "appleHealthCase" || page === "brandPerceptionCase" || page === "sourceCase" || page === "finTechCase";
 
+
   useEffect(() => {
     setDetailHeaderScrolled(false);
   }, [page, detailKey]);
@@ -6488,6 +6531,17 @@ export default function App() {
     : page === "awards" || page === "speaking" ? "awards"
     : page === "speakingInquiry" ? "connect"
     : page;
+  // Which way the page travels. The mark does not move between pages — it is
+  // a fixed layer and the page slides under it — so the page has to carry the
+  // motion, or the mark reads as re-drawn on each load rather than as the one
+  // thing that stayed. Direction follows the nav's own order, the same left to
+  // right the homepage deck runs in, so moving forward through the bar sends
+  // the new page in from the right and going back sends it in from the left.
+  const navIdx = navActive ? SECTION_ORDER.indexOf(navActive as typeof SECTION_ORDER[number]) : 0;
+  const prevNavIdx = useRef(navIdx);
+  const slideDir = navIdx === prevNavIdx.current ? 0 : navIdx > prevNavIdx.current ? 1 : -1;
+  useEffect(() => { prevNavIdx.current = navIdx; }, [navIdx]);
+  const pageMotion = { dir: slideDir, drill: drillIn };
   const toggleDark = useCallback(() => setIsDark(d => !d), []);
 
   // Router state -> address bar. The guard matters: without it the first
@@ -6545,10 +6599,12 @@ export default function App() {
           a white case study. Padding the page instead of insetting it would
           do the same in one line, but the pages whose roots are absolutely
           positioned ignore it. */}
+      <AnimatePresence initial={false} custom={pageMotion}>
       <motion.div key={motionKey} className={`absolute inset-0${railOn ? " lg:left-[var(--rail-w)]" : ""}`}
         style={{ zIndex: 1, transformOrigin: "50% 0%" }}
-        initial={drillIn ? { opacity: 0, scale: 0.965, y: 18 } : { opacity: 0, x: 0 }}
-        animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
+        custom={pageMotion}
+        variants={pageVariants}
+        initial="enter" animate="center" exit="exit"
         transition={{ duration: drillIn ? 0.5 : 0.45, ease: [0.42, 0, 0.58, 1] }}>
         {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} />}
         {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} /></div>}
@@ -6594,7 +6650,14 @@ export default function App() {
           <FinTechPage onBack={() => { setDetailKey("business"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
       </motion.div>
-      {railOn && <IdentityRail onNavigate={navigateGeneral} />}
+      </AnimatePresence>
+      {/* Outside the transition layer, and mounted for every page including
+          the homepage, so it is one element that persists rather than one
+          drawn again per route. On the homepage the hero carries its own mark,
+          so this one fades out rather than unmounting — unmounted, it popped
+          back on the first step away from home, which is the blink that made
+          the whole thing read as reloaded. */}
+      <IdentityRail onNavigate={navigateGeneral} visible={railOn} />
       {navActive && (
         <StickyPageNav activePage={navActive} onNavigate={navigateGeneral}
           tint={page === "speakingInquiry" || page === "speaking" ? GOLD : undefined}
