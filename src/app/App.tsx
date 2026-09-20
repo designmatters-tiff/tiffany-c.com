@@ -301,12 +301,13 @@ function LogoMark({ size = 70, color = GOLD, className }: { size?: number; color
 // line rather than hanging past it, which at that size read as adrift.
 //
 // The responsive sizes are CSS, not JS, so there is no first-paint flash at
-// the wrong size: --logo-size carries the per-page desktop value into the
-// md: classes.
+// the wrong size: --logo-size carries the desktop value into the md: classes.
+// Every page takes the default 28; `size` stays a prop for the odd page that
+// needs its own, but nothing overrides it today.
 const EYEBROW_LINE = 16;   // a text-label line: 0.75rem at 1.2, plus the breadcrumb's padding
 const MOBILE_MARK = 24;
 const MOBILE_HIT = 44;     // the tap target, larger than the mark it holds
-function HeaderLogo({ onNavigate, color = GOLD, size = 40, ring = 48 }: { onNavigate: (p: Page) => void; color?: string; size?: number; ring?: number }) {
+function HeaderLogo({ onNavigate, color = GOLD, size = 28, ring = 48 }: { onNavigate: (p: Page) => void; color?: string; size?: number; ring?: number }) {
   const [active, setActive] = useState(false);
   const goHome = useContext(GoHomeCtx);
   // Circumference of the drawn circle — the stroke sits on the path, so the
@@ -2472,7 +2473,7 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
           paddingBottom: headerScrolled ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
-          <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} size={28} />
+          <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
           <Breadcrumbs color={headingColor} items={[
             { label: "Work", onClick: () => onNavigate("work") },
             { label: "Case Studies", onClick: onBack },
