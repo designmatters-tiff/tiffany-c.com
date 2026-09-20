@@ -270,13 +270,39 @@ function LogoMark({ size = 70, color = GOLD }: { size?: number; color?: string }
 // The mark, top right of a page header, on the eyebrow's line. Homepage keeps
 // its own large one in the hero; every other page gets this. 40px tall inside
 // a 40x40 target — the mark is 1:1.4, so height is what's held to 40.
-function HeaderLogo({ onNavigate, color = GOLD }: { onNavigate: (p: Page) => void; color?: string }) {
+function HeaderLogo({ onNavigate, color = GOLD, size = 40 }: { onNavigate: (p: Page) => void; color?: string; size?: number }) {
   return (
     <button onClick={() => onNavigate("home")} aria-label="Tiffany C. — home"
       className="absolute right-6 md:right-20 top-10 md:top-14 flex items-start justify-end cursor-pointer z-10"
-      style={{ background: "none", border: "none", padding: 0, width: 40, height: 40 }}>
-      <LogoMark size={28} color={color} />
+      style={{ background: "none", border: "none", padding: 0, width: size, height: size }}>
+      {/* The mark is 1:1.4, so height is what's held to the given size. */}
+      <LogoMark size={Math.round(size / 1.4)} color={color} />
     </button>
+  );
+}
+
+
+// Breadcrumbs for a third-level page — Work < Case Studies < (this page).
+// A single back link tells you how to leave but not where you are; at three
+// levels deep that matters. Each crumb is its own control: the chevron slides
+// a little on hover and the label takes the site's underline sweep, and the
+// trail stitches itself in left to right on arrival so it reads as a path
+// rather than appearing all at once.
+function Breadcrumbs({ items, color }: { items: { label: string; onClick: () => void }[]; color: string }) {
+  return (
+    <nav aria-label="Breadcrumb" className="flex items-center flex-wrap mb-4" style={{ marginLeft: -2 }}>
+      {items.map((it, i) => (
+        <motion.button key={it.label} onClick={it.onClick}
+          initial={{ opacity: 0, x: -8 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.45, delay: 0.06 + i * 0.09, ease: [0.42, 0, 0.58, 1] }}
+          className="crumb group flex items-center gap-1.5 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] cursor-pointer"
+          style={{ background: "none", border: "none", padding: "2px 10px 2px 2px", color, transition: "color 0.3s ease" }}>
+          <ChevronLeft size={12} strokeWidth={1.5} className="crumb-chevron flex-shrink-0" />
+          <span className="link-underline whitespace-nowrap">{it.label}</span>
+        </motion.button>
+      ))}
+    </nav>
   );
 }
 
@@ -2370,12 +2396,11 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
           paddingBottom: headerScrolled ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
-          <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
-          <button onClick={onBack}
-            className="flex items-center gap-2 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
-            style={{ color: headingColor, transition: "color 0.3s ease" }}>
-            <ChevronLeft size={12} strokeWidth={1.5} /> CASE STUDIES
-          </button>
+          <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} size={24} />
+          <Breadcrumbs color={headingColor} items={[
+            { label: "Work", onClick: () => onNavigate("work") },
+            { label: "Case Studies", onClick: onBack },
+          ]} />
           <h1 className="font-['Museo',sans-serif] font-light"
             style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: headingColor, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
             KAI: Mobile app for IoT devices control
@@ -2741,11 +2766,10 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
           <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
-          <button onClick={onBack}
-            className="flex items-center gap-2 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
-            style={{ color: onDark ? "#fff" : GOLD, transition: "color 0.3s ease" }}>
-            <ChevronLeft size={12} strokeWidth={1.5} /> CASE STUDIES
-          </button>
+          <Breadcrumbs color={onDark ? "#fff" : GOLD} items={[
+            { label: "Work", onClick: () => onNavigate("work") },
+            { label: "Case Studies", onClick: onBack },
+          ]} />
           <h1 className="font-['Museo',sans-serif] font-light"
             style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: onDark ? '#fff' : GOLD, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
             Apple Health: Design Challenge
@@ -4413,11 +4437,10 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
           <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
-          <button onClick={onBack}
-            className="flex items-center gap-2 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
-            style={{ color: onDark ? "#fff" : GOLD, transition: "color 0.3s ease" }}>
-            <ChevronLeft size={12} strokeWidth={1.5} /> BUSINESS ACUMEN
-          </button>
+          <Breadcrumbs color={onDark ? "#fff" : GOLD} items={[
+            { label: "Work", onClick: () => onNavigate("work") },
+            { label: "Business Acumen", onClick: onBack },
+          ]} />
           <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: onDark ? '#fff' : GOLD, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>eCommerce: Behavioural UX Design</h1>
         </div>
 
@@ -4728,7 +4751,7 @@ export default function App() {
           <div className="absolute inset-0"><TestimonialsPage onNavigate={navigateGeneral} /></div>
         )}
         {page === "businessCase" && (
-          <BusinessCasePage onBack={() => setPage('work')} onNavigate={navigateGeneral} />
+          <BusinessCasePage onBack={() => { setDetailKey("business"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
         {page === "kaiCase" && (
           <KaiCasePage onBack={() => { setDetailKey("cases"); setPage("workDetail"); }} onNavigate={navigateGeneral} />

@@ -203,9 +203,27 @@
 
   @media (prefers-reduced-motion: reduce) {
     .link-underline::after,
-    a:not(.no-link-underline):not(:has(.link-underline))::after {
+    a:not(.no-link-underline):not(:has(.link-underline))::after,
+    .crumb-chevron {
       transition: none;
     }
+    .crumb:hover .crumb-chevron,
+    .crumb:focus-visible .crumb-chevron {
+      transform: none;
+    }
+  }
+
+  /* Breadcrumb chevrons ease back a step on hover — the direction the crumb
+     takes you. Paired with the underline sweep the links already have, so the
+     whole crumb answers rather than just the word. */
+  .crumb-chevron {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    opacity: 0.7;
+  }
+  .crumb:hover .crumb-chevron,
+  .crumb:focus-visible .crumb-chevron {
+    transform: translateX(-3px);
+    opacity: 1;
   }
 
   /* Gold CTA button — matches Figma states (Active/Hover/Onclick/Focused) */
