@@ -377,6 +377,34 @@ function Breadcrumbs({ items, color }: { items: { label: string; onClick: () => 
   );
 }
 
+// The menu control is one symbol in two states, not two icons swapped: the
+// two rules slide together and cross. Morphing in place is what says "this is
+// still the button you pressed, and now it closes" — a separate × appearing
+// somewhere else has to be found again.
+//
+// Geometry matches HamburgerIcon exactly (two 21x1 bars, 8 apart) so the
+// closed state is unchanged; the 24x24 box is only there to give the rotated
+// bars room. Crossed, the arms span ~15px — near enough to the 20px lucide
+// X this replaces that nothing jumps.
+function MenuIcon({ open = false, color = "white" }: { open?: boolean; color?: string }) {
+  const bar: React.CSSProperties = {
+    fill: color,
+    transformBox: "fill-box",
+    transformOrigin: "center",
+    transition: "transform 0.34s cubic-bezier(0.4, 0, 0.2, 1)",
+  };
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="menu-icon flex-shrink-0" aria-hidden="true">
+      {/* Each bar rotates about its own centre, then travels the 4px to the
+          icon's centre — so both land on the same line and cross. */}
+      <rect x="1.5" y="7.5" width="21" height="1" rx="0.5"
+        style={{ ...bar, transform: open ? "translateY(4px) rotate(45deg)" : "none" }} />
+      <rect x="1.5" y="15.5" width="21" height="1" rx="0.5"
+        style={{ ...bar, transform: open ? "translateY(-4px) rotate(-45deg)" : "none" }} />
+    </svg>
+  );
+}
+
 function HamburgerIcon({ color = "white" }: { color?: string }) {
   return (
     <svg width="22" height="9" viewBox="0 0 22 9" fill="none" className="flex-shrink-0">
@@ -395,6 +423,7 @@ function MobileMenu({
   onGoTo,
   onNavigate,
   forceScroll = false,
+  hideClose = false,
 }: {
   open: boolean;
   activeIdx: number;
@@ -407,6 +436,9 @@ function MobileMenu({
   // top-level route. PageBottomNav (used on standalone pages with no
   // track to scroll) keeps the page-aware branching below.
   forceScroll?: boolean;
+  // The nav's own control sits above this overlay and morphs into a close,
+  // so the footer's separate × would be a second way to do the same thing.
+  hideClose?: boolean;
 }) {
   const isDark = useContext(DarkModeCtx);
   // read unconditionally — the toggle below is behind a flag, and a hook
@@ -477,9 +509,11 @@ function MobileMenu({
           across the screen between states. Bright/dark took the right until
           THEME_TOGGLE_ENABLED was switched off. */}
       <div className="relative z-10 px-6 pb-8 flex items-center justify-between">
-        <button onClick={onClose} aria-label="Close menu" style={{ background: "none", border: "none", padding: 0 }}>
-          <X size={20} strokeWidth={1} color={closeColor} />
-        </button>
+        {!hideClose && (
+          <button onClick={onClose} aria-label="Close menu" style={{ background: "none", border: "none", padding: 0 }}>
+            <X size={20} strokeWidth={1} color={closeColor} />
+          </button>
+        )}
         {THEME_TOGGLE_ENABLED && (
           <DarkModeToggle isDark={isDark} onToggle={toggleDark} variant="inline" />
         )}
@@ -1598,8 +1632,13 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)",
         }} />
 
-      <motion.nav className="fixed z-30 md:hidden flex items-center px-5 overflow-hidden"
+      {/* While the menu is open the bar collapses to its control and climbs
+          above the overlay, so the symbol you pressed is the symbol that
+          closes it. The name and the section label go with the width — the
+          open menu lists both already. */}
+      <motion.nav className="fixed md:hidden flex items-center overflow-hidden"
         style={{
+          zIndex: menuOpen ? 60 : 30,
           bottom: "calc(5% + env(safe-area-inset-bottom))", left: 24,
           borderRadius: 0,
           background: navGradient(isDark),
@@ -1608,21 +1647,25 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}
         animate={{
-          width:  navShrunk ? navBtn.w + NAV_PAD_X * 2 : "calc(100% - 48px)",
-          height: navShrunk ? navBtn.h + NAV_PAD_Y * 2 : 56,
+          width:  menuOpen ? MOBILE_NAV_PILL : navShrunk ? navBtn.w + NAV_PAD_X * 2 : "calc(100% - 48px)",
+          height: menuOpen ? MOBILE_NAV_PILL : navShrunk ? navBtn.h + NAV_PAD_Y * 2 : 56,
+          paddingLeft:  menuOpen ? 0 : NAV_PAD_X,
+          paddingRight: menuOpen ? 0 : NAV_PAD_X,
         }}
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
         <button
           ref={navBtnRef}
-          onClick={() => setMenuOpen(true)}
-          className="flex items-center gap-3"
-          aria-label="Open navigation">
-          <HamburgerIcon color="white" />
-          <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap">
-            Tiffany C.
-          </span>
+          onClick={() => setMenuOpen(!menuOpen)}
+          className={`flex items-center gap-3 ${menuOpen ? "w-full justify-center" : ""}`}
+          aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen}>
+          <MenuIcon open={menuOpen} color="white" />
+          {!menuOpen && (
+            <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap">
+              Tiffany C.
+            </span>
+          )}
         </button>
-        {!navShrunk && (
+        {!navShrunk && !menuOpen && (
           <>
             <div className="flex-1" />
             {activeIdx > 0 && (
@@ -1637,6 +1680,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
       {/* Mobile menu overlay */}
       <MobileMenu
         open={menuOpen}
+        hideClose
         activeIdx={activeIdx}
         onClose={() => setMenuOpen(false)}
         onGoTo={(i) => { goTo(i); setMenuOpen(false); }}
@@ -2962,16 +3006,32 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
 function StickyPageNav({ activePage, onNavigate }: { activePage: Page; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
   const pageBg = isDark ? "#181410" : "#f8f7f5";
+  // Held here rather than in PageBottomNav because the open menu is a z-50
+  // overlay: the control has to climb above it to stay the thing you press
+  // to close, and the container is what carries the z-index.
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <>
       <div className="fixed inset-x-0 bottom-0 z-20 pointer-events-none"
         style={{ height: 90, background: `linear-gradient(to bottom, ${pageBg}00 0%, ${pageBg} 65%)` }} />
       {/* Desktop spans the content width; mobile is only as wide as the one
           control it holds, so `right` is released at that breakpoint. */}
-      <div className="fixed left-6 right-auto md:left-20 md:right-20 z-30 overflow-hidden"
-        style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
-        <PageBottomNav activePage={activePage} onNavigate={onNavigate} />
+      <div className="fixed left-6 right-auto md:left-20 md:right-20 overflow-hidden"
+        style={{ zIndex: menuOpen ? 60 : 30, bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+        <PageBottomNav activePage={activePage} onNavigate={onNavigate} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
       </div>
+      {/* Sibling of the container, not a child of it. The container takes a
+          z-index while the menu is open, which makes it a stacking context —
+          nested here, the overlay would always paint above the control that
+          closes it, however high the container climbed. */}
+      <MobileMenu
+        open={menuOpen}
+        hideClose
+        activeIdx={SECTIONS.findIndex(s => s.page === activePage)}
+        onClose={() => setMenuOpen(false)}
+        onGoTo={() => { onNavigate("home"); setMenuOpen(false); }}
+        onNavigate={(p) => { onNavigate(p); setMenuOpen(false); }}
+      />
     </>
   );
 }
@@ -2979,13 +3039,16 @@ function StickyPageNav({ activePage, onNavigate }: { activePage: Page; onNavigat
 function PageBottomNav({
   activePage,
   onNavigate,
+  menuOpen,
+  setMenuOpen,
 }: {
   activePage: Page;
   onNavigate: (p: Page) => void;
+  menuOpen: boolean;
+  setMenuOpen: (v: boolean) => void;
 }) {
   const isDark = useContext(DarkModeCtx);
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
-  const [menuOpen, setMenuOpen]     = useState(false);
   const isMobile = useIsMobile();
 
   const NAV_ITEMS = [
@@ -3038,20 +3101,13 @@ function PageBottomNav({
           bar used to span the screen carrying "Tiffany C." and the page's
           own name; on a phone both only repeat what the page already says,
           and the width they needed was the width of the screen. */}
-      <button onClick={() => setMenuOpen(true)} aria-label="Open navigation"
+      <button onClick={() => setMenuOpen(!menuOpen)}
+        aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen}
         className="md:hidden flex items-center justify-center"
         style={{ background: navGradient(isDark), width: MOBILE_NAV_PILL, height: MOBILE_NAV_PILL, border: "none", padding: 0 }}>
-        <HamburgerIcon />
+        <MenuIcon open={menuOpen} />
       </button>
 
-      {/* Mobile overlay */}
-      <MobileMenu
-        open={menuOpen}
-        activeIdx={SECTIONS.findIndex(s => s.page === activePage)}
-        onClose={() => setMenuOpen(false)}
-        onGoTo={() => { onNavigate("home"); setMenuOpen(false); }}
-        onNavigate={(p) => { onNavigate(p); setMenuOpen(false); }}
-      />
     </>
   );
 }

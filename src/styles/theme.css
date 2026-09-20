@@ -205,7 +205,8 @@
     .link-underline::after,
     a:not(.no-link-underline):not(:has(.link-underline))::after,
     .crumb-chevron,
-    .logo-ring circle {
+    .logo-ring circle,
+    .menu-icon rect {
       transition: none;
     }
     .crumb:hover .crumb-chevron,
