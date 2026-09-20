@@ -1954,8 +1954,8 @@ function KaiCaseContent() {
   const META: [string, React.ReactNode][] = [
     ["Year", "August – October 2019"],
     ["Client", (
-      <a href="https://edge.plus-solar.com.my/kai" target="_blank" rel="noopener noreferrer"
-        className="link-underline" style={{ color: fg }}>Plus Xnergy Edge</a>
+      <a href="https://www.plusxnergy.com/" target="_blank" rel="noopener noreferrer"
+        className="link-underline" style={{ color: fg }}>Plus Xnergy</a>
     )],
     ["Goal", "Monitor and manage energy use in real time"],
     ["Scope", "Design sprint facilitation, design strategy, UX & UI design"],
