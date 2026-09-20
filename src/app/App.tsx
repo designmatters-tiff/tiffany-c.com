@@ -1054,7 +1054,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
   // width leaves dead space on the right as soon as the name or the font
   // metrics change. Seeded at the current measured value so the first frame
   // is already close.
-  const navBtnRef = useRef<HTMLButtonElement | null>(null);
+  const navBtnRef = useRef<HTMLSpanElement | null>(null);
   const [navBtn, setNavBtn] = useState({ w: 94, h: 20 });
   useEffect(() => {
     const el = navBtnRef.current;
@@ -1667,24 +1667,32 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           // width is only ever a hit area.
           width:  menuOpen ? NAV_PAD_X * 2 + MENU_ICON_SIZE
                 : navShrunk ? navBtn.w + NAV_PAD_X * 2 : "calc(100% - 48px)",
-          height: navShrunk ? navBtn.h + NAV_PAD_Y * 2 : 56,
+          // Minimised takes the same 44 the standalone pill does, rather than
+          // a height derived from the control inside it. Derived, it grew with
+          // the button's tap padding and came out at 68 — taller than the 56
+          // it was supposedly shrinking from.
+          height: navShrunk ? MOBILE_NAV_PILL : 56,
         }}
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
         <button
-          ref={navBtnRef}
           onClick={() => setMenuOpen(!menuOpen)}
-          className="flex items-center gap-3"
+          className="flex items-center"
           // Padding out, margin back in: the tap target reaches 44 without the
           // icon moving a pixel. Open, the button holds nothing but the 24px
           // symbol, which is well under the floor on its own.
           style={{ padding: 10, margin: -10 }}
           aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen}>
-          <MenuIcon open={menuOpen} color={menuOpen ? (isDark ? "white" : INK) : "white"} />
-          {!menuOpen && (
-            <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap">
-              Tiffany C.
-            </span>
-          )}
+          {/* The measurement sits on the content, not the button: the button
+              carries tap padding, and the minimised width is meant to be the
+              width of what you can see. */}
+          <span ref={navBtnRef} className="flex items-center gap-3">
+            <MenuIcon open={menuOpen} color={menuOpen ? (isDark ? "white" : INK) : "white"} />
+            {!menuOpen && (
+              <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap">
+                Tiffany C.
+              </span>
+            )}
+          </span>
         </button>
         {!navShrunk && !menuOpen && (
           <>
