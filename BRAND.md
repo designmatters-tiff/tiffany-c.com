@@ -183,8 +183,10 @@ size, but none clears 4.5:1 — so none may be reused for body copy.
 Section accents (eyebrows, items, rules) are separate: Work bronze/grey, Awards
 blue `#5070A0`, Coaching and Connect purple-pink `#9B5A88`.
 
-Every colour decision must handle **both light and dark mode** — read `isDark`
-from `DarkModeCtx` and branch.
+**The site is light-only.** Dark mode is switched off at
+`THEME_TOGGLE_ENABLED` and no visitor can reach it, so a colour decision needs
+one value, not two. Existing `isDark` branches stay — they resolve to the light
+value — but don't add new ones.
 
 ### Type
 

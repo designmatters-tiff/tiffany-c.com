@@ -108,8 +108,17 @@ Styling is Tailwind utilities plus inline `style={{}}` for anything dynamic
 (dark mode, transitions, computed sizes). Follow that pattern — it's consistent
 throughout and mixing in a different approach will look out of place.
 
-**Dark mode** is `DarkModeCtx`, read via `const isDark = useContext(DarkModeCtx)`
-and branched inline. Every colour decision needs both branches.
+**Dark mode is dormant — do not build for it.** `THEME_TOGGLE_ENABLED` is
+`false`, there is no way for a visitor to turn it on, and the site ships
+light-only. New work takes the light value and stops there; don't write an
+`isDark` branch, and don't spend a verification pass on a theme nobody can
+reach.
+
+The machinery stays where it is: `DarkModeCtx` still exists, `isDark` still
+reads from it, and the branches already scattered through `App.tsx` are
+harmless — `isDark` is permanently `false`, so they resolve to the light value.
+Leave them be rather than unpicking them. If the toggle is ever switched back
+on, anything added in the meantime will need its dark half written then.
 
 ## Conventions that recur
 
