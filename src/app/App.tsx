@@ -128,7 +128,7 @@ const HEADING_COLOUR: Record<string, string> = Object.fromEntries(
   ]),
 );
 
-type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "kaiCase" | "appleHealthCase" | "testimonials";
+type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "kaiCase" | "appleHealthCase" | "brandPerceptionCase" | "testimonials";
 
 // ─── Dark mode context ────────────────────────────────────────────
 const DarkModeCtx = createContext(false);
@@ -951,7 +951,7 @@ function ContactRow({ row, accent, itemColor, linkColor, borderColor, onNavigate
 // `gutter={false}` where the page already wraps its content in the px-6
 // md:px-20 inset — without it the line indents twice and stops lining up
 // with the copy above it.
-function SiteFooter({ variant, gutter = true }: { variant?: "work"; gutter?: boolean }) {
+function SiteFooter({ variant, gutter = true }: { variant?: "work" | "nda"; gutter?: boolean }) {
   const isDark = useContext(DarkModeCtx);
   const year = new Date().getFullYear();
   return (
@@ -967,7 +967,9 @@ function SiteFooter({ variant, gutter = true }: { variant?: "work"; gutter?: boo
           // white barely above the background in dark.
           color: isDark ? "rgba(255,255,255,0.35)" : "rgba(102,102,96,0.45)",
         }}>
-        © {year} Tiffany Chew{variant === "work" && ". Case study content shared with permission. Client data and trademarks remain the property of their respective owners."}
+        © {year} Tiffany Chew
+        {variant === "work" && ". Case study content shared with permission. Client data and trademarks remain the property of their respective owners."}
+        {variant === "nda" && ". Shared under NDA for review purposes only, not for redistribution. Client data and trademarks remain the property of their respective owners."}
       </p>
     </div>
   );
@@ -1790,8 +1792,8 @@ const EXPERTISE_CARDS = [
   },
   {
     key: "ux", slug: "product-ux-strategies", title: "Product & UX Strategies", accent: "#5070A0", Illustration: IllustrationUX,
-    description: "Led 0-to-1 enterprise SaaS and scaled global platforms used by millions daily.",
-    bullets: ["Built UX Research function & company-wide NPS benchmarks from scratch", "Multi-platform, multi-brand design system adhering to accessibility standards", "End-to-end product design: discovery → delivery across fintech, retail & SaaS"],
+    description: "Setting design direction and the systems to measure whether it worked, from 0-to-1 SaaS to platforms used by millions daily.",
+    bullets: ["Brand Perception & UX Strategy — TNG eWallet (passcode required)", "Built UX Research function & company-wide NPS benchmarks from scratch", "Multi-platform, multi-brand design system adhering to accessibility standards", "End-to-end product design: discovery → delivery across fintech, retail & SaaS"],
   },
   {
     key: "people", slug: "people-process", title: "People & Process", accent: "#5070A0", Illustration: IllustrationPeople,
@@ -1918,11 +1920,19 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
           ))}
           {card.bullets.map(b => {
             const isSpecial = b === "eCommerce: Behavioural UX Design (passcode required)";
+            const isBrand = b === "Brand Perception & UX Strategy — TNG eWallet (passcode required)";
             const isKai = b === "KAI — Mobile app for IoT device control";
             const isApple = b === "Apple Health — Design Challenge";
             return (
               <li key={b} className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: bodyText }}>
-                {isApple ? (
+                {isBrand ? (
+                  <button onClick={() => onNavigate('brandPerceptionCase')}
+                    className="flex items-start gap-2 text-left"
+                    style={{ background: 'none', border: 'none', padding: 0, color: linkColor, cursor: 'pointer', font: 'inherit' }}>
+                    <span className="mt-0.5 flex-shrink-0">—</span>
+                    <span className="link-underline">{b}</span>
+                  </button>
+                ) : isApple ? (
                   <button onClick={() => onNavigate('appleHealthCase')}
                     className="flex items-start gap-2 text-left"
                     style={{ background: 'none', border: 'none', padding: 0, color: linkColor, cursor: 'pointer', font: 'inherit' }}>
@@ -4644,6 +4654,289 @@ function BusinessCaseContent() {
   );
 }
 
+// ─── Brand Perception & UX Strategy (TNG eWallet) ──────────────────
+//
+// Built on the KAI case study's shapes — the same META grid, section rule,
+// Museo h2, 68ch measure, Label and Fig — behind the eCommerce case's
+// passcode gate.
+
+const BP_SECTIONS: { id: string; label: string }[] = [
+  { id: "bp-overview", label: "Overview" },
+  { id: "bp-problem",  label: "The Problem" },
+  { id: "bp-strategy", label: "Strategy" },
+  { id: "bp-product",  label: "In the Product" },
+  { id: "bp-results",  label: "Results" },
+];
+
+function BrandPerceptionContent() {
+  const isDark = useContext(DarkModeCtx);
+  const fg   = GOLD;
+  const sub  = isDark ? "rgba(255,255,255,0.75)" : DIM;
+  const body = isDark ? "rgba(255,255,255,0.72)" : DIM;
+  const rule = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
+  const ink  = isDark ? "white" : INK;
+  const MEASURE = '68ch';
+  const FIGURE_MAX = 760;
+
+  const META: [string, React.ReactNode][] = [
+    ["Year", "January – December 2024"],
+    ["Client", "TNG Digital (TNG eWallet)"],
+    ["Goal", "Shift perception beyond payments and tolls"],
+    ["Scope", "Brand perception framework, UX strategy, cross-functional roadmap, measurement design"],
+    ["Role", "Head of Product Design & UX Research"],
+    ["Team size", "TBC"],
+  ];
+
+  // Stands in for artwork that lands in the next pass. A dashed outline in
+  // the section rule's own colour, holding its ratio — not a grey block,
+  // which reads as an image that failed to load.
+  const FigPlaceholder = ({ label, ratio = "16/9", max = FIGURE_MAX }: { label: string; ratio?: string; max?: number }) => (
+    <div style={{ margin: '28px 0 0', width: '100%', maxWidth: max }}>
+      <div className="flex items-center justify-center"
+        style={{ aspectRatio: ratio, border: `1px dashed ${rule}`, borderRadius: 8, background: 'transparent', padding: 16 }}>
+        <span className="font-['Nunito_Sans',sans-serif] text-small text-center" style={{ color: DIM }}>{label}</span>
+      </div>
+    </div>
+  );
+
+  const Label = ({ children }: { children: React.ReactNode }) => (
+    <h3 className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{children}</h3>
+  );
+
+  const P = ({ children, top = 8 }: { children: React.ReactNode; top?: number }) => (
+    <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: top, maxWidth: MEASURE }}>{children}</p>
+  );
+
+  // Section heads all carry the same rule, spacing and Museo gold.
+  const Section = ({ id, children }: { id: string; children: React.ReactNode }) => (
+    <section id={id} style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+      {children}
+    </section>
+  );
+
+  const PRIORITISATION: [string, string, string][] = [
+    ["01", "Desirability", "NPS and brand perception feedback, CES tickets, UX audit"],
+    ["02", "Reach", "Traffic flow and user reach"],
+    ["03", "Impact", "The sum of the two, used to sequence"],
+  ];
+
+  // Each block is title, figure, result, learning — so the next one is an
+  // entry in this array rather than another hand-built section.
+  const IN_PRODUCT: { title: string; body: string; result?: string; learning?: string; figure: string }[] = [
+    {
+      title: "Keyword seeding",
+      body: "Seeded the phrase “for safety” into copy that already existed, rather than writing new screens.",
+      result: "Security perception rose 13% over the quarter.",
+      learning: "Exposing users to the same stimulus repeatedly across touchpoints shifts perception. Small edits to legacy copy carried more weight than new features did.",
+      figure: "Before / after copy comparison",
+    },
+    {
+      title: "In-app education",
+      body: "Dynamic banners and push notifications in three languages, explaining what we were doing to keep users' money safe.",
+      result: "Push CTR between 0.94% and 3.45% across three April campaigns.",
+      learning: "Copy naming a specific benefit outperformed general reassurance. “Safe payments without entering your PIN” beat “keep your money safe.”",
+      figure: "Trilingual banner set",
+    },
+    {
+      title: "Email education",
+      body: "Educating users on checking transaction details before approving.",
+      result: "26.24% open rate across 2.9 million sends. Perception of “safe to transact” rose 12%.",
+      learning: "An education email moved a perception metric, not only an engagement one.",
+      figure: "Email and banner set",
+    },
+    {
+      title: "Onboarding revamp",
+      body: "Rewrote the onboarding sliders away from toll and payment messaging onto the new pillars: convenient, confident, rewarding. Turned around in ten days.",
+      figure: "Onboarding slider set",
+    },
+  ];
+
+  const RESULTS: [string, string, string][] = [
+    ["Security", "+13%", "beat target"],
+    ["Financial Services", "+27%", "beat target"],
+    ["Sustainability", "+20%", "beat target"],
+    ["Convenience", "flat", "missed target"],
+  ];
+
+  return (
+    <div className="relative w-full" style={{ minHeight: '100dvh', background: 'transparent' }}>
+      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10" style={{ maxWidth: 'max(900px, 80%)' }}>
+
+        <dl id="bp-overview" className="grid gap-x-6 gap-y-6"
+          style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(128px, 1fr))', margin: 0, scrollMarginTop: 140 }}>
+          {META.map(([label, value]) => (
+            <div key={label}>
+              <dt className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{label}</dt>
+              <dd className="font-['Nunito_Sans',sans-serif]" style={{ color: body, margin: '6px 0 0' }}>{value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        {/* ── The problem ── */}
+        <Section id="bp-problem">
+          <h2 className="font-['Museo',sans-serif] font-light"
+            style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.5rem)', lineHeight: 1.15, margin: 0 }}>
+            <Figures>Three of four brand perception pillars beat target in six months</Figures>
+          </h2>
+          <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+            <Figures>A 23-million-user wallet that people thought of as a toll company.</Figures>
+          </p>
+
+          <div className="grid gap-8 md:grid-cols-2" style={{ marginTop: 32, maxWidth: `calc(${MEASURE} * 2)` }}>
+            <div>
+              <Label>What users believed</Label>
+              <P>Users saw us as a payment and toll company. Most were unaware of any product or service beyond payment.</P>
+            </div>
+            <div>
+              <Label>What they did</Label>
+              <P>Reload just enough to use, just in time. They would not park money in the wallet even when the rate beat a fixed deposit.</P>
+            </div>
+          </div>
+
+          <P top={32}>
+            The gap between those two is where the work sat. A payment company gets used. A financial
+            service gets trusted, and trust is a perception problem before it is a product one.
+          </P>
+          <P top={16}>
+            How might we make the app a default choice that Malaysians, and people beyond Malaysia,
+            would want to use?
+          </P>
+        </Section>
+
+        {/* ── Strategy ── */}
+        <Section id="bp-strategy">
+          <Label>Four pillars</Label>
+          <P>
+            A nested model that separates how users feel from what they use. Convenience and security
+            as the emotional layer, payment and banking services as the functional layer, and social
+            responsibility inside that.
+          </P>
+          <P top={16}>
+            The value proposition it produced: the convenient and secure daily app to save, earn and
+            spend for people in Malaysia.
+          </P>
+          <FigPlaceholder label="Four-pillar nested diagram" ratio="1/1" max={560} />
+
+          <div style={{ marginTop: 40 }}>
+            <Label>Two principles</Label>
+            <P>
+              <strong style={{ color: ink, fontWeight: 600 }}>1. Perception shift via user journey.</strong>{' '}
+              Working from the peak-end rule: the lowest point in a journey shapes how the whole
+              experience is remembered, so the low points get optimised first, and the high points
+              become where convenience and security are deliberately instilled.
+            </P>
+            <P top={16}>
+              <strong style={{ color: ink, fontWeight: 600 }}>2. Well-informed users are happy users.</strong>{' '}
+              Working from the framing effect: repetition and reinforcement of the same vocabulary
+              across every communication and every state message, including empty, error, success and
+              transition states.
+            </P>
+            <P top={16}>
+              The complication: one flow carries three perceptions. A single onboarding journey moves
+              through financial services, then security, then convenience. The work could not be
+              organised by feature. It had to be organised by perception.
+            </P>
+            <FigPlaceholder label="Perception journey — five onboarding screens with perception tags" ratio="16/5" />
+          </div>
+
+          <div style={{ marginTop: 40 }}>
+            <Label>Prioritisation</Label>
+            <div className="grid gap-6 md:grid-cols-3" style={{ marginTop: 16 }}>
+              {PRIORITISATION.map(([n, title, detail]) => (
+                <div key={n} style={{ borderTop: `1px solid ${rule}`, paddingTop: 12 }}>
+                  <span className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: '1.5rem', lineHeight: 1 }}>{n}</span>
+                  <h4 className="font-['Nunito_Sans',sans-serif]" style={{ color: ink, marginTop: 8, fontWeight: 600 }}>{title}</h4>
+                  <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: body, marginTop: 4 }}>{detail}</p>
+                </div>
+              ))}
+            </div>
+            <P top={24}>
+              Used to sequence work across six teams: UX Research, Merchant Services, Commercial,
+              Core and Growth, User Domain, and Financial Services.
+            </P>
+          </div>
+        </Section>
+
+        {/* ── In the product ── */}
+        <Section id="bp-product">
+          <h2 className="font-['Museo',sans-serif] font-light"
+            style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.5rem)', lineHeight: 1.15, margin: 0 }}>
+            In the Product
+          </h2>
+          {IN_PRODUCT.map((b, i) => (
+            <div key={b.title} style={{ marginTop: i === 0 ? 32 : 48 }}>
+              <Label>{b.title}</Label>
+              <P><Figures>{b.body}</Figures></P>
+              <FigPlaceholder label={b.figure} />
+              {b.result && (
+                <p className="font-['Nunito_Sans',sans-serif]" style={{ color: ink, marginTop: 16, maxWidth: MEASURE }}>
+                  <span className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub, marginRight: 8 }}>Result</span>
+                  <Figures>{b.result}</Figures>
+                </p>
+              )}
+              {b.learning && (
+                <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
+                  <span className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub, marginRight: 8 }}>Learning</span>
+                  <Figures>{b.learning}</Figures>
+                </p>
+              )}
+            </div>
+          ))}
+        </Section>
+
+        {/* ── Results ── */}
+        <Section id="bp-results">
+          <h2 className="font-['Museo',sans-serif] font-light"
+            style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.5rem)', lineHeight: 1.15, margin: 0 }}>
+            Results
+          </h2>
+
+          {/* Deltas only — the absolute index values stay with the client.
+              overflow-x on the wrapper alone, so a narrow screen scrolls the
+              table rather than the page. */}
+          <div style={{ marginTop: 24, maxWidth: MEASURE, overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 300 }}>
+              <tbody>
+                {RESULTS.map(([pillar, delta, verdict]) => (
+                  <tr key={pillar} style={{ borderTop: `1px solid ${rule}` }}>
+                    <th scope="row" className="font-['Nunito_Sans',sans-serif]"
+                      style={{ color: ink, fontWeight: 400, textAlign: 'left', padding: '14px 16px 14px 0', whiteSpace: 'nowrap' }}>
+                      {pillar}
+                    </th>
+                    <td className="font-['Museo',sans-serif] font-light"
+                      style={{ color: fg, fontSize: '1.25rem', padding: '14px 16px 14px 0', whiteSpace: 'nowrap' }}>
+                      {delta}
+                    </td>
+                    <td className="font-['Nunito_Sans',sans-serif] text-small"
+                      style={{ color: sub, padding: '14px 0', whiteSpace: 'nowrap' }}>
+                      {verdict}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <P top={32}>
+            Convenience carried the most ambitious target of the four and was the only one we missed.
+            It finished flat.
+          </P>
+          <P top={16}>
+            The diagnosis was straightforward. H1 effort concentrated on financial services, security
+            and sustainability, and convenience received the least direct intervention of the four.
+          </P>
+          <P top={16}>
+            H2 moved to convenience specifically: seeding perception vocabulary into in-app copy,
+            applying a zero-rejection rule so the benefit is always stated plainly rather than the
+            restriction, and updating legacy copy across teams. That last one came straight from the
+            security result, which had shown legacy copy to be the highest-leverage surface available.
+          </P>
+        </Section>
+      </div>
+    </div>
+  );
+}
+
 function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
   const [value, setValue] = useState("");
@@ -4701,12 +4994,13 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
         {unlocked ? (
           <>
             <BusinessCaseContent />
-            <SiteFooter variant="work" />
+            <SiteFooter variant="nda" />
             <NavClearance />
           </>
         ) : (
           <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560 }}>
-            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>This page requires passcode</p>
+            <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>This work was produced under NDA. Access available on request.</p>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM, marginTop: 8 }}>This page requires passcode</p>
 
             <div className="flex flex-col gap-1" style={{ marginTop: 32 }}>
               <label
@@ -4748,6 +5042,113 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
   );
 }
 
+// Gated exactly as the eCommerce case is — same passcode, same shape. The
+// section rail takes this page's own five sections.
+function BrandPerceptionPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
+  const isDark = useContext(DarkModeCtx);
+  const [value, setValue] = useState("");
+  const [error, setError] = useState("");
+  const [unlocked, setUnlocked] = useState(false);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
+  const PASSCODE = "tifffolio";
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const onDark = useOnDarkBackdrop(headerRef);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const submit = () => {
+    if (value.trim() === PASSCODE) {
+      setError("");
+      setUnlocked(true);
+    } else {
+      setError("Incorrect passcode");
+    }
+  };
+
+  return (
+    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+      <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+          background: headerScrolled
+            // A 20% black tint under the frost while the heading is white,
+            // so the words have something to sit against rather than
+            // relying on whatever happens to be passing beneath.
+            ? (onDark
+                ? "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), rgba(248,247,245,0.55)"
+                : isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)")
+            : "transparent",
+          backdropFilter: headerScrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
+          borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
+          paddingBottom: headerScrolled ? 16 : 24,
+          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
+        }}>
+          <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
+          <Breadcrumbs color={onDark ? "#fff" : GOLD} items={[
+            { label: "Work", onClick: () => onNavigate("work") },
+            { label: "Product & UX Strategies", onClick: onBack },
+          ]} />
+          <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: onDark ? '#fff' : GOLD, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>Brand Perception &amp; UX Strategy</h1>
+        </div>
+
+        {unlocked ? (
+          <>
+            <BrandPerceptionContent />
+            <SiteFooter variant="nda" />
+            <NavClearance />
+          </>
+        ) : (
+          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560 }}>
+            <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>This work was produced under NDA. Access available on request.</p>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM, marginTop: 8 }}>This page requires passcode</p>
+
+            <div className="flex flex-col gap-1" style={{ marginTop: 32 }}>
+              <label
+                className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]"
+                style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>
+                PASSCODE *
+              </label>
+              {/* Masked, like any passcode field. The dots are set a little
+                  larger and widely tracked so they read as a deliberate row
+                  of marks rather than cramped default bullets. */}
+              <input
+                type="password"
+                aria-label="Passcode"
+                autoComplete="off"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && submit()}
+                placeholder=""
+                className="w-full"
+                style={{ background: 'transparent', border: 'none', borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.18)"}`, outline: 'none', padding: '8px 0', fontSize: '1.05rem', letterSpacing: value ? '0.35em' : 'normal', fontFamily: "'Nunito Sans', sans-serif", fontWeight: 300, color: isDark ? 'white' : INK, transition: 'border-color 0.2s, letter-spacing 0.2s' }}
+              />
+            </div>
+
+            {error && <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: '#E05C5C', marginTop: 10 }}>{error}</p>}
+
+            <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={submit}
+                className="font-['Nunito_Sans',sans-serif] text-small uppercase tracking-widest"
+                style={{ background: GOLD, color: '#fff', border: 'none', padding: '12px 28px', cursor: 'pointer', borderRadius: 2 }}>
+                Submit
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+      {unlocked && <CaseSectionRail scrollRef={scrollRef} sections={BP_SECTIONS} />}
+    </div>
+  );
+}
+
 // ─── URLs ──────────────────────────────────────────────────────────
 // The router is still a `Page` union held in useState — no library, no file
 // split — but every state now has a real path, pushed through the History
@@ -4768,6 +5169,7 @@ function pathOf(page: Page, detailKey?: string | null): string {
     case "businessCase":    return "/work/business-acumen/ecommerce";
     case "kaiCase":         return "/work/case-studies/kai";
     case "appleHealthCase": return "/work/case-studies/apple-health";
+    case "brandPerceptionCase": return "/work/product-ux-strategies/brand-perception";
     case "awards":          return "/awards";
     case "speaking":        return `/awards/${detailKey ?? ""}`;
     case "testimonials":    return "/testimonials";
@@ -4806,6 +5208,7 @@ function routeOf(pathname: string): { page: Page; detailKey: string | null } {
     if (seg[1] === "business-acumen" && seg[2] === "ecommerce") return at("businessCase");
     if (seg[1] === "case-studies" && seg[2] === "kai") return at("kaiCase");
     if (seg[1] === "case-studies" && seg[2] === "apple-health") return at("appleHealthCase");
+    if (seg[1] === "product-ux-strategies" && seg[2] === "brand-perception") return at("brandPerceptionCase");
     const card = EXPERTISE_CARDS.find(c => c.slug === seg[1]);
     // an unknown child falls back to the section rather than a dead end
     return card ? at("workDetail", card.key) : at("work");
@@ -4834,6 +5237,7 @@ function descriptionOf(page: Page, detailKey?: string | null): string {
     case "workDetail":   return card?.description ?? SITE_DESC;
     case "businessCase": return "A behavioural UX case study: lifting checkout rate from the bag page at Cotton On Group.";
     case "appleHealthCase": return "A five-day design challenge: repositioning Apple Health as a daily habit tool to drive daily active users.";
+    case "brandPerceptionCase": return "Shifting how 23 million people saw a wallet app — a brand perception framework, the UX strategy behind it, and how it was measured.";
     case "kaiCase": return "A design sprint case study: KAI, a mobile app for controlling a building's IoT machines and cutting Maximum Demand charges.";
     case "awards":       return "UX Leader of the Year finalist, with speaking and panel appearances across Australia, Europe and Asia.";
     case "speaking":     return ev ? `${ev.role} at ${ev.event}, ${ev.year} — ${ev.topic}` : SITE_DESC;
@@ -4856,6 +5260,7 @@ function titleOf(page: Page, detailKey?: string | null): string {
     case "businessCase":    return `eCommerce: Behavioural UX Design — ${SITE_TITLE}`;
     case "kaiCase":         return `KAI: Mobile app for IoT devices control — ${SITE_TITLE}`;
     case "appleHealthCase": return `Apple Health: Design Challenge — ${SITE_TITLE}`;
+    case "brandPerceptionCase": return `Brand Perception & UX Strategy — ${SITE_TITLE}`;
     case "awards":          return `Awards & Speaking — ${SITE_TITLE}`;
     case "speaking":        return ev ? `${ev.role} — ${ev.event} — ${SITE_TITLE}` : `Awards & Speaking — ${SITE_TITLE}`;
     case "testimonials":    return `Testimonials — ${SITE_TITLE}`;
@@ -4926,7 +5331,8 @@ export default function App() {
   const motionKey = page === "speaking" ? `speaking:${detailKey}` : page === "workDetail" ? `workDetail:${detailKey}` : page;
   // Case-study pages are a drill-in from the Work list; they animate as an
   // expansion of the row rather than as a new screen sliding in.
-  const drillIn = page === "workDetail" || page === "businessCase" || page === "kaiCase" || page === "appleHealthCase";
+  const drillIn = page === "workDetail" || page === "businessCase" || page === "kaiCase"
+    || page === "appleHealthCase" || page === "brandPerceptionCase";
 
   useEffect(() => {
     setDetailHeaderScrolled(false);
@@ -4941,7 +5347,7 @@ export default function App() {
   const navActive: Page | null =
       page === "home" ? null
     : page === "work" || page === "workDetail" || page === "businessCase"
-      || page === "kaiCase" || page === "appleHealthCase" ? "work"
+      || page === "kaiCase" || page === "appleHealthCase" || page === "brandPerceptionCase" ? "work"
     : page === "awards" || page === "speaking" ? "awards"
     : page === "speakingInquiry" ? "connect"
     : page;
@@ -5031,6 +5437,9 @@ export default function App() {
         )}
         {page === "appleHealthCase" && (
           <AppleHealthPage onBack={() => { setDetailKey("cases"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
+        )}
+        {page === "brandPerceptionCase" && (
+          <BrandPerceptionPage onBack={() => { setDetailKey("ux"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
       </motion.div>
       {navActive && <StickyPageNav activePage={navActive} onNavigate={navigateGeneral} />}
