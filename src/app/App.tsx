@@ -3026,7 +3026,7 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
 // Wraps PageBottomNav with a full-width fade scrim behind it, so content
 // scrolling up from underneath fades into the page background before it
 // would otherwise be visible peeking past the nav's side margins/edges.
-function StickyPageNav({ activePage, onNavigate }: { activePage: Page; onNavigate: (p: Page) => void }) {
+function StickyPageNav({ activePage, tint, onNavigate }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
   const pageBg = isDark ? "#181410" : "#f8f7f5";
   // Held here rather than in PageBottomNav because the open menu is a z-50
@@ -3050,7 +3050,7 @@ function StickyPageNav({ activePage, onNavigate }: { activePage: Page; onNavigat
           boxShadow: menuOpen ? "none" : "0 8px 32px rgba(0,0,0,0.18)",
           transition: "box-shadow 0.3s ease",
         }}>
-        <PageBottomNav activePage={activePage} onNavigate={onNavigate} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+        <PageBottomNav activePage={activePage} tint={tint} onNavigate={onNavigate} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
       </div>
       {/* Sibling of the container, not a child of it. The container takes a
           z-index while the menu is open, which makes it a stacking context —
@@ -3076,11 +3076,15 @@ function StickyPageNav({ activePage, onNavigate }: { activePage: Page; onNavigat
 
 function PageBottomNav({
   activePage,
+  tint,
   onNavigate,
   menuOpen,
   setMenuOpen,
 }: {
   activePage: Page;
+  // The page's own heading colour, where that differs from its nav
+  // section's — Speaking Inquiry sits under Connect but heads in gold.
+  tint?: string;
   onNavigate: (p: Page) => void;
   menuOpen: boolean;
   setMenuOpen: (v: boolean) => void;
@@ -3143,10 +3147,12 @@ function PageBottomNav({
         aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen}
         className="md:hidden flex items-center justify-center"
         style={{
-          // Closed it is a gradient tile against the page; open, the gradient
-          // goes and the × sits on the menu's cream in ink, the way the
-          // menu's own close button used to.
-          background: menuOpen ? "transparent" : navGradient(isDark),
+          // One flat colour, the page's own heading colour — at 44px square
+          // the full nav gradient was a five-stop sweep compressed into a
+          // thumbnail, which read as noise rather than as the bar it came
+          // from. Open, it goes altogether and the × sits on the menu's
+          // cream in ink, the way the menu's own close button used to.
+          background: menuOpen ? "transparent" : (tint ?? HEADING_COLOUR[activePage] ?? GOLD),
           width: MOBILE_NAV_PILL, height: MOBILE_NAV_PILL, border: "none", padding: 0,
           transition: "background 0.3s ease",
         }}>
@@ -3203,7 +3209,10 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
   // homepage deck the list is a slide you swipe to, not somewhere you return.
   const replay = !embedded;
   return (
-    <div className="relative w-full" style={{ minHeight: embedded ? "100%" : "100dvh", background: bg }}>
+    // Standalone, a column: on a tall screen the five rows do not reach the
+    // bottom, and the credit line has to end up 16px off the nav wherever the
+    // list stops. Embedded in the deck the slide owns its own height.
+    <div className={`relative w-full${embedded ? "" : " flex flex-col"}`} style={{ minHeight: embedded ? "100%" : "100dvh", background: bg }}>
       {/* Page heading — sticky so it stays visible while the rows below
           scroll past it, shrinking once the mobile "View more" cap lifts.
           Transparent at rest so the multicolour background shows through;
@@ -3236,7 +3245,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
         </motion.h1>
       </div>
 
-      <div style={{ paddingTop: 24 }}>
+      <div className={embedded ? undefined : "flex-1 flex flex-col"} style={{ paddingTop: 24 }}>
         {EXPERTISE_CARDS.map((card, i) => {
           const isOpening = opening === card.key;
           const cleared   = openIdx >= 0 && !isOpening;
@@ -3264,6 +3273,9 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
             </motion.div>
           );
         })}
+        {/* Takes up whatever the rows leave, so the credit line lands on the
+            nav rather than floating under the last divider. */}
+        {!embedded && <div className="flex-1" />}
         {!embedded && <SiteFooter />}
         <NavClearance />
       </div>
@@ -5450,7 +5462,12 @@ export default function App() {
           <BrandPerceptionPage onBack={() => { setDetailKey("ux"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
       </motion.div>
-      {navActive && <StickyPageNav activePage={navActive} onNavigate={navigateGeneral} />}
+      {navActive && (
+        <StickyPageNav activePage={navActive} onNavigate={navigateGeneral}
+          // These pages head in gold rather than in their section's colour,
+          // and the pill follows the heading it sits under.
+          tint={page === "speakingInquiry" || page === "speaking" ? GOLD : undefined} />
+      )}
     </div>
     </AccordionCtx.Provider>
     </GoHomeCtx.Provider>
