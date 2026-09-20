@@ -1,6 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback, createContext, useContext, Fragment } from "react";
 import { motion } from "motion/react";
-import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft } from "lucide-react";
+import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft, PiggyBank, Heart, LineChart } from "lucide-react";
 
 import ahPersona from "@/work/case/applehealth/userpersona.avif";
 import ahProblem from "@/work/case/applehealth/health problem.avif";
@@ -2304,6 +2304,12 @@ function KaiCaseContent() {
     ["Team size", "2 designers"],
   ];
 
+  const OUTCOMES: { Icon: typeof PiggyBank; text: string }[] = [
+    { Icon: PiggyBank, text: "Helped businesses save up to 20% on Maximum Demand charges" },
+    { Icon: Heart,     text: "“Extremely user friendly” — KAI's mobile user feedback" },
+    { Icon: LineChart, text: "Monitor and manage energy usage in real time" },
+  ];
+
   const Fig = ({ src, alt, caption, max = FIGURE_MAX }: { src: string; alt: string; caption?: string; max?: number }) => (
     <figure style={{ margin: '28px 0 0' }}>
       <img src={src} alt={alt} loading="lazy"
@@ -2336,13 +2342,22 @@ function KaiCaseContent() {
 
         {/* ── Background & brief ── */}
         <section id="kai-brief" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
-          <h2 className="font-['Museo',sans-serif] font-light"
-            style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.5rem)', lineHeight: 1.15, margin: 0 }}>
-            <Figures>Helped businesses save up to 20% on Maximum Demand charges</Figures>
-          </h2>
-          <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
-            “Extremely user friendly” — KAI's mobile user feedback.
-          </p>
+          {/* The three outcomes, as the original deck showed them: a band of
+              equals. Promoting one of them to the section heading and
+              demoting another to a caption under it lost the third
+              altogether, and lost the point — the case delivered a saving,
+              a reception and a capability, not one headline with footnotes. */}
+          <ul className="grid gap-8 md:gap-10 md:grid-cols-3" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {OUTCOMES.map(({ Icon, text }) => (
+              <li key={text} className="flex flex-col items-start">
+                <Icon size={32} strokeWidth={1.25} style={{ color: fg }} aria-hidden="true" />
+                <p className="font-['Museo',sans-serif] font-light"
+                  style={{ color: fg, fontSize: 'clamp(1.125rem, 1.6vw, 1.375rem)', lineHeight: 1.25, margin: '16px 0 0' }}>
+                  <Figures>{text}</Figures>
+                </p>
+              </li>
+            ))}
+          </ul>
 
           <Fig src={kaiHero} alt="KAI: monitor and manage energy usage in real time" />
 
@@ -4020,10 +4035,14 @@ function SpeakingEventRow({
               // natural aspect ratio (object-contain, auto width) instead
               // of being cropped to fill — mobile keeps the original
               // clamp()-based crop/cover treatment.
+              // Left-aligned, not centred: object-contain leaves slack beside
+              // a portrait, and centring it started each image at a different
+              // x. Down a list they read as drifting rather than as a column.
+              // The video below aligns the same way.
               /* 70vh left an open row taller than the screen, so the next
                  row's heading sat below the fold and the list read as having
                  ended. Sized to leave the following row in view. */
-              <div className="relative w-full overflow-hidden h-[clamp(220px,40vw,480px)] md:h-[46vh] md:flex md:items-center md:justify-center" style={{ background: "transparent" }}>
+              <div className="relative w-full overflow-hidden h-[clamp(220px,40vw,480px)] md:h-[46vh] md:flex md:items-center md:justify-start" style={{ background: "transparent" }}>
                 <img src={ev.img} alt={`${ev.event} — ${ev.topic}`}
                   className={`absolute inset-0 w-full h-full ${ev.portrait ? "object-contain" : "object-cover"} md:static md:inset-auto md:w-auto md:h-full md:max-w-full md:object-contain`}
                   style={ev.portrait ? undefined : { objectPosition: ev.dark ? "center 30%" : "center" }} />
@@ -4037,7 +4056,7 @@ function SpeakingEventRow({
                 reaching Awards & Speaking, let alone opening the row.
                 nocookie keeps that to people who actually press play. */}
             {ev.youtubeId && open && (
-              <div className="relative w-full overflow-hidden mt-5 md:w-auto md:h-[46vh] md:mx-auto md:max-w-full" style={{ aspectRatio: "16 / 9", background: "#000" }}>
+              <div className="relative w-full overflow-hidden mt-5 md:w-auto md:h-[46vh] md:mr-auto md:max-w-full" style={{ aspectRatio: "16 / 9", background: "#000" }}>
                 <iframe
                   src={`https://www.youtube-nocookie.com/embed/${ev.youtubeId}`}
                   title={`${ev.event} — ${ev.topic}`}
