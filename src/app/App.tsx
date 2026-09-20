@@ -19,6 +19,7 @@ import srcScreenDash from "@/work/case/source/source-08-screen-dashboard.avif";
 import srcScreenDisplay from "@/work/case/source/source-09-screen-display.avif";
 import srcBright from "@/work/case/source/source-10-bright-theme.avif";
 import srcProduction from "@/work/case/source/source-11-in-production.avif";
+import srcProductionVideo from "@/work/case/source/source-12-in-production.mp4";
 import ftAccount from "@/work/business/FinTech/fintech-01-goplus-account.avif";
 import ftGrowth from "@/work/business/FinTech/fintech-02-aum-growth-2023.avif";
 import ftReviews from "@/work/business/FinTech/fintech-03-appstore-reviews.avif";
@@ -3164,7 +3165,25 @@ function SourceCaseContent() {
             Making building consumption visible opened new business for the client in energy savings, maximum
             demand management and process automation. SOURCE 1.0 became the version every later one was built on.
           </P>
-          <Fig src={srcProduction} alt="SOURCE in production" />
+          {/* The result is the thing moving, not a still of it: the product
+              walkthrough, with the production screen as its poster so the
+              section still reads before anyone presses play. Controls rather
+              than autoplay — it runs nearly two minutes, and it is the last
+              thing on the page rather than something to scroll past. */}
+          <figure style={{ margin: '28px 0 0' }}>
+            <video
+              src={srcProductionVideo}
+              poster={srcProduction}
+              controls
+              playsInline
+              preload="metadata"
+              aria-label="SOURCE in production — a walkthrough of the live dashboard"
+              style={{ width: '100%', maxWidth: FIGURE_MAX, display: 'block', borderRadius: 8, background: '#000' }}
+            />
+            <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+              SOURCE in production.
+            </figcaption>
+          </figure>
         </Section>
 
       </div>
