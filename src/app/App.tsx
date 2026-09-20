@@ -8,6 +8,25 @@ import ahValues from "@/work/case/applehealth/new values.avif";
 import ahUserflow from "@/work/case/applehealth/userflow.avif";
 import ahPriority from "@/work/case/applehealth/Prioritisation.avif";
 
+import srcHero from "@/work/case/source/source-01-hero-tablet.avif";
+import srcRefHuawei from "@/work/case/source/source-02-ref-huawei.avif";
+import srcRefSma from "@/work/case/source/source-03-ref-sma.avif";
+import srcRefAdmin from "@/work/case/source/source-04-ref-admin.avif";
+import srcRawData from "@/work/case/source/source-05-raw-installation-data.avif";
+import srcHifi from "@/work/case/source/source-06-hifi-wireframe.avif";
+import srcScreenMap from "@/work/case/source/source-07-screen-map.avif";
+import srcScreenDash from "@/work/case/source/source-08-screen-dashboard.avif";
+import srcScreenDisplay from "@/work/case/source/source-09-screen-display.avif";
+import srcBright from "@/work/case/source/source-10-bright-theme.avif";
+import srcProduction from "@/work/case/source/source-11-in-production.avif";
+import ftAccount from "@/work/business/FinTech/fintech-01-goplus-account.avif";
+import ftGrowth from "@/work/business/FinTech/fintech-02-aum-growth-2023.avif";
+import ftReviews from "@/work/business/FinTech/fintech-03-appstore-reviews.avif";
+import ftFacebook from "@/work/business/FinTech/fintech-04-facebook-thread.avif";
+import ftPress from "@/work/business/FinTech/fintech-05-press-soyacincau.avif";
+import ftOptIn from "@/work/business/FinTech/fintech-06-opt-in-chart.avif";
+import ftConcept from "@/work/business/FinTech/fintech-07-concept-screens.avif";
+import ftConsent from "@/work/business/FinTech/fintech-08-consent-screen.avif";
 import kaiHero from "@/work/case/kai/kai-mobile-01-hero.avif";
 import kaiPersona from "@/work/case/kai/kai-mobile-02-persona-mr-tan.avif";
 import kaiJourney from "@/work/case/kai/kai-mobile-03-whiteboard-user-feedback.avif";
@@ -2864,18 +2883,6 @@ function SourceCaseContent() {
     </figure>
   );
 
-  // Images arrive later. Until then each figure holds its own space at the
-  // ratio the real one will take, so the page can be read and spaced now and
-  // nothing reflows when the files land.
-  const FigPlaceholder = ({ label, ratio = "16/9", max = FIGURE_MAX }: { label: string; ratio?: string; max?: number }) => (
-    <div style={{ margin: '28px 0 0', width: '100%', maxWidth: max }}>
-      <div className="flex items-center justify-center"
-        style={{ aspectRatio: ratio, border: `1px dashed ${rule}`, borderRadius: 8, background: 'transparent', padding: 16 }}>
-        <span className="font-['Nunito_Sans',sans-serif] text-small text-center" style={{ color: DIM }}>{label}</span>
-      </div>
-    </div>
-  );
-
   const Label = ({ children }: { children: React.ReactNode }) => (
     <h3 className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{children}</h3>
   );
@@ -2884,9 +2891,12 @@ function SourceCaseContent() {
     <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: top, maxWidth: MEASURE }}>{children}</p>
   );
 
+  // The 24px below is load-bearing: a section head is often followed straight
+  // by a Label, which carries no top margin of its own, and at margin 0 the
+  // two collided.
   const H2 = ({ children }: { children: React.ReactNode }) => (
     <h2 className="font-['Museo',sans-serif] font-light"
-      style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.25rem)', lineHeight: 1.15, margin: 0 }}>{children}</h2>
+      style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.25rem)', lineHeight: 1.15, margin: '0 0 24px' }}>{children}</h2>
   );
 
   const H3 = ({ children }: { children: React.ReactNode }) => (
@@ -2976,7 +2986,7 @@ function SourceCaseContent() {
             ))}
           </ul>
 
-          <FigPlaceholder label="Hero — SOURCE dashboard on tablet" ratio="16/10" />
+          <Fig src={srcHero} alt="The SOURCE dashboard running on a tablet" />
 
           <div className="grid gap-8 md:grid-cols-2" style={{ marginTop: 32, maxWidth: `calc(${MEASURE} * 2)` }}>
             <div>
@@ -3062,7 +3072,20 @@ function SourceCaseContent() {
             "Simplified data followed observable patterns, using semiotic representations",
             "The visualisations were unappealing to a layman — a building supervisor is not necessarily an engineer",
           ]} />
-          <FigPlaceholder label="Reference — existing third-party monitoring dashboards" ratio="16/9" />
+          {/* Three of the dashboards we were measuring against, side by side:
+              one is a screenshot, three is the pattern the finding describes. */}
+          <div className="grid gap-4 md:grid-cols-3" style={{ marginTop: 28, maxWidth: FIGURE_MAX }}>
+            {[[srcRefHuawei, "Huawei NetEco monitoring dashboard"],
+              [srcRefSma, "SMA Sunny Portal PV system overview"],
+              [srcRefAdmin, "Plus Solar residential admin dashboard"]].map(([src, alt]) => (
+              <img key={alt as string} src={src as string} alt={alt as string} loading="lazy"
+                style={{ width: '100%', display: 'block', borderRadius: 6, border: `1px solid ${rule}` }} />
+            ))}
+          </div>
+          <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+            Existing dashboards, built for engineers: crucial data points for a solar system, laid out as tables
+            and plots rather than as something a building supervisor would read.
+          </p>
 
           <H3>4. Key features &amp; data</H3>
           <Bullets items={[
@@ -3095,8 +3118,10 @@ function SourceCaseContent() {
             possible, a high-fidelity wireframe went up for review. Reading a piece of that raw data was the
             first step to designing against it.
           </P>
-          <FigPlaceholder label="Reference — raw installation data from the existing system" ratio="4/5" max={420} />
-          <FigPlaceholder label="Hi-fidelity wireframe — SOURCE energy monitoring dashboard" ratio="16/9" />
+          <Fig src={srcRawData} alt="Raw installation data from the existing monitoring system" max={380}
+            caption="A piece of the raw data — total production, peak power, panels, inverter, orientation, slope. Understanding this was the first step to designing against it." />
+          <Fig src={srcHifi} alt="High-fidelity wireframe of the SOURCE energy monitoring dashboard" max={480}
+            caption="High-fidelity wireframe: SOURCE energy monitoring dashboard." />
 
           <H3>Screens design</H3>
           <P>
@@ -3107,7 +3132,15 @@ function SourceCaseContent() {
             "Middle: the main dashboard, a single building's energy data visualised",
             "Right: a display screen serving as a daily lookout point, and as branding",
           ]} />
-          <FigPlaceholder label="Screens — map view, main dashboard, display screen" ratio="16/7" />
+          {/* The three screens the bullets above describe, in that order. */}
+          <div className="grid gap-4 md:grid-cols-3" style={{ marginTop: 28, maxWidth: FIGURE_MAX }}>
+            {[[srcScreenMap, "Map view — every building under the SOURCE system"],
+              [srcScreenDash, "Main dashboard — one building's energy data"],
+              [srcScreenDisplay, "Display screen — the daily lookout point"]].map(([src, alt]) => (
+              <img key={alt as string} src={src as string} alt={alt as string} loading="lazy"
+                style={{ width: '100%', display: 'block', borderRadius: 6 }} />
+            ))}
+          </div>
 
           <H3>Accessibility: a bright theme for an older generation</H3>
           <P>
@@ -3115,7 +3148,8 @@ function SourceCaseContent() {
             them, so the dashboard's colours were reconsidered for that group, with the contrast between colour
             and text raised.
           </P>
-          <FigPlaceholder label="Bright theme variant of the dashboard" ratio="16/9" />
+          <Fig src={srcBright} alt="The bright theme variant of the SOURCE dashboard" max={620}
+            caption="The bright theme: the same data, with the contrast between colour and text raised." />
         </Section>
 
         {/* ── Result ── */}
@@ -3130,7 +3164,7 @@ function SourceCaseContent() {
             Making building consumption visible opened new business for the client in energy savings, maximum
             demand management and process automation. SOURCE 1.0 became the version every later one was built on.
           </P>
-          <FigPlaceholder label="SOURCE in production — map view with live site notifications" ratio="16/9" />
+          <Fig src={srcProduction} alt="SOURCE in production" />
         </Section>
 
       </div>
@@ -3263,13 +3297,16 @@ function FinTechContent() {
     ["Launched", "20 February 2023"],
   ];
 
-  const FigPlaceholder = ({ label, ratio = "16/9", max = FIGURE_MAX }: { label: string; ratio?: string; max?: number }) => (
-    <div style={{ margin: '28px 0 0', width: '100%', maxWidth: max }}>
-      <div className="flex items-center justify-center"
-        style={{ aspectRatio: ratio, border: `1px dashed ${rule}`, borderRadius: 8, background: 'transparent', padding: 16 }}>
-        <span className="font-['Nunito_Sans',sans-serif] text-small text-center" style={{ color: DIM }}>{label}</span>
-      </div>
-    </div>
+  const Fig = ({ src, alt, caption, max = FIGURE_MAX }: { src: string; alt: string; caption?: string; max?: number }) => (
+    <figure style={{ margin: '28px 0 0' }}>
+      <img src={src} alt={alt} loading="lazy"
+        style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
+      {caption && (
+        <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+          {caption}
+        </figcaption>
+      )}
+    </figure>
   );
 
   const Label = ({ children }: { children: React.ReactNode }) => (
@@ -3280,9 +3317,12 @@ function FinTechContent() {
     <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: top, maxWidth: MEASURE }}>{children}</p>
   );
 
+  // The 24px below is load-bearing: a section head is often followed straight
+  // by a Label, which carries no top margin of its own, and at margin 0 the
+  // two collided.
   const H2 = ({ children }: { children: React.ReactNode }) => (
     <h2 className="font-['Museo',sans-serif] font-light"
-      style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.25rem)', lineHeight: 1.15, margin: 0 }}>{children}</h2>
+      style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.25rem)', lineHeight: 1.15, margin: '0 0 24px' }}>{children}</h2>
   );
 
   const Bullets = ({ items }: { items: React.ReactNode[] }) => (
@@ -3354,7 +3394,8 @@ function FinTechContent() {
               </P>
             </div>
           </div>
-          <FigPlaceholder label="Quick Cash In — enable screen" ratio="4/5" max={380} />
+          <Fig src={ftAccount} alt="The GO+ account screen inside TNG eWallet" max={320}
+            caption="GO+: balance, daily earnings, and the cash in and cash out the feature had to sit between." />
         </section>
 
         {/* ── Outcome ── */}
@@ -3409,7 +3450,7 @@ function FinTechContent() {
                   </div>
                 </div>
                 <div className="md:col-span-2">
-                  <FigPlaceholder label="Chart — 2023 QCI & AUM growth" ratio="16/9" />
+                  <Fig src={ftGrowth} alt="2023 QCI and AUM growth — monthly total AUM against fund-in amount" max={620} />
                   <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
                     Organic cash-in fell while users kept reloading their eWallets — the behaviour that held AUM up
                     through 2023.
@@ -3433,8 +3474,14 @@ function FinTechContent() {
                     one for saving or investment. That is consistent with what the focus group interviews found.
                   </P>
                 </div>
-                <div>
-                  <FigPlaceholder label="App Store review and Facebook thread" ratio="4/5" max={380} />
+                {/* Both sources, side by side — the point of the tab is that
+                    the reaction is mixed, and one screenshot only shows one
+                    side of it. */}
+                <div className="grid grid-cols-2 gap-4">
+                  <img src={ftReviews} alt="App Store ratings and reviews for TNG eWallet" loading="lazy"
+                    style={{ width: '100%', display: 'block', borderRadius: 8 }} />
+                  <img src={ftFacebook} alt="A Facebook thread discussing the GO+ change" loading="lazy"
+                    style={{ width: '100%', display: 'block', borderRadius: 8 }} />
                 </div>
               </div>
             )}
@@ -3452,7 +3499,7 @@ function FinTechContent() {
                   because it is spent on tolls, parking and merchant payments. Quick Cash In transfers future
                   reloads, transfers and cashback above RM10 into GO+ instead.
                 </P>
-                <FigPlaceholder label="Press coverage — SoyaCincau article" ratio="16/9" />
+                <Fig src={ftPress} alt="SoyaCincau coverage of the Quick Cash In feature" max={620} />
               </div>
             )}
           </div>
@@ -3498,14 +3545,16 @@ function FinTechContent() {
           ]} />
           <div className="grid gap-6 md:grid-cols-2" style={{ marginTop: 8 }}>
             <div>
-              <FigPlaceholder label="Chart — 89% agreed to opt in when informed" ratio="1/1" max={380} />
+              <img src={ftOptIn} alt="89% of testers agreed to opt in, 11% did not" loading="lazy"
+                style={{ width: '100%', maxWidth: 320, display: 'block' }} />
               <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
                 89% of testers agreed to opt in to auto-sweeping on the condition of informed understanding —
                 well-informed users show more positive emotion.
               </p>
             </div>
             <div>
-              <FigPlaceholder label="Concept C2 — key screens for enabling the feature" ratio="4/5" max={380} />
+              <Fig src={ftConcept} alt="The concept screens for enabling the feature" max={420}
+                caption="The concept screens: the notification, the confirmation, and the FAQ that explains what just happened." />
             </div>
           </div>
           <Lesson n={2} title="Beyond design">
@@ -3529,7 +3578,8 @@ function FinTechContent() {
             Experience Design team's recommended option was what the final solution was built on — meeting the
             regulatory demand while keeping the experience usable and compliant.
           </P>
-          <FigPlaceholder label="Consent screen — the compliant enable flow" ratio="4/5" max={380} />
+          <Fig src={ftConsent} alt="The final Quick Cash In consent screen" max={320}
+            caption="The shipped screen: the benefit, the terms it consents to, and an equally available way out." />
           <Lesson n={4} title="Take calculated risk">
             Striking the product-design balance means assessing user input fairly while knowing the business
             must-dos. This project underlined the importance of understanding the risks, managing user
