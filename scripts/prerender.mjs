@@ -40,6 +40,7 @@ const ROUTES = [
   { path: '/work/product-ux-strategies/brand-perception', index: false },
   { path: '/work/case-studies/kai' },
   { path: '/work/case-studies/apple-health' },
+  { path: '/work/case-studies/source' },
   { path: '/awards' },
   { path: '/awards/rotterdam' },
   { path: '/awards/ux-camp' },

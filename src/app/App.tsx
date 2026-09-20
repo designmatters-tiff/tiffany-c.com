@@ -1,6 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback, createContext, useContext, Fragment } from "react";
 import { motion } from "motion/react";
-import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft, PiggyBank, Heart, LineChart } from "lucide-react";
+import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft, PiggyBank, Heart, LineChart, Users, Layers } from "lucide-react";
 
 import ahPersona from "@/work/case/applehealth/userpersona.avif";
 import ahProblem from "@/work/case/applehealth/health problem.avif";
@@ -128,7 +128,7 @@ const HEADING_COLOUR: Record<string, string> = Object.fromEntries(
   ]),
 );
 
-type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "kaiCase" | "appleHealthCase" | "brandPerceptionCase" | "testimonials";
+type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "kaiCase" | "appleHealthCase" | "brandPerceptionCase" | "sourceCase" | "testimonials";
 
 // ─── Dark mode context ────────────────────────────────────────────
 const DarkModeCtx = createContext(false);
@@ -567,6 +567,12 @@ function MobileMenu({
 // the form is registered to; Formspree confirms that address before it starts
 // forwarding, so the first real submission is worth sending yourself.
 const SPEAKING_FORM_ENDPOINT = "https://formspree.io/f/xzebweln";
+
+// Client credits link out, and the same client turns up in more than one case
+// study, so the URLs live here rather than inline. Plus Solar Systems is the
+// name the SOURCE work was done under; the company is Plus Xnergy now, and the
+// live site is the useful destination.
+const PLUS_XNERGY_URL = "https://www.plusxnergy.com/";
 
 // The eCommerce prototype, as an embed. Figma serves embeds from
 // embed.figma.com — the www.figma.com share link renders its own UI and
@@ -1956,10 +1962,20 @@ const EXPERTISE_CARDS = [
     bullets: [
       "Apple Health — Design Challenge",
       "KAI — Mobile app for IoT device control",
-      "Source — Energy performance monitoring dashboard",
+      "SOURCE — Energy performance management dashboard",
     ],
   },
 ];
+
+// Work-card bullets that are really links into a case study. Keyed on the
+// bullet's exact text, so the copy above stays the single place it is written.
+const BULLET_LINKS: Record<string, Page> = {
+  "eCommerce: Behavioural UX Design (passcode required)": "businessCase",
+  "Brand Perception & UX Strategy — TNG eWallet (passcode required)": "brandPerceptionCase",
+  "KAI — Mobile app for IoT device control": "kaiCase",
+  "Apple Health — Design Challenge": "appleHealthCase",
+  "SOURCE — Energy performance management dashboard": "sourceCase",
+};
 
 // Rows navigate to a full WorkDetailPage rather than expanding inline —
 // matches the same drill-in pattern as the Speaking Inquiry page.
@@ -2056,40 +2072,19 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
             </li>
           ))}
           {card.bullets.map(b => {
-            const isSpecial = b === "eCommerce: Behavioural UX Design (passcode required)";
-            const isBrand = b === "Brand Perception & UX Strategy — TNG eWallet (passcode required)";
-            const isKai = b === "KAI — Mobile app for IoT device control";
-            const isApple = b === "Apple Health — Design Challenge";
+            // A bullet that names a case study is a link to it. This was four
+            // hand-written branches with the same body; a fifth would have made
+            // the shape harder to read than the data it encodes.
+            const target = BULLET_LINKS[b];
             return (
               <li key={b} className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: bodyText }}>
-                {isBrand ? (
-                  <button onClick={() => onNavigate('brandPerceptionCase')}
-                    className="flex items-start gap-2 text-left"
-                    style={{ background: 'none', border: 'none', padding: 0, color: linkColor, cursor: 'pointer', font: 'inherit' }}>
-                    <span className="mt-0.5 flex-shrink-0">—</span>
-                    <span className="link-underline">{b}</span>
-                  </button>
-                ) : isApple ? (
-                  <button onClick={() => onNavigate('appleHealthCase')}
-                    className="flex items-start gap-2 text-left"
-                    style={{ background: 'none', border: 'none', padding: 0, color: linkColor, cursor: 'pointer', font: 'inherit' }}>
-                    <span className="mt-0.5 flex-shrink-0">—</span>
-                    <span className="link-underline">{b}</span>
-                  </button>
-                ) : isKai ? (
-                  <button onClick={() => onNavigate('kaiCase')}
-                    className="flex items-start gap-2 text-left"
-                    style={{ background: 'none', border: 'none', padding: 0, color: linkColor, cursor: 'pointer', font: 'inherit' }}>
-                    <span className="mt-0.5 flex-shrink-0">—</span>
-                    <span className="link-underline">{b}</span>
-                  </button>
-                ) : isSpecial ? (
+                {target ? (
                   /* The dash sits outside the link and the sweep goes on the
                      text span, so the underline is the width of the words —
                      the same shape as the resource links above. On the button
                      itself (display:block, width:100%) it drew a rule across
                      the whole row. */
-                  <button onClick={() => onNavigate('businessCase')}
+                  <button onClick={() => onNavigate(target)}
                     className="flex items-start gap-2 text-left"
                     style={{ background: 'none', border: 'none', padding: 0, color: linkColor, cursor: 'pointer', font: 'inherit' }}>
                     <span className="mt-0.5 flex-shrink-0">—</span>
@@ -2298,7 +2293,7 @@ function KaiCaseContent() {
   const META: [string, React.ReactNode][] = [
     ["Year", "August – October 2019"],
     ["Client", (
-      <a href="https://www.plusxnergy.com/" target="_blank" rel="noopener noreferrer"
+      <a href={PLUS_XNERGY_URL} target="_blank" rel="noopener noreferrer"
         className="link-underline" style={{ color: fg }}>Plus Xnergy</a>
     )],
     ["Goal", "Monitor and manage energy use in real time"],
@@ -2807,6 +2802,392 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
 }
 
 
+// ─── SOURCE case study ────────────────────────────────────────────
+// Plus Solar Systems' energy performance management dashboard, 2018–2019.
+// The sibling of the KAI case: same client, same ecosystem, the web
+// dashboard KAI later put in a pocket. It follows KAI's shape deliberately —
+// a reader who has just come from one should not have to relearn the other.
+const SOURCE_SECTIONS: { id: string; label: string }[] = [
+  // As in KAI, Background & Brief has no dot of its own: it is the back half
+  // of the overview, and the rail stays with Overview while you are in it.
+  { id: "source-overview",     label: "Overview" },
+  { id: "source-research",     label: "Research" },
+  { id: "source-development",  label: "Development" },
+  { id: "source-result",       label: "Result" },
+];
+
+function SourceCaseContent() {
+  const isDark = useContext(DarkModeCtx);
+  const fg   = GOLD;
+  const sub  = isDark ? "rgba(255,255,255,0.75)" : DIM;
+  const body = isDark ? "rgba(255,255,255,0.72)" : DIM;
+  const rule = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
+  const ink  = isDark ? "white" : INK;
+  const MEASURE = '68ch';
+  const FIGURE_MAX = 760;
+
+  const META: [string, React.ReactNode][] = [
+    ["Year", "2018 – 2019"],
+    ["Client", (
+      <a href={PLUS_XNERGY_URL} target="_blank" rel="noopener noreferrer"
+        style={{ color: GOLD }} className="link-underline">Plus Solar Systems</a>
+    )],
+    ["Goal", "Make building energy and solar data visible to the people who own it"],
+    ["Scope", "Design strategy, UX, UI design"],
+    ["Role", "Product Design Lead"],
+    ["Team size", "1 – 2 designers"],
+  ];
+
+  // Same band as KAI's, for the same reason: the outcomes are what the case
+  // delivered, and one of them promoted to a headline turns the other two
+  // into footnotes.
+  const OUTCOMES: { Icon: typeof PiggyBank; text: string }[] = [
+    { Icon: Users,     text: "80+ daily active industrial users by March 2021" },
+    { Icon: LineChart, text: "Opened new business in energy savings and maximum demand management" },
+    { Icon: Layers,    text: "Became the base every later version of SOURCE was built on" },
+  ];
+
+  const Fig = ({ src, alt, caption, max = FIGURE_MAX }: { src: string; alt: string; caption?: string; max?: number }) => (
+    <figure style={{ margin: '28px 0 0' }}>
+      <img src={src} alt={alt} loading="lazy"
+        style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
+      {caption && (
+        <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+          {caption}
+        </figcaption>
+      )}
+    </figure>
+  );
+
+  // Images arrive later. Until then each figure holds its own space at the
+  // ratio the real one will take, so the page can be read and spaced now and
+  // nothing reflows when the files land.
+  const FigPlaceholder = ({ label, ratio = "16/9", max = FIGURE_MAX }: { label: string; ratio?: string; max?: number }) => (
+    <div style={{ margin: '28px 0 0', width: '100%', maxWidth: max }}>
+      <div className="flex items-center justify-center"
+        style={{ aspectRatio: ratio, border: `1px dashed ${rule}`, borderRadius: 8, background: 'transparent', padding: 16 }}>
+        <span className="font-['Nunito_Sans',sans-serif] text-small text-center" style={{ color: DIM }}>{label}</span>
+      </div>
+    </div>
+  );
+
+  const Label = ({ children }: { children: React.ReactNode }) => (
+    <h3 className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{children}</h3>
+  );
+
+  const P = ({ children, top = 8 }: { children: React.ReactNode; top?: number }) => (
+    <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: top, maxWidth: MEASURE }}>{children}</p>
+  );
+
+  const H2 = ({ children }: { children: React.ReactNode }) => (
+    <h2 className="font-['Museo',sans-serif] font-light"
+      style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.25rem)', lineHeight: 1.15, margin: 0 }}>{children}</h2>
+  );
+
+  const H3 = ({ children }: { children: React.ReactNode }) => (
+    <h3 className="font-['Museo',sans-serif] font-light"
+      style={{ color: ink, fontSize: 'clamp(1.0625rem, 1.5vw, 1.25rem)', lineHeight: 1.2, margin: '32px 0 0' }}>{children}</h3>
+  );
+
+  const Bullets = ({ items }: { items: string[] }) => (
+    <ul className="font-['Nunito_Sans',sans-serif]" style={{ color: body, margin: '8px 0 0', padding: 0, listStyle: 'none', maxWidth: MEASURE }}>
+      {items.map(t => (
+        <li key={t} className="flex items-start gap-2" style={{ marginTop: 6 }}>
+          <span className="flex-shrink-0" style={{ marginTop: 1 }}>—</span>
+          <span><Figures>{t}</Figures></span>
+        </li>
+      ))}
+    </ul>
+  );
+
+  const Section = ({ id, children }: { id: string; children: React.ReactNode }) => (
+    <section id={id} style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+      {children}
+    </section>
+  );
+
+  // The research method, as it ran: four steps, each feeding the next.
+  const RESEARCH_STEPS = [
+    "Stakeholder interviews",
+    "Define users & personas",
+    "Findings & analysis",
+    "Key features & data",
+  ];
+
+  const PERSONAS: { name: string; role: string; who: string; tasks: string[]; pains: string[] }[] = [
+    {
+      name: "Ms. Marion", role: "Building Manager", who: "36, Female",
+      tasks: [
+        "Ensure the building energy performs normal",
+        "Ensure solar performance with no downtime",
+        "Attend to any building energy anomaly",
+      ],
+      pains: [
+        "Wants a monthly energy consumption report to present to management without assembling it by hand",
+        "Often needs to check building systems manually",
+        "Alerts depend on on-site manpower, usually labour workers — a delayed alert puts both the workers and the building at risk",
+      ],
+    },
+    {
+      name: "John", role: "Senior Project Engineer", who: "29, Male",
+      tasks: [
+        "Conduct routine checkups on sites from time to time",
+        "Ensure a healthy level of solar system performance",
+        "Alert the factory owner or manager for operation and maintenance",
+        "Attend to system downtime, rectify cause and problems",
+      ],
+      pains: [
+        "Checking the solar systems is one-way — the system tells him nothing back",
+        "Extracting a report from the monitoring system to share with the factory manager is counter-productive",
+      ],
+    },
+  ];
+
+  return (
+    <div className="relative w-full" style={{ minHeight: '100dvh', background: 'transparent' }}>
+      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10" style={{ maxWidth: 'max(900px, 80%)' }}>
+
+        <dl id="source-overview" className="grid gap-x-6 gap-y-6"
+          style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(128px, 1fr))', margin: 0, scrollMarginTop: 140 }}>
+          {META.map(([label, value]) => (
+            <div key={label}>
+              <dt className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{label}</dt>
+              <dd className="font-['Nunito_Sans',sans-serif]" style={{ color: body, margin: '6px 0 0' }}>{value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        {/* ── Background & brief ── */}
+        <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+          <ul className="grid gap-8 md:gap-10 md:grid-cols-3" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {OUTCOMES.map(({ Icon, text }) => (
+              <li key={text} className="flex items-start gap-4 md:flex-col md:gap-0">
+                <Icon size={32} strokeWidth={1.25} style={{ color: fg }} aria-hidden="true" className="flex-shrink-0" />
+                <p className="font-['Museo',sans-serif] font-light mt-0 md:mt-4"
+                  style={{ color: fg, fontSize: 'clamp(1.125rem, 1.6vw, 1.375rem)', lineHeight: 1.25, margin: 0 }}>
+                  <Figures>{text}</Figures>
+                </p>
+              </li>
+            ))}
+          </ul>
+
+          <FigPlaceholder label="Hero — SOURCE dashboard on tablet" ratio="16/10" />
+
+          <div className="grid gap-8 md:grid-cols-2" style={{ marginTop: 32, maxWidth: `calc(${MEASURE} * 2)` }}>
+            <div>
+              <Label>Background</Label>
+              <P>
+                The client's core business is solar engineering. As a solar system provider, they wanted their
+                customers to feel confident that the systems were performing to expectation after installation.
+                SOURCE 1.0 answered that by making building energy data and solar system data visible to the
+                people who had bought it.
+              </P>
+            </div>
+            <div>
+              <Label>The brief</Label>
+              <P>
+                Design a web-based dashboard that shows the real-time performance of the company's solar systems —
+                and makes energy data worth looking at.
+              </P>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 24 }}>
+            <Label>My responsibilities</Label>
+            <P>
+              The project ran about a year, from scratch to an improved version. I started as the sole designer,
+              working closely with the product owner, the hardware engineers and a solar specialist to make sure
+              the data could actually be understood. A second designer joined during the product improvement phase.
+            </P>
+          </div>
+        </section>
+
+        {/* ── Design research & strategy ── */}
+        <Section id="source-research">
+          <H2>Design Research &amp; Strategy</H2>
+          <Label>Research goal</Label>
+          <Bullets items={[
+            "Discover users' pain points and needs",
+            "Find out the best practices of current dashboards",
+          ]} />
+
+          {/* The four steps as a row of their own rather than a diagram: the
+              original was a boxes-and-arrows image, and four short phrases
+              carry it without an asset to maintain. */}
+          <ol className="grid gap-3 md:grid-cols-4" style={{ listStyle: 'none', margin: '28px 0 0', padding: 0 }}>
+            {RESEARCH_STEPS.map((step, i) => (
+              <li key={step} className="font-['Nunito_Sans',sans-serif] text-small flex items-start gap-3"
+                style={{ color: body, border: `1px solid ${rule}`, borderRadius: 8, padding: '14px 16px' }}>
+                <span className="font-['Museo',sans-serif] flex-shrink-0" style={{ color: fg }}>{i + 1}</span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ol>
+
+          <H3>1. Stakeholder interviews</H3>
+          <P>
+            To deepen the understanding of the brief. The interviews happened in a meeting with the client's
+            business owners, internal engineers and the business development people who face clients — between
+            them, the key users of the dashboard.
+          </P>
+
+          <H3>2. Define users &amp; personas</H3>
+          <P>
+            Defining key features for a new product without being a domain expert meant starting from who uses it.
+            The dashboard's users are not only the solar system owners but the internal engineers the original
+            dashboards existed for. Two personas came out of it.
+          </P>
+
+          <div className="grid gap-6 md:grid-cols-2" style={{ marginTop: 20, maxWidth: `calc(${MEASURE} * 2)` }}>
+            {PERSONAS.map(p => (
+              <div key={p.name} style={{ border: `1px solid ${rule}`, borderRadius: 8, padding: 20 }}>
+                <p className="font-['Museo',sans-serif] font-light" style={{ color: ink, fontSize: '1.125rem', margin: 0 }}>{p.name}</p>
+                <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, margin: '4px 0 0' }}>
+                  {p.role} · {p.who}
+                </p>
+                <div style={{ marginTop: 16 }}><Label>Key tasks</Label><Bullets items={p.tasks} /></div>
+                <div style={{ marginTop: 16 }}><Label>Pain points</Label><Bullets items={p.pains} /></div>
+              </div>
+            ))}
+          </div>
+
+          <H3>3. Findings &amp; analysis</H3>
+          <Bullets items={[
+            "Existing dashboards were built for engineers to understand",
+            "Simplified data followed observable patterns, using semiotic representations",
+            "The visualisations were unappealing to a layman — a building supervisor is not necessarily an engineer",
+          ]} />
+          <FigPlaceholder label="Reference — existing third-party monitoring dashboards" ratio="16/9" />
+
+          <H3>4. Key features &amp; data</H3>
+          <Bullets items={[
+            "An overview of all buildings, mainly for internal engineers",
+            "The major list of building energy consumption data: solar power, utility, exported and imported energy, performance ratio, irradiance",
+            "Timestamps for crucial data points, e.g. maximum and minimum building consumption",
+            "A flexible viewing mode — by year, month, week, day",
+            "Export an energy report",
+          ]} />
+        </Section>
+
+        {/* ── Design development ── */}
+        <Section id="source-development">
+          <H2>Design Development</H2>
+
+          <Label>The challenge</Label>
+          <P>
+            The low-fidelity wireframe stage was dropped. Dashboard design is graphs and charts, and with the
+            actual visualisation of the data in front of us the considerations ran deeper for both the designer
+            and the stakeholders — which is what drove the iterations.
+          </P>
+
+          <H3>Synthesising data to design</H3>
+          <P>
+            The stakeholder briefing was what let me turn data into a wireframe. One customer profile — IKEA, a
+            solar system owner with multiple sites across Malaysia — was taken as the case to develop against.
+          </P>
+          <P>
+            The existing dashboard's data set the ground to start from. After gathering as many samples as
+            possible, a high-fidelity wireframe went up for review. Reading a piece of that raw data was the
+            first step to designing against it.
+          </P>
+          <FigPlaceholder label="Reference — raw installation data from the existing system" ratio="4/5" max={420} />
+          <FigPlaceholder label="Hi-fidelity wireframe — SOURCE energy monitoring dashboard" ratio="16/9" />
+
+          <H3>Screens design</H3>
+          <P>
+            Into the final stage, where the choice of colour and typography is ready to be decided.
+          </P>
+          <Bullets items={[
+            "Left: a map view, as an overview of every building under the SOURCE system",
+            "Middle: the main dashboard, a single building's energy data visualised",
+            "Right: a display screen serving as a daily lookout point, and as branding",
+          ]} />
+          <FigPlaceholder label="Screens — map view, main dashboard, display screen" ratio="16/7" />
+
+          <H3>Accessibility: a bright theme for an older generation</H3>
+          <P>
+            Users over fifty preferred a bright theme. White text on the original dark scheme was not legible to
+            them, so the dashboard's colours were reconsidered for that group, with the contrast between colour
+            and text raised.
+          </P>
+          <FigPlaceholder label="Bright theme variant of the dashboard" ratio="16/9" />
+        </Section>
+
+        {/* ── Result ── */}
+        <Section id="source-result">
+          <H2>Result</H2>
+          <Label>Final production &amp; outcome</Label>
+          <P>
+            About 80 daily active industrial users as of March 2021 — building managers, business owners, energy
+            managers and engineers.
+          </P>
+          <P>
+            Making building consumption visible opened new business for the client in energy savings, maximum
+            demand management and process automation. SOURCE 1.0 became the version every later one was built on.
+          </P>
+          <FigPlaceholder label="SOURCE in production — map view with live site notifications" ratio="16/9" />
+        </Section>
+
+      </div>
+    </div>
+  );
+}
+
+function SourceCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
+  const isDark = useContext(DarkModeCtx);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const onDark = useOnDarkBackdrop(headerRef);
+  const headingColor = onDark ? "#ffffff" : isDark ? GOLD_BRIGHT : GOLD;
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    // Cream, not KAI's white. KAI is white because its content is a white
+    // document; this one is the site's own ground, and going white here would
+    // make the rail's strip the odd colour again for no gain.
+    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+      <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+          background: headerScrolled
+            ? (onDark
+                ? "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), rgba(248,247,245,0.55)"
+                : isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)")
+            : "transparent",
+          backdropFilter: headerScrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
+          borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
+          paddingBottom: headerScrolled ? 16 : 24,
+          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
+        }}>
+          <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
+          <Breadcrumbs color={headingColor} items={[
+            { label: "Work", onClick: () => onNavigate("work") },
+            { label: "Case Studies", onClick: onBack },
+          ]} />
+          <h1 className="font-['Museo',sans-serif] font-light"
+            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: headingColor, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
+            SOURCE: Energy performance management dashboard
+          </h1>
+        </div>
+
+        <SourceCaseContent />
+        <SiteFooter />
+        <NavClearance />
+      </div>
+      <CaseSectionRail scrollRef={scrollRef} sections={SOURCE_SECTIONS} />
+    </div>
+  );
+}
+
+
 // ─── Apple Health case study ──────────────────────────────────────
 
 const AH_SECTIONS: { id: string; label: string }[] = [
@@ -3186,7 +3567,7 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
 // Pages that drill three levels deep (Work > category > case study).
 // These are the only pages that show the standalone hamburger pill on mobile;
 // every other non-home page shows the full gradient bar.
-const DEEP_PAGES = new Set<Page>(["businessCase", "kaiCase", "appleHealthCase", "brandPerceptionCase"]);
+const DEEP_PAGES = new Set<Page>(["businessCase", "kaiCase", "appleHealthCase", "brandPerceptionCase", "sourceCase"]);
 
 function StickyPageNav({ activePage, tint, onNavigate, isDeepPage = false }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void; isDeepPage?: boolean }) {
   const isDark = useContext(DarkModeCtx);
@@ -5368,6 +5749,7 @@ function pathOf(page: Page, detailKey?: string | null): string {
     case "businessCase":    return "/work/business-acumen/ecommerce";
     case "kaiCase":         return "/work/case-studies/kai";
     case "appleHealthCase": return "/work/case-studies/apple-health";
+    case "sourceCase":      return "/work/case-studies/source";
     case "brandPerceptionCase": return "/work/product-ux-strategies/brand-perception";
     case "awards":          return "/awards";
     case "speaking":        return `/awards/${detailKey ?? ""}`;
@@ -5407,6 +5789,7 @@ function routeOf(pathname: string): { page: Page; detailKey: string | null } {
     if (seg[1] === "business-acumen" && seg[2] === "ecommerce") return at("businessCase");
     if (seg[1] === "case-studies" && seg[2] === "kai") return at("kaiCase");
     if (seg[1] === "case-studies" && seg[2] === "apple-health") return at("appleHealthCase");
+    if (seg[1] === "case-studies" && seg[2] === "source") return at("sourceCase");
     if (seg[1] === "product-ux-strategies" && seg[2] === "brand-perception") return at("brandPerceptionCase");
     const card = EXPERTISE_CARDS.find(c => c.slug === seg[1]);
     // an unknown child falls back to the section rather than a dead end
@@ -5436,6 +5819,7 @@ function descriptionOf(page: Page, detailKey?: string | null): string {
     case "workDetail":   return card?.description ?? SITE_DESC;
     case "businessCase": return "A behavioural UX case study: lifting checkout rate from the bag page at Cotton On Group.";
     case "appleHealthCase": return "A five-day design challenge: repositioning Apple Health as a daily habit tool to drive daily active users.";
+    case "sourceCase":      return "A year-long case study: SOURCE, the energy performance management dashboard that made building and solar data visible to the people who owned it.";
     case "brandPerceptionCase": return "Shifting how 23 million people saw a wallet app — a brand perception framework, the UX strategy behind it, and how it was measured.";
     case "kaiCase": return "A design sprint case study: KAI, a mobile app for controlling a building's IoT machines and cutting Maximum Demand charges.";
     case "awards":       return "UX Leader of the Year finalist, with speaking and panel appearances across Australia, Europe and Asia.";
@@ -5459,6 +5843,7 @@ function titleOf(page: Page, detailKey?: string | null): string {
     case "businessCase":    return `eCommerce: Behavioural UX Design — ${SITE_TITLE}`;
     case "kaiCase":         return `KAI: Mobile app for IoT devices control — ${SITE_TITLE}`;
     case "appleHealthCase": return `Apple Health: Design Challenge — ${SITE_TITLE}`;
+    case "sourceCase":      return `SOURCE: Energy Performance Management Dashboard — ${SITE_TITLE}`;
     case "brandPerceptionCase": return `Brand Perception & UX Strategy — ${SITE_TITLE}`;
     case "awards":          return `Awards & Speaking — ${SITE_TITLE}`;
     case "speaking":        return ev ? `${ev.role} — ${ev.event} — ${SITE_TITLE}` : `Awards & Speaking — ${SITE_TITLE}`;
@@ -5531,7 +5916,7 @@ export default function App() {
   // Case-study pages are a drill-in from the Work list; they animate as an
   // expansion of the row rather than as a new screen sliding in.
   const drillIn = page === "workDetail" || page === "businessCase" || page === "kaiCase"
-    || page === "appleHealthCase" || page === "brandPerceptionCase";
+    || page === "appleHealthCase" || page === "brandPerceptionCase" || page === "sourceCase";
 
   useEffect(() => {
     setDetailHeaderScrolled(false);
@@ -5562,7 +5947,8 @@ export default function App() {
   const navActive: Page | null =
       page === "home" ? null
     : page === "work" || page === "workDetail" || page === "businessCase"
-      || page === "kaiCase" || page === "appleHealthCase" || page === "brandPerceptionCase" ? "work"
+      || page === "kaiCase" || page === "appleHealthCase" || page === "brandPerceptionCase"
+      || page === "sourceCase" ? "work"
     : page === "awards" || page === "speaking" ? "awards"
     : page === "speakingInquiry" ? "connect"
     : page;
@@ -5664,6 +6050,9 @@ export default function App() {
         )}
         {page === "brandPerceptionCase" && (
           <BrandPerceptionPage onBack={() => { setDetailKey("ux"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
+        )}
+        {page === "sourceCase" && (
+          <SourceCasePage onBack={() => { setDetailKey("cases"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
       </motion.div>
       {railOn && <IdentityRail onNavigate={navigateGeneral} />}
