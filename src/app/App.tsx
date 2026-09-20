@@ -776,7 +776,7 @@ const SECTIONS = [
     accent: "#9B5A88", labelColor: "#9B5A88",
     tagline: "Let's Connect",
     context: "Open to collaboration",
-    items: ["Speaking Inquiry", "linkedin", "instagram", "designmatters.tiff@gmail.com"],
+    items: ["designmatters.tiff@gmail.com", "Speaking Inquiry", ["LinkedIn", "Instagram"]],
   },
 ] as const;
 
@@ -867,6 +867,43 @@ function ContactItem({
     <div className={`flex items-center${pad}`}>
       {/* Plain label — goes nowhere, so it stays body text. */}
       <span className="font-['Nunito_Sans',sans-serif] text-body" style={{ color: itemColor }}>{item}</span>
+    </div>
+  );
+}
+
+// A contact list entry is either one destination or several sharing a row.
+// Both the standalone Connect/Coaching page and the homepage deck's slide
+// render their lists through this, so the two surfaces stay identical — they
+// had already drifted once, with the deck still showing four separate rows
+// in the old order after the page had been reordered.
+type ContactEntry = string | readonly string[];
+const asRow = (entry: ContactEntry): readonly string[] => typeof entry === "string" ? [entry] : entry;
+
+function ContactRow({ row, accent, itemColor, linkColor, borderColor, onNavigate }: {
+  row: readonly string[];
+  accent: string;
+  itemColor: string;
+  linkColor?: string;
+  borderColor: string;
+  onNavigate?: (p: Page) => void;
+}) {
+  if (row.length === 1) {
+    return <ContactItem item={row[0]} accent={accent} itemColor={itemColor} linkColor={linkColor} borderColor={borderColor} onNavigate={onNavigate} />;
+  }
+  // Several destinations on one line. The wrapper carries the row's full width
+  // and height so the items inside keep the same rhythm a row of their own
+  // would have, and nothing wraps at 360px.
+  return (
+    <div className="w-full flex items-center gap-3 py-4 md:py-[18px] flex-nowrap">
+      {row.map((sub, i) => (
+        <Fragment key={sub}>
+          {i > 0 && (
+            <span aria-hidden="true" className="flex-shrink-0 font-['Nunito_Sans',sans-serif] text-body"
+              style={{ color: itemColor, opacity: 0.3 }}>·</span>
+          )}
+          <ContactItem item={sub} accent={accent} itemColor={itemColor} linkColor={linkColor} borderColor={borderColor} inline onNavigate={onNavigate} />
+        </Fragment>
+      ))}
     </div>
   );
 }
@@ -1373,15 +1410,16 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 <div className="flex-1" style={{ minHeight: "4vh" }} />
 
                 <div style={{ borderTop: `1px solid ${border}` }}>
-                  {section.items.map((item, k) => {
+                  {section.items.map((entry, k) => {
                     const itemColor = isDark ? "white" : INK;
+                    const row = asRow(entry);
                     return (
-                      <div key={item} style={{ borderBottom: `1px solid ${border}`, lineHeight: 0, overflow: "hidden" }}>
+                      <div key={row.join("|")} style={{ borderBottom: `1px solid ${border}`, lineHeight: 0, overflow: "hidden" }}>
                         <div style={{
                           clipPath: isActive ? "inset(0 0 0% 0)" : "inset(0 0 100% 0)",
                           transition: `clip-path 0.55s cubic-bezier(0.4,0,0.2,1) ${0.22 + k * 0.09}s`,
                         }}>
-                          <ContactItem item={item} accent={section.accent} itemColor={itemColor} linkColor={HEADING_COLOUR[section.key]} borderColor={border} onNavigate={onNavigate} />
+                          <ContactRow row={row} accent={section.accent} itemColor={itemColor} linkColor={HEADING_COLOUR[section.key]} borderColor={border} onNavigate={onNavigate} />
                         </div>
                       </div>
                     );
@@ -3117,9 +3155,7 @@ function ContactListPage({
 }: {
   eyebrow: string;
   title: string;
-  // A plain string is one full-width row. A nested array is several
-  // destinations sharing a single row.
-  items: readonly (string | readonly string[])[];
+  items: readonly ContactEntry[];
   accent: string;
   // Coaching and Connect share this shell but sit at different points along
   // the nav gradient, so the heading colour comes in per page.
@@ -3149,28 +3185,10 @@ function ContactListPage({
       <div className="px-6 md:px-20 pt-6">
         <div style={{ borderTop: `1px solid ${brd}` }}>
           {items.map(entry => {
-            const row = typeof entry === "string" ? [entry] : entry;
+            const row = asRow(entry);
             return (
               <div key={row.join("|")} style={{ borderBottom: `1px solid ${brd}` }}>
-                {row.length === 1 ? (
-                  <ContactItem item={row[0]} accent={accent} itemColor={itemColor} linkColor={headingColor} borderColor={brd} onNavigate={onNavigate} />
-                ) : (
-                  // Several destinations on one line. The wrapper carries the
-                  // row's full width and height so the items inside keep the
-                  // same rhythm as a row of their own would, and nothing wraps
-                  // at 360px.
-                  <div className="w-full flex items-center gap-3 py-4 md:py-[18px] flex-nowrap">
-                    {row.map((sub, i) => (
-                      <Fragment key={sub}>
-                        {i > 0 && (
-                          <span aria-hidden="true" className="flex-shrink-0 font-['Nunito_Sans',sans-serif] text-body"
-                            style={{ color: itemColor, opacity: 0.3 }}>·</span>
-                        )}
-                        <ContactItem item={sub} accent={accent} itemColor={itemColor} linkColor={headingColor} borderColor={brd} inline onNavigate={onNavigate} />
-                      </Fragment>
-                    ))}
-                  </div>
-                )}
+                <ContactRow row={row} accent={accent} itemColor={itemColor} linkColor={headingColor} borderColor={brd} onNavigate={onNavigate} />
               </div>
             );
           })}
