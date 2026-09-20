@@ -799,7 +799,7 @@ const SECTIONS = [
     key: "coaching", label: "Coaching",        page: "coaching" as Page,
     accent: "#5070A0", labelColor: "#9B5A88",
     tagline: "UX Career Coaching",
-    context: "Portfolio · Positioning · Negotiation",
+    context: "Portfolio · Interview · Negotiation",
     items: [
       "1:1 Calls",
       "Priority DM",
