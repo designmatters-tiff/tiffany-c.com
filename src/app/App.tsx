@@ -362,16 +362,26 @@ function Breadcrumbs({ items, color }: { items: { label: string; onClick: () => 
     // logomark shares that line and the heading rides up under the mark
     // without it. The words are back, so the line carries itself again.
     <nav aria-label="Breadcrumb" className="flex items-center flex-wrap mb-4" style={{ marginLeft: -2 }}>
+      {/* One chevron, on the first crumb only: it means "back", and back is a
+          direction, not a thing each level repeats. The rest are separated by
+          a slash, which reads as a path. */}
       {items.map((it, i) => (
-        <motion.button key={it.label} onClick={it.onClick}
-          initial={{ opacity: 0, x: -8 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.45, delay: 0.06 + i * 0.09, ease: [0.42, 0, 0.58, 1] }}
-          className="crumb group flex items-center gap-1.5 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] cursor-pointer"
-          style={{ background: "none", border: "none", padding: "2px 10px 2px 2px", color, transition: "color 0.3s ease" }}>
-          <ChevronLeft size={12} strokeWidth={1.5} className="crumb-chevron flex-shrink-0" />
-          <span className="link-underline whitespace-nowrap">{it.label}</span>
-        </motion.button>
+        <Fragment key={it.label}>
+          {i > 0 && (
+            <span aria-hidden="true"
+              className="font-['Nunito_Sans',sans-serif] text-label flex-shrink-0"
+              style={{ color, opacity: 0.4, margin: "0 8px 0 0" }}>/</span>
+          )}
+          <motion.button onClick={it.onClick}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.45, delay: 0.06 + i * 0.09, ease: [0.42, 0, 0.58, 1] }}
+            className="crumb group flex items-center gap-1.5 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] cursor-pointer"
+            style={{ background: "none", border: "none", padding: "2px 10px 2px 2px", color, transition: "color 0.3s ease" }}>
+            {i === 0 && <ChevronLeft size={12} strokeWidth={1.5} className="crumb-chevron flex-shrink-0" />}
+            <span className="link-underline whitespace-nowrap">{it.label}</span>
+          </motion.button>
+        </Fragment>
       ))}
     </nav>
   );
@@ -2215,8 +2225,9 @@ function useOnDarkBackdrop(headerRef: React.RefObject<HTMLDivElement | null>) {
 // ─── KAI case study ───────────────────────────────────────────────
 
 const KAI_SECTIONS: { id: string; label: string }[] = [
+  // Background & Brief has no dot of its own: it reads as the back half of
+  // the overview, and the rail stays with Overview while you are in it.
   { id: "kai-overview",  label: "Overview" },
-  { id: "kai-brief",     label: "Background & Brief" },
   { id: "kai-sprint",    label: "Design Sprint" },
   { id: "kai-testing",   label: "User Testing" },
   { id: "kai-solutions", label: "Design Solutions" },
@@ -4502,7 +4513,7 @@ function CaseSectionRail({ scrollRef, sections = CASE_SECTIONS }: { scrollRef: R
     const LINE = 180; // just below the sticky header
     const pick = () => {
       const rootTop = root.getBoundingClientRect().top;
-      let current = CASE_SECTIONS[0].id;
+      let current = sections[0].id;
       for (const sec of sections) {
         const el = document.getElementById(sec.id);
         if (el && el.getBoundingClientRect().top - rootTop <= LINE) current = sec.id;
