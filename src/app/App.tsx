@@ -726,6 +726,7 @@ function SpeakingInquiryPage({ onBack, onNavigate, headerScrolled = false, scrol
           </button>
         )}
 
+        <SiteFooter gutter={false} />
         {/* Bottom spacer so content clears the floating nav */}
         <div style={{ height: 140 }} />
       </div>
@@ -908,6 +909,37 @@ function ContactRow({ row, accent, itemColor, linkColor, borderColor, onNavigate
           <ContactItem item={sub} accent={accent} itemColor={itemColor} linkColor={linkColor} borderColor={borderColor} inline onNavigate={onNavigate} />
         </Fragment>
       ))}
+    </div>
+  );
+}
+
+// One quiet line at the end of a page. Copyright attaches on creation, so the
+// notice stakes the claim rather than creating it — which is why it wants the
+// lowest contrast on the page and not a divider, a column or a heading.
+//
+// The year is computed, never written down: a portfolio showing last year's
+// year reads as a site nobody tends.
+// `gutter={false}` where the page already wraps its content in the px-6
+// md:px-20 inset — without it the line indents twice and stops lining up
+// with the copy above it.
+function SiteFooter({ variant, gutter = true }: { variant?: "work"; gutter?: boolean }) {
+  const isDark = useContext(DarkModeCtx);
+  const year = new Date().getFullYear();
+  return (
+    <div className={gutter ? "px-6 md:px-20" : undefined}>
+      <p className="font-['Nunito_Sans',sans-serif]"
+        style={{
+          fontSize: 11,
+          fontWeight: 400,
+          lineHeight: 1.5,
+          marginTop: 48,
+          maxWidth: 620,
+          // The quietest thing on the page in either theme: DIM at 45%, and a
+          // white barely above the background in dark.
+          color: isDark ? "rgba(255,255,255,0.35)" : "rgba(102,102,96,0.45)",
+        }}>
+        © {year} Tiffany Chew{variant === "work" && ". Case study content shared with permission. Client data and trademarks remain the property of their respective owners."}
+      </p>
     </div>
   );
 }
@@ -1871,6 +1903,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
           })}
         </ul>
 
+        <SiteFooter variant="work" gutter={false} />
         {/* Bottom spacer so content clears the floating detail nav */}
         <div style={{ height: 96 }} />
       </div>
@@ -2543,6 +2576,7 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
         </div>
 
         <KaiCaseContent />
+        <SiteFooter variant="work" />
         <div style={{ height: 96 }} />
       </div>
       <CaseSectionRail scrollRef={scrollRef} sections={KAI_SECTIONS} />
@@ -2911,6 +2945,7 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
         </div>
 
         <AppleHealthContent />
+        <SiteFooter variant="work" />
         <div style={{ height: 96 }} />
       </div>
       <CaseSectionRail scrollRef={scrollRef} sections={AH_SECTIONS} />
@@ -3132,6 +3167,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
             </motion.div>
           );
         })}
+        {!embedded && <SiteFooter />}
         {/* Bottom spacer so content clears the floating nav */}
         <div style={{ height: 96 }} />
       </div>
@@ -3195,6 +3231,7 @@ function ContactListPage({
         </div>
       </div>
 
+      <SiteFooter />
       <div style={{ height: 96 }} />
     </div>
   );
@@ -3569,6 +3606,7 @@ function TestimonialsPage({
               className="link-underline" style={{ color: accent }}>ADPList</a>.
           </p>
 
+          {!embedded && <SiteFooter gutter={false} />}
           <div style={{ height: 120 }} />
         </div>
     </>
@@ -3961,6 +3999,7 @@ function AwardsSpeakingPage({
         ))}
       </div>
 
+      {!embedded && <SiteFooter />}
       <div style={{ height: 96 }} />
     </>
   );
@@ -4207,6 +4246,7 @@ function SpeakingDetailPage({
         </div>
       )}
 
+      <SiteFooter />
       <div style={{ height: 96 }} />
     </div>
   );
@@ -4568,6 +4608,7 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
         {unlocked ? (
           <>
             <BusinessCaseContent />
+            <SiteFooter variant="work" />
             <div style={{ height: 96 }} />
           </>
         ) : (
