@@ -4195,19 +4195,14 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
 // Wraps PageBottomNav with a full-width fade scrim behind it, so content
 // scrolling up from underneath fades into the page background before it
 // would otherwise be visible peeking past the nav's side margins/edges.
-// Pages that drill three levels deep (Work > category > case study).
-// These are the only pages that show the standalone hamburger pill on mobile;
-// every other non-home page shows the full gradient bar.
-const DEEP_PAGES = new Set<Page>(["businessCase", "kaiCase", "appleHealthCase", "brandPerceptionCase", "sourceCase", "finTechCase"]);
-
-function StickyPageNav({ activePage, tint, onNavigate, isDeepPage = false }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void; isDeepPage?: boolean }) {
+function StickyPageNav({ activePage, tint, onNavigate }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
   const [menuOpen, setMenuOpen] = useState(false);
   const goHome = useContext(GoHomeCtx);
   // Desktop bar height (px) — used for the fade scrim sizing.
   const BAR_H = 64;
-  // Mobile fade: pill height on deep pages, full bar on others.
-  const mobileNavH = isDeepPage ? MOBILE_NAV_PILL : BAR_H;
+  // Mobile is the pill, at every depth — the fade is sized to it.
+  const mobileNavH = MOBILE_NAV_PILL;
   return (
     <>
       <div className="fixed inset-x-0 z-20 pointer-events-none"
@@ -4229,7 +4224,12 @@ function StickyPageNav({ activePage, tint, onNavigate, isDeepPage = false }: { a
           to the rail's edge and the left column reads as a separate panel
           rather than as part of the page. Crossing it ties the two back
           together. */}
-      <div className={`fixed overflow-hidden ${isDeepPage ? "left-6 right-auto md:left-20 md:right-20" : "left-0 right-0 md:left-20 md:right-20"}`}
+      {/* Mobile is only ever as wide as the one control it holds, so `right`
+          is released there; desktop spans the page. The bar briefly ran full
+          width on first-level mobile pages, which put five labels across a
+          390px screen — they truncated to "Award", "Testim", "Coach",
+          "Conne" and the last one ran off the edge. */}
+      <div className="fixed overflow-hidden left-6 right-auto md:left-20 md:right-20"
         style={{
           zIndex: menuOpen ? 60 : 30,
           bottom: "calc(3% + env(safe-area-inset-bottom))",
@@ -4237,18 +4237,17 @@ function StickyPageNav({ activePage, tint, onNavigate, isDeepPage = false }: { a
           boxShadow: menuOpen ? "none" : "0 8px 32px rgba(0,0,0,0.18)",
           transition: "box-shadow 0.3s ease",
         }}>
-        <PageBottomNav activePage={activePage} tint={tint} onNavigate={onNavigate} menuOpen={menuOpen} setMenuOpen={setMenuOpen} isDeepPage={isDeepPage} />
+        <PageBottomNav activePage={activePage} tint={tint} onNavigate={onNavigate} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
       </div>
-      {isDeepPage && (
-        <MobileMenu
-          open={menuOpen}
-          hideClose
-          activeIdx={SECTIONS.findIndex(s => s.page === activePage)}
-          onClose={() => setMenuOpen(false)}
-          onGoTo={() => { (goHome ?? (() => onNavigate("home")))(); setMenuOpen(false); }}
-          onNavigate={(p) => { onNavigate(p); setMenuOpen(false); }}
-        />
-      )}
+      {/* The pill is the only nav on mobile now, so its menu is too. */}
+      <MobileMenu
+        open={menuOpen}
+        hideClose
+        activeIdx={SECTIONS.findIndex(s => s.page === activePage)}
+        onClose={() => setMenuOpen(false)}
+        onGoTo={() => { (goHome ?? (() => onNavigate("home")))(); setMenuOpen(false); }}
+        onNavigate={(p) => { onNavigate(p); setMenuOpen(false); }}
+      />
     </>
   );
 }
@@ -4259,7 +4258,6 @@ function PageBottomNav({
   onNavigate,
   menuOpen,
   setMenuOpen,
-  isDeepPage = false,
 }: {
   activePage: Page;
   // The page's own heading colour, where that differs from its nav
@@ -4268,7 +4266,6 @@ function PageBottomNav({
   onNavigate: (p: Page) => void;
   menuOpen: boolean;
   setMenuOpen: (v: boolean) => void;
-  isDeepPage?: boolean;
 }) {
   const isDark = useContext(DarkModeCtx);
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
@@ -4283,8 +4280,10 @@ function PageBottomNav({
 
   return (
     <>
-      {/* Full gradient bar — always visible on 1st-level pages, desktop-only on deep pages */}
-      <div className={`${isDeepPage ? "hidden md:flex" : "flex"} items-stretch h-16 overflow-hidden`}
+      {/* The full gradient bar is desktop chrome. On a phone it is the pill
+          below and nothing else — the bar's five labels do not fit, and the
+          page already says where you are. */}
+      <div className="hidden md:flex items-stretch h-16 overflow-hidden"
         style={{ background: navGradient(isDark) }}>
         <button
           className="flex items-center gap-3 overflow-hidden"
@@ -4319,10 +4318,10 @@ function PageBottomNav({
         ))}
       </div>
 
-      {/* Hamburger pill — only on deep (3rd-level) pages on mobile */}
+      {/* The pill — the whole of mobile navigation, at every depth. */}
       <button onClick={() => setMenuOpen(!menuOpen)}
         aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen}
-        className={`${isDeepPage ? "md:hidden flex" : "hidden"} items-center justify-center`}
+        className="md:hidden flex items-center justify-center"
         style={{
           // One flat colour, the page's own heading colour — at 44px square
           // the full nav gradient was a five-stop sweep compressed into a
@@ -6728,7 +6727,7 @@ export default function App() {
       {navActive && (
         <StickyPageNav activePage={navActive} onNavigate={navigateGeneral}
           tint={page === "speakingInquiry" || page === "speaking" ? GOLD : undefined}
-          isDeepPage={DEEP_PAGES.has(page)} />
+          />
       )}
     </div>
     </AccordionCtx.Provider>
