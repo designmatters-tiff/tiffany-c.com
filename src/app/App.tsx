@@ -128,7 +128,7 @@ const HEADING_COLOUR: Record<string, string> = Object.fromEntries(
   ]),
 );
 
-type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "kaiCase" | "appleHealthCase" | "brandPerceptionCase" | "sourceCase" | "testimonials";
+type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "kaiCase" | "appleHealthCase" | "brandPerceptionCase" | "sourceCase" | "finTechCase" | "testimonials";
 
 // ─── Dark mode context ────────────────────────────────────────────
 const DarkModeCtx = createContext(false);
@@ -573,6 +573,7 @@ const SPEAKING_FORM_ENDPOINT = "https://formspree.io/f/xzebweln";
 // name the SOURCE work was done under; the company is Plus Xnergy now, and the
 // live site is the useful destination.
 const PLUS_XNERGY_URL = "https://www.plusxnergy.com/";
+const TNG_DIGITAL_URL = "https://www.tngdigital.com.my/";
 
 // The eCommerce prototype, as an embed. Figma serves embeds from
 // embed.figma.com — the www.figma.com share link renders its own UI and
@@ -1931,7 +1932,10 @@ const EXPERTISE_CARDS = [
   {
     key: "business", slug: "business-acumen", title: "Business Acumen", accent: "#8A6E2E", Illustration: IllustrationBusiness,
     description: "Aligning product design with measurable revenue growth and user outcomes.",
-    bullets: ["eCommerce: Behavioural UX Design (passcode required)"],
+    bullets: [
+      "FinTech: Balancing user preference & business result (passcode required)",
+      "eCommerce: Behavioural UX Design (passcode required)",
+    ],
   },
   {
     key: "ux", slug: "product-ux-strategies", title: "Product & UX Strategies", accent: "#5070A0", Illustration: IllustrationUX,
@@ -1975,6 +1979,7 @@ const BULLET_LINKS: Record<string, Page> = {
   "KAI — Mobile app for IoT device control": "kaiCase",
   "Apple Health — Design Challenge": "appleHealthCase",
   "SOURCE — Energy performance management dashboard": "sourceCase",
+  "FinTech: Balancing user preference & business result (passcode required)": "finTechCase",
 };
 
 // Rows navigate to a full WorkDetailPage rather than expanding inline —
@@ -3188,6 +3193,464 @@ function SourceCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate
 }
 
 
+// ─── FinTech case study (passcode-gated) ──────────────────────────
+// TNG eWallet's Quick Cash In, 2022–2023. Lives under Business Acumen: the
+// case is the balance between what the business needed and what users would
+// accept, and the numbers are the argument.
+const FT_SECTIONS: { id: string; label: string }[] = [
+  { id: "ft-overview", label: "Overview" },
+  { id: "ft-outcome",  label: "Outcome" },
+  { id: "ft-pitfalls", label: "Pitfalls" },
+  { id: "ft-findings", label: "Findings" },
+  { id: "ft-decision", label: "Decision" },
+  { id: "ft-learning", label: "Learnings" },
+];
+
+// The evidence for the outcome comes from three directions and they are not a
+// sequence — a reader wants the business case, or the user reaction, or the
+// press, not all three stacked. Tabs keep the section one screen tall and let
+// the reader pick, which is how the original presented it.
+const FT_EVIDENCE = ["Business", "Users", "Media"] as const;
+type FtEvidence = typeof FT_EVIDENCE[number];
+
+function EvidenceTabs({ value, onChange }: { value: FtEvidence; onChange: (v: FtEvidence) => void }) {
+  const isDark = useContext(DarkModeCtx);
+  return (
+    <div role="tablist" aria-label="Evidence" className="flex flex-wrap gap-2" style={{ marginTop: 28 }}>
+      {FT_EVIDENCE.map(t => {
+        const on = t === value;
+        return (
+          <button key={t} role="tab" aria-selected={on} id={`ft-tab-${t}`} aria-controls={`ft-panel-${t}`}
+            onClick={() => onChange(t)}
+            className="font-['Nunito_Sans',sans-serif] text-small cursor-pointer"
+            style={{
+              // 44px floor for the tap target, whatever the label's width.
+              minHeight: 44, padding: "0 20px", borderRadius: 999,
+              border: `1px solid ${on ? "transparent" : isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.14)"}`,
+              background: on ? GOLD : "transparent",
+              color: on ? "#fff" : isDark ? "rgba(255,255,255,0.72)" : DIM,
+              transition: "background 0.25s ease, color 0.25s ease, border-color 0.25s ease",
+            }}>
+            {t}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function FinTechContent() {
+  const isDark = useContext(DarkModeCtx);
+  const fg   = GOLD;
+  const sub  = isDark ? "rgba(255,255,255,0.75)" : DIM;
+  const body = isDark ? "rgba(255,255,255,0.72)" : DIM;
+  const rule = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
+  const ink  = isDark ? "white" : INK;
+  const MEASURE = '68ch';
+  const FIGURE_MAX = 760;
+
+  const [tab, setTab] = useState<FtEvidence>("Business");
+
+  const META: [string, React.ReactNode][] = [
+    ["Year", "2022 – 2023"],
+    ["Client", (
+      <a href={TNG_DIGITAL_URL} target="_blank" rel="noopener noreferrer"
+        className="link-underline" style={{ color: fg }}>TNG Digital (TNG eWallet)</a>
+    )],
+    ["Goal", "Keep GO+ funded without forcing users into it"],
+    ["Scope", "Design sprint facilitation, focus group research, concept validation, product strategy"],
+    ["Role", "Head of Product Design & UX Research"],
+    ["Launched", "20 February 2023"],
+  ];
+
+  const FigPlaceholder = ({ label, ratio = "16/9", max = FIGURE_MAX }: { label: string; ratio?: string; max?: number }) => (
+    <div style={{ margin: '28px 0 0', width: '100%', maxWidth: max }}>
+      <div className="flex items-center justify-center"
+        style={{ aspectRatio: ratio, border: `1px dashed ${rule}`, borderRadius: 8, background: 'transparent', padding: 16 }}>
+        <span className="font-['Nunito_Sans',sans-serif] text-small text-center" style={{ color: DIM }}>{label}</span>
+      </div>
+    </div>
+  );
+
+  const Label = ({ children }: { children: React.ReactNode }) => (
+    <h3 className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{children}</h3>
+  );
+
+  const P = ({ children, top = 8 }: { children: React.ReactNode; top?: number }) => (
+    <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: top, maxWidth: MEASURE }}>{children}</p>
+  );
+
+  const H2 = ({ children }: { children: React.ReactNode }) => (
+    <h2 className="font-['Museo',sans-serif] font-light"
+      style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.25rem)', lineHeight: 1.15, margin: 0 }}>{children}</h2>
+  );
+
+  const Bullets = ({ items }: { items: React.ReactNode[] }) => (
+    <ul className="font-['Nunito_Sans',sans-serif]" style={{ color: body, margin: '8px 0 0', padding: 0, listStyle: 'none', maxWidth: MEASURE }}>
+      {items.map((t, i) => (
+        <li key={i} className="flex items-start gap-2" style={{ marginTop: 6 }}>
+          <span className="flex-shrink-0" style={{ marginTop: 1 }}>—</span>
+          <span>{t}</span>
+        </li>
+      ))}
+    </ul>
+  );
+
+  const Section = ({ id, children }: { id: string; children: React.ReactNode }) => (
+    <section id={id} style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+      {children}
+    </section>
+  );
+
+  // The lessons are the spine of this case — each one is what a stretch of it
+  // cost to learn. They get a surface of their own so they read as asides
+  // rather than as more body copy, which is how the original set them.
+  const Lesson = ({ n, title, children }: { n: number; title: string; children: React.ReactNode }) => (
+    <div style={{
+      marginTop: 28, borderRadius: 8, padding: '20px 24px',
+      background: isDark ? "rgba(255,255,255,0.05)" : "rgba(17,17,17,0.04)",
+      borderLeft: `2px solid ${GOLD}`,
+    }}>
+      <p className="font-['Museo',sans-serif] font-light" style={{ color: ink, fontSize: '1.0625rem', margin: 0 }}>
+        Lesson #{n}: {title}
+      </p>
+      <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: body, margin: '8px 0 0', maxWidth: MEASURE }}>
+        {children}
+      </p>
+    </div>
+  );
+
+  return (
+    <div className="relative w-full" style={{ minHeight: '100dvh', background: 'transparent' }}>
+      <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10" style={{ maxWidth: 'max(900px, 80%)' }}>
+
+        <dl id="ft-overview" className="grid gap-x-6 gap-y-6"
+          style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(128px, 1fr))', margin: 0, scrollMarginTop: 140 }}>
+          {META.map(([label, value]) => (
+            <div key={label}>
+              <dt className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{label}</dt>
+              <dd className="font-['Nunito_Sans',sans-serif]" style={{ color: body, margin: '6px 0 0' }}>{value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+          <div className="grid gap-8 md:grid-cols-2" style={{ maxWidth: `calc(${MEASURE} * 2)` }}>
+            <div>
+              <Label>The brief</Label>
+              <P>
+                GO+ is the eWallet's investment account: money parked there earns daily interest. Its problem was
+                that the balance kept draining away — GO+ funds are what the wallet spends from, so tolls, parking
+                and merchant payments emptied the thing users were trying to grow.
+              </P>
+            </div>
+            <div>
+              <Label>My responsibilities</Label>
+              <P>
+                I opened the project with a two-day design sprint and then led the team through focus group
+                interviews. Analysing the responses gave us the first user persona for GO+, and the basis for the
+                solutions I put to the business owners. The project was deprioritised for a time; the final
+                production launched on 20 February 2023.
+              </P>
+            </div>
+          </div>
+          <FigPlaceholder label="Quick Cash In — enable screen" ratio="4/5" max={380} />
+        </section>
+
+        {/* ── Outcome ── */}
+        <Section id="ft-outcome">
+          <H2>A middle ground for users and business</H2>
+          <P>
+            Quick Cash In — the refined version of what started as 'auto-sweeping' — struck the balance. It routes
+            future reloads, transfers and cashback into GO+ rather than taking control of the wallet, and it has
+            been written up in the press as the fix to a market problem.
+          </P>
+          <P>
+            Post-launch there were no major customer complaints, and users who understand the product applaud the
+            convenience. A minority still prefer to keep day-to-day spending separate from their investment
+            account, which is useful for the next iteration rather than a mark against this one.
+          </P>
+          <div style={{ marginTop: 24 }}>
+          <Label>What it delivered</Label>
+          <Bullets items={[
+            <Figures>30% increment in Assets Under Management (AUM) within the first three months</Figures>,
+            <Figures>4x more fund-in transactions</Figures>,
+            <Figures>1.25x growth in the user base</Figures>,
+          ]} />
+          </div>
+
+          {/* Three directions of evidence, one at a time. */}
+          <EvidenceTabs value={tab} onChange={setTab} />
+
+          <div role="tabpanel" id={`ft-panel-${tab}`} aria-labelledby={`ft-tab-${tab}`}
+            style={{ marginTop: 20, border: `1px solid ${rule}`, borderRadius: 12, padding: '24px' }}>
+            {tab === "Business" && (
+              <div className="grid gap-6 md:grid-cols-2" style={{ alignItems: 'start' }}>
+                <div>
+                  <p className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: 'clamp(1.25rem, 2vw, 1.75rem)', margin: 0, lineHeight: 1.2 }}>
+                    <Figures>1.7x AUM growth year on year</Figures>
+                  </p>
+                  <P top={12}>
+                    AUM of MYR 685.6 million across 3.54 million users, with QCI contributing 91.6% of it, as of
+                    March 2024 — against MYR 395.3 million and 2.83 million users in January 2023.
+                  </P>
+                </div>
+                <div>
+                  <Label>Daily QCI transactions</Label>
+                  <Bullets items={[<Figures>Feb 2023: 152k → Feb 2024: 467k</Figures>]} />
+                  <div style={{ marginTop: 16 }}><Label>Daily amount</Label>
+                    <Bullets items={[<Figures>Feb 2023: RM 16 mil → Feb 2024: RM 58 mil</Figures>]} />
+                  </div>
+                  <div style={{ marginTop: 16 }}><Label>Cumulative</Label>
+                    <Bullets items={[
+                      <Figures>MYR 521 mil on day one (19 Feb 2023)</Figures>,
+                      <Figures>MYR 14 bil cumulative QCI amount</Figures>,
+                    ]} />
+                  </div>
+                </div>
+                <div className="md:col-span-2">
+                  <FigPlaceholder label="Chart — 2023 QCI & AUM growth" ratio="16/9" />
+                  <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+                    Organic cash-in fell while users kept reloading their eWallets — the behaviour that held AUM up
+                    through 2023.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {tab === "Users" && (
+              <div className="grid gap-6 md:grid-cols-2" style={{ alignItems: 'start' }}>
+                <div>
+                  <p className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: 'clamp(1.25rem, 2vw, 1.75rem)', margin: 0, lineHeight: 1.2 }}>
+                    App Store and Facebook responses are a mix of positive and negative
+                  </p>
+                  <P top={12}>
+                    It is entirely the user's call what serves them best and what they perceive as beneficial.
+                  </P>
+                  <P>
+                    <Figures>Today 2.17 million users out of 3.5 million — roughly 70% of GO+ users — have QCI enabled.</Figures>{" "}
+                    We take the minority to be users who prefer to separate the two funds: one for daily spending,
+                    one for saving or investment. That is consistent with what the focus group interviews found.
+                  </P>
+                </div>
+                <div>
+                  <FigPlaceholder label="App Store review and Facebook thread" ratio="4/5" max={380} />
+                </div>
+              </div>
+            )}
+
+            {tab === "Media" && (
+              <div>
+                <p className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: 'clamp(1.25rem, 2vw, 1.75rem)', margin: 0, lineHeight: 1.2 }}>
+                  “TNG eWallet finally solves the biggest problem of its Go+ investment feature”
+                </p>
+                <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 8 }}>
+                  Alexander Wong, SoyaCincau — 3 January 2023
+                </p>
+                <P>
+                  The article names the problem the project existed to solve: a GO+ balance is hard to keep high
+                  because it is spent on tolls, parking and merchant payments. Quick Cash In transfers future
+                  reloads, transfers and cashback above RM10 into GO+ instead.
+                </P>
+                <FigPlaceholder label="Press coverage — SoyaCincau article" ratio="16/9" />
+              </div>
+            )}
+          </div>
+        </Section>
+
+        {/* ── Pitfalls ── */}
+        <Section id="ft-pitfalls">
+          <H2>Pitfalls from the design sprint</H2>
+          <Label>Reflection</Label>
+          <P>
+            The workshop's objective was a solution we were confident to deploy. The design direction I was given
+            was broader than a feature change: in the long-term goal setting session the team agreed to change
+            users' behaviour by positioning GO+ as the main eWallet — a transactional account routing funds to the
+            wallet and then to GO+, closer to a savings account.
+          </P>
+          <P>
+            In retrospect, as a newcomer myself, I was eager to understand the business intention and proposed a
+            two-day workshop. The invitation was forwarded past the intended group of ten: two fund operation
+            managers, four product managers, four business owners, two designers and one UX writer. With several
+            people representing the same unit, the conversation broadened well past the original intention.
+          </P>
+          <P>
+            The business intention was aggressive — to force users to opt in. The design team proposed testing
+            three solutions instead, which took us into the testing stage of the sprint.
+          </P>
+          <Lesson n={1} title="Pivot when things go haywire">
+            When a project veers off course, pivot quickly through validation. Early scope creep turned into
+            immediate concept validation with internal users, to narrow the requirements and make an informed
+            decision. It taught me the power of rapid validation in a complex environment.
+          </Lesson>
+        </Section>
+
+        {/* ── Findings ── */}
+        <Section id="ft-findings">
+          <H2>Key findings from focus group interviews and concept validation</H2>
+          <P>Nine GO+ users, internal. Concept C with three variants, tested with a prototype.</P>
+          <Bullets items={[
+            <><strong style={{ color: ink, fontWeight: 600 }}>Strong acceptance of auto-sweeping.</strong> The hypothesis held: <Figures>89% of users agreed to enrol once they were fully informed of the benefits.</Figures></>,
+            <><strong style={{ color: ink, fontWeight: 600 }}>Concept C2 was preferred.</strong> It informs the user and leaves them the option to opt in later.</>,
+            <><strong style={{ color: ink, fontWeight: 600 }}>Mixed emotions.</strong> Testing drew both positive and negative reactions, which is what makes clear communication and user control matter here.</>,
+            <><strong style={{ color: ink, fontWeight: 600 }}>Stakeholder disconnect on personas.</strong> The personas did not resonate with business stakeholders, or they did not see their significance — a sign we needed better ways to carry user insight into that room.</>,
+            <><strong style={{ color: ink, fontWeight: 600 }}>Terminology.</strong> Users found 'auto-sweeping' confusing. The copy had to explain itself.</>,
+          ]} />
+          <div className="grid gap-6 md:grid-cols-2" style={{ marginTop: 8 }}>
+            <div>
+              <FigPlaceholder label="Chart — 89% agreed to opt in when informed" ratio="1/1" max={380} />
+              <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
+                89% of testers agreed to opt in to auto-sweeping on the condition of informed understanding —
+                well-informed users show more positive emotion.
+              </p>
+            </div>
+            <div>
+              <FigPlaceholder label="Concept C2 — key screens for enabling the feature" ratio="4/5" max={380} />
+            </div>
+          </div>
+          <Lesson n={2} title="Beyond design">
+            As UX experts our role is to offer strategic, informed recommendations, not just designs. My team and I
+            weighed the pros and cons of every proposal against the core business goals. It is about calculated
+            risk and measurable impact.
+          </Lesson>
+          <Lesson n={3} title="Earning business owners' trust">
+            Early business scepticism, fuelled by the workshop mismatch, showed we had to demonstrate UX value
+            proactively. The team repaired that through clear communication and tangible outcomes. We are now
+            highly strategic in proposing new initiatives, and make sure their purpose is unmistakable.
+          </Lesson>
+        </Section>
+
+        {/* ── Decision ── */}
+        <Section id="ft-decision">
+          <H2>Decision: product and business versus UX</H2>
+          <P>
+            The factor that shaped the final GO+ design was a mandatory user consent requirement identified with
+            Bank Negara Malaysia, the central bank. Working closely with the product and business teams, our User
+            Experience Design team's recommended option was what the final solution was built on — meeting the
+            regulatory demand while keeping the experience usable and compliant.
+          </P>
+          <FigPlaceholder label="Consent screen — the compliant enable flow" ratio="4/5" max={380} />
+          <Lesson n={4} title="Take calculated risk">
+            Striking the product-design balance means assessing user input fairly while knowing the business
+            must-dos. This project underlined the importance of understanding the risks, managing user
+            expectations, and making brave, informed decisions.
+          </Lesson>
+        </Section>
+
+        {/* ── Learnings ── */}
+        <Section id="ft-learning">
+          <H2>Learnings</H2>
+          <Bullets items={[
+            <><strong style={{ color: ink, fontWeight: 600 }}>Design vision is crucial.</strong> For a design lead it is paramount to have absolute clarity on the business need and on the feasibility of design solutions, short and long term. That is what keeps a team moving in one direction.</>,
+            <><strong style={{ color: ink, fontWeight: 600 }}>Informed decision-making.</strong> For a product with no precedent in the market, collective decision-making from business stakeholders, combined with a deep understanding of user needs, becomes the guiding factor.</>,
+            <><strong style={{ color: ink, fontWeight: 600 }}>Consistent communication.</strong> Leadership has to keep communicating with both internal and external teams. It builds a habit of learning from challenges and the awareness to head off the same problem next time — even when the approach that ships is simpler than the one planned.</>,
+          ]} />
+        </Section>
+
+      </div>
+    </div>
+  );
+}
+
+function FinTechPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
+  const isDark = useContext(DarkModeCtx);
+  const [value, setValue] = useState("");
+  const [error, setError] = useState("");
+  const [unlocked, setUnlocked] = useState(false);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
+  const PASSCODE = "tifffolio";
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const onDark = useOnDarkBackdrop(headerRef);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const submit = () => {
+    if (value.trim() === PASSCODE) { setError(""); setUnlocked(true); }
+    else setError("Incorrect passcode");
+  };
+
+  return (
+    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+      <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+          background: headerScrolled
+            ? (onDark
+                ? "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), rgba(248,247,245,0.55)"
+                : isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)")
+            : "transparent",
+          backdropFilter: headerScrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
+          borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
+          paddingBottom: headerScrolled ? 16 : 24,
+          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
+        }}>
+          <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
+          <Breadcrumbs color={onDark ? "#fff" : GOLD} items={[
+            { label: "Work", onClick: () => onNavigate("work") },
+            { label: "Business Acumen", onClick: onBack },
+          ]} />
+          <h1 className="font-['Museo',sans-serif] font-light"
+            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: onDark ? '#fff' : GOLD, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
+            FinTech: Balancing user preference &amp; business result
+          </h1>
+        </div>
+
+        {unlocked ? (
+          <>
+            <FinTechContent />
+            <NdaNotice />
+            <SiteFooter />
+            <NavClearance />
+          </>
+        ) : (
+          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560 }}>
+            <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>This work was produced under NDA. Access available on request.</p>
+            <p className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM, marginTop: 8 }}>This page requires passcode</p>
+
+            <div className="flex flex-col gap-1" style={{ marginTop: 32 }}>
+              <label className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]"
+                style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>
+                PASSCODE *
+              </label>
+              <input
+                type="password"
+                aria-label="Passcode"
+                autoComplete="off"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && submit()}
+                placeholder=""
+                className="w-full"
+                style={{ background: 'transparent', border: 'none', borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.18)"}`, outline: 'none', padding: '8px 0', fontSize: '1.05rem', letterSpacing: value ? '0.35em' : 'normal', fontFamily: "'Nunito Sans', sans-serif", fontWeight: 300, color: isDark ? 'white' : INK, transition: 'border-color 0.2s, letter-spacing 0.2s' }}
+              />
+            </div>
+
+            {error && <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: '#E05C5C', marginTop: 10 }}>{error}</p>}
+
+            <div className="flex justify-end md:justify-start" style={{ marginTop: 24 }}>
+              <button
+                onClick={submit}
+                className="font-['Nunito_Sans',sans-serif] text-small uppercase tracking-widest"
+                style={{ background: GOLD, color: '#fff', border: 'none', padding: '12px 28px', cursor: 'pointer', borderRadius: 2 }}>
+                Submit
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+      {unlocked && <CaseSectionRail scrollRef={scrollRef} sections={FT_SECTIONS} />}
+    </div>
+  );
+}
+
+
 // ─── Apple Health case study ──────────────────────────────────────
 
 const AH_SECTIONS: { id: string; label: string }[] = [
@@ -3567,7 +4030,7 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
 // Pages that drill three levels deep (Work > category > case study).
 // These are the only pages that show the standalone hamburger pill on mobile;
 // every other non-home page shows the full gradient bar.
-const DEEP_PAGES = new Set<Page>(["businessCase", "kaiCase", "appleHealthCase", "brandPerceptionCase", "sourceCase"]);
+const DEEP_PAGES = new Set<Page>(["businessCase", "kaiCase", "appleHealthCase", "brandPerceptionCase", "sourceCase", "finTechCase"]);
 
 function StickyPageNav({ activePage, tint, onNavigate, isDeepPage = false }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void; isDeepPage?: boolean }) {
   const isDark = useContext(DarkModeCtx);
@@ -5252,7 +5715,7 @@ function BrandPerceptionContent() {
   const META: [string, React.ReactNode][] = [
     ["Year", "January – December 2024"],
     ["Client", (
-      <a href="https://www.tngdigital.com.my/" target="_blank" rel="noopener noreferrer"
+      <a href={TNG_DIGITAL_URL} target="_blank" rel="noopener noreferrer"
         className="link-underline" style={{ color: fg }}>TNG Digital (TNG eWallet)</a>
     )],
     ["Goal", "Shift perception beyond payments and tolls"],
@@ -5750,6 +6213,7 @@ function pathOf(page: Page, detailKey?: string | null): string {
     case "kaiCase":         return "/work/case-studies/kai";
     case "appleHealthCase": return "/work/case-studies/apple-health";
     case "sourceCase":      return "/work/case-studies/source";
+    case "finTechCase":     return "/work/business-acumen/fintech";
     case "brandPerceptionCase": return "/work/product-ux-strategies/brand-perception";
     case "awards":          return "/awards";
     case "speaking":        return `/awards/${detailKey ?? ""}`;
@@ -5790,6 +6254,7 @@ function routeOf(pathname: string): { page: Page; detailKey: string | null } {
     if (seg[1] === "case-studies" && seg[2] === "kai") return at("kaiCase");
     if (seg[1] === "case-studies" && seg[2] === "apple-health") return at("appleHealthCase");
     if (seg[1] === "case-studies" && seg[2] === "source") return at("sourceCase");
+    if (seg[1] === "business-acumen" && seg[2] === "fintech") return at("finTechCase");
     if (seg[1] === "product-ux-strategies" && seg[2] === "brand-perception") return at("brandPerceptionCase");
     const card = EXPERTISE_CARDS.find(c => c.slug === seg[1]);
     // an unknown child falls back to the section rather than a dead end
@@ -5819,6 +6284,7 @@ function descriptionOf(page: Page, detailKey?: string | null): string {
     case "workDetail":   return card?.description ?? SITE_DESC;
     case "businessCase": return "A behavioural UX case study: lifting checkout rate from the bag page at Cotton On Group.";
     case "appleHealthCase": return "A five-day design challenge: repositioning Apple Health as a daily habit tool to drive daily active users.";
+    case "finTechCase":     return "A passcode-gated case study: Quick Cash In for TNG eWallet's GO+, and the balance between an aggressive business goal and what users would accept.";
     case "sourceCase":      return "A year-long case study: SOURCE, the energy performance management dashboard that made building and solar data visible to the people who owned it.";
     case "brandPerceptionCase": return "Shifting how 23 million people saw a wallet app — a brand perception framework, the UX strategy behind it, and how it was measured.";
     case "kaiCase": return "A design sprint case study: KAI, a mobile app for controlling a building's IoT machines and cutting Maximum Demand charges.";
@@ -5844,6 +6310,7 @@ function titleOf(page: Page, detailKey?: string | null): string {
     case "kaiCase":         return `KAI: Mobile app for IoT devices control — ${SITE_TITLE}`;
     case "appleHealthCase": return `Apple Health: Design Challenge — ${SITE_TITLE}`;
     case "sourceCase":      return `SOURCE: Energy Performance Management Dashboard — ${SITE_TITLE}`;
+    case "finTechCase":     return `FinTech: Balancing User Preference & Business Result — ${SITE_TITLE}`;
     case "brandPerceptionCase": return `Brand Perception & UX Strategy — ${SITE_TITLE}`;
     case "awards":          return `Awards & Speaking — ${SITE_TITLE}`;
     case "speaking":        return ev ? `${ev.role} — ${ev.event} — ${SITE_TITLE}` : `Awards & Speaking — ${SITE_TITLE}`;
@@ -5916,7 +6383,7 @@ export default function App() {
   // Case-study pages are a drill-in from the Work list; they animate as an
   // expansion of the row rather than as a new screen sliding in.
   const drillIn = page === "workDetail" || page === "businessCase" || page === "kaiCase"
-    || page === "appleHealthCase" || page === "brandPerceptionCase" || page === "sourceCase";
+    || page === "appleHealthCase" || page === "brandPerceptionCase" || page === "sourceCase" || page === "finTechCase";
 
   useEffect(() => {
     setDetailHeaderScrolled(false);
@@ -5948,7 +6415,7 @@ export default function App() {
       page === "home" ? null
     : page === "work" || page === "workDetail" || page === "businessCase"
       || page === "kaiCase" || page === "appleHealthCase" || page === "brandPerceptionCase"
-      || page === "sourceCase" ? "work"
+      || page === "sourceCase" || page === "finTechCase" ? "work"
     : page === "awards" || page === "speaking" ? "awards"
     : page === "speakingInquiry" ? "connect"
     : page;
@@ -6053,6 +6520,9 @@ export default function App() {
         )}
         {page === "sourceCase" && (
           <SourceCasePage onBack={() => { setDetailKey("cases"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
+        )}
+        {page === "finTechCase" && (
+          <FinTechPage onBack={() => { setDetailKey("business"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
       </motion.div>
       {railOn && <IdentityRail onNavigate={navigateGeneral} />}
