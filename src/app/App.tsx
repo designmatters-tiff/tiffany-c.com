@@ -967,11 +967,7 @@ function SiteFooter({ variant, gutter = true }: { variant?: "work" | "nda"; gutt
           // white barely above the background in dark.
           color: isDark ? "rgba(255,255,255,0.35)" : "rgba(102,102,96,0.45)",
         }}>
-        Designed and built by Tiffany Chew © {year}
-        {/* The variants carry the terms the gated and client pages need; the
-            credit line above is the base every page shows. */}
-        {variant === "work" && ". Case study content shared with permission. Client data and trademarks remain the property of their respective owners."}
-        {variant === "nda" && ". Shared under NDA for review purposes only, not for redistribution. Client data and trademarks remain the property of their respective owners."}
+        Designed and built by Tiffany Chew · © {year}
       </p>
     </div>
   );
