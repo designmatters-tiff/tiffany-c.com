@@ -791,6 +791,7 @@ function ContactItem({
   itemColor,
   linkColor,
   borderColor,
+  inline = false,
   onNavigate,
 }: {
   item: string;
@@ -800,60 +801,70 @@ function ContactItem({
   // just a label keeps itemColor, so colour always means "you can follow this".
   linkColor?: string;
   borderColor: string;
+  // Set when several of these share one row: the row wrapper owns the height
+  // and the full width, so the item drops its own.
+  inline?: boolean;
   onNavigate?: (p: Page) => void;
 }) {
-  if (item === "linkedin") {
+  const wide = inline ? "" : "w-full ";
+  const pad  = inline ? "" : " py-4 md:py-[18px]";
+  // Matched case-insensitively: the same destination is written "linkedin" in
+  // the homepage deck's section data and "LinkedIn" in the Connect page's
+  // list, and the label a visitor reads shouldn't have to be the lookup key.
+  const key = item.toLowerCase();
+
+  if (key === "linkedin") {
     return (
       <a href="https://www.linkedin.com/in/tiffany-c/" target="_blank" rel="noopener noreferrer"
-        className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
+        className={`${wide}flex items-center gap-3${pad} cursor-pointer`} onClick={e => e.stopPropagation()}>
         <Linkedin size={16} strokeWidth={1} style={{ color: accent, flexShrink: 0 }} />
-        <span className="link-underline font-['Nunito_Sans',sans-serif] text-body" style={{ color: linkColor ?? itemColor }}>LinkedIn</span>
+        <span className="link-underline font-['Nunito_Sans',sans-serif] text-body whitespace-nowrap" style={{ color: linkColor ?? itemColor }}>LinkedIn</span>
         <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
       </a>
     );
   }
-  if (item === "instagram") {
+  if (key === "instagram") {
     return (
       <a href="https://www.instagram.com/tffny.c/" target="_blank" rel="noopener noreferrer"
-        className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
+        className={`${wide}flex items-center gap-3${pad} cursor-pointer`} onClick={e => e.stopPropagation()}>
         <Instagram size={16} strokeWidth={1} style={{ color: accent, flexShrink: 0 }} />
-        <span className="link-underline font-['Nunito_Sans',sans-serif] text-body" style={{ color: linkColor ?? itemColor }}>Instagram</span>
+        <span className="link-underline font-['Nunito_Sans',sans-serif] text-body whitespace-nowrap" style={{ color: linkColor ?? itemColor }}>Instagram</span>
         <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
       </a>
     );
   }
-  if (item === "designmatters.tiff@gmail.com") {
+  if (key === "designmatters.tiff@gmail.com") {
     return (
       <a href="mailto:designmatters.tiff@gmail.com"
-        className="w-full flex items-center py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
+        className={`${wide}flex items-center${pad} cursor-pointer`} onClick={e => e.stopPropagation()}>
         <span className="link-underline font-['Nunito_Sans',sans-serif] text-body" style={{ color: linkColor ?? itemColor }}>{item}</span>
       </a>
     );
   }
-  if (item === "1:1 Calls" || item === "Priority DM" || item === "Package (1-1 Coaching Service)") {
+  if (key === "1:1 calls" || key === "priority dm" || key === "package (1-1 coaching service)") {
     return (
       <a href="https://topmate.io/tffnyc" target="_blank" rel="noopener noreferrer"
-        className="w-full flex items-center gap-2 py-4 md:py-[18px] cursor-pointer" onClick={e => e.stopPropagation()}>
+        className={`${wide}flex items-center gap-2${pad} cursor-pointer`} onClick={e => e.stopPropagation()}>
         <span className="link-underline font-['Nunito_Sans',sans-serif] text-body" style={{ color: linkColor ?? itemColor }}>{item}</span>
         <ExternalLink size={13} strokeWidth={1} style={{ color: itemColor, opacity: 0.5, flexShrink: 0 }} />
       </a>
     );
   }
-  if (item === "Speaking Inquiry") {
+  if (key === "speaking inquiry") {
     return (
       <button
-        className="w-full flex items-center gap-3 py-4 md:py-[18px] cursor-pointer text-left"
+        className={`${wide}flex items-center gap-3${pad} cursor-pointer text-left`}
         onClick={() => onNavigate?.("speakingInquiry")}
       >
         <ChevronRight size={16} strokeWidth={1} style={{ color: accent, flexShrink: 0 }} />
-        <span className="link-underline font-['Nunito_Sans',sans-serif] text-body" style={{ color: linkColor ?? itemColor }}>
+        <span className="link-underline font-['Nunito_Sans',sans-serif] text-body whitespace-nowrap" style={{ color: linkColor ?? itemColor }}>
           Speaking Inquiry
         </span>
       </button>
     );
   }
   return (
-    <div className="flex items-center py-4 md:py-[18px]">
+    <div className={`flex items-center${pad}`}>
       {/* Plain label — goes nowhere, so it stays body text. */}
       <span className="font-['Nunito_Sans',sans-serif] text-body" style={{ color: itemColor }}>{item}</span>
     </div>
@@ -3106,7 +3117,9 @@ function ContactListPage({
 }: {
   eyebrow: string;
   title: string;
-  items: readonly string[];
+  // A plain string is one full-width row. A nested array is several
+  // destinations sharing a single row.
+  items: readonly (string | readonly string[])[];
   accent: string;
   // Coaching and Connect share this shell but sit at different points along
   // the nav gradient, so the heading colour comes in per page.
@@ -3135,11 +3148,32 @@ function ContactListPage({
       {/* Items */}
       <div className="px-6 md:px-20 pt-6">
         <div style={{ borderTop: `1px solid ${brd}` }}>
-          {items.map(item => (
-            <div key={item} style={{ borderBottom: `1px solid ${brd}` }}>
-              <ContactItem item={item} accent={accent} itemColor={itemColor} linkColor={headingColor} borderColor={brd} onNavigate={onNavigate} />
-            </div>
-          ))}
+          {items.map(entry => {
+            const row = typeof entry === "string" ? [entry] : entry;
+            return (
+              <div key={row.join("|")} style={{ borderBottom: `1px solid ${brd}` }}>
+                {row.length === 1 ? (
+                  <ContactItem item={row[0]} accent={accent} itemColor={itemColor} linkColor={headingColor} borderColor={brd} onNavigate={onNavigate} />
+                ) : (
+                  // Several destinations on one line. The wrapper carries the
+                  // row's full width and height so the items inside keep the
+                  // same rhythm as a row of their own would, and nothing wraps
+                  // at 360px.
+                  <div className="w-full flex items-center gap-3 py-4 md:py-[18px] flex-nowrap">
+                    {row.map((sub, i) => (
+                      <Fragment key={sub}>
+                        {i > 0 && (
+                          <span aria-hidden="true" className="flex-shrink-0 font-['Nunito_Sans',sans-serif] text-body"
+                            style={{ color: itemColor, opacity: 0.3 }}>·</span>
+                        )}
+                        <ContactItem item={sub} accent={accent} itemColor={itemColor} linkColor={headingColor} borderColor={brd} inline onNavigate={onNavigate} />
+                      </Fragment>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -3166,7 +3200,14 @@ function ConnectPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
     <ContactListPage
       eyebrow="Open to collaboration"
       title="Let's Connect"
-      items={["Speaking Inquiry", "linkedin", "instagram", "designmatters.tiff@gmail.com"]}
+      // Email first: it is the primary action for a consulting enquiry.
+      // LinkedIn and Instagram are passive profiles, so they share the last
+      // row rather than each taking one of their own.
+      items={[
+        "designmatters.tiff@gmail.com",
+        "Speaking Inquiry",
+        ["LinkedIn", "Instagram"],
+      ]}
       accent="#9B5A88"
       headingColor={HEADING_COLOUR.connect}
       onNavigate={onNavigate}
