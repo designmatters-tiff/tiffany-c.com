@@ -3113,63 +3113,56 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
 // Wraps PageBottomNav with a full-width fade scrim behind it, so content
 // scrolling up from underneath fades into the page background before it
 // would otherwise be visible peeking past the nav's side margins/edges.
-function StickyPageNav({ activePage, tint, onNavigate }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void }) {
+// Pages that drill three levels deep (Work > category > case study).
+// These are the only pages that show the standalone hamburger pill on mobile;
+// every other non-home page shows the full gradient bar.
+const DEEP_PAGES = new Set<Page>(["businessCase", "kaiCase", "appleHealthCase", "brandPerceptionCase"]);
+
+function StickyPageNav({ activePage, tint, onNavigate, isDeepPage = false }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void; isDeepPage?: boolean }) {
   const isDark = useContext(DarkModeCtx);
-  // Held here rather than in PageBottomNav because the open menu is a z-50
-  // overlay: the control has to climb above it to stay the thing you press
-  // to close, and the container is what carries the z-index.
   const [menuOpen, setMenuOpen] = useState(false);
   const goHome = useContext(GoHomeCtx);
+  // Desktop bar height (px) — used for the fade scrim sizing.
+  const BAR_H = 64;
+  // Mobile fade: pill height on deep pages, full bar on others.
+  const mobileNavH = isDeepPage ? MOBILE_NAV_PILL : BAR_H;
   return (
     <>
-      {/* Mobile and desktop separately: the bar is a 44px pill at one
-          breakpoint and a 64px band at the other, and the fade starts from
-          whichever it is. */}
-      <div className="fixed inset-x-0 z-20 pointer-events-none md:hidden"
+      <div className="fixed inset-x-0 z-20 pointer-events-none"
         style={{
-          top: `calc(100% - (3% + env(safe-area-inset-bottom) + ${MOBILE_NAV_PILL + NAV_FADE_LEAD}px))`,
+          top: `calc(100% - (3% + env(safe-area-inset-bottom) + ${mobileNavH + NAV_FADE_LEAD}px))`,
           bottom: 0,
           ...navFade(isDark),
         }} />
       <div className="fixed z-20 pointer-events-none hidden md:block"
         style={{
           left: 80, right: 80,
-          top: `calc(100% - (3% + ${64 + NAV_FADE_LEAD}px))`,
+          top: `calc(100% - (3% + ${BAR_H + NAV_FADE_LEAD}px))`,
           bottom: 0,
           ...navFade(isDark),
         }} />
-      {/* Desktop spans the content width; mobile is only as wide as the one
-          control it holds, so `right` is released at that breakpoint. */}
-      <div className="fixed left-6 right-auto md:left-20 md:right-20 overflow-hidden"
+      {/* Deep pages: pill only on mobile (left-anchored, auto right).
+          All other pages: full-width bar on every breakpoint. */}
+      <div className={`fixed overflow-hidden ${isDeepPage ? "left-6 right-auto md:left-20 md:right-20" : "left-0 right-0 md:left-20 md:right-20"}`}
         style={{
           zIndex: menuOpen ? 60 : 30,
           bottom: "calc(3% + env(safe-area-inset-bottom))",
           borderRadius: 0,
-          // Open, the control is a bare × on the menu's own ground: no tile,
-          // so no shadow for a tile to cast.
           boxShadow: menuOpen ? "none" : "0 8px 32px rgba(0,0,0,0.18)",
           transition: "box-shadow 0.3s ease",
         }}>
-        <PageBottomNav activePage={activePage} tint={tint} onNavigate={onNavigate} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+        <PageBottomNav activePage={activePage} tint={tint} onNavigate={onNavigate} menuOpen={menuOpen} setMenuOpen={setMenuOpen} isDeepPage={isDeepPage} />
       </div>
-      {/* Sibling of the container, not a child of it. The container takes a
-          z-index while the menu is open, which makes it a stacking context —
-          nested here, the overlay would always paint above the control that
-          closes it, however high the container climbed. */}
-      <MobileMenu
-        open={menuOpen}
-        hideClose
-        activeIdx={SECTIONS.findIndex(s => s.page === activePage)}
-        onClose={() => setMenuOpen(false)}
-        // The homepage is a deck you swipe through, and this lands you at its
-        // start. It used to land on the slide matching the page you left,
-        // which from Connect or Coaching — the last two sections — put you at
-        // the end of the track with the forward swipe dead on arrival. That
-        // reads as a broken gesture, not as "you are at the end". Same rule
-        // the logomark already follows.
-        onGoTo={() => { (goHome ?? (() => onNavigate("home")))(); setMenuOpen(false); }}
-        onNavigate={(p) => { onNavigate(p); setMenuOpen(false); }}
-      />
+      {isDeepPage && (
+        <MobileMenu
+          open={menuOpen}
+          hideClose
+          activeIdx={SECTIONS.findIndex(s => s.page === activePage)}
+          onClose={() => setMenuOpen(false)}
+          onGoTo={() => { (goHome ?? (() => onNavigate("home")))(); setMenuOpen(false); }}
+          onNavigate={(p) => { onNavigate(p); setMenuOpen(false); }}
+        />
+      )}
     </>
   );
 }
@@ -3193,7 +3186,6 @@ function PageBottomNav({
 }) {
   const isDark = useContext(DarkModeCtx);
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
-  const isMobile = useIsMobile();
 
   const NAV_ITEMS = [
     { key: "work",     label: "Work",             page: "work" as Page },
@@ -3205,8 +3197,8 @@ function PageBottomNav({
 
   return (
     <>
-      {/* Desktop — same fluid flex-grow expand/collapse as the homepage nav */}
-      <div className="hidden md:flex items-stretch h-16 overflow-hidden"
+      {/* Full gradient bar — always visible on 1st-level pages, desktop-only on deep pages */}
+      <div className={`${isDeepPage ? "hidden md:flex" : "flex"} items-stretch h-16 overflow-hidden`}
         style={{ background: navGradient(isDark) }}>
         <button
           className="flex items-center gap-3 overflow-hidden"
@@ -3241,13 +3233,10 @@ function PageBottomNav({
         ))}
       </div>
 
-      {/* Mobile — the menu minimised to its control, and nothing else. The
-          bar used to span the screen carrying "Tiffany C." and the page's
-          own name; on a phone both only repeat what the page already says,
-          and the width they needed was the width of the screen. */}
+      {/* Hamburger pill — only on deep (3rd-level) pages on mobile */}
       <button onClick={() => setMenuOpen(!menuOpen)}
         aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen}
-        className="md:hidden flex items-center justify-center"
+        className={`${isDeepPage ? "md:hidden flex" : "hidden"} items-center justify-center`}
         style={{
           // One flat colour, the page's own heading colour — at 44px square
           // the full nav gradient was a five-stop sweep compressed into a
@@ -5573,9 +5562,8 @@ export default function App() {
       </motion.div>
       {navActive && (
         <StickyPageNav activePage={navActive} onNavigate={navigateGeneral}
-          // These pages head in gold rather than in their section's colour,
-          // and the pill follows the heading it sits under.
-          tint={page === "speakingInquiry" || page === "speaking" ? GOLD : undefined} />
+          tint={page === "speakingInquiry" || page === "speaking" ? GOLD : undefined}
+          isDeepPage={DEEP_PAGES.has(page)} />
       )}
     </div>
     </AccordionCtx.Provider>
