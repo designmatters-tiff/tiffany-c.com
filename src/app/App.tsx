@@ -391,7 +391,7 @@ function MenuIcon({ open = false, color = "white" }: { open?: boolean; color?: s
     fill: color,
     transformBox: "fill-box",
     transformOrigin: "center",
-    transition: "transform 0.34s cubic-bezier(0.4, 0, 0.2, 1)",
+    transition: "transform 0.34s cubic-bezier(0.4, 0, 0.2, 1), fill 0.3s ease",
   };
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="menu-icon flex-shrink-0" aria-hidden="true">
@@ -1641,10 +1641,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           zIndex: menuOpen ? 60 : 30,
           bottom: "calc(5% + env(safe-area-inset-bottom))", left: 24,
           borderRadius: 0,
-          background: navGradient(isDark),
+          background: menuOpen ? "transparent" : navGradient(isDark),
           backdropFilter: "none",
           WebkitBackdropFilter: "none",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+          boxShadow: menuOpen ? "none" : "0 8px 32px rgba(0,0,0,0.18)",
+          transition: "background 0.3s ease, box-shadow 0.3s ease",
         }}
         animate={{
           width:  menuOpen ? MOBILE_NAV_PILL : navShrunk ? navBtn.w + NAV_PAD_X * 2 : "calc(100% - 48px)",
@@ -1658,7 +1659,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           onClick={() => setMenuOpen(!menuOpen)}
           className={`flex items-center gap-3 ${menuOpen ? "w-full justify-center" : ""}`}
           aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen}>
-          <MenuIcon open={menuOpen} color="white" />
+          <MenuIcon open={menuOpen} color={menuOpen ? (isDark ? "white" : INK) : "white"} />
           {!menuOpen && (
             <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap">
               Tiffany C.
@@ -3017,7 +3018,15 @@ function StickyPageNav({ activePage, onNavigate }: { activePage: Page; onNavigat
       {/* Desktop spans the content width; mobile is only as wide as the one
           control it holds, so `right` is released at that breakpoint. */}
       <div className="fixed left-6 right-auto md:left-20 md:right-20 overflow-hidden"
-        style={{ zIndex: menuOpen ? 60 : 30, bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+        style={{
+          zIndex: menuOpen ? 60 : 30,
+          bottom: "calc(3% + env(safe-area-inset-bottom))",
+          borderRadius: 0,
+          // Open, the control is a bare × on the menu's own ground: no tile,
+          // so no shadow for a tile to cast.
+          boxShadow: menuOpen ? "none" : "0 8px 32px rgba(0,0,0,0.18)",
+          transition: "box-shadow 0.3s ease",
+        }}>
         <PageBottomNav activePage={activePage} onNavigate={onNavigate} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
       </div>
       {/* Sibling of the container, not a child of it. The container takes a
@@ -3104,8 +3113,15 @@ function PageBottomNav({
       <button onClick={() => setMenuOpen(!menuOpen)}
         aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen}
         className="md:hidden flex items-center justify-center"
-        style={{ background: navGradient(isDark), width: MOBILE_NAV_PILL, height: MOBILE_NAV_PILL, border: "none", padding: 0 }}>
-        <MenuIcon open={menuOpen} />
+        style={{
+          // Closed it is a gradient tile against the page; open, the gradient
+          // goes and the × sits on the menu's cream in ink, the way the
+          // menu's own close button used to.
+          background: menuOpen ? "transparent" : navGradient(isDark),
+          width: MOBILE_NAV_PILL, height: MOBILE_NAV_PILL, border: "none", padding: 0,
+          transition: "background 0.3s ease",
+        }}>
+        <MenuIcon open={menuOpen} color={menuOpen ? (isDark ? "white" : INK) : "white"} />
       </button>
 
     </>
