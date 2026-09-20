@@ -757,8 +757,7 @@ function SpeakingInquiryPage({ onBack, onNavigate, headerScrolled = false, scrol
         )}
 
         <SiteFooter gutter={false} />
-        {/* Bottom spacer so content clears the floating nav */}
-        <div style={{ height: 140 }} />
+        <NavClearance />
       </div>
 
     </div>
@@ -962,7 +961,7 @@ function SiteFooter({ variant, gutter = true }: { variant?: "work"; gutter?: boo
           fontSize: 11,
           fontWeight: 400,
           lineHeight: 1.5,
-          marginTop: 48,
+          marginTop: 24,
           maxWidth: 620,
           // The quietest thing on the page in either theme: DIM at 45%, and a
           // white barely above the background in dark.
@@ -971,6 +970,22 @@ function SiteFooter({ variant, gutter = true }: { variant?: "work"; gutter?: boo
         © {year} Tiffany Chew{variant === "work" && ". Case study content shared with permission. Client data and trademarks remain the property of their respective owners."}
       </p>
     </div>
+  );
+}
+
+// Sits under a page's last line so the copyright clears the floating nav by
+// 16px. Two blocks rather than one: the bar is 64 tall on desktop and a 44px
+// pill on mobile, and a media query cannot be written inline. The 3dvh mirrors
+// the nav's own 3% offset.
+const FOOTER_TO_NAV = 16;
+function NavClearance() {
+  return (
+    <>
+      <div className="md:hidden"
+        style={{ height: `calc(3dvh + env(safe-area-inset-bottom) + ${MOBILE_NAV_PILL + FOOTER_TO_NAV}px)` }} />
+      <div className="hidden md:block"
+        style={{ height: `calc(3dvh + ${64 + FOOTER_TO_NAV}px)` }} />
+    </>
   );
 }
 
@@ -1955,8 +1970,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
         </ul>
 
         <SiteFooter variant="work" gutter={false} />
-        {/* Bottom spacer so content clears the floating detail nav */}
-        <div style={{ height: 96 }} />
+        <NavClearance />
       </div>
     </div>
   );
@@ -2567,8 +2581,6 @@ function KaiCaseContent() {
             ))}
           </div>
         </section>
-
-        <div style={{ height: 96 }} />
       </div>
     </div>
   );
@@ -2628,7 +2640,7 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
 
         <KaiCaseContent />
         <SiteFooter variant="work" />
-        <div style={{ height: 96 }} />
+        <NavClearance />
       </div>
       <CaseSectionRail scrollRef={scrollRef} sections={KAI_SECTIONS} />
     </div>
@@ -2944,8 +2956,6 @@ function AppleHealthContent() {
             <ExternalLink size={13} strokeWidth={1} style={{ opacity: 0.7, flexShrink: 0 }} />
           </a>
         </section>
-
-        <div style={{ height: 96 }} />
       </div>
     </div>
   );
@@ -2997,7 +3007,7 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
 
         <AppleHealthContent />
         <SiteFooter variant="work" />
-        <div style={{ height: 96 }} />
+        <NavClearance />
       </div>
       <CaseSectionRail scrollRef={scrollRef} sections={AH_SECTIONS} />
     </div>
@@ -3253,8 +3263,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           );
         })}
         {!embedded && <SiteFooter />}
-        {/* Bottom spacer so content clears the floating nav */}
-        <div style={{ height: 96 }} />
+        <NavClearance />
       </div>
 
     </div>
@@ -3324,10 +3333,7 @@ function ContactListPage({
       </div>
 
       <SiteFooter />
-      {/* Taller than the usual 96: with the column filling the viewport this
-          is the only clearance under the footer, and the desktop bar is 64
-          tall on a 3% offset. At 96 the copyright sat 5px off it. */}
-      <div style={{ height: 140 }} />
+      <NavClearance />
     </div>
   );
 }
@@ -3709,7 +3715,7 @@ function TestimonialsPage({
           </p>
 
           {!embedded && <SiteFooter gutter={false} />}
-          <div style={{ height: 120 }} />
+          <NavClearance />
         </div>
     </>
   );
@@ -4102,7 +4108,7 @@ function AwardsSpeakingPage({
       </div>
 
       {!embedded && <SiteFooter />}
-      <div style={{ height: 96 }} />
+      <NavClearance />
     </>
   );
 
@@ -4349,7 +4355,7 @@ function SpeakingDetailPage({
       )}
 
       <SiteFooter />
-      <div style={{ height: 96 }} />
+      <NavClearance />
     </div>
   );
 }
@@ -4646,8 +4652,6 @@ function BusinessCaseContent() {
             </figcaption>
           </figure>
         </section>
-
-        <div style={{ height: 96 }} />
       </div>
     </div>
   );
@@ -4711,7 +4715,7 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
           <>
             <BusinessCaseContent />
             <SiteFooter variant="work" />
-            <div style={{ height: 96 }} />
+            <NavClearance />
           </>
         ) : (
           <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560 }}>
