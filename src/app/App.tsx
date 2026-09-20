@@ -307,6 +307,9 @@ function LogoMark({ size = 70, color = GOLD, className }: { size?: number; color
 const EYEBROW_LINE = 16;   // a text-label line: 0.75rem at 1.2, plus the breadcrumb's padding
 const MOBILE_MARK = 24;
 const MOBILE_HIT = 44;     // the tap target, larger than the mark it holds
+// `lg:hidden` while the identity rail is in trial: the rail carries the mark
+// at those widths, and two marks on one page cannot be judged. One class to
+// bring it back.
 function HeaderLogo({ onNavigate, color = GOLD, size = 28, ring = 48 }: { onNavigate: (p: Page) => void; color?: string; size?: number; ring?: number }) {
   const [active, setActive] = useState(false);
   const goHome = useContext(GoHomeCtx);
@@ -320,7 +323,7 @@ function HeaderLogo({ onNavigate, color = GOLD, size = 28, ring = 48 }: { onNavi
       onClick={() => (goHome ? goHome() : onNavigate("home"))}
       onMouseEnter={() => setActive(true)} onMouseLeave={() => setActive(false)}
       onFocus={() => setActive(true)} onBlur={() => setActive(false)}
-      className="absolute right-6 md:right-20 top-[var(--logo-top)] md:top-14 flex items-center md:items-start justify-end cursor-pointer z-10
+      className="absolute right-6 md:right-20 top-[var(--logo-top)] md:top-14 flex items-center md:items-start justify-end cursor-pointer z-10 lg:hidden
                  w-[var(--hit)] h-[var(--hit)] md:w-[var(--logo-size)] md:h-[var(--logo-size)]"
       style={{
         background: "none", border: "none", padding: 0,
@@ -1035,6 +1038,39 @@ function SiteFooter({ gutter = true }: { gutter?: boolean }) {
   return (
     <div className={`hidden md:block${gutter ? " px-6 md:px-20" : ""}`} style={{ marginTop: 24 }}>
       <SiteCredit />
+    </div>
+  );
+}
+
+// The identity rail: the logomark, held down the left of every page but the
+// homepage, on desktop only. The homepage hero is where the mark is
+// introduced; here it has settled into a fixed column that carries it for the
+// rest of the site.
+//
+// RAIL_W is the one number the layout is built from. The page layer starts
+// after it, and so does the bottom nav, so the rail's edge is the site's left
+// margin on desktop rather than the viewport's.
+// Clamped rather than a flat percentage: 20% of 1728 is 345px of column for a
+// 70px mark, and 20% of 768 is too narrow to hold one at all. This gives the
+// mark the site's own 80px gutter plus about as much again to its right, and
+// stops growing once that reads as deliberate.
+//
+// It starts at lg, not md: at 768 a sidebar takes a quarter of the screen
+// from the content, so those widths keep today's layout.
+const RAIL_W = "clamp(200px, 15vw, 260px)";
+const RAIL_GUTTER = 80;   // matches the md:px-20 every page starts from
+
+function IdentityRail({ onNavigate }: { onNavigate: (p: Page) => void }) {
+  const goHome = useContext(GoHomeCtx);
+  return (
+    <div className="hidden lg:block fixed top-0 bottom-0 left-0 z-20 pointer-events-none"
+      style={{ width: "var(--rail-w)" }}>
+      <button onClick={() => (goHome ? goHome() : onNavigate("home"))}
+        aria-label="Tiffany C. — home"
+        className="absolute pointer-events-auto cursor-pointer"
+        style={{ left: RAIL_GUTTER, top: 56, background: "none", border: "none", padding: 0 }}>
+        <LogoMark size={70} />
+      </button>
     </div>
   );
 }
@@ -3113,7 +3149,7 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
 // Wraps PageBottomNav with a full-width fade scrim behind it, so content
 // scrolling up from underneath fades into the page background before it
 // would otherwise be visible peeking past the nav's side margins/edges.
-function StickyPageNav({ activePage, tint, onNavigate }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void }) {
+function StickyPageNav({ activePage, tint, railOn = false, onNavigate }: { activePage: Page; tint?: string; railOn?: boolean; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
   // Held here rather than in PageBottomNav because the open menu is a z-50
   // overlay: the control has to climb above it to stay the thing you press
@@ -3133,14 +3169,14 @@ function StickyPageNav({ activePage, tint, onNavigate }: { activePage: Page; tin
         }} />
       <div className="fixed z-20 pointer-events-none hidden md:block"
         style={{
-          left: 80, right: 80,
+          left: railOn ? `calc(var(--rail-w) + ${RAIL_GUTTER}px)` : RAIL_GUTTER, right: RAIL_GUTTER,
           top: `calc(100% - (3% + ${64 + NAV_FADE_LEAD}px))`,
           bottom: 0,
           ...navFade(isDark),
         }} />
       {/* Desktop spans the content width; mobile is only as wide as the one
           control it holds, so `right` is released at that breakpoint. */}
-      <div className="fixed left-6 right-auto md:left-20 md:right-20 overflow-hidden"
+      <div className={`fixed left-6 right-auto md:left-20 md:right-20 overflow-hidden${railOn ? " lg:left-[calc(var(--rail-w)+80px)]" : ""}`}
         style={{
           zIndex: menuOpen ? 60 : 30,
           bottom: "calc(3% + env(safe-area-inset-bottom))",
@@ -5473,6 +5509,10 @@ export default function App() {
   // study read as the whole window reloading. It now lives out here, mounted
   // once, and only its active item changes as the route does — the bar itself
   // never moves. The homepage is the exception; its nav travels with the deck.
+  // The rail is desktop chrome for every page but the homepage, whose deck
+  // owns the full width.
+  const railOn = page !== "home";
+
   const navActive: Page | null =
       page === "home" ? null
     : page === "work" || page === "workDetail" || page === "businessCase"
@@ -5517,7 +5557,8 @@ export default function App() {
     <DarkModeToggleCtx.Provider value={toggleDark}>
     <GoHomeCtx.Provider value={goHome}>
     <AccordionCtx.Provider value={{ openId: openAccordionId, setOpenId: setOpenAccordionId }}>
-    <div className="relative w-screen h-dvh overflow-hidden" style={{ background: isDark ? "#282828" : "#f8f7f5" }}>
+    <div className="relative w-screen h-dvh overflow-hidden"
+      style={{ background: isDark ? "#282828" : "#f8f7f5", ["--rail-w" as string]: RAIL_W }}>
       {/* Flat ground — warm cream in light, near-black in dark. No mesh, and
           no per-section tinting: one colour behind the whole site. */}
       <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, background: isDark ? "#282828" : "#f8f7f5" }} />
@@ -5528,7 +5569,9 @@ export default function App() {
           up from the top edge, where the accordion row sits, easing in and
           out so it settles rather than snaps. Everything else stays a plain
           cross-fade. */}
-      <motion.div key={motionKey} className="absolute inset-0"
+      {/* One offset moves every page: each keeps its own md:px-20 gutter,
+          now measured from the rail's edge rather than the viewport's. */}
+      <motion.div key={motionKey} className={`absolute inset-0${railOn ? " lg:left-[var(--rail-w)]" : ""}`}
         style={{ zIndex: 1, transformOrigin: "50% 0%" }}
         initial={drillIn ? { opacity: 0, scale: 0.965, y: 18 } : { opacity: 0, x: 0 }}
         animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
@@ -5571,8 +5614,9 @@ export default function App() {
           <BrandPerceptionPage onBack={() => { setDetailKey("ux"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
       </motion.div>
+      {railOn && <IdentityRail onNavigate={navigateGeneral} />}
       {navActive && (
-        <StickyPageNav activePage={navActive} onNavigate={navigateGeneral}
+        <StickyPageNav activePage={navActive} railOn={railOn} onNavigate={navigateGeneral}
           // These pages head in gold rather than in their section's colour,
           // and the pill follows the heading it sits under.
           tint={page === "speakingInquiry" || page === "speaking" ? GOLD : undefined} />
