@@ -130,9 +130,10 @@ on, anything added in the meantime will need its dark half written then.
   their own. Inside the transition it faded and scaled back in on every
   navigation, which read as the whole window reloading.
 - **Mobile chrome is deliberately bare.** The nav is a 44px hamburger pill,
-  bottom left — no name, no page label — and `Breadcrumbs` renders on desktop
-  only. It still emits its empty line on mobile, because the header logomark
-  sits on that line and the heading rides up under the mark without it.
+  bottom left — no name, no page label. `Breadcrumbs` does show at every
+  width, on the third-level pages that use it. Whatever occupies that line,
+  something has to: the header logomark sits on it, and the heading rides up
+  under the mark if the row collapses.
 - **Mobile vs desktop** are often two sibling blocks (`md:hidden` and
   `hidden md:flex`) rather than one responsive block. Change both. The header
   logomark is the exception: its sizes are CSS custom properties so there is

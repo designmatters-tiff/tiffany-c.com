@@ -357,14 +357,11 @@ function HeaderLogo({ onNavigate, color = GOLD, size = 28, ring = 48 }: { onNavi
 // rather than appearing all at once.
 function Breadcrumbs({ items, color }: { items: { label: string; onClick: () => void }[]; color: string }) {
   return (
-    <>
-      {/* The trail is desktop only: on a phone it cost a whole line above the
-          heading to say what the heading says, and the minimised menu is the
-          way back. Its line still has a job there, though — the logomark sits
-          on it, and without the space the heading rides up underneath the
-          mark. So mobile keeps the gap and drops only the words. */}
-      <div className="md:hidden mb-4" style={{ height: 18 }} aria-hidden="true" />
-    <nav aria-label="Breadcrumb" className="hidden md:flex items-center flex-wrap mb-4" style={{ marginLeft: -2 }}>
+    // Shown at every width. The trail was desktop-only for a while and the
+    // line it sits on was held open on mobile with a spacer, because the
+    // logomark shares that line and the heading rides up under the mark
+    // without it. The words are back, so the line carries itself again.
+    <nav aria-label="Breadcrumb" className="flex items-center flex-wrap mb-4" style={{ marginLeft: -2 }}>
       {items.map((it, i) => (
         <motion.button key={it.label} onClick={it.onClick}
           initial={{ opacity: 0, x: -8 }}
@@ -377,7 +374,6 @@ function Breadcrumbs({ items, color }: { items: { label: string; onClick: () => 
         </motion.button>
       ))}
     </nav>
-    </>
   );
 }
 
