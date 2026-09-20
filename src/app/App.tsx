@@ -573,10 +573,13 @@ const SPEAKING_FORM_ENDPOINT = "https://formspree.io/f/xzebweln";
 // refuses to frame. The `t=` share token from the copied link is deliberately
 // left off: it's tied to a session, so the embed relies on the prototype's own
 // "anyone with the link can view" setting instead of an expiring token.
+// `scaling=contain` rather than `min-zoom`: min-zoom fits the frame to the
+// viewport's width and lets the rest run off the bottom, which cropped the
+// phone. contain fits the whole frame inside the box, letterboxing instead.
 const ECOMMERCE_PROTO_EMBED =
   "https://embed.figma.com/proto/hy4NQmlE9WX1sCHaVD9aNh/Portfolio-2026" +
   "?node-id=25-521&starting-point-node-id=25%3A521&page-id=25%3A519" +
-  "&scaling=min-zoom&content-scaling=fixed&embed-host=share";
+  "&scaling=contain&content-scaling=fixed&embed-host=share";
 
 const FORM_FIELDS: { name: string; label: string; type?: string; required?: boolean }[] = [
   { name: "topic",       label: "Topic",          required: true  },
@@ -2349,10 +2352,14 @@ function KaiCaseContent() {
               a reception and a capability, not one headline with footnotes. */}
           <ul className="grid gap-8 md:gap-10 md:grid-cols-3" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             {OUTCOMES.map(({ Icon, text }) => (
-              <li key={text} className="flex flex-col items-start">
-                <Icon size={32} strokeWidth={1.25} style={{ color: fg }} aria-hidden="true" />
-                <p className="font-['Museo',sans-serif] font-light"
-                  style={{ color: fg, fontSize: 'clamp(1.125rem, 1.6vw, 1.375rem)', lineHeight: 1.25, margin: '16px 0 0' }}>
+              // Icon beside the text on a phone, above it on desktop. Stacked,
+              // three of these ran the band down most of the screen for three
+              // short lines; alongside, each outcome is one block the width of
+              // the column and the three read as a list again.
+              <li key={text} className="flex items-start gap-4 md:flex-col md:gap-0">
+                <Icon size={32} strokeWidth={1.25} style={{ color: fg }} aria-hidden="true" className="flex-shrink-0" />
+                <p className="font-['Museo',sans-serif] font-light mt-0 md:mt-4"
+                  style={{ color: fg, fontSize: 'clamp(1.125rem, 1.6vw, 1.375rem)', lineHeight: 1.25, margin: 0 }}>
                   <Figures>{text}</Figures>
                 </p>
               </li>
@@ -4746,8 +4753,11 @@ function BusinessCaseContent() {
           <div className="flex flex-col md:flex-row gap-6 md:gap-8 md:items-start"
             style={{ maxWidth: `calc(${FIGURE_MAX}px * 2 + 32px)` }}>
             <figure className="w-full md:w-1/2" style={{ margin: 0 }}>
+              {/* Portrait, because what is inside is a phone. At 4/3 the box
+                  was wider than tall and the frame's bottom — the Apply
+                  button the whole flow ends on — fell outside it. */}
               <div style={{
-                width: '100%', aspectRatio: '4 / 3', borderRadius: 8, overflow: 'hidden',
+                width: '100%', aspectRatio: '3 / 4', borderRadius: 8, overflow: 'hidden',
                 border: `1px solid ${rule}`, background: isDark ? 'rgba(255,255,255,0.03)' : '#fff',
               }}>
                 <iframe
@@ -4759,7 +4769,7 @@ function BusinessCaseContent() {
                 />
               </div>
               <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
-                Prototype: the bag page flow, clickable.
+                Lived test: the bag page flow, clickable.
               </figcaption>
             </figure>
 
