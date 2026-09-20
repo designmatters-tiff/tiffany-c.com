@@ -253,6 +253,23 @@ function DarkModeToggle({
 }
 
 // ─── useIsMobile ──────────────────────────────────────────────────
+// Tailwind's `md` boundary. useIsMobile() below breaks at `lg`, which is the
+// right line for the identity rail but the wrong one for the bottom bar — the
+// bar swaps layout at md, and between 768 and 1023 the two disagreed.
+function useIsPhone() {
+  const q = "(max-width: 767px)";
+  const [phone, setPhone] = useState(
+    typeof window !== "undefined" ? window.matchMedia(q).matches : false
+  );
+  useEffect(() => {
+    const mql = window.matchMedia(q);
+    const h = (e: MediaQueryListEvent) => setPhone(e.matches);
+    mql.addEventListener("change", h);
+    return () => mql.removeEventListener("change", h);
+  }, []);
+  return phone;
+}
+
 function useIsMobile() {
   const [mobile, setMobile] = useState(
     typeof window !== "undefined" ? window.matchMedia("(max-width: 1023px)").matches : false
@@ -4195,14 +4212,20 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
 // Wraps PageBottomNav with a full-width fade scrim behind it, so content
 // scrolling up from underneath fades into the page background before it
 // would otherwise be visible peeking past the nav's side margins/edges.
-function StickyPageNav({ activePage, tint, onNavigate }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void }) {
+// Third-level pages — Work > category > case study, and the gated pieces that
+// sit the same depth under Business Acumen and Product & UX Strategies. These
+// are the only pages that show the hamburger on a phone; first and second
+// level both carry the full bar.
+const DEEP_PAGES = new Set<Page>(["businessCase", "kaiCase", "appleHealthCase", "brandPerceptionCase", "sourceCase", "finTechCase"]);
+
+function StickyPageNav({ activePage, tint, onNavigate, isSubPage = false }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void; isSubPage?: boolean }) {
   const isDark = useContext(DarkModeCtx);
   const [menuOpen, setMenuOpen] = useState(false);
   const goHome = useContext(GoHomeCtx);
   // Desktop bar height (px) — used for the fade scrim sizing.
   const BAR_H = 64;
-  // Mobile is the pill, at every depth — the fade is sized to it.
-  const mobileNavH = MOBILE_NAV_PILL;
+  // Mobile fade: pill height on deep pages, full bar on others.
+  const mobileNavH = isSubPage ? MOBILE_NAV_PILL : BAR_H;
   return (
     <>
       <div className="fixed inset-x-0 z-20 pointer-events-none"
@@ -4224,12 +4247,9 @@ function StickyPageNav({ activePage, tint, onNavigate }: { activePage: Page; tin
           to the rail's edge and the left column reads as a separate panel
           rather than as part of the page. Crossing it ties the two back
           together. */}
-      {/* Mobile is only ever as wide as the one control it holds, so `right`
-          is released there; desktop spans the page. The bar briefly ran full
-          width on first-level mobile pages, which put five labels across a
-          390px screen — they truncated to "Award", "Testim", "Coach",
-          "Conne" and the last one ran off the edge. */}
-      <div className="fixed overflow-hidden left-6 right-auto md:left-20 md:right-20"
+      {/* Narrow whenever the phone is showing the pill rather than the bar —
+          open, the × has to sit where the pill sat, not at the screen edge. */}
+      <div className={`fixed overflow-hidden ${isSubPage || menuOpen ? "left-6 right-auto md:left-20 md:right-20" : "left-0 right-0 md:left-20 md:right-20"}`}
         style={{
           zIndex: menuOpen ? 60 : 30,
           bottom: "calc(3% + env(safe-area-inset-bottom))",
@@ -4237,17 +4257,21 @@ function StickyPageNav({ activePage, tint, onNavigate }: { activePage: Page; tin
           boxShadow: menuOpen ? "none" : "0 8px 32px rgba(0,0,0,0.18)",
           transition: "box-shadow 0.3s ease",
         }}>
-        <PageBottomNav activePage={activePage} tint={tint} onNavigate={onNavigate} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+        <PageBottomNav activePage={activePage} tint={tint} onNavigate={onNavigate} menuOpen={menuOpen} setMenuOpen={setMenuOpen} isSubPage={isSubPage} />
       </div>
-      {/* The pill is the only nav on mobile now, so its menu is too. */}
-      <MobileMenu
-        open={menuOpen}
-        hideClose
-        activeIdx={SECTIONS.findIndex(s => s.page === activePage)}
-        onClose={() => setMenuOpen(false)}
-        onGoTo={() => { (goHome ?? (() => onNavigate("home")))(); setMenuOpen(false); }}
-        onNavigate={(p) => { onNavigate(p); setMenuOpen(false); }}
-      />
+      {/* Reachable from the pill on deep pages and from the bar everywhere
+          else, so it is no longer conditional. menuOpen can only be set on a
+          phone, so desktop never sees it. */}
+      {(
+        <MobileMenu
+          open={menuOpen}
+          hideClose
+          activeIdx={SECTIONS.findIndex(s => s.page === activePage)}
+          onClose={() => setMenuOpen(false)}
+          onGoTo={() => { (goHome ?? (() => onNavigate("home")))(); setMenuOpen(false); }}
+          onNavigate={(p) => { onNavigate(p); setMenuOpen(false); }}
+        />
+      )}
     </>
   );
 }
@@ -4258,6 +4282,7 @@ function PageBottomNav({
   onNavigate,
   menuOpen,
   setMenuOpen,
+  isSubPage = false,
 }: {
   activePage: Page;
   // The page's own heading colour, where that differs from its nav
@@ -4266,62 +4291,102 @@ function PageBottomNav({
   onNavigate: (p: Page) => void;
   menuOpen: boolean;
   setMenuOpen: (v: boolean) => void;
+  isSubPage?: boolean;
 }) {
   const isDark = useContext(DarkModeCtx);
+  // On a phone the bar scrolls instead of squeezing. Equal flex shares gave
+  // each of six items a sixth of 390px, so the labels ellipsised to "Award",
+  // "Testim", "Coach" and "Conne" ran off the end. Sized to their content and
+  // scrolled, nothing is ever cut; the active one is brought into view.
+  const isPhone = useIsPhone();
+  const barRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!isPhone) return;
+    const el = barRef.current?.querySelector('[data-nav-active="true"]');
+    el?.scrollIntoView({ inline: "center", block: "nearest" });
+  }, [isPhone, activePage]);
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
 
+  // `short` is the phone label. Six full labels do not fit 360px however they
+  // are sized, and the alternatives are worse: squeezed they ellipsise to
+  // "Award" and "Testim", scrolled they sit cut off at the right edge, which
+  // reads as broken rather than as scrollable. Only Awards & Speaking actually
+  // needs shortening, and the page it opens says the full name at the top.
   const NAV_ITEMS = [
-    { key: "work",     label: "Work",             page: "work" as Page },
-    { key: "awards",   label: "Awards & Speaking", page: "awards" as Page },
-    { key: "testimonials", label: "Testimonials", page: "testimonials" as Page },
-    { key: "coaching", label: "Coaching",         page: "coaching" as Page },
-    { key: "connect",  label: "Connect",          page: "connect" as Page },
+    { key: "work",     label: "Work",             short: "Work",         page: "work" as Page },
+    { key: "awards",   label: "Awards & Speaking", short: "Awards",      page: "awards" as Page },
+    { key: "testimonials", label: "Testimonials", short: "Testimonials", page: "testimonials" as Page },
+    { key: "coaching", label: "Coaching",         short: "Coaching",     page: "coaching" as Page },
+    { key: "connect",  label: "Connect",          short: "Connect",      page: "connect" as Page },
   ];
 
   return (
     <>
-      {/* The full gradient bar is desktop chrome. On a phone it is the pill
-          below and nothing else — the bar's five labels do not fit, and the
-          page already says where you are. */}
-      <div className="hidden md:flex items-stretch h-16 overflow-hidden"
-        style={{ background: navGradient(isDark) }}>
+      {/* Full gradient bar — on a phone only where the page is one of the five
+          the bar names; desktop always.
+          On a phone the whole bar is one control that opens the menu, not six
+          small ones: at 390px a six-way split gives each about 60px, which is
+          under the 44px floor once padding is taken off, and the labels past
+          the edge could not be reached at all. Tapping anywhere opens the full
+          list, which is where the navigating happens. Desktop keeps its six
+          separate targets, where there is room for them. */}
+      <div className={`${isSubPage || menuOpen ? "hidden md:flex" : "flex"} items-stretch h-16 overflow-hidden`}
+        onClick={isPhone ? () => setMenuOpen(true) : undefined}
+        role={isPhone ? "button" : undefined}
+        aria-label={isPhone ? "Open navigation" : undefined}
+        aria-expanded={isPhone ? menuOpen : undefined}
+        style={{ background: navGradient(isDark), cursor: isPhone ? "pointer" : undefined }}>
         <button
           className="flex items-center gap-3 overflow-hidden"
           onMouseEnter={() => setHoveredNav("about")}
           onMouseLeave={() => setHoveredNav(null)}
           onClick={() => onNavigate("home")}
           style={{
-            flex: hoveredNav === "about" ? "3 1 0%" : "1 1 0%",
-            minWidth: 0, padding: "0 20px",
+            flex: isPhone ? "0 0 auto" : hoveredNav === "about" ? "3 1 0%" : "1 1 0%",
+            pointerEvents: isPhone ? "none" : undefined,
+            minWidth: 0, padding: isPhone ? "0 12px" : "0 20px",
             opacity: hoveredNav === "about" ? 1 : 0.52,
             transition: "flex 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease",
             borderRight: "1px solid rgba(255,255,255,0.18)",
           }}>
           <HamburgerIcon />
-          <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap overflow-hidden text-ellipsis">Tiffany C.</span>
+          {/* The name is desktop-only: on a phone its ~70px is what the five
+              labels need to fit, and the icon alone already says "menu". */}
+          <span className="hidden md:inline font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap overflow-hidden text-ellipsis">Tiffany C.</span>
         </button>
+        {/* No scroller: the labels fit. `md:contents` dissolves this wrapper
+            above the breakpoint so the desktop row is untouched. */}
+        <div className="flex items-stretch min-w-0 flex-1 md:contents"
+          style={{ pointerEvents: isPhone ? "none" : undefined }}>
         {NAV_ITEMS.map(item => (
           <button key={item.key}
             onMouseEnter={() => setHoveredNav(item.key)}
             onMouseLeave={() => setHoveredNav(null)}
             onClick={() => item.page && onNavigate(item.page)}
             className="flex items-center font-['Museo',sans-serif] font-light text-small whitespace-nowrap overflow-hidden text-ellipsis text-white"
+            data-nav-active={activePage === item.page ? "true" : undefined}
             style={{
-              flex: activePage === item.page || hoveredNav === item.key ? "3 1 0%" : "1 1 0%",
-              minWidth: 0, padding: "0 20px",
+              flex: isPhone ? "1 1 auto" : activePage === item.page || hoveredNav === item.key ? "3 1 0%" : "1 1 0%",
+              minWidth: 0, padding: isPhone ? "0 6px" : "0 20px",
+              fontSize: isPhone ? 11 : undefined,
+              justifyContent: isPhone ? "center" : undefined,
               opacity: activePage === item.page || hoveredNav === item.key ? 1 : 0.52,
               transition: "flex 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease",
               borderLeft: "1px solid rgba(255,255,255,0.18)",
             }}>
-            {item.label}
+            {isPhone ? item.short : item.label}
           </button>
         ))}
+        </div>
       </div>
 
-      {/* The pill — the whole of mobile navigation, at every depth. */}
+      {/* The pill: the nav below first level, and the close control everywhere
+          else once the bar has opened the menu. One × in one place, morphing
+          from the same icon, with the credit on its row — rather than a second
+          close button that the menu would have had to grow for this case. */}
       <button onClick={() => setMenuOpen(!menuOpen)}
         aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen}
-        className="md:hidden flex items-center justify-center"
+        className={`${isSubPage || menuOpen ? "md:hidden flex" : "hidden"} items-center justify-center`}
         style={{
           // One flat colour, the page's own heading colour — at 44px square
           // the full nav gradient was a five-stop sweep compressed into a
@@ -6727,7 +6792,7 @@ export default function App() {
       {navActive && (
         <StickyPageNav activePage={navActive} onNavigate={navigateGeneral}
           tint={page === "speakingInquiry" || page === "speaking" ? GOLD : undefined}
-          />
+          isSubPage={DEEP_PAGES.has(page)} />
       )}
     </div>
     </AccordionCtx.Provider>
