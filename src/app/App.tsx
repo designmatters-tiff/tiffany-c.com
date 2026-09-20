@@ -1232,30 +1232,32 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 reach even once the slide scrolls. Auto margins centre only
                 while there's room to spare. */}
             <div className="flex flex-col gap-5" style={{ marginTop: "auto", marginBottom: "auto" }}>
-              <div>
+              {/* The portrait sits on the heading's baseline rather than
+                  floating from its top: bottom-aligned, the two read as one
+                  block instead of the photo hanging above the last lines.
+                  A float can only align to the top of the line it sits on,
+                  so this is a flex row — which also means the heading wraps
+                  in its own column rather than around a circle. */}
+              <div className="flex items-end gap-4">
+                {/* Fluid like the body copy below it, rather than locked at
+                    3rem. At four lines a fixed 3rem heading was what pushed
+                    the hero past the fold on shorter phones. */}
+                <h1 className="flex-1 min-w-0 font-['Museo',sans-serif] font-light"
+                  style={{ fontSize: "clamp(2.25rem, 11vw, 3rem)", lineHeight: 1.1, color: GOLD, margin: 0 }}>
+                  Hi, I'm a product &amp; design leader
+                </h1>
                 <img
                   src={profilePhoto}
                   alt="Tiffany Chew"
-                  className="rounded-full object-cover"
+                  className="rounded-full object-cover flex-shrink-0"
                   style={{
-                    float: "right",
                     width: "34vw",
                     height: "34vw",
                     maxWidth: 160,
                     maxHeight: 160,
-                    marginLeft: 16,
-                    marginBottom: 8,
-                    shapeOutside: "circle(50%)",
                     border: `1px solid ${GOLD}`,
                   }}
                 />
-                {/* Fluid like the body copy below it, rather than locked at
-                    3rem. At four lines a fixed 3rem heading was what pushed
-                    the hero past the fold on shorter phones. */}
-                <h1 className="font-['Museo',sans-serif] font-light"
-                  style={{ fontSize: "clamp(2.25rem, 11vw, 3rem)", lineHeight: 1.1, color: GOLD }}>
-                  Hi, I'm a product &amp; design leader
-                </h1>
               </div>
               <p className="font-['Nunito_Sans',sans-serif] text-body leading-relaxed"
                 style={{ color: bodyCol, maxWidth: "min(100%, 68ch)" }}>
