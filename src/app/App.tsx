@@ -462,13 +462,25 @@ function MobileMenu({
     >
       <div className="absolute inset-0" style={{ background: menuBg }} />
 
-      {/* Header row */}
-      <div className="relative z-10 flex items-center justify-end px-6 pt-10 pb-6">
-        <LogoMark size={44} color={itemActive} />
+      {/* Header row — the same 24px mark the page headers carry. At 44 it
+          took 62px of height the list needed, and on a short screen the list
+          pushed past the control that closes it. */}
+      <div className="relative z-10 flex items-center justify-end px-6 pt-10 pb-4">
+        <LogoMark size={Math.round(MOBILE_MARK / 1.4)} color={itemActive} />
       </div>
 
-      {/* Nav items list — right-aligned, active-section dot at the start */}
-      <div className="relative z-10 flex flex-col flex-1 px-6 pb-12 justify-center gap-1">
+      {/* Nav items list — right-aligned, active-section dot at the start.
+          Auto margins, not justify-center: a centred flex child that overflows
+          spills past BOTH ends, so on a short screen the last row ran under
+          the close control. Auto margins centre only while there is room to
+          spare, and the padding below reserves the control's own footprint. */}
+      <div className="relative z-10 flex flex-col flex-1 px-6 min-h-0 overflow-y-auto scrollbar-hide"
+        style={{ paddingBottom: `calc(3% + env(safe-area-inset-bottom) + ${MOBILE_NAV_PILL + FOOTER_TO_NAV}px)` }}>
+        {/* No gap between rows: each already draws its own rule, so a gap only
+            broke the list into floating segments and cost 20px of height.
+            overflow-y is the guarantee — on a screen too short for six rows
+            the list scrolls rather than running under the close control. */}
+        <div className="flex flex-col" style={{ marginTop: "auto", marginBottom: "auto" }}>
         {SECTIONS.map((s, i) => {
           const isActive = activeIdx === i;
           return (
@@ -484,7 +496,7 @@ function MobileMenu({
               }}
               onMouseEnter={() => setHoveredKey(s.key)}
               onMouseLeave={() => setHoveredKey(null)}
-              className="flex items-center justify-between py-5 text-right"
+              className="flex items-center justify-between py-4 text-right"
               style={{ borderBottom: `1px solid ${rowBorder}` }}
             >
               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: itemActive, opacity: isActive ? 1 : 0 }} />
@@ -502,13 +514,14 @@ function MobileMenu({
             </button>
           );
         })}
+        </div>
       </div>
 
       {/* Footer — close on the left, sitting where the hamburger that opened
           the menu sits in the collapsed nav, so the control doesn't jump
           across the screen between states. Bright/dark took the right until
           THEME_TOGGLE_ENABLED was switched off. */}
-      <div className="relative z-10 px-6 pb-8 flex items-center justify-between">
+      <div className={`relative z-10 px-6 flex items-center justify-between${hideClose ? "" : " pb-8"}`}>
         {!hideClose && (
           <button onClick={onClose} aria-label="Close menu" style={{ background: "none", border: "none", padding: 0 }}>
             <X size={20} strokeWidth={1} color={closeColor} />
