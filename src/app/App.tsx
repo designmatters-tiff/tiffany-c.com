@@ -170,7 +170,7 @@ function DarkModeToggle({
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       className={
         variant === "floating"
-          ? "fixed top-5 right-5 z-[60] hidden md:flex items-center"
+          ? "fixed top-5 right-5 z-[60] hidden items-center"
           : "flex items-center"
       }
       style={{ background: "none", border: "none", padding: 0 }}
@@ -930,55 +930,46 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
               fixed gaps, matching the Figma reference exactly, rather than
               vertically centering the whole block. */}
           <div className="hidden md:flex absolute inset-0 flex-col px-20"
-            style={{ paddingTop: 64, paddingBottom: "calc(64px + 5vh + 96px)" }}>
-            <LogoMark size={70} />
-            <div className="relative" style={{ marginTop: 64 }}>
+            style={{ paddingTop: 64, paddingBottom: "calc(64px + 5vh + 64px)" }}>
+            <div className="flex justify-end">
+              <LogoMark size={70} />
+            </div>
+            {/* Heading */}
+            <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: "4rem", lineHeight: 1.05, color: GOLD, marginTop: 48 }}>
+              Hello, I'm Tiff —<br />
+              a product &amp; design leader
+            </h1>
+            {/* Photo + body copy row */}
+            <div className="flex items-start gap-12" style={{ marginTop: 48, flex: 1, minHeight: 0 }}>
               <img
                 src={profilePhoto}
                 alt="Tiffany Chew"
-                className="rounded-full object-cover absolute"
+                className="rounded-full object-cover flex-shrink-0"
                 style={{
-                  width: "24vw",
-                  height: "24vw",
-                  maxWidth: 315,
-                  maxHeight: 315,
-                  right: 0,
-                  top: "-14%",
+                  width: "18vw",
+                  height: "18vw",
+                  maxWidth: 240,
+                  maxHeight: 240,
                   border: `1px solid ${GOLD}`,
                 }}
               />
-              <h1 className="font-['Museo',sans-serif] font-light"
-                style={{ fontSize: "4rem", lineHeight: 1.05, color: GOLD, maxWidth: "52%" }}>
-                Tiff is a product &amp; design leader
-              </h1>
+              <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
+                style={{ fontSize: "clamp(1rem, 1.5vw, 1.25rem)", color: bodyCol, paddingTop: 8 }}>
+                I work with C-suites and product teams to shape design
+                functions that deliver. As an ex-founder who built and
+                exited my own brand, and a leader across fintech, retail,
+                and SaaS, I bring an entrepreneurial and outcomes-focused
+                lens to design leadership.
+                <br /><br />
+                My forte is connecting strategy to craft, breaking it into
+                tangible wins toward an ultimate company vision. Because the
+                clarity between a big decision and a small win is where
+                sustainable growth lives.
+              </p>
             </div>
-            <div className="flex-1" />
-            <p className="font-['Avenir',sans-serif] font-light leading-relaxed"
-              style={{ fontSize: "clamp(1.05rem, 1.7vw, 1.4rem)", color: bodyCol, maxWidth: "60%" }}>
-              I work with C-suites and product teams to shape design
-              functions that deliver. As an ex-founder who built and
-              exited my own brand, and a leader across fintech, retail,
-              and SaaS, I bring an entrepreneurial and outcomes-focused
-              lens to design leadership.
-              <br /><br />
-              My forte is connecting strategy to craft, breaking it into
-              tangible wins toward an ultimate company vision. Because the
-              clarity between a big decision and a small win is where
-              sustainable growth lives.
-            </p>
           </div>
           <div className="hidden md:block">
             <div className="absolute" style={{ bottom: "calc(64px + 5vh + 40px)", left: "7%", right: "7%", height: 1, background: "rgba(178,147,59,0.25)" }} />
-            <div className="absolute right-10 flex flex-col items-center gap-2"
-              style={{ bottom: "calc(64px + 5vh + 28px)" }}>
-              <motion.p className="font-['Avenir',sans-serif] font-light text-[0.65rem] uppercase tracking-[0.2em]"
-                style={{ color: dimCol }}
-                animate={{ opacity: [0.4, 0.9, 0.4] }} transition={{ repeat: Infinity, duration: 3 }}>
-                scroll
-              </motion.p>
-              <motion.div className="w-px" style={{ background: dimCol }}
-                animate={{ height: [16, 28, 16] }} transition={{ repeat: Infinity, duration: 3 }} />
-            </div>
           </div>
         </section>
 
