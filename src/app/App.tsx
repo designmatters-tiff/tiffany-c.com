@@ -55,8 +55,8 @@ const GOLD_BRIGHT = "#e3c85c";
 const INK         = "#111111";
 const DIM         = "#666660";
 // Nav gradient (opaque) — nav itself stays fully opaque per Figma.
-const NAV_GRADIENT = "linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
-const NAV_GRADIENT_DARK = "linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), linear-gradient(to right, #B2933B, #6281B7, #C27AA6)";
+const NAV_GRADIENT = "linear-gradient(105deg, #B2933B 0%, #6281B7 45%, #b472a0 75%, #C27AA6 100%)";
+const NAV_GRADIENT_DARK = "linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), linear-gradient(105deg, #B2933B 0%, #6281B7 45%, #b472a0 75%, #C27AA6 100%)";
 const navGradient = (isDark: boolean) => isDark ? NAV_GRADIENT_DARK : NAV_GRADIENT;
 
 // Each section's heading takes its colour from the bottom nav's gradient at
@@ -474,8 +474,8 @@ function MobileMenu({
           spills past BOTH ends, so on a short screen the last row ran under
           the close control. Auto margins centre only while there is room to
           spare, and the padding below reserves the control's own footprint. */}
-      <div className="relative z-10 flex flex-col flex-1 px-6 min-h-0 overflow-y-auto scrollbar-hide"
-        style={{ paddingBottom: FOOTER_TO_NAV }}>
+      <div className="relative z-10 flex flex-col flex-1 min-h-0 overflow-y-auto scrollbar-hide"
+        style={{ paddingLeft: 42, paddingRight: 24, paddingBottom: `calc(3% + env(safe-area-inset-bottom) + ${MOBILE_NAV_PILL + FOOTER_TO_NAV}px)` }}>
         {/* No gap between rows: each already draws its own rule, so a gap only
             broke the list into floating segments and cost 20px of height.
             overflow-y is the guarantee — on a screen too short for six rows
@@ -523,13 +523,15 @@ function MobileMenu({
           takes its height and offset and keeps its width clear on the left.
           Where the menu still draws its own × instead, that sits here as
           before. */}
-      <div className={`relative z-10 flex items-center ${hideClose ? "justify-end" : "justify-between px-6 pb-8"}`}
-        style={hideClose ? {
+      <div className="absolute z-10 flex items-center"
+        style={{
+          left: 0, right: 0,
+          bottom: "calc(3% + env(safe-area-inset-bottom))",
           height: MOBILE_NAV_PILL,
-          marginBottom: "calc(3% + env(safe-area-inset-bottom))",
-          paddingLeft: 24 + MOBILE_NAV_PILL + 16,
+          paddingLeft: hideClose ? 24 + MOBILE_NAV_PILL + 16 : 24,
           paddingRight: 24,
-        } : undefined}>
+          justifyContent: hideClose ? "flex-end" : "space-between",
+        }}>
         {hideClose && <SiteCredit align="right" />}
         {!hideClose && (
           <button onClick={onClose} aria-label="Close menu" style={{ background: "none", border: "none", padding: 0 }}>
