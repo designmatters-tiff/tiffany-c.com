@@ -773,11 +773,13 @@ function SpeakingInquiryPage({ onBack, onNavigate, headerScrolled = false, scrol
             read to end. The bottom nav is the site's menu on every other
             page and stays that. */}
         {!sent && (
-          <button onClick={handleSubmit} disabled={status === "sending"}
-            className="gold-submit-btn px-8 font-['Museo',sans-serif] font-light text-small text-white cursor-pointer"
-            style={{ height: 48, border: 'none', marginTop: 36, opacity: status === "sending" ? 0.6 : 1 }}>
-            {status === "sending" ? "Sending…" : "Submit"}
-          </button>
+          <div className="flex justify-end md:justify-start" style={{ marginTop: 36 }}>
+            <button onClick={handleSubmit} disabled={status === "sending"}
+              className="gold-submit-btn px-8 font-['Museo',sans-serif] font-light text-small text-white cursor-pointer"
+              style={{ height: 48, border: 'none', opacity: status === "sending" ? 0.6 : 1 }}>
+              {status === "sending" ? "Sending…" : "Submit"}
+            </button>
+          </div>
         )}
 
         {/* Fills whatever the content leaves, so the credit line lands on
@@ -5137,7 +5139,9 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
 
             {error && <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: '#E05C5C', marginTop: 10 }}>{error}</p>}
 
-            <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end' }}>
+            {/* Right on a phone, where the thumb is; left on desktop, where
+                the form's own left edge is what the eye follows down. */}
+            <div className="flex justify-end md:justify-start" style={{ marginTop: 24 }}>
               <button
                 onClick={submit}
                 className="font-['Nunito_Sans',sans-serif] text-small uppercase tracking-widest"
@@ -5245,7 +5249,9 @@ function BrandPerceptionPage({ onBack, onNavigate }: { onBack: () => void; onNav
 
             {error && <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: '#E05C5C', marginTop: 10 }}>{error}</p>}
 
-            <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end' }}>
+            {/* Right on a phone, where the thumb is; left on desktop, where
+                the form's own left edge is what the eye follows down. */}
+            <div className="flex justify-end md:justify-start" style={{ marginTop: 24 }}>
               <button
                 onClick={submit}
                 className="font-['Nunito_Sans',sans-serif] text-small uppercase tracking-widest"
