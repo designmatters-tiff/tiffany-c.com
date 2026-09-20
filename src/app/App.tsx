@@ -3404,14 +3404,14 @@ function FinTechContent() {
   const [tab, setTab] = useState<FtEvidence>("Business");
 
   const META: [string, React.ReactNode][] = [
-    ["Year", "2022 – 2023"],
+    ["Year", "2021"],
     ["Client", (
       <a href={TNG_DIGITAL_URL} target="_blank" rel="noopener noreferrer"
         className="link-underline" style={{ color: fg }}>TNG Digital (TNG eWallet)</a>
     )],
     ["Goal", "Keep GO+ funded without forcing users into it"],
     ["Scope", "Design sprint facilitation, focus group research, concept validation, product strategy"],
-    ["Role", "Head of Product Design & UX Research"],
+    ["Role", "Product Design Lead"],
     ["Launched", "20 February 2023"],
   ];
 
