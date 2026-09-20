@@ -983,6 +983,9 @@ const AUTO_DURATION = 5000;
 // The mobile nav pill — square, and 44 so the tap target clears the minimum
 // however small the icon inside it is.
 const MOBILE_NAV_PILL = 44;
+// The morphing menu symbol's box. Named because the homepage's bar sizes its
+// collapsed hit area from it.
+const MENU_ICON_SIZE = 24;
 const NAV_PAD_X = 20;
 const NAV_PAD_Y = 12;
 
@@ -1636,7 +1639,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           above the overlay, so the symbol you pressed is the symbol that
           closes it. The name and the section label go with the width — the
           open menu lists both already. */}
-      <motion.nav className="fixed md:hidden flex items-center overflow-hidden"
+      <motion.nav className="fixed md:hidden flex items-center px-5 overflow-hidden"
         style={{
           zIndex: menuOpen ? 60 : 30,
           bottom: "calc(5% + env(safe-area-inset-bottom))", left: 24,
@@ -1648,16 +1651,23 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           transition: "background 0.3s ease, box-shadow 0.3s ease",
         }}
         animate={{
-          width:  menuOpen ? MOBILE_NAV_PILL : navShrunk ? navBtn.w + NAV_PAD_X * 2 : "calc(100% - 48px)",
-          height: menuOpen ? MOBILE_NAV_PILL : navShrunk ? navBtn.h + NAV_PAD_Y * 2 : 56,
-          paddingLeft:  menuOpen ? 0 : NAV_PAD_X,
-          paddingRight: menuOpen ? 0 : NAV_PAD_X,
+          // Open, the bar trims from the right and keeps its left edge, its
+          // padding and its height — so the symbol morphing inside it does not
+          // travel while it morphs. The box is transparent by then, so its
+          // width is only ever a hit area.
+          width:  menuOpen ? NAV_PAD_X * 2 + MENU_ICON_SIZE
+                : navShrunk ? navBtn.w + NAV_PAD_X * 2 : "calc(100% - 48px)",
+          height: navShrunk ? navBtn.h + NAV_PAD_Y * 2 : 56,
         }}
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
         <button
           ref={navBtnRef}
           onClick={() => setMenuOpen(!menuOpen)}
-          className={`flex items-center gap-3 ${menuOpen ? "w-full justify-center" : ""}`}
+          className="flex items-center gap-3"
+          // Padding out, margin back in: the tap target reaches 44 without the
+          // icon moving a pixel. Open, the button holds nothing but the 24px
+          // symbol, which is well under the floor on its own.
+          style={{ padding: 10, margin: -10 }}
           aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen}>
           <MenuIcon open={menuOpen} color={menuOpen ? (isDark ? "white" : INK) : "white"} />
           {!menuOpen && (
