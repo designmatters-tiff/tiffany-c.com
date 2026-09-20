@@ -475,7 +475,7 @@ function MobileMenu({
           the close control. Auto margins centre only while there is room to
           spare, and the padding below reserves the control's own footprint. */}
       <div className="relative z-10 flex flex-col flex-1 px-6 min-h-0 overflow-y-auto scrollbar-hide"
-        style={{ paddingBottom: `calc(3% + env(safe-area-inset-bottom) + ${MOBILE_NAV_PILL + FOOTER_TO_NAV}px)` }}>
+        style={{ paddingBottom: FOOTER_TO_NAV }}>
         {/* No gap between rows: each already draws its own rule, so a gap only
             broke the list into floating segments and cost 20px of height.
             overflow-y is the guarantee — on a screen too short for six rows
@@ -517,11 +517,20 @@ function MobileMenu({
         </div>
       </div>
 
-      {/* Footer — close on the left, sitting where the hamburger that opened
-          the menu sits in the collapsed nav, so the control doesn't jump
-          across the screen between states. Bright/dark took the right until
-          THEME_TOGGLE_ENABLED was switched off. */}
-      <div className={`relative z-10 px-6 flex items-center justify-between${hideClose ? "" : " pb-8"}`}>
+      {/* Footer — on a phone this is where the credit lives, sharing the row
+          with the control that closes the menu. That control is the nav's own
+          pill showing through above this overlay at bottom left, so the row
+          takes its height and offset and keeps its width clear on the left.
+          Where the menu still draws its own × instead, that sits here as
+          before. */}
+      <div className={`relative z-10 flex items-center ${hideClose ? "justify-end" : "justify-between px-6 pb-8"}`}
+        style={hideClose ? {
+          height: MOBILE_NAV_PILL,
+          marginBottom: "calc(3% + env(safe-area-inset-bottom))",
+          paddingLeft: 24 + MOBILE_NAV_PILL + 16,
+          paddingRight: 24,
+        } : undefined}>
+        {hideClose && <SiteCredit align="right" />}
         {!hideClose && (
           <button onClick={onClose} aria-label="Close menu" style={{ background: "none", border: "none", padding: 0 }}>
             <X size={20} strokeWidth={1} color={closeColor} />
@@ -967,24 +976,35 @@ function ContactRow({ row, accent, itemColor, linkColor, borderColor, onNavigate
 // `gutter={false}` where the page already wraps its content in the px-6
 // md:px-20 inset — without it the line indents twice and stops lining up
 // with the copy above it.
-function SiteFooter({ variant, gutter = true }: { variant?: "work" | "nda"; gutter?: boolean }) {
+// The line itself, so the page footer and the mobile menu cannot drift apart.
+function SiteCredit({ align = "left" }: { align?: "left" | "right" }) {
   const isDark = useContext(DarkModeCtx);
   const year = new Date().getFullYear();
   return (
-    <div className={gutter ? "px-6 md:px-20" : undefined}>
-      <p className="font-['Nunito_Sans',sans-serif]"
-        style={{
-          fontSize: 11,
-          fontWeight: 400,
-          lineHeight: 1.5,
-          marginTop: 24,
-          maxWidth: 620,
-          // The quietest thing on the page in either theme: DIM at 45%, and a
-          // white barely above the background in dark.
-          color: isDark ? "rgba(255,255,255,0.35)" : "rgba(102,102,96,0.45)",
-        }}>
-        Designed and built by Tiffany Chew · © {year}
-      </p>
+    <p className="font-['Nunito_Sans',sans-serif] whitespace-nowrap"
+      style={{
+        fontSize: 11,
+        fontWeight: 400,
+        lineHeight: 1.5,
+        maxWidth: 620,
+        textAlign: align,
+        // The quietest thing on the page in either theme: DIM at 45%, and a
+        // white barely above the background in dark.
+        color: isDark ? "rgba(255,255,255,0.35)" : "rgba(102,102,96,0.45)",
+      }}>
+      Designed and built by Tiffany Chew · © {year}
+    </p>
+  );
+}
+
+// Desktop only. On a phone the credit lives in the menu, on the row that
+// closes it — the two viewports carry it differently on purpose, so a small
+// screen does not spend its last line on a credit.
+function SiteFooter({ variant, gutter = true }: { variant?: "work" | "nda"; gutter?: boolean }) {
+  void variant;
+  return (
+    <div className={`hidden md:block${gutter ? " px-6 md:px-20" : ""}`} style={{ marginTop: 24 }}>
+      <SiteCredit />
     </div>
   );
 }
