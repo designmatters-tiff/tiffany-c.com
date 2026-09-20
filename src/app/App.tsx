@@ -1500,10 +1500,18 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
         })}
       </div>
 
-      {/* There used to be a "swipe to explore" label pinned above the nav
-          here. It sat over the hero's own words on shorter phones, and the
-          intro copy matters more than the hint — the carousel indicator
-          below already signals there's more than one section. */}
+      {activeIdx === 0 && (
+        <p className="absolute z-30 font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest"
+          style={{
+            bottom: isMobile
+              ? "calc(5% + 56px + 14px + env(safe-area-inset-bottom))"
+              : "calc(64px + 5vh + 8px)",
+            left: isMobile ? 24 : "7%",
+            color: dimCol,
+          }}>
+          swipe to explore
+        </p>
+      )}
 
       {/* ── Persistent mobile carousel indicator — sits directly below the
           floating nav bar, spanning the same width. Stays visible across
