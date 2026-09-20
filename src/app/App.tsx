@@ -357,7 +357,14 @@ function HeaderLogo({ onNavigate, color = GOLD, size = 28, ring = 48 }: { onNavi
 // rather than appearing all at once.
 function Breadcrumbs({ items, color }: { items: { label: string; onClick: () => void }[]; color: string }) {
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center flex-wrap mb-4" style={{ marginLeft: -2 }}>
+    <>
+      {/* The trail is desktop only: on a phone it cost a whole line above the
+          heading to say what the heading says, and the minimised menu is the
+          way back. Its line still has a job there, though — the logomark sits
+          on it, and without the space the heading rides up underneath the
+          mark. So mobile keeps the gap and drops only the words. */}
+      <div className="md:hidden mb-4" style={{ height: 18 }} aria-hidden="true" />
+    <nav aria-label="Breadcrumb" className="hidden md:flex items-center flex-wrap mb-4" style={{ marginLeft: -2 }}>
       {items.map((it, i) => (
         <motion.button key={it.label} onClick={it.onClick}
           initial={{ opacity: 0, x: -8 }}
@@ -370,6 +377,7 @@ function Breadcrumbs({ items, color }: { items: { label: string; onClick: () => 
         </motion.button>
       ))}
     </nav>
+    </>
   );
 }
 
@@ -514,16 +522,12 @@ const FORM_FIELDS: { name: string; label: string; type?: string; required?: bool
 // Speaking Inquiry is a full 2nd-level page (not an inline accordion).
 // It carries the same gradient bottom nav as every other page, shown as
 // "Connect / Speaking Inquiry" and shrinking on scroll — see StickyPageNav.
-function SpeakingInquiryContainer({ onBack, onNavigate, onScrolledChange }: { onBack: () => void; onNavigate: (p: Page) => void; onScrolledChange?: (v: boolean) => void }) {
+function SpeakingInquiryContainer({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   return (
     <div ref={scrollRef} className="absolute inset-0 overflow-y-auto"
-      onScroll={e => {
-        const v = e.currentTarget.scrollTop > 24;
-        setHeaderScrolled(v);
-        onScrolledChange?.(v);
-      }}>
+      onScroll={e => setHeaderScrolled(e.currentTarget.scrollTop > 24)}>
       <SpeakingInquiryPage onBack={onBack} onNavigate={onNavigate} headerScrolled={headerScrolled}
         scrollToTop={() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })} />
     </div>
@@ -914,6 +918,9 @@ const AUTO_DURATION = 5000;
 // on it — the minimised width is computed from this, so the two have to agree
 // or the bar stops being symmetric. NAV_PAD_Y applies to the minimised state
 // only: the expanded bar keeps its fixed 56px height.
+// The mobile nav pill — square, and 44 so the tap target clears the minimum
+// however small the icon inside it is.
+const MOBILE_NAV_PILL = 44;
 const NAV_PAD_X = 20;
 const NAV_PAD_Y = 12;
 
@@ -2921,16 +2928,18 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
 // Wraps PageBottomNav with a full-width fade scrim behind it, so content
 // scrolling up from underneath fades into the page background before it
 // would otherwise be visible peeking past the nav's side margins/edges.
-function StickyPageNav({ activePage, detailLabel, parentLabel, compact, onNavigate }: { activePage: Page; detailLabel?: string; parentLabel?: string; compact?: boolean; onNavigate: (p: Page) => void }) {
+function StickyPageNav({ activePage, onNavigate }: { activePage: Page; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
   const pageBg = isDark ? "#181410" : "#f8f7f5";
   return (
     <>
       <div className="fixed inset-x-0 bottom-0 z-20 pointer-events-none"
         style={{ height: 90, background: `linear-gradient(to bottom, ${pageBg}00 0%, ${pageBg} 65%)` }} />
-      <div className="fixed inset-x-6 md:inset-x-20 z-30 overflow-hidden"
+      {/* Desktop spans the content width; mobile is only as wide as the one
+          control it holds, so `right` is released at that breakpoint. */}
+      <div className="fixed left-6 right-auto md:left-20 md:right-20 z-30 overflow-hidden"
         style={{ bottom: "calc(3% + env(safe-area-inset-bottom))", borderRadius: 0, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
-        <PageBottomNav activePage={activePage} detailLabel={detailLabel} parentLabel={parentLabel} compact={compact} onNavigate={onNavigate} />
+        <PageBottomNav activePage={activePage} onNavigate={onNavigate} />
       </div>
     </>
   );
@@ -2938,15 +2947,9 @@ function StickyPageNav({ activePage, detailLabel, parentLabel, compact, onNaviga
 
 function PageBottomNav({
   activePage,
-  detailLabel,
-  parentLabel,
-  compact,
   onNavigate,
 }: {
   activePage: Page;
-  detailLabel?: string;
-  parentLabel?: string;
-  compact?: boolean;
   onNavigate: (p: Page) => void;
 }) {
   const isDark = useContext(DarkModeCtx);
@@ -3000,20 +3003,15 @@ function PageBottomNav({
         ))}
       </div>
 
-      {/* Mobile */}
-      <div className={`md:hidden flex items-center ${compact ? 'h-12' : 'h-16'} px-5`}
-        style={{ background: navGradient(isDark), transition: 'height 0.25s ease' }}>
-        <button onClick={() => setMenuOpen(true)} className="flex items-center gap-3" aria-label="Open navigation">
-          <HamburgerIcon />
-          <span className={`font-['Museo',sans-serif] font-light ${compact ? 'text-small' : 'text-body'} text-white`}>Tiffany C.</span>
-        </button>
-        <div className="flex-1" />
-        <span className={`font-['Museo',sans-serif] font-light ${compact ? 'text-label' : 'text-small'} text-white/75`} style={{ transition: 'font-size 0.25s ease' }}>
-          {detailLabel
-            ? `${parentLabel ?? NAV_ITEMS.find(n => n.page === activePage)?.label ?? ""} / ${detailLabel}`
-            : (NAV_ITEMS.find(n => n.page === activePage)?.label ?? "")}
-        </span>
-      </div>
+      {/* Mobile — the menu minimised to its control, and nothing else. The
+          bar used to span the screen carrying "Tiffany C." and the page's
+          own name; on a phone both only repeat what the page already says,
+          and the width they needed was the width of the screen. */}
+      <button onClick={() => setMenuOpen(true)} aria-label="Open navigation"
+        className="md:hidden flex items-center justify-center"
+        style={{ background: navGradient(isDark), width: MOBILE_NAV_PILL, height: MOBILE_NAV_PILL, border: "none", padding: 0 }}>
+        <HamburgerIcon />
+      </button>
 
       {/* Mobile overlay */}
       <MobileMenu
@@ -4791,7 +4789,6 @@ export default function App() {
   };
 
   const [detailHeaderScrolled, setDetailHeaderScrolled] = useState(false);
-  const detailLabel = page === "workDetail" && detailKey ? EXPERTISE_CARDS.find(c => c.key === detailKey)?.title : undefined;
   const motionKey = page === "speaking" ? `speaking:${detailKey}` : page === "workDetail" ? `workDetail:${detailKey}` : page;
   // Case-study pages are a drill-in from the Work list; they animate as an
   // expansion of the row rather than as a new screen sliding in.
@@ -4814,12 +4811,6 @@ export default function App() {
     : page === "awards" || page === "speaking" ? "awards"
     : page === "speakingInquiry" ? "connect"
     : page;
-  const navParentLabel = page === "speakingInquiry" ? "Connect" : undefined;
-  const navDetailLabel = page === "speakingInquiry" ? "Speaking Inquiry" : detailLabel;
-  // Only the two pages with a shrink-on-scroll header ask the bar to shrink
-  // with them.
-  const navCompact = (page === "workDetail" || page === "speakingInquiry") && detailHeaderScrolled;
-
   const toggleDark = useCallback(() => setIsDark(d => !d), []);
 
   // Router state -> address bar. The guard matters: without it the first
@@ -4879,7 +4870,7 @@ export default function App() {
         {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={navigateGeneral} /></div>}
         {page === "connect"  && <div className="absolute inset-0 overflow-y-auto"><ConnectPage onNavigate={navigateGeneral} /></div>}
         {page === "speakingInquiry" && (
-          <SpeakingInquiryContainer onNavigate={navigateGeneral} onScrolledChange={setDetailHeaderScrolled} onBack={() => {
+          <SpeakingInquiryContainer onNavigate={navigateGeneral} onBack={() => {
             const connectIdx = SECTIONS.findIndex(s => s.key === "connect");
             setHomeInitialIdx(connectIdx > 0 ? connectIdx : 0);
             setPage("home");
@@ -4908,10 +4899,7 @@ export default function App() {
           <AppleHealthPage onBack={() => { setDetailKey("cases"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
       </motion.div>
-      {navActive && (
-        <StickyPageNav activePage={navActive} parentLabel={navParentLabel} detailLabel={navDetailLabel}
-          compact={navCompact} onNavigate={navigateGeneral} />
-      )}
+      {navActive && <StickyPageNav activePage={navActive} onNavigate={navigateGeneral} />}
     </div>
     </AccordionCtx.Provider>
     </GoHomeCtx.Provider>
