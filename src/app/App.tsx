@@ -799,7 +799,7 @@ const SECTIONS = [
     key: "coaching", label: "Coaching",        page: "coaching" as Page,
     accent: "#5070A0", labelColor: "#9B5A88",
     tagline: "UX Career Coaching",
-    context: "Portfolio · Interview Strategies",
+    context: "Portfolio · Positioning · Negotiation",
     items: [
       "1:1 Calls",
       "Priority DM",
@@ -810,7 +810,7 @@ const SECTIONS = [
     key: "connect", label: "Connect",          page: "connect" as Page,
     accent: "#9B5A88", labelColor: "#9B5A88",
     tagline: "Let's Connect",
-    context: "Open to collaboration",
+    context: "Consulting · Workshop · Speaking",
     items: ["designmatters.tiff@gmail.com", "Speaking Inquiry", ["LinkedIn", "Instagram"]],
   },
 ] as const;
@@ -3288,9 +3288,13 @@ function ContactListPage({
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
   const itemColor = isDark ? "white" : INK;
   return (
-    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
-      {/* Page heading */}
-      <div className="relative px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10" style={{ borderBottom: `1px solid ${brd}` }}>
+    // A column, so a short list can be held at the foot of the screen instead
+    // of stopping a third of the way down with the rest of the page empty —
+    // the same shape the homepage deck gives this section.
+    <div className="relative w-full flex flex-col" style={{ minHeight: "100dvh", background: "transparent" }}>
+      {/* Page heading. No rule of its own: the list's own top border is the
+          line, and carrying both drew two of them 25px apart. */}
+      <div className="relative px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10">
         <HeaderLogo onNavigate={onNavigate} color={headingColor} />
         <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-2" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -3302,8 +3306,11 @@ function ContactListPage({
         </motion.h1>
       </div>
 
+      {/* Takes up whatever is spare, pushing the list down the page. */}
+      <div className="flex-1" style={{ minHeight: "4vh" }} />
+
       {/* Items */}
-      <div className="px-6 md:px-20 pt-6">
+      <div className="px-6 md:px-20">
         <div style={{ borderTop: `1px solid ${brd}` }}>
           {items.map(entry => {
             const row = asRow(entry);
@@ -3317,16 +3324,25 @@ function ContactListPage({
       </div>
 
       <SiteFooter />
-      <div style={{ height: 96 }} />
+      {/* Taller than the usual 96: with the column filling the viewport this
+          is the only clearance under the footer, and the desktop bar is 64
+          tall on a 3% offset. At 96 the copyright sat 5px off it. */}
+      <div style={{ height: 140 }} />
     </div>
   );
 }
 
+// The eyebrow and title come from SECTIONS, not from a second copy here. Both
+// pages had drifted to a generic "Open to collaboration" while the homepage
+// deck still showed the real one.
+const sectionOf = (key: string) => SECTIONS.find(s => s.key === key);
+
 function CoachingPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
+  const section = sectionOf("coaching");
   return (
     <ContactListPage
-      eyebrow="Open to collaboration"
-      title="UX Career Coaching"
+      eyebrow={section?.context ?? ""}
+      title={section?.tagline ?? "UX Career Coaching"}
       items={["1:1 Calls", "Priority DM", "Package (1-1 Coaching Service)"]}
       accent="#9B5A88"
       headingColor={HEADING_COLOUR.coaching}
@@ -3336,10 +3352,11 @@ function CoachingPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
 }
 
 function ConnectPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
+  const section = sectionOf("connect");
   return (
     <ContactListPage
-      eyebrow="Open to collaboration"
-      title="Let's Connect"
+      eyebrow={section?.context ?? ""}
+      title={section?.tagline ?? "Let's Connect"}
       // Email first: it is the primary action for a consulting enquiry.
       // LinkedIn and Instagram are passive profiles, so they share the last
       // row rather than each taking one of their own.
