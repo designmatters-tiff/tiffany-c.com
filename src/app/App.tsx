@@ -363,7 +363,12 @@ function HeaderLogo({ onNavigate, color = GOLD, size = 28, ring = 48 }: { onNavi
       onClick={() => (goHome ? goHome() : onNavigate("home"))}
       onMouseEnter={() => setActive(true)} onMouseLeave={() => setActive(false)}
       onFocus={() => setActive(true)} onBlur={() => setActive(false)}
-      className="absolute right-6 md:right-20 top-[var(--logo-top)] md:top-14 flex items-center md:items-start justify-end cursor-pointer z-10 lg:hidden
+      // Phones do not get this mark: the nav pill carries "Tiffany C." at the
+      // bottom of every page, so a second identity in the top corner only
+      // spends the eyebrow's line. It survives from md to lg, the band where
+      // there is no rail yet and the pill has already given way to the bar,
+      // and the rail takes over from lg.
+      className="absolute right-6 md:right-20 top-[var(--logo-top)] md:top-14 hidden md:flex items-center md:items-start justify-end cursor-pointer z-10 lg:hidden
                  w-[var(--hit)] h-[var(--hit)] md:w-[var(--logo-size)] md:h-[var(--logo-size)]"
       style={{
         background: "none", border: "none", padding: 0,
