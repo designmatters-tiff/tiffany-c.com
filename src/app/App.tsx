@@ -4241,15 +4241,15 @@ function StickyPageNav({ activePage, tint, onNavigate, isSubPage = false }: { ac
           bottom: 0,
           ...navFade(isDark),
         }} />
-      {/* Deep pages: pill only on mobile (left-anchored, auto right).
-          All other pages: full-width bar on every breakpoint.
-          Desktop spans the page either way, rail or no rail: run the bar in
-          to the rail's edge and the left column reads as a separate panel
-          rather than as part of the page. Crossing it ties the two back
-          together. */}
-      {/* Narrow whenever the phone is showing the pill rather than the bar —
-          open, the × has to sit where the pill sat, not at the screen edge. */}
-      <div className={`fixed overflow-hidden ${isSubPage || menuOpen ? "left-6 right-auto md:left-20 md:right-20" : "left-0 right-0 md:left-20 md:right-20"}`}
+      {/* Desktop spans the page, rail or no rail: run the bar in to the rail's
+          edge and the left column reads as a separate panel rather than as
+          part of the page. Crossing it ties the two back together.
+
+          On a phone the geometry follows the control inside. First and second
+          level get the wide pill, inset 24 each side like the homepage's; a
+          third-level page, or any page with the menu open, collapses to the
+          left so the control keeps its position while it morphs. */}
+      <div className={`fixed overflow-hidden ${isSubPage || menuOpen ? "left-6 right-auto md:left-20 md:right-20" : "left-6 right-6 md:left-20 md:right-20"}`}
         style={{
           zIndex: menuOpen ? 60 : 30,
           bottom: "calc(3% + env(safe-area-inset-bottom))",
@@ -4330,12 +4330,8 @@ function PageBottomNav({
           the edge could not be reached at all. Tapping anywhere opens the full
           list, which is where the navigating happens. Desktop keeps its six
           separate targets, where there is room for them. */}
-      <div className={`${isSubPage || menuOpen ? "hidden md:flex" : "flex"} items-stretch h-16 overflow-hidden`}
-        onClick={isPhone ? () => setMenuOpen(true) : undefined}
-        role={isPhone ? "button" : undefined}
-        aria-label={isPhone ? "Open navigation" : undefined}
-        aria-expanded={isPhone ? menuOpen : undefined}
-        style={{ background: navGradient(isDark), cursor: isPhone ? "pointer" : undefined }}>
+      <div className="hidden md:flex items-stretch h-16 overflow-hidden"
+        style={{ background: navGradient(isDark) }}>
         <button
           className="flex items-center gap-3 overflow-hidden"
           onMouseEnter={() => setHoveredNav("about")}
@@ -4384,6 +4380,26 @@ function PageBottomNav({
           else once the bar has opened the menu. One × in one place, morphing
           from the same icon, with the credit on its row — rather than a second
           close button that the menu would have had to grow for this case. */}
+      {/* The wide pill, first and second level on a phone: the homepage's own
+          mobile nav, carried through the rest of the site. Gradient, inset,
+          56 tall, the mark's name beside the symbol. The six-cell bar is
+          desktop furniture — compressed to a phone its labels either ellipsise
+          or run off the edge, and it repeats what the page heading says. */}
+      <button onClick={() => setMenuOpen(!menuOpen)}
+        aria-label="Open navigation" aria-expanded={menuOpen}
+        className={`${isSubPage || menuOpen ? "hidden" : "md:hidden flex"} items-center w-full px-5`}
+        style={{
+          height: 56, border: "none", padding: "0 20px",
+          background: navGradient(isDark),
+        }}>
+        <span className="flex items-center gap-3">
+          <MenuIcon open={false} color="white" />
+          <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap">
+            Tiffany C.
+          </span>
+        </span>
+      </button>
+
       <button onClick={() => setMenuOpen(!menuOpen)}
         aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen}
         className={`${isSubPage || menuOpen ? "md:hidden flex" : "hidden"} items-center justify-center`}
