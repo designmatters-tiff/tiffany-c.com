@@ -1941,8 +1941,17 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onSlideChan
           above the overlay, so the symbol you pressed is the symbol that
           closes it. The name and the section label go with the width — the
           open menu lists both already. */}
-      <motion.nav className="fixed md:hidden flex items-center px-5 overflow-hidden"
+      {/* The bar is the button, not a bar with a button in it. The tap target
+          used to be the symbol and the name — about 116px of a 342px bar — so
+          the whole right half, section label included, looked pressable and
+          did nothing. Nothing inside it is separately interactive, so the
+          outer element can carry the press. */}
+      <motion.button className="fixed md:hidden flex items-center px-5 overflow-hidden"
+        onClick={() => setMenuOpen(!menuOpen)}
+        aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+        aria-expanded={menuOpen}
         style={{
+          border: "none",
           zIndex: menuOpen ? 60 : 30,
           bottom: "calc(5% + env(safe-area-inset-bottom))", left: 24,
           borderRadius: 0,
@@ -1966,26 +1975,16 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onSlideChan
           height: navShrunk ? MOBILE_NAV_PILL : 56,
         }}
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="flex items-center"
-          // Padding out, margin back in: the tap target reaches 44 without the
-          // icon moving a pixel. Open, the button holds nothing but the 24px
-          // symbol, which is well under the floor on its own.
-          style={{ padding: 10, margin: -10 }}
-          aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen}>
-          {/* The measurement sits on the content, not the button: the button
-              carries tap padding, and the minimised width is meant to be the
-              width of what you can see. */}
-          <span ref={navBtnRef} className="flex items-center gap-3">
-            <MenuIcon open={menuOpen} color={menuOpen ? (isDark ? "white" : INK) : "white"} />
-            {!menuOpen && (
-              <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap">
-                Tiffany C.
-              </span>
-            )}
-          </span>
-        </button>
+        {/* The measurement sits on the content, not the bar: the minimised
+            width is meant to be the width of what you can see. */}
+        <span ref={navBtnRef} className="flex items-center gap-3">
+          <MenuIcon open={menuOpen} color={menuOpen ? (isDark ? "white" : INK) : "white"} />
+          {!menuOpen && (
+            <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap">
+              Tiffany C.
+            </span>
+          )}
+        </span>
         {!navShrunk && !menuOpen && (
           <>
             <div className="flex-1" />
@@ -1996,7 +1995,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onSlideChan
             )}
           </>
         )}
-      </motion.nav>
+      </motion.button>
 
       {/* Mobile menu overlay */}
       <MobileMenu
