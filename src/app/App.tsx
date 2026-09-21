@@ -5352,6 +5352,13 @@ function AwardsSpeakingPage({
     return () => { window.clearTimeout(t); window.removeEventListener("resize", check); };
   }, [embedded, selfExpanded]);
   const scrolled = embedded ? headerScrolled : selfScrolled;
+  // The heading shrinks on the same signal that frosts the band behind it.
+  // It was driven by `compact`, which only the homepage deck ever sets, so on
+  // /awards the band appeared and the heading stayed full size — an opened row
+  // then scrolled under a full-height header and could not be read. Same shape
+  // as TestimonialsPage: the deck's flag when embedded, this page's own scroll
+  // when standalone.
+  const shrunk = embedded ? compact : selfScrolled;
   const visibleEvents = capped ? SPEAKING_EVENTS.slice(0, 3) : SPEAKING_EVENTS;
 
   const headerRef = useRef<HTMLDivElement>(null);
@@ -5382,7 +5389,7 @@ function AwardsSpeakingPage({
           backdropFilter: scrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: scrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${scrolled ? brd : "transparent"}`,
-          paddingBottom: compact ? 16 : undefined,
+          paddingBottom: shrunk ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
           {!embedded && <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : HEADING_COLOUR.awards} />}
@@ -5391,7 +5398,7 @@ function AwardsSpeakingPage({
           Recognition &amp; voice in community
         </motion.p>
         <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg"
-          style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: onDark ? "#fff" : HEADING_COLOUR.awards, transition: "font-size 0.35s ease, color 0.3s ease" }}
+          style={{ fontSize: shrunk ? "1.5rem" : undefined, lineHeight: 1.05, color: onDark ? "#fff" : HEADING_COLOUR.awards, transition: "font-size 0.35s ease, color 0.3s ease" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Awards &amp; Speaking
         </motion.h1>
