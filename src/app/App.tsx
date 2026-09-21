@@ -5449,7 +5449,7 @@ function AwardsSpeakingPage({
           {!embedded && <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : HEADING_COLOUR.awards} />}
         <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-2" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
-          Recognition &amp; voice in community
+          Ideas · Voices · Community
         </motion.p>
         <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg"
           style={{ fontSize: shrunk ? "1.5rem" : undefined, lineHeight: 1.05, color: onDark ? "#fff" : HEADING_COLOUR.awards, transition: "font-size 0.35s ease, color 0.3s ease" }}
