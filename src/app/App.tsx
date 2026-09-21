@@ -4398,6 +4398,13 @@ function PageBottomNav({
             Tiffany C.
           </span>
         </span>
+        {/* Where you are, on the right, the way the homepage deck's pill
+            carries the section you have swiped to. Without it the pill is the
+            same on every page and says only that a menu exists. */}
+        <span className="ml-auto font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap overflow-hidden text-ellipsis"
+          style={{ paddingLeft: 12 }}>
+          {NAV_ITEMS.find(i => i.page === activePage)?.label}
+        </span>
       </button>
 
       <button onClick={() => setMenuOpen(!menuOpen)}
