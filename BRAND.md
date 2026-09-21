@@ -343,8 +343,8 @@ text.
 Things that affect brand consistency and are still outstanding:
 
 - ~~**Speaking inquiry form doesn't work.**~~ Wired to a real Formspree
-  endpoint. Worth one live submission after launch to confirm the address and
-  prove the path end to end.
+  endpoint, and a live submission has been received — the address is confirmed
+  and the path is proven end to end.
 - **Email link styling** is inconsistent with LinkedIn and Instagram beside it —
   it's a real `mailto:` link but has no icon and no hover underline, so it reads
   as plain text.
