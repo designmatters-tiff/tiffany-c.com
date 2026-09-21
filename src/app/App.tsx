@@ -1636,7 +1636,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onSlideChan
                   }}
                 />
               </div>
-              <p className="font-['Nunito_Sans',sans-serif] text-body leading-relaxed"
+              {/* text-small, the size the Work card descriptions use: the hero's
+                  body is the longest block on the phone and at text-body it ran
+                  past the screen and under the nav. Desktop keeps text-body, where
+                  there is room for it. */}
+              <p className="font-['Nunito_Sans',sans-serif] text-small leading-relaxed"
                 style={{ color: bodyCol, maxWidth: "min(100%, 68ch)" }}>
                 I work with C-suites and product teams to shape design
                 functions that deliver. As a founder who built and

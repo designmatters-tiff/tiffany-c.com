@@ -171,10 +171,10 @@ have each been walked back once already.
 
 - **360px is the narrowest width to check.** Not 390. The tight cases — the
   eCommerce breadcrumb, the paired social row on Connect — only bite there.
-  375x667 (iPhone SE) is worth a look too: the hero fits 360x740 and 390x844
-  exactly, and still runs about 23px past a 667-tall screen, where the slide
-  scrolls. Only the body copy can close that last gap — the mark and the top
-  padding have already given what they can.
+  375x667 (iPhone SE) is worth a look too: the hero now fits every phone size
+  checked, 360x667 through 430x932, with nothing scrolling. It took the body
+  copy dropping to `text-small` — the size the Work card descriptions use — on
+  top of the smaller mark and tighter top padding. Desktop keeps `text-body`.
 - **The phone nav is the homepage's pill, at every level.** First and second
   level carry the wide pill — gradient, inset 24 each side, 56 tall, the
   symbol with "Tiffany C." beside it and the section name on the right. Third
