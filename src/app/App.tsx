@@ -4221,6 +4221,17 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
 // sit the same depth under Business Acumen and Product & UX Strategies. These
 // are the only pages that show the hamburger on a phone; first and second
 // level both carry the full bar.
+// The section each page belongs to, for the phone pill's right-hand label.
+// Second-level pages name their parent, which is what the desktop bar's active
+// state does too.
+const NAV_LABELS: Partial<Record<Page, string>> = {
+  work: "Work",
+  awards: "Awards & Speaking",
+  testimonials: "Testimonials",
+  coaching: "Coaching",
+  connect: "Connect",
+};
+
 const DEEP_PAGES = new Set<Page>(["businessCase", "kaiCase", "appleHealthCase", "brandPerceptionCase", "sourceCase", "finTechCase"]);
 
 function StickyPageNav({ activePage, tint, onNavigate, isSubPage = false }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void; isSubPage?: boolean }) {
@@ -4229,8 +4240,20 @@ function StickyPageNav({ activePage, tint, onNavigate, isSubPage = false }: { ac
   const goHome = useContext(GoHomeCtx);
   // Desktop bar height (px) — used for the fade scrim sizing.
   const BAR_H = 64;
-  // Mobile fade: pill height on deep pages, full bar on others.
-  const mobileNavH = isSubPage ? MOBILE_NAV_PILL : BAR_H;
+  // Shrunk on a third-level page, and while the menu is open.
+  const phoneShrunk = isSubPage || menuOpen;
+  // The pill's full width in pixels, because motion cannot tween a calc().
+  // Measured off the viewport rather than a container, so the element can be
+  // positioned on its own and animate without anything clipping it.
+  const [vw, setVw] = useState(typeof window === "undefined" ? 390 : window.innerWidth);
+  useEffect(() => {
+    const onResize = () => setVw(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const phoneWide = Math.max(MOBILE_NAV_PILL, vw - 48);
+  // Mobile fade: sized to whichever height the control is at.
+  const mobileNavH = phoneShrunk ? MOBILE_NAV_PILL : 56;
   return (
     <>
       <div className="fixed inset-x-0 z-20 pointer-events-none"
@@ -4246,24 +4269,72 @@ function StickyPageNav({ activePage, tint, onNavigate, isSubPage = false }: { ac
           bottom: 0,
           ...navFade(isDark),
         }} />
-      {/* Desktop spans the page, rail or no rail: run the bar in to the rail's
-          edge and the left column reads as a separate panel rather than as
-          part of the page. Crossing it ties the two back together.
-
-          On a phone the geometry follows the control inside. First and second
-          level get the wide pill, inset 24 each side like the homepage's; a
-          third-level page, or any page with the menu open, collapses to the
-          left so the control keeps its position while it morphs. */}
-      <div className={`fixed overflow-hidden ${isSubPage || menuOpen ? "left-6 right-auto md:left-20 md:right-20" : "left-6 right-6 md:left-20 md:right-20"}`}
+      {/* Desktop: the bar spans the page, rail or no rail. Run it in to the
+          rail's edge and the left column reads as a separate panel rather than
+          as part of the page; crossing it ties the two back together. */}
+      <div className="fixed overflow-hidden hidden md:block md:left-20 md:right-20"
         style={{
-          zIndex: menuOpen ? 60 : 30,
+          zIndex: 30,
           bottom: "calc(3% + env(safe-area-inset-bottom))",
           borderRadius: 0,
-          boxShadow: menuOpen ? "none" : "0 8px 32px rgba(0,0,0,0.18)",
-          transition: "box-shadow 0.3s ease",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}>
-        <PageBottomNav activePage={activePage} tint={tint} onNavigate={onNavigate} menuOpen={menuOpen} setMenuOpen={setMenuOpen} isSubPage={isSubPage} />
+        <PageBottomNav activePage={activePage} tint={tint} onNavigate={onNavigate} />
       </div>
+
+      {/* The phone control, as one element rather than two. Going from second
+          level into a case study it was a wide pill and a square swapping by
+          display, which cut from one to the other with nothing in between. It
+          animates its own width now, the way the homepage's bar does when a
+          section expands: the pill draws in from the right to the square, and
+          the symbol never moves because it sits in a 44-wide block at the left
+          edge the whole time.
+
+          Opening the menu is the same move, so the symbol you pressed is the
+          symbol that closes it. */}
+      <motion.button
+        className="md:hidden flex items-center overflow-hidden"
+        onClick={() => setMenuOpen(!menuOpen)}
+        aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+        aria-expanded={menuOpen}
+        style={{
+          position: "fixed", left: 24,
+          bottom: "calc(3% + env(safe-area-inset-bottom))",
+          zIndex: menuOpen ? 60 : 30,
+          border: "none", padding: 0, borderRadius: 0,
+          // Wide it carries the nav's gradient; shrunk to a 44 square that
+          // same five-stop sweep reads as noise, so it takes the page's own
+          // heading colour, flat. Open it goes altogether and the x sits on
+          // the menu's cream.
+          background: menuOpen ? "transparent"
+            : phoneShrunk ? (tint ?? HEADING_COLOUR[activePage] ?? GOLD)
+            : navGradient(isDark),
+          boxShadow: menuOpen ? "none" : "0 8px 32px rgba(0,0,0,0.18)",
+          transition: "background 0.3s ease, box-shadow 0.3s ease",
+        }}
+        animate={{
+          width: phoneShrunk ? MOBILE_NAV_PILL : phoneWide,
+          height: phoneShrunk ? MOBILE_NAV_PILL : 56,
+        }}
+        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
+        {/* 44 wide, centred: at the square size the symbol is exactly in the
+            middle, and at full width it is in the same place it will end up. */}
+        <span className="flex items-center justify-center flex-shrink-0"
+          style={{ width: MOBILE_NAV_PILL }}>
+          <MenuIcon open={menuOpen} color={menuOpen ? (isDark ? "white" : INK) : "white"} />
+        </span>
+        <motion.span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap"
+          animate={{ opacity: phoneShrunk ? 0 : 1 }}
+          transition={{ duration: phoneShrunk ? 0.15 : 0.3, delay: phoneShrunk ? 0 : 0.12 }}>
+          Tiffany C.
+        </motion.span>
+        <motion.span className="ml-auto font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap"
+          style={{ paddingLeft: 12, paddingRight: 20 }}
+          animate={{ opacity: phoneShrunk ? 0 : 1 }}
+          transition={{ duration: phoneShrunk ? 0.15 : 0.3, delay: phoneShrunk ? 0 : 0.12 }}>
+          {NAV_LABELS[activePage] ?? ""}
+        </motion.span>
+      </motion.button>
       {/* Reachable from the pill on deep pages and from the bar everywhere
           else, so it is no longer conditional. menuOpen can only be set on a
           phone, so desktop never sees it. */}
@@ -4283,20 +4354,10 @@ function StickyPageNav({ activePage, tint, onNavigate, isSubPage = false }: { ac
 
 function PageBottomNav({
   activePage,
-  tint,
   onNavigate,
-  menuOpen,
-  setMenuOpen,
-  isSubPage = false,
 }: {
   activePage: Page;
-  // The page's own heading colour, where that differs from its nav
-  // section's — Speaking Inquiry sits under Connect but heads in gold.
-  tint?: string;
   onNavigate: (p: Page) => void;
-  menuOpen: boolean;
-  setMenuOpen: (v: boolean) => void;
-  isSubPage?: boolean;
 }) {
   const isDark = useContext(DarkModeCtx);
   // On a phone the bar scrolls instead of squeezing. Equal flex shares gave
@@ -4385,49 +4446,6 @@ function PageBottomNav({
           else once the bar has opened the menu. One × in one place, morphing
           from the same icon, with the credit on its row — rather than a second
           close button that the menu would have had to grow for this case. */}
-      {/* The wide pill, first and second level on a phone: the homepage's own
-          mobile nav, carried through the rest of the site. Gradient, inset,
-          56 tall, the mark's name beside the symbol. The six-cell bar is
-          desktop furniture — compressed to a phone its labels either ellipsise
-          or run off the edge, and it repeats what the page heading says. */}
-      <button onClick={() => setMenuOpen(!menuOpen)}
-        aria-label="Open navigation" aria-expanded={menuOpen}
-        className={`${isSubPage || menuOpen ? "hidden" : "md:hidden flex"} items-center w-full px-5`}
-        style={{
-          height: 56, border: "none", padding: "0 20px",
-          background: navGradient(isDark),
-        }}>
-        <span className="flex items-center gap-3">
-          <MenuIcon open={false} color="white" />
-          <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap">
-            Tiffany C.
-          </span>
-        </span>
-        {/* Where you are, on the right, the way the homepage deck's pill
-            carries the section you have swiped to. Without it the pill is the
-            same on every page and says only that a menu exists. */}
-        <span className="ml-auto font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap overflow-hidden text-ellipsis"
-          style={{ paddingLeft: 12 }}>
-          {NAV_ITEMS.find(i => i.page === activePage)?.label}
-        </span>
-      </button>
-
-      <button onClick={() => setMenuOpen(!menuOpen)}
-        aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen}
-        className={`${isSubPage || menuOpen ? "md:hidden flex" : "hidden"} items-center justify-center`}
-        style={{
-          // One flat colour, the page's own heading colour — at 44px square
-          // the full nav gradient was a five-stop sweep compressed into a
-          // thumbnail, which read as noise rather than as the bar it came
-          // from. Open, it goes altogether and the × sits on the menu's
-          // cream in ink, the way the menu's own close button used to.
-          background: menuOpen ? "transparent" : (tint ?? HEADING_COLOUR[activePage] ?? GOLD),
-          width: MOBILE_NAV_PILL, height: MOBILE_NAV_PILL, border: "none", padding: 0,
-          transition: "background 0.3s ease",
-        }}>
-        <MenuIcon open={menuOpen} color={menuOpen ? (isDark ? "white" : INK) : "white"} />
-      </button>
-
     </>
   );
 }
