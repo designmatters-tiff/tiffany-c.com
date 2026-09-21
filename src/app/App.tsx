@@ -536,7 +536,7 @@ function MobileMenu({
           the close control. Auto margins centre only while there is room to
           spare, and the padding below reserves the control's own footprint. */}
       <div className="relative z-10 flex flex-col flex-1 min-h-0 overflow-y-auto scrollbar-hide"
-        style={{ paddingLeft: 42, paddingRight: 24, paddingBottom: `calc(3% + env(safe-area-inset-bottom) + ${MOBILE_NAV_PILL + FOOTER_TO_NAV}px)` }}>
+        style={{ paddingLeft: 42, paddingRight: 24, paddingBottom: `calc(${NAV_BOTTOM} + env(safe-area-inset-bottom) + ${MOBILE_NAV_BAR + FOOTER_TO_NAV}px)` }}>
         {/* No gap between rows: each already draws its own rule, so a gap only
             broke the list into floating segments and cost 20px of height.
             overflow-y is the guarantee — on a screen too short for six rows
@@ -587,7 +587,7 @@ function MobileMenu({
       <div className="absolute z-10 flex items-center"
         style={{
           left: 0, right: 0,
-          bottom: "calc(3% + env(safe-area-inset-bottom))",
+          bottom: `calc(${NAV_BOTTOM} + env(safe-area-inset-bottom))`,
           height: MOBILE_NAV_PILL,
           paddingLeft: hideClose ? 24 + MOBILE_NAV_PILL + 16 : 24,
           paddingRight: 24,
@@ -1243,18 +1243,29 @@ const navFade = (isDark: boolean): React.CSSProperties => ({
   WebkitMaskImage: NAV_FADE_MASK,
 });
 
-// Sits under a page's last line so the copyright clears the floating nav by
-// 16px. Two blocks rather than one: the bar is 64 tall on desktop and a 44px
-// pill on mobile, and a media query cannot be written inline. The 3dvh mirrors
-// the nav's own 3% offset.
-const FOOTER_TO_NAV = 16;
+// The floating nav's offset from the bottom, and the gap the page leaves above
+// it. Both the homepage deck and every other page read these, because they had
+// drifted: the deck sat at 5% and the pages at 3%, so the bar jumped lower the
+// moment you left home, and the swipe indicator — pinned at 2% for the deck's
+// spacing — ended up touching the pill.
+const NAV_BOTTOM = "5%";
+const NAV_BOTTOM_DVH = "5dvh";
+// The wide pill's height. Clearance is figured from this rather than from the
+// 44px square, so the taller of the two is always cleared.
+const MOBILE_NAV_BAR = 56;
+const FOOTER_TO_NAV = 24;
+
+// Sits under a page's last line so the content clears the floating nav by
+// FOOTER_TO_NAV. Two blocks rather than one: the bar is 64 tall on desktop and
+// 56 on mobile, and a media query cannot be written inline. The dvh term
+// mirrors the nav's own percentage offset.
 function NavClearance() {
   return (
     <>
       <div className="md:hidden"
-        style={{ height: `calc(3dvh + env(safe-area-inset-bottom) + ${MOBILE_NAV_PILL + FOOTER_TO_NAV}px)` }} />
+        style={{ height: `calc(${NAV_BOTTOM_DVH} + env(safe-area-inset-bottom) + ${MOBILE_NAV_BAR + FOOTER_TO_NAV}px)` }} />
       <div className="hidden md:block"
-        style={{ height: `calc(3dvh + ${64 + FOOTER_TO_NAV}px)` }} />
+        style={{ height: `calc(${NAV_BOTTOM_DVH} + ${64 + FOOTER_TO_NAV}px)` }} />
     </>
   );
 }
@@ -4293,14 +4304,14 @@ function StickyPageNav({ activePage, tint, onNavigate, isSubPage = false }: { ac
     <>
       <div className="fixed inset-x-0 z-20 pointer-events-none"
         style={{
-          top: `calc(100% - (3% + env(safe-area-inset-bottom) + ${mobileNavH + NAV_FADE_LEAD}px))`,
+          top: `calc(100% - (${NAV_BOTTOM} + env(safe-area-inset-bottom) + ${mobileNavH + NAV_FADE_LEAD}px))`,
           bottom: 0,
           ...navFade(isDark),
         }} />
       <div className="fixed z-20 pointer-events-none hidden md:block"
         style={{
           left: RAIL_GUTTER, right: RAIL_GUTTER,
-          top: `calc(100% - (3% + ${BAR_H + NAV_FADE_LEAD}px))`,
+          top: `calc(100% - (${NAV_BOTTOM} + ${BAR_H + NAV_FADE_LEAD}px))`,
           bottom: 0,
           ...navFade(isDark),
         }} />
@@ -4310,7 +4321,7 @@ function StickyPageNav({ activePage, tint, onNavigate, isSubPage = false }: { ac
       <div className="fixed overflow-hidden hidden md:block md:left-20 md:right-20"
         style={{
           zIndex: 30,
-          bottom: "calc(3% + env(safe-area-inset-bottom))",
+          bottom: `calc(${NAV_BOTTOM} + env(safe-area-inset-bottom))`,
           borderRadius: 0,
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}>
@@ -4334,7 +4345,7 @@ function StickyPageNav({ activePage, tint, onNavigate, isSubPage = false }: { ac
         aria-expanded={menuOpen}
         style={{
           position: "fixed", left: 24,
-          bottom: "calc(3% + env(safe-area-inset-bottom))",
+          bottom: `calc(${NAV_BOTTOM} + env(safe-area-inset-bottom))`,
           zIndex: menuOpen ? 60 : 30,
           border: "none", padding: 0, borderRadius: 0,
           // Wide it carries the nav's gradient; shrunk to a 44 square that
