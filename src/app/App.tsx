@@ -5096,7 +5096,7 @@ const SPEAKING_EVENTS = [
   { key: "rotterdam", year: "2026", role: "Speaker",  event: "UX Rotterdam",                  location: "Rotterdam, NL", region: "Europe",    topic: "The Human Cost of Human-Centred-Design",                           link: null,                                               img: awardsRotterdam, caption: "2026 @ Rotterdam, NL", dark: true },
   { key: "ux-camp",   year: "2025", role: "Speaker",  event: "UX Camp Melbourne",             location: "Melbourne, AU", region: "Australia", topic: "404: System Burnout — An error message to my UX career",            link: null, youtubeId: "hJIJB3di6T4",                                img: null,          caption: null,             dark: false },
   { key: "taipei",    year: "2025", role: "Panelist", event: "Ladies that UX Taipei",         location: "Taipei, TW",    region: "Taiwan",    topic: "Driving Organisational Change and Creating Meaningful Impact",     link: null,                                               img: awardsTaipei,  caption: "2025 @ Taipei, TW",  dark: false },
-  { key: "fusecon",   year: "2025", role: "Panelist", event: "FUSECON 2025",                  location: "Malaysia",      region: "Malaysia",  topic: "Mental Health: From Awareness to Action",                          link: null,                                               img: awardsFuseCon, img2: awardsFuseConPanelist, caption: "FUSECON 2025, MY",    dark: true  },
+  { key: "fusecon",   year: "2025", role: "Panelist", event: "FUSECON 2025",                  location: "Malaysia",      region: "Malaysia",  topic: "Mental Health: From Awareness to Action",                          link: null,                                               img: awardsFuseCon, img2: awardsFuseConPanelist, mobileImgOnly: 2, caption: "FUSECON 2025, MY",    dark: true  },
   { key: "fusecon-2024", year: "2024", role: "Panelist", event: "FUSECON 2024",               location: "Malaysia",      region: "Malaysia",  topic: "UX in Malaysia & beyond",                                          link: null,                                               img: awardsFuseCon2024, caption: "FUSECON 2024, MY", dark: false },
   { key: "figma-kl",  year: "2024", role: "Panelist", event: "Friends of Figma KL × adplist", location: "KL, MY",        region: "Malaysia",  topic: "The Journey to Senior Designer: Skills, Insights and Experiences", link: null,                                               img: awardsFoF2024Desktop, caption: "Friends of Figma KL × adplist, 2024", dark: false },
   { key: "design-kl", year: "2023", role: "Speaker",  event: "Design Leadership Kuala Lumpur",location: "KL, MY",        region: "Malaysia",  topic: "Synergy for Sustainable Growth: Empowering UX Team",               link: null,                                               img: awardsDesignKL, img2: awardsDesignKLTiff, caption: "Design Leadership KL 2023", dark: false },
@@ -5199,12 +5199,17 @@ function SpeakingEventRow({
               // its width from its height, which is what stops the crop.
               // Mobile still fills its box, but from the upper part of the
               // frame, where the faces are.
+              // `mobileImgOnly` drops the other one below md, where the pair
+              // stacks and the row costs two screens. Which one goes is per
+              // event, not a rule: FUSECON pairs a portrait of Tiffany with
+              // the panel, and the panel is the one that says what the event
+              // was, but Design Leadership KL pairs them the other way round.
               <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-5">
-                <div className="relative w-full h-[220px] md:h-[340px] md:w-auto overflow-hidden flex-shrink-0">
+                <div className={`relative w-full h-[220px] md:h-[340px] md:w-auto overflow-hidden flex-shrink-0${ev.mobileImgOnly === 2 ? " hidden md:block" : ""}`}>
                   <img src={ev.img} alt={`${ev.event} — ${ev.topic}`}
                     className="absolute inset-0 w-full h-full object-cover object-[center_20%] md:static md:inset-auto md:w-auto md:h-full md:max-w-full md:object-contain" />
                 </div>
-                <div className="relative w-full h-[220px] md:h-[340px] md:w-auto overflow-hidden min-w-0">
+                <div className={`relative w-full h-[220px] md:h-[340px] md:w-auto overflow-hidden min-w-0${ev.mobileImgOnly === 1 ? " hidden md:block" : ""}`}>
                   <img src={ev.img2} alt={`${ev.event} panel discussion`}
                     className="absolute inset-0 w-full h-full object-cover object-[center_20%] md:static md:inset-auto md:w-auto md:h-full md:max-w-full md:object-contain" />
                 </div>
