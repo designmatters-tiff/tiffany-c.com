@@ -308,3 +308,12 @@
     line-height: 1.5;
   }
 }
+
+/* Horizontal overscroll must not become browser back-navigation. The section
+   pages read a horizontal flick as "move to the next section"; left to the
+   browser, a swipe right walks out of the site instead. The OS edge swipe is
+   unaffected — that is a system gesture, and the handler ignores anything
+   starting in the edge strip so the two never compete. */
+html, body {
+  overscroll-behavior-x: none;
+}

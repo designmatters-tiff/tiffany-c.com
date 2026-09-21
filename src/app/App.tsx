@@ -4221,6 +4221,34 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
 // sit the same depth under Business Acumen and Product & UX Strategies. These
 // are the only pages that show the hamburger on a phone; first and second
 // level both carry the full bar.
+// The same track the homepage deck runs, as routes. Swiping a section page
+// moves along it; the hero is index 0, so the indicator's proportions match
+// the deck's and the two read as one sequence rather than two.
+const SWIPE_PAGES: Page[] = ["home", "work", "awards", "testimonials", "coaching", "connect"];
+
+// The deck's carousel indicator, for the standalone section pages. Same
+// design deliberately: a gold bar covering what you have passed, small dots
+// for what is ahead. A second style here would say the two were different
+// things when they are the same track.
+function SectionProgress({ idx }: { idx: number }) {
+  const isDark = useContext(DarkModeCtx);
+  return (
+    <div className="md:hidden fixed z-30 flex items-center pointer-events-none"
+      style={{ bottom: "calc(2% + env(safe-area-inset-bottom))", left: 24, right: 24 }}>
+      <div className="rounded-full transition-all duration-300"
+        style={{ width: `${((idx + 1) / SWIPE_PAGES.length) * 100}%`, height: 2, background: GOLD, flexShrink: 0 }} />
+      {idx < SWIPE_PAGES.length - 1 && (
+        <div className="flex items-center gap-1.5" style={{ marginLeft: 8 }}>
+          {SWIPE_PAGES.slice(idx + 1).map((_, i) => (
+            <div key={i} className="rounded-full"
+              style={{ width: 4, height: 4, background: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.25)" }} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // The section each page belongs to, for the phone pill's right-hand label.
 // Second-level pages name their parent, which is what the desktop bar's active
 // state does too.
@@ -6725,6 +6753,40 @@ export default function App() {
   const slideDir = navIdx === prevNavIdx.current ? 0 : navIdx > prevNavIdx.current ? 1 : -1;
   useEffect(() => { prevNavIdx.current = navIdx; }, [navIdx]);
   const pageMotion = { dir: slideDir, drill: drillIn };
+
+  // Swiping between section pages. The homepage deck is a real scroll track;
+  // these are separate routes, so rather than mount all five at once the
+  // gesture is read and turned into a navigation — the page transition is
+  // already a cross-slide in the nav's own direction, so it lands the same way
+  // a deck slide would, and every page keeps its URL.
+  const swipeIdx = SWIPE_PAGES.indexOf(page);
+  const canSwipe = swipeIdx > 0;   // the hero has the deck's own gesture
+  const touchStart = useRef<{ x: number; y: number; t: number } | null>(null);
+  const onPageTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStart.current = { x: t.clientX, y: t.clientY, t: Date.now() };
+  };
+  const onPageTouchEnd = (e: React.TouchEvent) => {
+    const start = touchStart.current;
+    touchStart.current = null;
+    if (!start || !canSwipe) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    // Four ways a gesture is not this gesture: it began in the edge strip iOS
+    // uses for its own back swipe; it did not travel far enough to be
+    // deliberate; it was mostly vertical, which is the page scrolling; or it
+    // was slow, which is a drag rather than a flick.
+    if (start.x < 24) return;
+    if (Math.abs(dx) < 60) return;
+    if (Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    if (Date.now() - start.t > 600) return;
+    const next = swipeIdx + (dx < 0 ? 1 : -1);
+    if (next < 0 || next >= SWIPE_PAGES.length) return;
+    const target = SWIPE_PAGES[next];
+    if (target === "home") { goHome(); return; }
+    setPage(target);
+  };
   const toggleDark = useCallback(() => setIsDark(d => !d), []);
 
   // Router state -> address bar. The guard matters: without it the first
@@ -6785,7 +6847,13 @@ export default function App() {
           positioned ignore it. */}
       <AnimatePresence initial={false} custom={pageMotion}>
       <motion.div key={motionKey} className={`absolute inset-0${railInset ? " lg:left-[var(--rail-w)]" : ""}`}
-        style={{ zIndex: 1, transformOrigin: "50% 0%" }}
+        onTouchStart={onPageTouchStart}
+        onTouchEnd={onPageTouchEnd}
+        // Horizontal overscroll stays inside the page: without this a swipe
+        // right hands the gesture to the browser's own back navigation, which
+        // leaves the site rather than moving a section. The OS edge swipe is
+        // untouched — that one starts in the strip the handler ignores.
+        style={{ zIndex: 1, transformOrigin: "50% 0%", overscrollBehaviorX: "contain" }}
         custom={pageMotion}
         variants={pageVariants}
         initial="enter" animate="center" exit="exit"
@@ -6841,6 +6909,7 @@ export default function App() {
           so this one fades out rather than unmounting — unmounted, it popped
           back on the first step away from home, which is the blink that made
           the whole thing read as reloaded. */}
+      {canSwipe && <SectionProgress idx={swipeIdx} />}
       <IdentityRail onNavigate={navigateGeneral} visible={railOn} />
       {navActive && (
         <StickyPageNav activePage={navActive} onNavigate={navigateGeneral}
