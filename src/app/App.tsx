@@ -2477,7 +2477,7 @@ function KaiCaseContent() {
 
   const Fig = ({ src, alt, caption, max = FIGURE_MAX }: { src: string; alt: string; caption?: string; max?: number }) => (
     <figure style={{ margin: '28px 0 0' }}>
-      <img src={src} alt={alt} loading="lazy"
+      <img src={src} alt={alt} loading="lazy" className="mx-auto md:mx-0"
         style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
       {caption && (
         <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
@@ -2811,7 +2811,7 @@ function KaiCaseContent() {
             </p>
 
             <div className="flex flex-col md:flex-row gap-8 md:gap-10 md:items-start" style={{ marginTop: 28 }}>
-              <img src={kaiHomeScreen} alt="KAI home screen — building data and connected devices" loading="lazy"
+              <img src={kaiHomeScreen} alt="KAI home screen — building data and connected devices" loading="lazy" className="mx-auto md:mx-0"
                 style={{ width: '100%', maxWidth: 300, display: 'block', borderRadius: 8 }} />
               <div style={{ maxWidth: MEASURE }}>
                 <div>
@@ -2832,7 +2832,7 @@ function KaiCaseContent() {
             </div>
 
             <div className="flex flex-col md:flex-row gap-8 md:gap-10 md:items-start" style={{ marginTop: 40 }}>
-              <img src={kaiControls} alt="KAI machine controls — on/off toggles and schedule icons" loading="lazy"
+              <img src={kaiControls} alt="KAI machine controls — on/off toggles and schedule icons" loading="lazy" className="mx-auto md:mx-0"
                 style={{ width: '100%', maxWidth: 300, display: 'block', borderRadius: 8 }} />
               <div style={{ maxWidth: MEASURE }}>
                 <div>
@@ -2851,7 +2851,7 @@ function KaiCaseContent() {
             </div>
 
             <div className="flex flex-col md:flex-row gap-8 md:gap-10 md:items-start" style={{ marginTop: 40 }}>
-              <img src={kaiSchedule} alt="KAI schedule chart — daily and weekly machine scheduling" loading="lazy"
+              <img src={kaiSchedule} alt="KAI schedule chart — daily and weekly machine scheduling" loading="lazy" className="mx-auto md:mx-0"
                 style={{ width: '100%', maxWidth: 300, display: 'block', borderRadius: 8 }} />
               <div style={{ maxWidth: MEASURE }}>
                 <div>
@@ -3016,7 +3016,7 @@ function SourceCaseContent() {
 
   const Fig = ({ src, alt, caption, max = FIGURE_MAX }: { src: string; alt: string; caption?: string; max?: number }) => (
     <figure style={{ margin: '28px 0 0' }}>
-      <img src={src} alt={alt} loading="lazy"
+      <img src={src} alt={alt} loading="lazy" className="mx-auto md:mx-0"
         style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
       {caption && (
         <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
@@ -3461,7 +3461,7 @@ function FinTechContent() {
 
   const Fig = ({ src, alt, caption, max = FIGURE_MAX }: { src: string; alt: string; caption?: string; max?: number }) => (
     <figure style={{ margin: '28px 0 0' }}>
-      <img src={src} alt={alt} loading="lazy"
+      <img src={src} alt={alt} loading="lazy" className="mx-auto md:mx-0"
         style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
       {caption && (
         <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
@@ -3707,7 +3707,7 @@ function FinTechContent() {
           ]} />
           <div className="grid gap-6 md:grid-cols-2" style={{ marginTop: 8 }}>
             <div>
-              <img src={ftOptIn} alt="89% of testers agreed to opt in, 11% did not" loading="lazy"
+              <img src={ftOptIn} alt="89% of testers agreed to opt in, 11% did not" loading="lazy" className="mx-auto md:mx-0"
                 style={{ width: '100%', maxWidth: 320, display: 'block' }} />
               <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
                 89% of testers agreed to opt in to auto-sweeping on the condition of informed understanding —
@@ -3903,7 +3903,7 @@ function AppleHealthContent() {
 
   const Fig = ({ src, alt, caption, max = FIGURE_MAX }: { src: string; alt: string; caption?: string; max?: number }) => (
     <figure style={{ margin: '28px 0 0' }}>
-      <img src={src} alt={alt} loading="lazy"
+      <img src={src} alt={alt} loading="lazy" className="mx-auto md:mx-0"
         style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
       {caption && (
         <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
