@@ -2979,7 +2979,7 @@ function SourceCaseContent() {
     )],
     ["Goal", "Make building energy and solar data visible to the people who own it"],
     ["Scope", "Design strategy, UX, UI design"],
-    ["Role", "Product Design Lead"],
+    ["Role", "Design Innovation Manager"],
     ["Team size", "1 – 2 designers"],
   ];
 
