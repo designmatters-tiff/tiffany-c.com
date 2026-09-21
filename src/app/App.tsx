@@ -287,7 +287,10 @@ function useIsMobile() {
 
 // The hero mark's box, per breakpoint. The mark is 1:1.4.
 const HERO_MARK = {
-  mobile:  { w: 52, h: 73 },
+  // The phone mark is small because the hero has to fit a screen. At 52 the
+  // block ran 74px past an iPhone SE and the copy scrolled; the mark is the
+  // one element there that can give height back without cutting words.
+  mobile:  { w: 36, h: 50 },
   desktop: { w: 70, h: 98 },
 };
 
@@ -1581,7 +1584,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onSlideChan
 
           {/* Mobile layout — min-height rather than inset-0 so the block can
               grow past one screen and scroll instead of being clipped. */}
-          <div className="lg:hidden relative flex flex-col px-6 pt-14"
+          {/* pt-8 rather than pt-14: the top is the other place height can
+              come from, and the mark no longer needs a deep shoulder above it.
+              The bottom reserve is not a candidate — it is what holds the copy
+              clear of the floating nav and the "swipe to explore" line. */}
+          <div className="lg:hidden relative flex flex-col px-6 pt-8"
             style={{ minHeight: "100%", paddingBottom: HERO_BOTTOM_RESERVE }}>
             <span className="self-end" style={{ width: HERO_MARK.mobile.w, height: HERO_MARK.mobile.h }}>
               <LogoMark size={HERO_MARK.mobile.w} className="w-full h-full" />
@@ -1590,7 +1597,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onSlideChan
                 overflows spills past BOTH ends, putting the heading out of
                 reach even once the slide scrolls. Auto margins centre only
                 while there's room to spare. */}
-            <div className="flex flex-col gap-5" style={{ marginTop: "auto", marginBottom: "auto" }}>
+            <div className="flex flex-col gap-4" style={{ marginTop: "auto", marginBottom: "auto" }}>
               {/* The portrait sits on the heading's baseline rather than
                   floating from its top: bottom-aligned, the two read as one
                   block instead of the photo hanging above the last lines.
@@ -1792,7 +1799,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onSlideChan
         <p className="absolute z-30 font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest"
           style={{
             bottom: "calc(5% + 56px + 14px + env(safe-area-inset-bottom))",
-            left: 24,
+            right: 24,
             color: dimCol,
           }}>
           swipe to explore
@@ -4777,7 +4784,7 @@ const TESTIMONIALS: {
   },
   {
     key: "junhoe", group: "leadership",
-    name: "Junhoe W.", title: "Sr. Product Designer, BigPay",
+    name: "Junhoe W.", title: "Design Manager",
     source: "Reported to Tiffany", date: null,
     quote: [
       "Few people have the opportunity to report to a manager who is also a coach and mentor but I did when I worked for Tiffany Chew. I had the pleasure of working with Tiffany for two years at Plus Solar Systems, collaborating on several project teams. Tiffany's ability to juggle multiple projects was unlike any I've seen before and made a dramatic difference in the productivity level of our team. As a team member, Tiffany earns my highest recommendation.",
