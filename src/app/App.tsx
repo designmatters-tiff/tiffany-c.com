@@ -6814,6 +6814,21 @@ export default function App() {
     applyRoute(page, detailKey, "push");
   }, [page, detailKey]);
 
+  // Hover has to be asked for. A navigation leaves the pointer exactly where it
+  // was, so whatever the new page puts under it comes up hovered on arrival —
+  // on Business Acumen that was the second bullet, underlining itself before
+  // the reader had done anything. The class goes on at every route change and
+  // comes off at the first genuine pointer movement. Touch never sets it off:
+  // a tap emits pointermove at the tap point, which clears the flag with
+  // nothing hovered.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.add("nav-settling");
+    const clear = () => root.classList.remove("nav-settling");
+    window.addEventListener("pointermove", clear, { once: true });
+    return () => { window.removeEventListener("pointermove", clear); clear(); };
+  }, [page, detailKey]);
+
   // Address bar -> router state, so back and forward move through the site
   // instead of leaving it.
   useEffect(() => {

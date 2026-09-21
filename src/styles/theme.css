@@ -200,6 +200,15 @@
   a:not(.no-link-underline):not(:has(.link-underline)):hover::after {
     width: 100%;
   }
+  /* A navigation does not move the mouse, so whatever now sits under the
+     cursor comes up hovered before the reader has touched anything — landing
+     on Business Acumen, the second bullet drew its own underline. `nav-settling`
+     goes on <html> at every route change and comes off at the first real
+     pointer movement, so hover waits to be asked for. */
+  html.nav-settling .link-underline:hover::after,
+  html.nav-settling a:not(.no-link-underline):not(:has(.link-underline)):hover::after {
+    width: 0;
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .link-underline::after,
