@@ -4780,7 +4780,7 @@ const TESTIMONIALS: {
   {
     key: "shin", group: "leadership",
     name: "Shin L.", title: "Lead UX Writer",
-    source: "Worked in Tiffany's team", date: null,
+    source: "Reported to Tiffany", date: null,
     quote: [
       "I had the privilege of working under Tiffany, and she stood out as an exceptional leader who masterfully combines strategic thinking with actionable execution. Tiffany showed me how to translate high-level organisational goals into actionable plans that deliver measurable impact.",
       "One of her key contributions was leveraging content strategy to improve brand perception. Under her leadership, our efforts contributed to a remarkable 14% increase in our brand perception score in 2024. Additionally, Tiffany and I collaborated to implement strategies that harnessed artificial intelligence to enhance team efficiency. These initiatives resulted in a 20% improvement in overall efficiency, setting a benchmark for innovation within the team.",
