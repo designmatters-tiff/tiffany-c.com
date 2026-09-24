@@ -2106,7 +2106,7 @@ const EXPERTISE_CARDS = [
   {
     key: "people", slug: "people-process", title: "People & Process", accent: "#5070A0", Illustration: IllustrationPeople,
     description: "Built high-performing multidisciplinary teams and cross-unit prioritisation frameworks.",
-    bullets: ["Team growth: 7 → 22 designers across B2C, B2B & Research", "Coaching Responsibility Agreements & design culture building", "Chapter Lead — Ladies that UX, Kuala Lumpur (2022–2024)"],
+    bullets: ["Team growth: 7 → 22 designers across B2C, B2B & Research", "Chapter Lead — Ladies that UX, Kuala Lumpur (2022–2024)"],
     resources: [
       {
         label: "Coaching Guide for Product Designers at all levels",
