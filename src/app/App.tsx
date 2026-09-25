@@ -1166,11 +1166,11 @@ const RAIL_W = `${RAIL_GUTTER + RAIL_MARK}px`;
 
 function IdentityRail({ onNavigate, visible = true }: { onNavigate: (p: Page) => void; visible?: boolean }) {
   const goHome = useContext(GoHomeCtx);
-  // The homepage's mark is content inside slide 0 — it scrolls away with the
-  // deck — so it cannot be this element. Instead this one starts life exactly
-  // on top of it and flies to the rail as you leave home, cross-fading with
-  // the hero's copy so the handoff reads as one mark travelling rather than
-  // two marks swapping.
+  // There is one logomark on a desktop screen and this is it. It parks over
+  // the hero's corner on the homepage — the hero leaves an empty box for it —
+  // and flies into the rail the moment the deck leaves that slide. The hero
+  // used to draw its own as well, which put two on screen for the length of
+  // that first slide change.
   //
   // The hero mark is right-aligned inside the hero's px-20, so its left edge
   // is viewport - 80 - 70. Everything else here is a fixed delta from the
@@ -1198,28 +1198,26 @@ function IdentityRail({ onNavigate, visible = true }: { onNavigate: (p: Page) =>
       <motion.button onClick={() => (goHome ? goHome() : onNavigate("home"))}
         aria-label="Tiffany C. — home"
         className="absolute cursor-pointer"
-        // Off on the homepage: the hero's own mark is the one you can click
-        // there, and two hit targets stacked on the same spot is one too many.
+        // Not a link on the homepage — you are already there, and the hero
+        // is where the mark is simply itself rather than a way back.
         style={{ left: RAIL_GUTTER, top: RAIL_MARK_TOP, background: "none", border: "none", padding: 0,
                  transformOrigin: "top left", pointerEvents: visible ? "auto" : "none" }}
         initial={false}
+        // Opaque at both ends. It used to fade in over the hero's own mark,
+        // because there were two; now this is the only mark on a desktop
+        // screen, so fading it would leave the hero with none.
         animate={visible
-          ? { x: 0, y: 0, scale: 1, opacity: 1 }
-          : { x: homeX, y: homeY, scale: homeScale, opacity: 0 }}
+          ? { x: 0, y: 0, scale: 1 }
+          : { x: homeX, y: homeY, scale: homeScale }}
         // Eased out rather than in-and-out: this travels most of the screen,
         // and a symmetric curve spends that distance at one speed and stops
         // dead. Out, it leaves quickly and settles into the rail.
         //
-        // Opacity runs on its own, much shorter tween. Sharing the position's
-        // duration left the mark at 6% opacity a hundred pixels into the
-        // flight — invisible for the part of the journey that has to read as
-        // the same mark continuing.
-        //
-        // With reduced motion the mark does not fly at all: it is where it
-        // belongs on each page and only cross-fades.
+        // With reduced motion the mark does not fly at all: it cuts to where
+        // it belongs.
         transition={reduceMotion
           ? { duration: 0 }
-          : { duration: 0.55, ease: [0.22, 1, 0.36, 1], opacity: { duration: 0.2, ease: "easeOut" } }}>
+          : { duration: 0.55, ease: [0.22, 1, 0.36, 1] }}>
         <LogoMark size={RAIL_MARK} />
       </motion.button>
     </div>
@@ -1301,7 +1299,7 @@ const HERO_BOTTOM_RESERVE = "calc(5% + 80px + env(safe-area-inset-bottom))";
 
 // ─── Homepage ─────────────────────────────────────────────────────
 
-export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onSlideChange }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number; onSlideChange?: (idx: number) => void }) {
+export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onLeftHero }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number; onLeftHero?: (left: boolean) => void }) {
   const isDark = useContext(DarkModeCtx);
   const pageBg  = isDark ? "#282828" : "#f8f7f5";
   const fg      = isDark ? GOLD : INK;
@@ -1313,6 +1311,10 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onSlideChan
   const scrollEl  = useRef<HTMLDivElement>(null);
   const dragState = useRef<{ active: boolean; startX: number; scrollLeft: number }>({ active: false, startX: 0, scrollLeft: 0 });
   const [activeIdx, setActiveIdx]   = useState(initialIdx);
+  // Held in a ref because the scroll listener is bound once, on mount.
+  const onLeftHeroRef = useRef(onLeftHero);
+  onLeftHeroRef.current = onLeftHero;
+  const leftHeroRef = useRef(false);
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
   const [progress, setProgress]     = useState(0);
   const [menuOpen, setMenuOpen]     = useState(false);
@@ -1465,6 +1467,16 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onSlideChan
     const el = scrollEl.current;
     if (!el) return;
     const onScroll = () => {
+      // The rail takes the mark over the moment the deck leaves the hero, not
+      // when activeIdx flips at the halfway point. At the halfway point the
+      // mark is still sitting in the hero's corner, so it would hang there for
+      // half the slide and then fly — and the rail's own mark would arrive
+      // over a hero mark that has not left yet.
+      const left = el.scrollLeft > 0;
+      if (left !== leftHeroRef.current) {
+        leftHeroRef.current = left;
+        onLeftHeroRef.current?.(left);
+      }
       const idx = Math.round(el.scrollLeft / el.clientWidth);
       if (idx !== activeIdxRef.current) {
         activeIdxRef.current = idx;
@@ -1498,9 +1510,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onSlideChan
   useEffect(() => { setNavMinimized(false); }, [activeIdx]);
   // The deck is the one place where the page does not change but the section
   // does. The rail needs to know, because past the hero the mark belongs in it
-  // — slide 0's own mark has scrolled off with the slide, and without this the
-  // deck runs from Work to Connect with no mark on screen at all.
-  useEffect(() => { onSlideChange?.(activeIdx); }, [activeIdx, onSlideChange]);
+  // rather than in the slide.
+  // Reported on mount so a return to the homepage puts the mark back on the
+  // hero: the deck is at scrollLeft 0 then and fires no scroll event of its
+  // own.
+  useEffect(() => { onLeftHeroRef.current?.(false); }, []);
 
   // Swiping the deck is how most people read this site on a phone, so the
   // section you're looking at owns the address bar: land on Awards and the
@@ -1661,9 +1675,14 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onSlideChan
               vertically centering the whole block. */}
           <div className="hidden lg:flex absolute inset-0 flex-col px-20"
             style={{ paddingTop: 64, paddingBottom: "calc(64px + 5vh + 64px)" }}>
-            <span className="self-end" style={{ width: HERO_MARK.desktop.w, height: HERO_MARK.desktop.h }}>
-              <LogoMark size={HERO_MARK.desktop.w} className="w-full h-full" />
-            </span>
+            {/* Empty on purpose. From lg the mark you see here is the fixed
+                one IdentityRail holds, parked over this box until the deck
+                leaves the hero. Drawing a second one here put two marks on
+                screen for the whole of that first slide change — this one
+                scrolling away with the slide while the rail's flew in past
+                it. The box stays so the stack below it does not move. */}
+            <span className="self-end" aria-hidden
+              style={{ width: HERO_MARK.desktop.w, height: HERO_MARK.desktop.h }} />
             {/* Photo left + right column (heading, body, swipe cue). Row is
                 full-width; text column is capped at ~55% so the right 40%
                 stays naturally empty. */}
@@ -6692,7 +6711,9 @@ export default function App() {
   const [workDetailOrigin, setWorkDetailOrigin] = useState<Page>("work");
   const workSectionIdx = SECTIONS.findIndex(s => s.key === "work");
   const [homeInitialIdx, setHomeInitialIdx] = useState(0);
-  const [homeSlide, setHomeSlide] = useState(0);
+  // Whether the homepage deck has moved off the hero slide, which is what
+  // decides where the one logomark lives.
+  const [leftHero, setLeftHero] = useState(false);
 
   const navigateToWorkDetail = (key: string) => {
     setWorkDetailOrigin(page === "home" ? "home" : "work");
@@ -6741,7 +6762,7 @@ export default function App() {
   // the deck past that slide is a section change without a page change, so it
   // has to count: otherwise the deck runs from Work to Connect with the hero's
   // mark scrolled off and the rail's not yet shown.
-  const railOn = page !== "home" || homeSlide > 0;
+  const railOn = page !== "home" || leftHero;
   // The mark showing and the page making room for it are different questions.
   // The homepage deck is a full-bleed track whose slides are each a viewport
   // wide; insetting it mid-swipe shoved it 126px sideways and narrowed every
@@ -6854,10 +6875,12 @@ export default function App() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  // The mark always lands on the hero, whose own mark it grows into.
+  // The mark always lands on the hero, growing back into the corner it
+  // started from. Clearing leftHero here as well as on the deck's own mount
+  // means the flight back begins with the navigation rather than after it.
   const goHome = useCallback(() => {
     setHomeInitialIdx(0);
-    setHomeSlide(0);
+    setLeftHero(false);
     setPage("home");
   }, []);
 
@@ -6899,7 +6922,7 @@ export default function App() {
         variants={pageVariants}
         initial="enter" animate="center" exit="exit"
         transition={{ duration: drillIn ? 0.5 : 0.45, ease: [0.42, 0, 0.58, 1] }}>
-        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} onSlideChange={setHomeSlide} />}
+        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} onLeftHero={setLeftHero} />}
         {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} /></div>}
         {page === "awards"   && <div className="absolute inset-0"><AwardsSpeakingPage onNavigate={navigateGeneral} /></div>}
         {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={navigateGeneral} /></div>}
