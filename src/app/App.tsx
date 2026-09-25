@@ -3979,8 +3979,11 @@ function FinTechPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
 // ─── Apple Health case study ──────────────────────────────────────
 
 const AH_SECTIONS: { id: string; label: string }[] = [
+  // The Solution has no dot of its own: it reads as the back half of the
+  // overview, and the rail stays with Overview while you are in it — the same
+  // way Background & Brief sits under KAI's. The section itself stays in the
+  // page, heading, anchor and all.
   { id: "ah-overview",  label: "Overview" },
-  { id: "ah-solution",  label: "The Solution" },
   { id: "ah-research",  label: "Research" },
   { id: "ah-design",    label: "Design Solutions" },
   { id: "ah-priority",  label: "Prioritisation" },
