@@ -58,6 +58,12 @@ import awardsFoF2024Mobile from "@/imports/AwardsSpeaking/FoF 2024/mobile_fof202
 import awardsDesignKL from "@/imports/AwardsSpeaking/Design Leadership KL/DLKL2023.avif";
 import awardsDesignKLTiff from "@/imports/AwardsSpeaking/Design Leadership KL/DLKL2023-tiff.avif";
 import profilePhoto from "@/imports/Profile/tiff-headshot.avif";
+import vcTestCard from "@/work/case/visacsr/testcard.avif";
+import vcCardMailer from "@/work/case/visacsr/cardmailer.avif";
+import vcHero from "@/work/case/visacsr/herovisa.avif";
+import vcResearchWise from "@/work/case/visacsr/researchwise.avif";
+import vcLaunch from "@/work/case/visacsr/launch.avif";
+import vcDonation from "@/work/case/visacsr/donation.avif";
 import foggModel from "@/work/business/eCommerce/Fogg behavioural model.avif";
 import graphResult from "@/work/business/eCommerce/graph-result.avif";
 import interventionImg from "@/work/business/eCommerce/the intervention.avif";
@@ -3547,18 +3553,18 @@ function VisaCardContent() {
     ["Role", "Head of Product Design"],
   ];
 
-  // Stands in for artwork still to come. A dashed outline in the section
-  // rule's own colour, holding its ratio — not a grey block, which reads as an
-  // image that failed to load. The frame is decoration and says nothing, so it
-  // is hidden from a screen reader and the caption carries the meaning.
-  // Swapping real artwork in is one line: FigPlaceholder to Fig.
-  const FigPlaceholder = ({ caption, ratio = "16/9" }: { caption: string; ratio?: string }) => (
-    <figure style={{ margin: '28px 0 0', width: '100%', maxWidth: FIGURE_MAX }}>
-      <div aria-hidden="true" className="flex items-center justify-center"
-        style={{ aspectRatio: ratio, border: `1px dashed ${rule}`, borderRadius: 12, background: 'transparent', padding: 16 }} />
-      <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
-        {caption}
-      </figcaption>
+  // No aspect-ratio here: each file carries its own, and the ones on this page
+  // are all different — a square test card, two 3:4 portraits, a 8:5 hero and
+  // a 2:1 cheque presentation. `eager` for the one figure above the fold.
+  const Fig = ({ src, alt, caption, max = FIGURE_MAX, eager = false }: { src: string; alt: string; caption?: string; max?: number; eager?: boolean }) => (
+    <figure style={{ margin: '28px 0 0' }}>
+      <img src={src} alt={alt} loading={eager ? undefined : "lazy"} className="mx-auto md:mx-0"
+        style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
+      {caption && (
+        <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+          {caption}
+        </figcaption>
+      )}
     </figure>
   );
 
@@ -3613,7 +3619,8 @@ function VisaCardContent() {
           the problem. The card had no reason that anyone could agree on, so every design was arguable and none
           was decidable.
         </P>
-        <FigPlaceholder ratio="1/1"
+        <Fig src={vcTestCard} eager
+          alt="An unprinted TNG eWallet Visa card, test-printed overseas"
           caption="Mock card, test-printed overseas to check how the gradient and the yellow edge held on the real substrate." />
       </section>
 
@@ -3649,7 +3656,8 @@ function VisaCardContent() {
           The painting had been rejected by the client it was made for, because the canvas was an odd size, and
           had sat unsold for years. The proceeds from its purchase went directly to him.
         </P>
-        <FigPlaceholder ratio="4/3"
+        <Fig src={vcCardMailer}
+          alt="The card carrier, showing Damien Wong's painting and the activation steps in English and Malay"
           caption="The card carrier, which tells Damien's story alongside the activation steps in English and Malay." />
       </Section>
 
@@ -3670,12 +3678,14 @@ function VisaCardContent() {
             the deactivation confirmation — are still to come. The finished
             card stands in for them until they land, and the caption is about
             the card rather than about screens that are not here. */}
-        <FigPlaceholder ratio="3/2"
+        <Fig src={vcHero}
+          alt="The finished card, its face carrying no number, beside the eWallet app that holds the credentials"
           caption="The card face carries no number. The credentials live in the app." />
 
         <div style={{ marginTop: 40 }}>
           <Label>Onboarding benchmarks</Label>
-          <FigPlaceholder ratio="3/4"
+          <Fig src={vcResearchWise}
+            alt="The Wise welcome pack, opened"
             caption="The Wise welcome pack, reviewed for how it carries a user from a posted card to a working one." />
         </div>
       </Section>
@@ -3700,10 +3710,16 @@ function VisaCardContent() {
         <P top={16}>
           The card has since been discontinued.
         </P>
-        {/* TODO: the launch photograph needs Tiffany's crop — the slide behind
-            the speaker names her, and this page deliberately does not. */}
-        <FigPlaceholder ratio="3/4" caption="Launch, 18 January 2023." />
-        <FigPlaceholder ratio="2/1" caption="RM1,000,000 presented to United Voice, January 2024." />
+        {/* The press-mingle photograph goes in uncropped. The slide behind the
+            speaker names her; that is a press photograph of a public event and
+            was published as one. The body copy above still does not name her —
+            that is a choice about the writing, not about the picture. */}
+        <Fig src={vcLaunch}
+          alt="Damien's mother speaking at the launch, with his painting on an easel beside her"
+          caption="Launch, 18 January 2023." />
+        <Fig src={vcDonation}
+          alt="TNG Digital and Visa presenting United Voice with a cheque for RM1,000,000"
+          caption="RM1,000,000 presented to United Voice, January 2024." />
       </Section>
 
     </div>
