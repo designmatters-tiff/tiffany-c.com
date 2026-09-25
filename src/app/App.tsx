@@ -3675,10 +3675,10 @@ function FinTechContent() {
             <div>
               <Label>My responsibilities</Label>
               <P>
-                I opened the project with a two-day design sprint and then led the team through focus group
-                interviews. Analysing the responses gave us the first user persona for GO+, and the basis for the
-                solutions I put to the business owners. The project was deprioritised for a time; the final
-                production launched on 20 February 2023.
+                I ran a two-day design sprint to frame the problem, then led the team through focus group
+                interviews. The analysis produced the first user persona for GO+ and the evidence behind the
+                solutions I took to the business owners. It was deprioritised for several months, then picked
+                back up and shipped on 20 February 2023.
               </P>
             </div>
           </div>
