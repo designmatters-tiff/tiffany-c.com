@@ -1599,7 +1599,15 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, heroProgres
   const currentEmbedScrollable = isMobile && "embeds" in currentSection && Boolean(currentSection.embeds);
   const navShrunk = currentEmbedScrollable && navMinimized;
 
-  useEffect(() => { setNavMinimized(false); }, [activeIdx]);
+  // Read off the slide you have arrived at, not assumed to be the top of it.
+  // Swiping past an embedded section does not unmount it — the slide keeps its
+  // scroll position in the track — so coming back to one you had scrolled left
+  // this flag false while the content was still well down the page, and the
+  // sticky header sat over the quotes with nothing behind it.
+  useEffect(() => {
+    const el = embedSectionRefs.current[SECTIONS[activeIdx]?.key ?? ""];
+    setNavMinimized(!!el && el.scrollTop > 24);
+  }, [activeIdx]);
   // Arriving from another page there is no scroll to ride — the deck mounts
   // already at slide 0 — so this one stretch of the journey is a tween. It is
   // cancelled by the first scroll, which takes over.
