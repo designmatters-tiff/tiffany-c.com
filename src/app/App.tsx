@@ -3577,18 +3577,27 @@ function FinTechContent() {
     ["Launched", "20 February 2023"],
   ];
 
-  // `radius` for the shots that are a phone rather than a picture of one: the
-  // two device mockups, which are a body cropped to its own bounding box, and
-  // the two raw app screenshots, which are edge-to-edge captures. All four end
-  // in four hard corners at the 8px every other figure takes.
+  // `radius` for the two device mockups, whose body is cropped to its own
+  // bounding box: the corner the artwork draws runs off the square edge of the
+  // file, so the 8px every other figure takes leaves them with four hard
+  // corners. Not for the raw app captures on the Users tab — there is no bezel
+  // there for the arc to cut into, only the status bar and the tab labels.
   const PHONE_RADIUS = 60;
+  const PHONE_WIDTH = "md:w-[60%]";
   // `top` so a figure can head a column flush with the heading beside it —
   // 28px of clear air is right when it follows a paragraph, wrong when it is
   // the first thing in its own column.
-  const Fig = ({ src, alt, caption, max = FIGURE_MAX, radius, top = 28 }: { src: string; alt: string; caption?: string; max?: number; radius?: number; top?: number }) => (
+  // `imgClass` for the phone shots sitting beside their own copy. A device
+  // mockup given the whole column is a life-size phone pinned to the page — it
+  // takes the eye before the words it is there to illustrate. It is a class
+  // rather than a width so the cap can start at md: below that the figure has
+  // the row to itself and there is nothing for it to shout over. The caption
+  // still runs the column's width; it is a line of text, not part of the
+  // picture.
+  const Fig = ({ src, alt, caption, max = FIGURE_MAX, radius, top = 28, imgClass = '' }: { src: string; alt: string; caption?: string; max?: number; radius?: number; top?: number; imgClass?: string }) => (
     <figure style={{ margin: `${top}px 0 0` }}>
-      <img src={src} alt={alt} loading="lazy" className="mx-auto md:mx-0"
-        style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: radius ?? 8 }} />
+      <img src={src} alt={alt} loading="lazy" className={`mx-auto md:mx-0 w-full ${imgClass}`}
+        style={{ maxWidth: max, display: 'block', borderRadius: radius ?? 8 }} />
       {caption && (
         <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
           {caption}
@@ -3692,7 +3701,7 @@ function FinTechContent() {
         <Section id="ft-outcome">
           <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
             <div>
-              <Fig src={ftAccount} top={0} alt="The GO+ account screen inside TNG eWallet" radius={PHONE_RADIUS}
+              <Fig src={ftAccount} top={0} imgClass={PHONE_WIDTH} alt="The GO+ account screen inside TNG eWallet" radius={PHONE_RADIUS}
                 caption="GO+: balance, daily earnings, and the cash in and cash out the feature had to sit between." />
             </div>
             <div>
@@ -3765,10 +3774,13 @@ function FinTechContent() {
                     captures ran about 1,700px against 300 of text and the tab
                     was mostly scrolling. */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* The ordinary 8px, not the phone radius: these are raw
+                      captures, so a device corner cuts into the status bar and
+                      the tab labels rather than into a bezel. */}
                   <img src={ftReviews} alt="App Store ratings and reviews for TNG eWallet" loading="lazy"
-                    style={{ width: '100%', display: 'block', borderRadius: PHONE_RADIUS }} />
+                    style={{ width: '100%', display: 'block', borderRadius: 8 }} />
                   <img src={ftFacebook} alt="A Facebook thread discussing the GO+ change" loading="lazy"
-                    style={{ width: '100%', display: 'block', borderRadius: PHONE_RADIUS }} />
+                    style={{ width: '100%', display: 'block', borderRadius: 8 }} />
                 </div>
                 <div>
                   <p className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: 'clamp(1.25rem, 2vw, 1.75rem)', margin: 0, lineHeight: 1.2 }}>
@@ -3882,7 +3894,7 @@ function FinTechContent() {
         <Section id="ft-decision">
           <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
             <div>
-              <Fig src={ftConsent} top={0} alt="The final Quick Cash In consent screen" radius={PHONE_RADIUS}
+              <Fig src={ftConsent} top={0} imgClass={PHONE_WIDTH} alt="The final Quick Cash In consent screen" radius={PHONE_RADIUS}
                 caption="The shipped screen: the benefit, the terms it consents to, and an equally available way out." />
             </div>
             <div>
@@ -6930,9 +6942,13 @@ export default function App() {
   // content. Two pages set their own: the KAI case is a white document, and
   // a speaking event flagged `dark` runs near-black behind its hero.
   // Everything else is the site's cream.
+  // A case study is a document, and a document is on white. The site's cream
+  // is the ground the portfolio sits on; inside a case the work is the page.
+  // KAI had this to itself — the rest of the cases now read the same way.
+  // DEEP_PAGES is the same six routes the phone nav treats as third level.
   const groundBg = isDark
     ? "#282828"
-    : page === "kaiCase"
+    : DEEP_PAGES.has(page)
       ? "#ffffff"
       : page === "speaking" && SPEAKING_DETAIL[detailKey ?? ""]?.dark
         ? "#030303"
