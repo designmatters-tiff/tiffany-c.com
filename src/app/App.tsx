@@ -6032,7 +6032,7 @@ function BusinessCaseContent() {
       <a href="https://cottonon.com" target="_blank" rel="noopener noreferrer"
         className="link-underline" style={{ color: fg }}>Cotton On Group</a>
     )],
-    ["Goal", "Increase checkout rate"],
+    ["Goal", "Increase checkout completion rate"],
     ["Scope", "Design workshop facilitation, research analysis"],
     ["Role", "Product Design Lead"],
     ["Team size", "1"],
@@ -6172,7 +6172,7 @@ function BusinessCaseContent() {
             Result from the tested group — voucher owners
           </p>
           <dl className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginTop: 20 }}>
-            {[["Revenue", "+57%"], ["Checkout rate", "2×"], ["Conversion rate", "+0.28%"]].map(([label, value]) => (
+            {[["Revenue", "+57%"], ["Checkout completion", "2×"], ["Conversion rate", "+0.28pp"]].map(([label, value]) => (
               <div key={label}>
                 <dd className="font-['Museo',sans-serif] font-light"
                   style={{ color: fg, fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', lineHeight: 1.1, margin: 0, fontVariantNumeric: 'tabular-nums' }}>{value}</dd>
@@ -6181,7 +6181,8 @@ function BusinessCaseContent() {
             ))}
           </dl>
           <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 16 }}>
-            Measured from checkout entry to purchase.
+            Checkout completion is purchases as a share of checkout entries.
+            Conversion rate is in percentage points.
           </p>
 
           <figure style={{ margin: '32px 0 0' }}>
