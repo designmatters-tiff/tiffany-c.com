@@ -326,3 +326,20 @@
 html, body {
   overscroll-behavior-x: none;
 }
+
+/* The NDA watermark prints. It is the one thing on a gated page that has to
+   survive leaving the screen, so it is kept on paper rather than hidden
+   there — a printout or a print-to-PDF of the client work carries the terms
+   the same way a screenshot does.
+
+   Two adjustments for paper: browsers drop light backgrounds and washed-out
+   text when printing unless told not to, and 4% does not survive a printer's
+   own contrast handling, so the mark is set a little heavier here. */
+@media print {
+  [data-nda-watermark] {
+    display: block !important;
+    opacity: 0.1 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

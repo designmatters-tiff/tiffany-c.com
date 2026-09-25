@@ -1075,6 +1075,72 @@ function NdaNotice() {
   );
 }
 
+// The mark laid over the gated client work once it is unlocked. NdaNotice
+// states the terms in words a reader can read; this carries them into any
+// screenshot of the page, which is how the work actually travels.
+//
+// It is meant to sit at the edge of visibility: nobody should have to read
+// through it, but a capture holds it, and raising the contrast on that capture
+// brings it out. 4% is where body copy still measured at full contrast against
+// the cream ground; dark needs 6% to register at all against a near-black one.
+//
+// Real DOM text rather than an SVG data URI, so the tile is set in the site's
+// own Nunito Sans and takes the theme's ink, and the wording lives in one
+// place next to the notice it repeats.
+//
+// The tiling: a rotated sheet twice the viewport in each direction, so its
+// corners still cover after the rotation. Rows are 120px apart and each row
+// repeats the line with a 64px gap, staggered a third of a line per row — any
+// 300px square of the page lands on at least part of one.
+const WATERMARK_ROWS = 20;
+const WATERMARK_PER_ROW = 6;
+const WATERMARK_ROW_GAP = 120;
+
+// `recipient` goes unused while there is a single shared passcode — there is
+// no name to put in the line. It is in the signature now because the tile is
+// the awkward thing to change later and this is not.
+function NdaWatermark({ recipient }: { recipient?: string }) {
+  const isDark = useContext(DarkModeCtx);
+  // Read at render, never baked in: the date on a capture is the day it was
+  // taken.
+  // en-AU: day first, and the site is written in Australian English. Its short
+  // month is "Sept", not "Sep" — that is the locale's own form, left alone.
+  const date = new Date().toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
+  const line = ["SHARED UNDER NDA", recipient, date, "NOT FOR REDISTRIBUTION"]
+    .filter(Boolean).join(" \u00b7 ");
+  return (
+    <div aria-hidden="true" data-nda-watermark
+      className="fixed inset-0 overflow-hidden"
+      style={{
+        // Over the page and its sticky header, under the bottom nav, the
+        // section rail and the menu — site chrome stays clean.
+        zIndex: 25,
+        pointerEvents: "none",
+        userSelect: "none", WebkitUserSelect: "none",
+        opacity: isDark ? 0.06 : 0.04,
+        color: isDark ? "#fff" : INK,
+      }}>
+      <div style={{ position: "absolute", top: "-50%", left: "-50%", width: "200%", height: "200%",
+                    transform: "rotate(-30deg)", transformOrigin: "center" }}>
+        {Array.from({ length: WATERMARK_ROWS }, (_, row) => (
+          <div key={row} className="flex whitespace-nowrap"
+            style={{ gap: 64, height: WATERMARK_ROW_GAP, alignItems: "center",
+                     // A third of a line per row, so the gaps between
+                     // instances never line up into a clear channel.
+                     marginLeft: (row % 3) * 180 }}>
+            {Array.from({ length: WATERMARK_PER_ROW }, (_, i) => (
+              <span key={i} className="font-['Nunito_Sans',sans-serif] uppercase"
+                style={{ fontSize: 11, letterSpacing: "0.2em" }}>
+                {line}
+              </span>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // The line itself, so the page footer and the mobile menu cannot drift apart.
 function SiteCredit({ align = "left" }: { align?: "left" | "right" }) {
   const isDark = useContext(DarkModeCtx);
@@ -3894,6 +3960,9 @@ function FinTechPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
           </div>
         )}
       </div>
+      {/* Only behind the gate, and only once it is open — never on the
+          passcode screen, and never on a public page. */}
+      {unlocked && <NdaWatermark />}
       {unlocked && <CaseSectionRail scrollRef={scrollRef} sections={FT_SECTIONS} />}
     </div>
   );
@@ -6447,6 +6516,9 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
           </div>
         )}
       </div>
+      {/* Only behind the gate, and only once it is open — never on the
+          passcode screen, and never on a public page. */}
+      {unlocked && <NdaWatermark />}
       {unlocked && <CaseSectionRail scrollRef={scrollRef} />}
     </div>
   );
@@ -6556,6 +6628,9 @@ function BrandPerceptionPage({ onBack, onNavigate }: { onBack: () => void; onNav
           </div>
         )}
       </div>
+      {/* Only behind the gate, and only once it is open — never on the
+          passcode screen, and never on a public page. */}
+      {unlocked && <NdaWatermark />}
       {unlocked && <CaseSectionRail scrollRef={scrollRef} sections={BP_SECTIONS} />}
     </div>
   );
