@@ -3587,8 +3587,11 @@ function FinTechContent() {
   // the file's own 425x858 either way, which is the arc the device is drawn
   // with, so it holds at whatever width the column gives it.
   const PHONE_RADIUS = "17.6% / 8.7%";
-  const Fig = ({ src, alt, caption, max = FIGURE_MAX, radius }: { src: string; alt: string; caption?: string; max?: number; radius?: string }) => (
-    <figure style={{ margin: '28px 0 0' }}>
+  // `top` so a figure can head a column flush with the heading beside it —
+  // 28px of clear air is right when it follows a paragraph, wrong when it is
+  // the first thing in its own column.
+  const Fig = ({ src, alt, caption, max = FIGURE_MAX, radius, top = 28 }: { src: string; alt: string; caption?: string; max?: number; radius?: string; top?: number }) => (
+    <figure style={{ margin: `${top}px 0 0` }}>
       <img src={src} alt={alt} loading="lazy" className="mx-auto md:mx-0"
         style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: radius ?? 8 }} />
       {caption && (
@@ -3716,7 +3719,15 @@ function FinTechContent() {
           <div role="tabpanel" id={`ft-panel-${tab}`} aria-labelledby={`ft-tab-${tab}`}
             style={{ marginTop: 20, border: `1px solid ${rule}`, borderRadius: 12, padding: '24px' }}>
             {tab === "Business" && (
-              <div className="grid gap-6 md:grid-cols-2" style={{ alignItems: 'start' }}>
+              <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
+                <div>
+                  <Fig src={ftGrowth} top={0}
+                    alt="2023 QCI and AUM growth — monthly total AUM against fund-in amount" />
+                  <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+                    Organic cash-in fell while users kept reloading their eWallets — the behaviour that held AUM up
+                    through 2023.
+                  </p>
+                </div>
                 <div>
                   <p className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: 'clamp(1.25rem, 2vw, 1.75rem)', margin: 0, lineHeight: 1.2 }}>
                     <Figures>1.7x AUM growth year on year</Figures>
@@ -3725,10 +3736,9 @@ function FinTechContent() {
                     AUM of MYR 685.6 million across 3.54 million users, with QCI contributing 91.6% of it, as of
                     March 2024 — against MYR 395.3 million and 2.83 million users in January 2023.
                   </P>
-                </div>
-                <div>
-                  <Label>Daily QCI transactions</Label>
-                  <Bullets items={[<Figures>Feb 2023: 152k → Feb 2024: 467k</Figures>]} />
+                  <div style={{ marginTop: 20 }}><Label>Daily QCI transactions</Label>
+                    <Bullets items={[<Figures>Feb 2023: 152k → Feb 2024: 467k</Figures>]} />
+                  </div>
                   <div style={{ marginTop: 16 }}><Label>Daily amount</Label>
                     <Bullets items={[<Figures>Feb 2023: RM 16 mil → Feb 2024: RM 58 mil</Figures>]} />
                   </div>
@@ -3739,18 +3749,22 @@ function FinTechContent() {
                     ]} />
                   </div>
                 </div>
-                <div className="md:col-span-2">
-                  <Fig src={ftGrowth} alt="2023 QCI and AUM growth — monthly total AUM against fund-in amount" max={620} />
-                  <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
-                    Organic cash-in fell while users kept reloading their eWallets — the behaviour that held AUM up
-                    through 2023.
-                  </p>
-                </div>
               </div>
             )}
 
             {tab === "Users" && (
-              <div className="grid gap-6 md:grid-cols-2" style={{ alignItems: 'start' }}>
+              <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
+                {/* Both sources — the point of the tab is that the reaction is
+                    mixed, and one screenshot only shows one side of it. Stacked
+                    rather than side by side: in half a column a pair of
+                    screenshots of small type is a picture of reviews rather
+                    than something you can read. */}
+                <div className="flex flex-col gap-4">
+                  <img src={ftReviews} alt="App Store ratings and reviews for TNG eWallet" loading="lazy"
+                    style={{ width: '100%', display: 'block', borderRadius: 8 }} />
+                  <img src={ftFacebook} alt="A Facebook thread discussing the GO+ change" loading="lazy"
+                    style={{ width: '100%', display: 'block', borderRadius: 8 }} />
+                </div>
                 <div>
                   <p className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: 'clamp(1.25rem, 2vw, 1.75rem)', margin: 0, lineHeight: 1.2 }}>
                     App Store and Facebook responses are a mix of positive and negative
@@ -3764,32 +3778,27 @@ function FinTechContent() {
                     one for saving or investment. That is consistent with what the focus group interviews found.
                   </P>
                 </div>
-                {/* Both sources, side by side — the point of the tab is that
-                    the reaction is mixed, and one screenshot only shows one
-                    side of it. */}
-                <div className="grid grid-cols-2 gap-4">
-                  <img src={ftReviews} alt="App Store ratings and reviews for TNG eWallet" loading="lazy"
-                    style={{ width: '100%', display: 'block', borderRadius: 8 }} />
-                  <img src={ftFacebook} alt="A Facebook thread discussing the GO+ change" loading="lazy"
-                    style={{ width: '100%', display: 'block', borderRadius: 8 }} />
-                </div>
               </div>
             )}
 
             {tab === "Media" && (
-              <div>
-                <p className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: 'clamp(1.25rem, 2vw, 1.75rem)', margin: 0, lineHeight: 1.2 }}>
-                  “TNG eWallet finally solves the biggest problem of its Go+ investment feature”
-                </p>
-                <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 8 }}>
-                  Alexander Wong, SoyaCincau — 3 January 2023
-                </p>
-                <P>
-                  The article names the problem the project existed to solve: a GO+ balance is hard to keep high
-                  because it is spent on tolls, parking and merchant payments. Quick Cash In transfers future
-                  reloads, transfers and cashback above RM10 into GO+ instead.
-                </P>
-                <Fig src={ftPress} alt="SoyaCincau coverage of the Quick Cash In feature" max={620} />
+              <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
+                <div>
+                  <Fig src={ftPress} top={0} alt="SoyaCincau coverage of the Quick Cash In feature" />
+                </div>
+                <div>
+                  <p className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: 'clamp(1.25rem, 2vw, 1.75rem)', margin: 0, lineHeight: 1.2 }}>
+                    “TNG eWallet finally solves the biggest problem of its Go+ investment feature”
+                  </p>
+                  <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 8 }}>
+                    Alexander Wong, SoyaCincau — 3 January 2023
+                  </p>
+                  <P>
+                    The article names the problem the project existed to solve: a GO+ balance is hard to keep high
+                    because it is spent on tolls, parking and merchant payments. Quick Cash In transfers future
+                    reloads, transfers and cashback above RM10 into GO+ instead.
+                  </P>
+                </div>
               </div>
             )}
           </div>
