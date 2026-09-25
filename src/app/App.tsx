@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback, createContext, useContext, Fragment } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion, useMotionValue, useTransform, useMotionValueEvent, animate, type MotionValue } from "motion/react";
 import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft, PiggyBank, Heart, LineChart, Users, Layers } from "lucide-react";
 
 import ahPersona from "@/work/case/applehealth/userpersona.avif";
@@ -18,7 +18,8 @@ import srcScreenMap from "@/work/case/source/source-07-screen-map.avif";
 import srcScreenDash from "@/work/case/source/source-08-screen-dashboard.avif";
 import srcScreenDisplay from "@/work/case/source/source-09-screen-display.avif";
 import srcBright from "@/work/case/source/source-10-bright-theme.avif";
-import srcProduction from "@/work/case/source/source-11-in-production.avif";
+import srcProductionVideo from "@/work/case/source/source-12-in-production.mp4";
+import srcVideoPoster from "@/work/case/source/source-13-video-poster.avif";
 import ftAccount from "@/work/business/FinTech/fintech-01-goplus-account.avif";
 import ftGrowth from "@/work/business/FinTech/fintech-02-aum-growth-2023.avif";
 import ftReviews from "@/work/business/FinTech/fintech-03-appstore-reviews.avif";
@@ -147,7 +148,7 @@ const HEADING_COLOUR: Record<string, string> = Object.fromEntries(
   ]),
 );
 
-type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "kaiCase" | "appleHealthCase" | "brandPerceptionCase" | "sourceCase" | "finTechCase" | "testimonials";
+type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "kaiCase" | "appleHealthCase" | "brandPerceptionCase" | "sourceCase" | "finTechCase" | "visaCardCase" | "testimonials";
 
 // ─── Dark mode context ────────────────────────────────────────────
 const DarkModeCtx = createContext(false);
@@ -252,6 +253,23 @@ function DarkModeToggle({
 }
 
 // ─── useIsMobile ──────────────────────────────────────────────────
+// Tailwind's `md` boundary. useIsMobile() below breaks at `lg`, which is the
+// right line for the identity rail but the wrong one for the bottom bar — the
+// bar swaps layout at md, and between 768 and 1023 the two disagreed.
+function useIsPhone() {
+  const q = "(max-width: 767px)";
+  const [phone, setPhone] = useState(
+    typeof window !== "undefined" ? window.matchMedia(q).matches : false
+  );
+  useEffect(() => {
+    const mql = window.matchMedia(q);
+    const h = (e: MediaQueryListEvent) => setPhone(e.matches);
+    mql.addEventListener("change", h);
+    return () => mql.removeEventListener("change", h);
+  }, []);
+  return phone;
+}
+
 function useIsMobile() {
   const [mobile, setMobile] = useState(
     typeof window !== "undefined" ? window.matchMedia("(max-width: 1023px)").matches : false
@@ -269,9 +287,19 @@ function useIsMobile() {
 
 // The hero mark's box, per breakpoint. The mark is 1:1.4.
 const HERO_MARK = {
-  mobile:  { w: 52, h: 73 },
+  // The phone mark is small because the hero has to fit a screen. At 52 the
+  // block ran 74px past an iPhone SE and the copy scrolled; the mark is the
+  // one element there that can give height back without cutting words.
+  mobile:  { w: 36, h: 50 },
   desktop: { w: 70, h: 98 },
 };
+
+// Every list row on the site names its item at this size, in Museo: the Work
+// categories, the award, and the speaking events. They are the same kind of
+// thing — one line naming what a row opens — and they were three separate
+// clamps drifting apart, the speaking rows a step larger than Work and the
+// award a step larger again.
+const LIST_TITLE_SIZE = "clamp(1rem, 1.6vw, 1.25rem)";
 
 // Clicking the mark goes to the top of the homepage, not to the slide the
 // page you were on corresponds to. It is the brand mark; the top of the site
@@ -287,7 +315,6 @@ const HERO_MARK = {
 const GoHomeCtx = createContext<(() => void) | null>(null);
 // True wherever the identity rail is on screen, so the desktop credit knows
 // to hang off the rail's edge rather than the page's.
-const RailCtx = createContext(false);
 
 // `className` is how a caller makes the mark responsive: the width/height
 // attributes are the default, and Tailwind sizing classes override them.
@@ -345,7 +372,12 @@ function HeaderLogo({ onNavigate, color = GOLD, size = 28, ring = 48 }: { onNavi
       onClick={() => (goHome ? goHome() : onNavigate("home"))}
       onMouseEnter={() => setActive(true)} onMouseLeave={() => setActive(false)}
       onFocus={() => setActive(true)} onBlur={() => setActive(false)}
-      className="absolute right-6 md:right-20 top-[var(--logo-top)] md:top-14 flex items-center md:items-start justify-end cursor-pointer z-10 lg:hidden
+      // Phones do not get this mark: the nav pill carries "Tiffany C." at the
+      // bottom of every page, so a second identity in the top corner only
+      // spends the eyebrow's line. It survives from md to lg, the band where
+      // there is no rail yet and the pill has already given way to the bar,
+      // and the rail takes over from lg.
+      className="absolute right-6 md:right-20 top-[var(--logo-top)] md:top-14 hidden md:flex items-center md:items-start justify-end cursor-pointer z-10 lg:hidden
                  w-[var(--hit)] h-[var(--hit)] md:w-[var(--logo-size)] md:h-[var(--logo-size)]"
       style={{
         background: "none", border: "none", padding: 0,
@@ -510,7 +542,7 @@ function MobileMenu({
           the close control. Auto margins centre only while there is room to
           spare, and the padding below reserves the control's own footprint. */}
       <div className="relative z-10 flex flex-col flex-1 min-h-0 overflow-y-auto scrollbar-hide"
-        style={{ paddingLeft: 42, paddingRight: 24, paddingBottom: `calc(3% + env(safe-area-inset-bottom) + ${MOBILE_NAV_PILL + FOOTER_TO_NAV}px)` }}>
+        style={{ paddingLeft: 42, paddingRight: 24, paddingBottom: `calc(${NAV_BOTTOM} + env(safe-area-inset-bottom) + ${MOBILE_NAV_BAR + FOOTER_TO_NAV}px)` }}>
         {/* No gap between rows: each already draws its own rule, so a gap only
             broke the list into floating segments and cost 20px of height.
             overflow-y is the guarantee — on a screen too short for six rows
@@ -561,7 +593,7 @@ function MobileMenu({
       <div className="absolute z-10 flex items-center"
         style={{
           left: 0, right: 0,
-          bottom: "calc(3% + env(safe-area-inset-bottom))",
+          bottom: `calc(${NAV_BOTTOM} + env(safe-area-inset-bottom))`,
           height: MOBILE_NAV_PILL,
           paddingLeft: hideClose ? 24 + MOBILE_NAV_PILL + 16 : 24,
           paddingRight: 24,
@@ -830,7 +862,6 @@ function SpeakingInquiryPage({ onBack, onNavigate, headerScrolled = false, scrol
         {/* Fills whatever the content leaves, so the credit line lands on
             the nav rather than stopping wherever the copy happens to end. */}
         <div className="flex-1" />
-        <SiteFooter gutter={false} />
         <NavClearance />
       </div>
 
@@ -1051,6 +1082,72 @@ function NdaNotice() {
   );
 }
 
+// The mark laid over the gated client work once it is unlocked. NdaNotice
+// states the terms in words a reader can read; this carries them into any
+// screenshot of the page, which is how the work actually travels.
+//
+// It is meant to sit at the edge of visibility: nobody should have to read
+// through it, but a capture holds it, and raising the contrast on that capture
+// brings it out. 4% is where body copy still measured at full contrast against
+// the cream ground; dark needs 6% to register at all against a near-black one.
+//
+// Real DOM text rather than an SVG data URI, so the tile is set in the site's
+// own Nunito Sans and takes the theme's ink, and the wording lives in one
+// place next to the notice it repeats.
+//
+// The tiling: a rotated sheet twice the viewport in each direction, so its
+// corners still cover after the rotation. Rows are 120px apart and each row
+// repeats the line with a 64px gap, staggered a third of a line per row — any
+// 300px square of the page lands on at least part of one.
+const WATERMARK_ROWS = 20;
+const WATERMARK_PER_ROW = 6;
+const WATERMARK_ROW_GAP = 120;
+
+// `recipient` goes unused while there is a single shared passcode — there is
+// no name to put in the line. It is in the signature now because the tile is
+// the awkward thing to change later and this is not.
+function NdaWatermark({ recipient }: { recipient?: string }) {
+  const isDark = useContext(DarkModeCtx);
+  // Read at render, never baked in: the date on a capture is the day it was
+  // taken.
+  // en-AU: day first, and the site is written in Australian English. Its short
+  // month is "Sept", not "Sep" — that is the locale's own form, left alone.
+  const date = new Date().toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
+  const line = ["SHARED UNDER NDA", recipient, date, "NOT FOR REDISTRIBUTION"]
+    .filter(Boolean).join(" \u00b7 ");
+  return (
+    <div aria-hidden="true" data-nda-watermark
+      className="fixed inset-0 overflow-hidden"
+      style={{
+        // Over the page and its sticky header, under the bottom nav, the
+        // section rail and the menu — site chrome stays clean.
+        zIndex: 25,
+        pointerEvents: "none",
+        userSelect: "none", WebkitUserSelect: "none",
+        opacity: isDark ? 0.06 : 0.04,
+        color: isDark ? "#fff" : INK,
+      }}>
+      <div style={{ position: "absolute", top: "-50%", left: "-50%", width: "200%", height: "200%",
+                    transform: "rotate(-30deg)", transformOrigin: "center" }}>
+        {Array.from({ length: WATERMARK_ROWS }, (_, row) => (
+          <div key={row} className="flex whitespace-nowrap"
+            style={{ gap: 64, height: WATERMARK_ROW_GAP, alignItems: "center",
+                     // A third of a line per row, so the gaps between
+                     // instances never line up into a clear channel.
+                     marginLeft: (row % 3) * 180 }}>
+            {Array.from({ length: WATERMARK_PER_ROW }, (_, i) => (
+              <span key={i} className="font-['Nunito_Sans',sans-serif] uppercase"
+                style={{ fontSize: 11, letterSpacing: "0.2em" }}>
+                {line}
+              </span>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // The line itself, so the page footer and the mobile menu cannot drift apart.
 function SiteCredit({ align = "left" }: { align?: "left" | "right" }) {
   const isDark = useContext(DarkModeCtx);
@@ -1063,17 +1160,23 @@ function SiteCredit({ align = "left" }: { align?: "left" | "right" }) {
   );
 }
 
-// Desktop only. On a phone the credit lives in the menu, on the row that
-// closes it — the two viewports carry it differently on purpose, so a small
-// screen does not spend its last line on a credit.
-function SiteFooter({ gutter = true }: { gutter?: boolean }) {
-  // With the rail on, the credit pulls back across it so it starts on the
-  // logomark's column, not the page's. It is the site's byline rather than
-  // this page's, and the mark is where the site signs itself.
-  const rail = useContext(RailCtx);
+// Desktop only, and site chrome rather than page content — one line under the
+// nav bar, in the strip the phone gives its page indicator, at the same offset
+// from the bottom. On a phone the credit lives in the menu instead, on the row
+// that closes it, so a small screen does not spend its last line on a byline.
+//
+// It used to end each page's content and pull back across the rail to start on
+// the logomark's column. That column is unreachable from inside a page: past
+// the homepage the page layer is offset to clear the rail and it scrolls, so
+// it clips horizontally too, and the pull took the line straight into the
+// clipped strip — it read as "and built by Tiffany Chew" with the first word
+// gone. Out here the left inset is simply the bar's own, which is the mark's
+// column as well.
+function SiteCreditBar() {
   return (
-    <div className={`hidden md:block${gutter ? " px-6 md:px-20" : ""}${rail ? " lg:-ml-[var(--rail-w)]" : ""}`}
-      style={{ marginTop: 24 }}>
+    <div className="hidden md:block fixed z-30 pointer-events-none"
+      style={{ left: RAIL_GUTTER, right: RAIL_GUTTER,
+               bottom: `calc(${NAV_UNDERLINE_BOTTOM} + env(safe-area-inset-bottom))` }}>
       <SiteCredit />
     </div>
   );
@@ -1097,21 +1200,100 @@ function SiteFooter({ gutter = true }: { gutter?: boolean }) {
 //
 // It starts at lg, not md: at 768 a sidebar takes a quarter of the screen
 // from the content, so those widths keep today's layout.
+// Page transition. The mark does not move between pages — it is a fixed layer
+// and the page travels under it — so the page has to carry the motion, or the
+// mark reads as re-drawn on each load rather than as the one thing that
+// stayed. 140px is far enough to read as travel and short enough that neither
+// page is mostly off-screen mid-flight; a full-width slide turns a cross-fade
+// into a carousel, and the two pages are stacked, not sequential.
+//
+// Defined out here, and driven by `custom` rather than by a closure, because
+// the leaving page needs the direction of the move that is leaving it. Read
+// from a closure it gets the value from its own last render, which is the
+// direction of the *previous* navigation — in practice 0, so it stood still
+// and only faded while the incoming page slid in over it.
+const PAGE_SLIDE = 140;
+type PageMotion = { dir: number; drill: boolean };
+const pageVariants = {
+  enter: (c: PageMotion) => c.drill
+    ? { opacity: 0, scale: 0.965, y: 18, x: 0 }
+    : { opacity: 0, scale: 1, y: 0, x: c.dir * PAGE_SLIDE },
+  center: { opacity: 1, scale: 1, y: 0, x: 0 },
+  exit: (c: PageMotion) => c.drill
+    ? { opacity: 0, scale: 1, y: 0, x: 0 }
+    : { opacity: 0, scale: 1, y: 0, x: -c.dir * PAGE_SLIDE },
+};
+
 const RAIL_GUTTER = 80;   // matches the md:px-20 every page starts from
-const RAIL_MARK = 70;
+// The mark is sized and placed off the page heading, not chosen: it stands as
+// tall as the heading's em box and sits on the heading's own baseline, so the
+// two read as one line rather than as a mark floating beside a title.
+//
+// 64px is the heading size on the pages that set the site's rhythm — Work,
+// Awards, Coaching, Connect — and 129px is where their baseline falls. Case
+// study headings are smaller (52px), so their baseline lands at 131 and
+// Testimonials at 137; measured across 1280, 1440 and 1728 the spread is
+// 127–137, close enough that one position serves all of them.
+const RAIL_HEADING_SIZE = 64;
+const RAIL_HEADING_BASELINE = 129;
+// LogoMark draws at 80x112, so its height is 1.4x the width it is given.
+const RAIL_MARK = Math.round(RAIL_HEADING_SIZE / 1.4);
+const RAIL_MARK_TOP = RAIL_HEADING_BASELINE - RAIL_HEADING_SIZE;
 const RAIL_W = `${RAIL_GUTTER + RAIL_MARK}px`;
 
-function IdentityRail({ onNavigate }: { onNavigate: (p: Page) => void }) {
+function IdentityRail({ onNavigate, progress, visible = true }: { onNavigate: (p: Page) => void; progress: MotionValue<number>; visible?: boolean }) {
   const goHome = useContext(GoHomeCtx);
+  // There is one logomark on a desktop screen and this is it. It parks over
+  // the hero's corner on the homepage — the hero leaves an empty box for it —
+  // and travels into the rail as the deck leaves that slide. The hero used to
+  // draw its own as well, which put two on screen for the length of that
+  // slide change.
+  //
+  // `progress` is the journey, 0 at the hero and 1 in the rail, and it is a
+  // motion value rather than React state because on the deck it is the scroll
+  // position: the mark is not animating on its own timer, it is pinned to how
+  // far the track has moved, the way a thing on the page would be. A tween of
+  // its own only runs where there is no scroll to ride — a page change.
+  //
+  // The hero mark is right-aligned inside the hero's px-20, so its left edge
+  // is viewport - 80 - 70. Everything else here is a fixed delta from the
+  // rail's own position, which is why the viewport width is the only thing
+  // that has to be measured.
+  const [vw, setVw] = useState(typeof window === "undefined" ? 1440 : window.innerWidth);
+  useEffect(() => {
+    const onResize = () => setVw(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const homeX = vw - (RAIL_GUTTER + HERO_MARK.desktop.w) - RAIL_GUTTER;
+  const homeY = 64 - RAIL_MARK_TOP;
+  // Drawn at the rail's size and scaled up for the hero end, rather than
+  // re-rendered at a new size: an SVG scales cleanly, and animating a width
+  // would relayout every frame.
+  const homeScale = HERO_MARK.desktop.w / RAIL_MARK;
+  // 1 lands it in the rail, 0 back over the hero's empty box.
+  const x     = useTransform(progress, t => homeX * (1 - t));
+  const y     = useTransform(progress, t => homeY * (1 - t));
+  const scale = useTransform(progress, t => homeScale + (1 - homeScale) * t);
   return (
+    // Never unmounted — it is the one element that stays put while pages slide
+    // underneath, and an unmount would make it something each page draws for
+    // itself.
     <div className="hidden lg:block fixed top-0 bottom-0 left-0 z-20 pointer-events-none"
       style={{ width: "var(--rail-w)" }}>
-      <button onClick={() => (goHome ? goHome() : onNavigate("home"))}
+      <motion.button onClick={() => (goHome ? goHome() : onNavigate("home"))}
         aria-label="Tiffany C. — home"
-        className="absolute pointer-events-auto cursor-pointer"
-        style={{ left: RAIL_GUTTER, top: 56, background: "none", border: "none", padding: 0 }}>
+        className="absolute cursor-pointer"
+        // Not a link on the homepage — you are already there, and the hero
+        // is where the mark is simply itself rather than a way back.
+        // Opaque throughout. It used to fade in over the hero's own mark,
+        // because there were two; now this is the only mark on a desktop
+        // screen, so fading it would leave the hero with none.
+        style={{ left: RAIL_GUTTER, top: RAIL_MARK_TOP, background: "none", border: "none", padding: 0,
+                 transformOrigin: "top left", pointerEvents: visible ? "auto" : "none",
+                 x, y, scale }}>
         <LogoMark size={RAIL_MARK} />
-      </button>
+      </motion.button>
     </div>
   );
 }
@@ -1133,18 +1315,32 @@ const navFade = (isDark: boolean): React.CSSProperties => ({
   WebkitMaskImage: NAV_FADE_MASK,
 });
 
-// Sits under a page's last line so the copyright clears the floating nav by
-// 16px. Two blocks rather than one: the bar is 64 tall on desktop and a 44px
-// pill on mobile, and a media query cannot be written inline. The 3dvh mirrors
-// the nav's own 3% offset.
-const FOOTER_TO_NAV = 16;
+// The floating nav's offset from the bottom, and the gap the page leaves above
+// it. Both the homepage deck and every other page read these, because they had
+// drifted: the deck sat at 5% and the pages at 3%, so the bar jumped lower the
+// moment you left home, and the swipe indicator — pinned at 2% for the deck's
+// spacing — ended up touching the pill.
+const NAV_BOTTOM = "5%";
+const NAV_BOTTOM_DVH = "5dvh";
+// The strip beneath the nav bar. A phone puts its page indicator there; a
+// desktop screen puts the credit there. One constant so the two cannot drift.
+const NAV_UNDERLINE_BOTTOM = "2%";
+// The wide pill's height. Clearance is figured from this rather than from the
+// 44px square, so the taller of the two is always cleared.
+const MOBILE_NAV_BAR = 56;
+const FOOTER_TO_NAV = 24;
+
+// Sits under a page's last line so the content clears the floating nav by
+// FOOTER_TO_NAV. Two blocks rather than one: the bar is 64 tall on desktop and
+// 56 on mobile, and a media query cannot be written inline. The dvh term
+// mirrors the nav's own percentage offset.
 function NavClearance() {
   return (
     <>
       <div className="md:hidden"
-        style={{ height: `calc(3dvh + env(safe-area-inset-bottom) + ${MOBILE_NAV_PILL + FOOTER_TO_NAV}px)` }} />
+        style={{ height: `calc(${NAV_BOTTOM_DVH} + env(safe-area-inset-bottom) + ${MOBILE_NAV_BAR + FOOTER_TO_NAV}px)` }} />
       <div className="hidden md:block"
-        style={{ height: `calc(3dvh + ${64 + FOOTER_TO_NAV}px)` }} />
+        style={{ height: `calc(${NAV_BOTTOM_DVH} + ${64 + FOOTER_TO_NAV}px)` }} />
     </>
   );
 }
@@ -1180,7 +1376,7 @@ const HERO_BOTTOM_RESERVE = "calc(5% + 80px + env(safe-area-inset-bottom))";
 
 // ─── Homepage ─────────────────────────────────────────────────────
 
-export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number }) {
+export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, heroProgress, resetSignal = 0 }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number; heroProgress?: MotionValue<number>; resetSignal?: number }) {
   const isDark = useContext(DarkModeCtx);
   const pageBg  = isDark ? "#282828" : "#f8f7f5";
   const fg      = isDark ? GOLD : INK;
@@ -1192,6 +1388,14 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
   const scrollEl  = useRef<HTMLDivElement>(null);
   const dragState = useRef<{ active: boolean; startX: number; scrollLeft: number }>({ active: false, startX: 0, scrollLeft: 0 });
   const [activeIdx, setActiveIdx]   = useState(initialIdx);
+  // Held in a ref because the scroll listener is bound once, on mount. A
+  // motion value is stable across renders, so it needs no ref of its own.
+  const heroProgressRef = useRef(heroProgress);
+  heroProgressRef.current = heroProgress;
+  // The tween that carries the mark home when the deck mounts. The first
+  // scroll stops it: past that the scroll is the animation.
+  const heroTween = useRef<{ stop: () => void } | null>(null);
+  const reduceMotion = useReducedMotion();
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
   const [progress, setProgress]     = useState(0);
   const [menuOpen, setMenuOpen]     = useState(false);
@@ -1251,6 +1455,16 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
     el.scrollTo({ left: clamped * el.clientWidth, behavior: "smooth" });
     resetTimer();
   }, [resetTimer]);
+
+  // "Go home" from anywhere in the site means the hero. From another page
+  // that is a mount and initialIdx handles it, but from inside the deck the
+  // page is already "home", so setPage("home") changes nothing, nothing
+  // moved, and the address bar kept the section's route. This is the deck's
+  // half of it: a bumped signal scrolls the track back to slide 0, and the
+  // scroll rewrites the URL on its way.
+  useEffect(() => {
+    if (resetSignal > 0) goTo(0);
+  }, [resetSignal, goTo]);
 
   // Restores horizontal-swipe position when returning from a Work
   // detail page — jumps instantly (no smooth scroll) so it doesn't
@@ -1344,6 +1558,17 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
     const el = scrollEl.current;
     if (!el) return;
     const onScroll = () => {
+      // The logomark rides this, rather than firing a tween of its own once
+      // the slide has changed. Tied to a threshold it waited — going back to
+      // the hero it only knew at scrollLeft 0, so it sat in the rail for the
+      // whole return and then shot right. Tied to the scroll it simply comes
+      // with the page, and stops where the page stops.
+      const p = heroProgressRef.current;
+      if (p) {
+        heroTween.current?.stop();
+        heroTween.current = null;
+        p.set(Math.max(0, Math.min(1, el.scrollLeft / el.clientWidth)));
+      }
       const idx = Math.round(el.scrollLeft / el.clientWidth);
       if (idx !== activeIdxRef.current) {
         activeIdxRef.current = idx;
@@ -1374,7 +1599,26 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
   const currentEmbedScrollable = isMobile && "embeds" in currentSection && Boolean(currentSection.embeds);
   const navShrunk = currentEmbedScrollable && navMinimized;
 
-  useEffect(() => { setNavMinimized(false); }, [activeIdx]);
+  // Read off the slide you have arrived at, not assumed to be the top of it.
+  // Swiping past an embedded section does not unmount it — the slide keeps its
+  // scroll position in the track — so coming back to one you had scrolled left
+  // this flag false while the content was still well down the page, and the
+  // sticky header sat over the quotes with nothing behind it.
+  useEffect(() => {
+    const el = embedSectionRefs.current[SECTIONS[activeIdx]?.key ?? ""];
+    setNavMinimized(!!el && el.scrollTop > 24);
+  }, [activeIdx]);
+  // Arriving from another page there is no scroll to ride — the deck mounts
+  // already at slide 0 — so this one stretch of the journey is a tween. It is
+  // cancelled by the first scroll, which takes over.
+  useEffect(() => {
+    const p = heroProgressRef.current;
+    if (!p || p.get() === 0) return;
+    const controls = animate(p, 0, reduceMotion ? { duration: 0 } : { duration: 0.55, ease: [0.22, 1, 0.36, 1] });
+    heroTween.current = controls;
+    return () => controls.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Swiping the deck is how most people read this site on a phone, so the
   // section you're looking at owns the address bar: land on Awards and the
@@ -1469,7 +1713,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
 
           {/* Mobile layout — min-height rather than inset-0 so the block can
               grow past one screen and scroll instead of being clipped. */}
-          <div className="lg:hidden relative flex flex-col px-6 pt-14"
+          {/* pt-8 rather than pt-14: the top is the other place height can
+              come from, and the mark no longer needs a deep shoulder above it.
+              The bottom reserve is not a candidate — it is what holds the copy
+              clear of the floating nav and the "swipe to explore" line. */}
+          <div className="lg:hidden relative flex flex-col px-6 pt-8"
             style={{ minHeight: "100%", paddingBottom: HERO_BOTTOM_RESERVE }}>
             <span className="self-end" style={{ width: HERO_MARK.mobile.w, height: HERO_MARK.mobile.h }}>
               <LogoMark size={HERO_MARK.mobile.w} className="w-full h-full" />
@@ -1478,7 +1726,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 overflows spills past BOTH ends, putting the heading out of
                 reach even once the slide scrolls. Auto margins centre only
                 while there's room to spare. */}
-            <div className="flex flex-col gap-5" style={{ marginTop: "auto", marginBottom: "auto" }}>
+            <div className="flex flex-col gap-4" style={{ marginTop: "auto", marginBottom: "auto" }}>
               {/* The portrait sits on the heading's baseline rather than
                   floating from its top: bottom-aligned, the two read as one
                   block instead of the photo hanging above the last lines.
@@ -1506,7 +1754,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                   }}
                 />
               </div>
-              <p className="font-['Nunito_Sans',sans-serif] text-body leading-relaxed"
+              {/* text-small, the size the Work card descriptions use: the hero's
+                  body is the longest block on the phone and at text-body it ran
+                  past the screen and under the nav. Desktop keeps text-body, where
+                  there is room for it. */}
+              <p className="font-['Nunito_Sans',sans-serif] text-small leading-relaxed"
                 style={{ color: bodyCol, maxWidth: "min(100%, 68ch)" }}>
                 I work with C-suites and product teams to shape design
                 functions that deliver. As a founder who built and
@@ -1527,9 +1779,14 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
               vertically centering the whole block. */}
           <div className="hidden lg:flex absolute inset-0 flex-col px-20"
             style={{ paddingTop: 64, paddingBottom: "calc(64px + 5vh + 64px)" }}>
-            <span className="self-end" style={{ width: HERO_MARK.desktop.w, height: HERO_MARK.desktop.h }}>
-              <LogoMark size={HERO_MARK.desktop.w} className="w-full h-full" />
-            </span>
+            {/* Empty on purpose. From lg the mark you see here is the fixed
+                one IdentityRail holds, parked over this box until the deck
+                leaves the hero. Drawing a second one here put two marks on
+                screen for the whole of that first slide change — this one
+                scrolling away with the slide while the rail's flew in past
+                it. The box stays so the stack below it does not move. */}
+            <span className="self-end" aria-hidden
+              style={{ width: HERO_MARK.desktop.w, height: HERO_MARK.desktop.h }} />
             {/* Photo left + right column (heading, body, swipe cue). Row is
                 full-width; text column is capped at ~55% so the right 40%
                 stays naturally empty. */}
@@ -1596,7 +1853,11 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
             return (
               <section key={section.key}
                 ref={(el) => { embedSectionRefs.current[section.key] = el; }}
-                className="flex-shrink-0 relative scrollbar-hide"
+                // The slide stays a viewport wide — it is the deck's track and
+                // narrowing it would break the snap — so the rail's room is
+                // padding inside it, not width taken off it. The embedded page
+                // brings its own px-20, which lands under the mark otherwise.
+                className="flex-shrink-0 relative scrollbar-hide lg:pl-[var(--rail-w)]"
                 // No touchAction override: the browser routes a vertical drag
                 // to this section and a horizontal one to the deck behind it.
                 // Pinning it to pan-y scrolls the section but kills the swipe
@@ -1623,7 +1884,12 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
                 touchAction: "pan-x",
               }}>
 
-              <div className="relative z-10 flex flex-col h-full px-6 md:px-20 pt-10 md:pt-14"
+              {/* On desktop these slides start after the rail, exactly as every
+                  other page does — the mark is chrome over the deck here, and
+                  at the page's own px-20 it landed on top of the heading. The
+                  hero is the exception: its own mark is the one on screen
+                  there, so it keeps the full width it was designed in. */}
+              <div className="relative z-10 flex flex-col h-full px-6 md:px-20 pt-10 md:pt-14 lg:pl-[calc(var(--rail-w)+80px)]"
                 style={{ paddingBottom: "calc(64px + 8vh + 32px)" }}>
 
                 <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-4 md:mb-6"
@@ -1671,7 +1937,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
         <p className="absolute z-30 font-['Avenir',sans-serif] font-light text-[0.6rem] uppercase tracking-widest"
           style={{
             bottom: "calc(5% + 56px + 14px + env(safe-area-inset-bottom))",
-            left: 24,
+            right: 24,
             color: dimCol,
           }}>
           swipe to explore
@@ -1798,8 +2064,17 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           above the overlay, so the symbol you pressed is the symbol that
           closes it. The name and the section label go with the width — the
           open menu lists both already. */}
-      <motion.nav className="fixed md:hidden flex items-center px-5 overflow-hidden"
+      {/* The bar is the button, not a bar with a button in it. The tap target
+          used to be the symbol and the name — about 116px of a 342px bar — so
+          the whole right half, section label included, looked pressable and
+          did nothing. Nothing inside it is separately interactive, so the
+          outer element can carry the press. */}
+      <motion.button className="fixed md:hidden flex items-center px-5 overflow-hidden"
+        onClick={() => setMenuOpen(!menuOpen)}
+        aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+        aria-expanded={menuOpen}
         style={{
+          border: "none",
           zIndex: menuOpen ? 60 : 30,
           bottom: "calc(5% + env(safe-area-inset-bottom))", left: 24,
           borderRadius: 0,
@@ -1823,26 +2098,16 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
           height: navShrunk ? MOBILE_NAV_PILL : 56,
         }}
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="flex items-center"
-          // Padding out, margin back in: the tap target reaches 44 without the
-          // icon moving a pixel. Open, the button holds nothing but the 24px
-          // symbol, which is well under the floor on its own.
-          style={{ padding: 10, margin: -10 }}
-          aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen}>
-          {/* The measurement sits on the content, not the button: the button
-              carries tap padding, and the minimised width is meant to be the
-              width of what you can see. */}
-          <span ref={navBtnRef} className="flex items-center gap-3">
-            <MenuIcon open={menuOpen} color={menuOpen ? (isDark ? "white" : INK) : "white"} />
-            {!menuOpen && (
-              <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap">
-                Tiffany C.
-              </span>
-            )}
-          </span>
-        </button>
+        {/* The measurement sits on the content, not the bar: the minimised
+            width is meant to be the width of what you can see. */}
+        <span ref={navBtnRef} className="flex items-center gap-3">
+          <MenuIcon open={menuOpen} color={menuOpen ? (isDark ? "white" : INK) : "white"} />
+          {!menuOpen && (
+            <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap">
+              Tiffany C.
+            </span>
+          )}
+        </span>
         {!navShrunk && !menuOpen && (
           <>
             <div className="flex-1" />
@@ -1853,7 +2118,7 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0 }: { onNavig
             )}
           </>
         )}
-      </motion.nav>
+      </motion.button>
 
       {/* Mobile menu overlay */}
       <MobileMenu
@@ -1944,9 +2209,9 @@ function IllustrationCases() {
 
 const EXPERTISE_CARDS = [
   {
-    key: "ai", slug: "ai-ux", title: "AI + UX", accent: GOLD, Illustration: IllustrationAI,
+    key: "ai", slug: "ai-ux", title: "AI + UX DesignOps", accent: GOLD, Illustration: IllustrationAI,
     description: "Designing and iterating AI-native workflows and infrastructure from the ground up.",
-    bullets: ["Reduced trilingual UX copy turnaround by 20% through AI tooling", "AI-native hiring standards & team norms at Cotton On Group"],
+    bullets: ["2023 TNG eWallet: Reduced trilingual UX copy turnaround by 20% through AI tooling", "AI-native hiring standards & team norms at Cotton On Group"],
   },
   {
     key: "business", slug: "business-acumen", title: "Business Acumen", accent: "#8A6E2E", Illustration: IllustrationBusiness,
@@ -1964,7 +2229,7 @@ const EXPERTISE_CARDS = [
   {
     key: "people", slug: "people-process", title: "People & Process", accent: "#5070A0", Illustration: IllustrationPeople,
     description: "Built high-performing multidisciplinary teams and cross-unit prioritisation frameworks.",
-    bullets: ["Team growth: 7 → 22 designers across B2C, B2B & Research", "Coaching Responsibility Agreements & design culture building", "Chapter Lead — Ladies that UX, Kuala Lumpur (2022–2024)"],
+    bullets: ["Team growth: 7 → 22 designers, writers and built UX research function from scratch across B2C, B2B & Research (2022–2024)", "Chapter Lead — Ladies that UX, Kuala Lumpur (2022–2024)"],
     resources: [
       {
         label: "Coaching Guide for Product Designers at all levels",
@@ -1981,8 +2246,9 @@ const EXPERTISE_CARDS = [
   },
   {
     key: "cases", slug: "case-studies", title: "Case Studies", accent: GOLD, Illustration: IllustrationCases,
-    description: "Product design taken end to end — the individual-contributor work the rest is built on.",
+    description: "Hands-on product design: research, design sprints, prototyping, shipped work.",
     bullets: [
+      "TNG eWallet Visa Card — Malaysia's first numberless card",
       "Apple Health — Design Challenge",
       "KAI — Mobile app for IoT device control",
       "SOURCE — Energy performance management dashboard",
@@ -1992,9 +2258,13 @@ const EXPERTISE_CARDS = [
 
 // Work-card bullets that are really links into a case study. Keyed on the
 // bullet's exact text, so the copy above stays the single place it is written.
+// Brand Perception and the Visa card are deliberately absent: both are
+// finished enough to read at their own URL but not signed off — Brand
+// Perception pending review, the Visa card pending its images — so the Work
+// index names them without opening them. A line here is all it takes to link
+// either one.
 const BULLET_LINKS: Record<string, Page> = {
   "eCommerce: Behavioural UX Design (passcode required)": "businessCase",
-  "Brand Perception & UX Strategy — TNG eWallet (passcode required)": "brandPerceptionCase",
   "KAI — Mobile app for IoT device control": "kaiCase",
   "Apple Health — Design Challenge": "appleHealthCase",
   "SOURCE — Energy performance management dashboard": "sourceCase",
@@ -2024,10 +2294,10 @@ function ExpertiseCard({ card, onOpen }: { card: typeof EXPERTISE_CARDS[0]; onOp
       </div>
       <div className="flex-1 min-w-0">
         {/* Title — Museo, matching the Awards and Speaking rows. */}
-        <h3 className="font-['Museo',sans-serif] font-light"
-          style={{ fontSize: "clamp(1rem, 1.6vw, 1.25rem)", color: titleColor }}>
+        <h2 className="font-['Museo',sans-serif] font-light"
+          style={{ fontSize: LIST_TITLE_SIZE, color: titleColor }}>
           {card.title}
-        </h3>
+        </h2>
         <p className="font-['Nunito_Sans',sans-serif] text-small leading-relaxed mt-1" style={{ color: isDark ? "rgba(255,255,255,0.55)" : DIM, maxWidth: 600 }}>
           {card.description}
         </p>
@@ -2127,7 +2397,6 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
         {/* Fills whatever the content leaves, so the credit line lands on
             the nav rather than stopping wherever the copy happens to end. */}
         <div className="flex-1" />
-        <SiteFooter gutter={false} />
         <NavClearance />
       </div>
     </div>
@@ -2334,7 +2603,7 @@ function KaiCaseContent() {
 
   const Fig = ({ src, alt, caption, max = FIGURE_MAX }: { src: string; alt: string; caption?: string; max?: number }) => (
     <figure style={{ margin: '28px 0 0' }}>
-      <img src={src} alt={alt} loading="lazy"
+      <img src={src} alt={alt} loading="lazy" className="mx-auto md:mx-0"
         style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
       {caption && (
         <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
@@ -2668,7 +2937,7 @@ function KaiCaseContent() {
             </p>
 
             <div className="flex flex-col md:flex-row gap-8 md:gap-10 md:items-start" style={{ marginTop: 28 }}>
-              <img src={kaiHomeScreen} alt="KAI home screen — building data and connected devices" loading="lazy"
+              <img src={kaiHomeScreen} alt="KAI home screen — building data and connected devices" loading="lazy" className="mx-auto md:mx-0"
                 style={{ width: '100%', maxWidth: 300, display: 'block', borderRadius: 8 }} />
               <div style={{ maxWidth: MEASURE }}>
                 <div>
@@ -2689,7 +2958,7 @@ function KaiCaseContent() {
             </div>
 
             <div className="flex flex-col md:flex-row gap-8 md:gap-10 md:items-start" style={{ marginTop: 40 }}>
-              <img src={kaiControls} alt="KAI machine controls — on/off toggles and schedule icons" loading="lazy"
+              <img src={kaiControls} alt="KAI machine controls — on/off toggles and schedule icons" loading="lazy" className="mx-auto md:mx-0"
                 style={{ width: '100%', maxWidth: 300, display: 'block', borderRadius: 8 }} />
               <div style={{ maxWidth: MEASURE }}>
                 <div>
@@ -2708,7 +2977,7 @@ function KaiCaseContent() {
             </div>
 
             <div className="flex flex-col md:flex-row gap-8 md:gap-10 md:items-start" style={{ marginTop: 40 }}>
-              <img src={kaiSchedule} alt="KAI schedule chart — daily and weekly machine scheduling" loading="lazy"
+              <img src={kaiSchedule} alt="KAI schedule chart — daily and weekly machine scheduling" loading="lazy" className="mx-auto md:mx-0"
                 style={{ width: '100%', maxWidth: 300, display: 'block', borderRadius: 8 }} />
               <div style={{ maxWidth: MEASURE }}>
                 <div>
@@ -2817,7 +3086,6 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
         </div>
 
         <KaiCaseContent />
-        <SiteFooter />
         <NavClearance />
       </div>
       <CaseSectionRail scrollRef={scrollRef} sections={KAI_SECTIONS} />
@@ -2858,7 +3126,7 @@ function SourceCaseContent() {
     )],
     ["Goal", "Make building energy and solar data visible to the people who own it"],
     ["Scope", "Design strategy, UX, UI design"],
-    ["Role", "Product Design Lead"],
+    ["Role", "Design Innovation Manager"],
     ["Team size", "1 – 2 designers"],
   ];
 
@@ -2873,7 +3141,7 @@ function SourceCaseContent() {
 
   const Fig = ({ src, alt, caption, max = FIGURE_MAX }: { src: string; alt: string; caption?: string; max?: number }) => (
     <figure style={{ margin: '28px 0 0' }}>
-      <img src={src} alt={alt} loading="lazy"
+      <img src={src} alt={alt} loading="lazy" className="mx-auto md:mx-0"
         style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
       {caption && (
         <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
@@ -3164,7 +3432,26 @@ function SourceCaseContent() {
             Making building consumption visible opened new business for the client in energy savings, maximum
             demand management and process automation. SOURCE 1.0 became the version every later one was built on.
           </P>
-          <Fig src={srcProduction} alt="SOURCE in production" />
+          {/* The result is the thing moving, not a still of it: the product
+              walkthrough, postered on the video's own backdrop so the frame
+              belongs to what plays rather than showing an unrelated slide.
+              Controls rather than autoplay — it runs nearly two minutes, and
+              it is the last thing on the page rather than something to scroll
+              past. */}
+          <figure style={{ margin: '28px 0 0' }}>
+            <video
+              src={srcProductionVideo}
+              poster={srcVideoPoster}
+              controls
+              playsInline
+              preload="metadata"
+              aria-label="SOURCE in production — a walkthrough of the live dashboard"
+              style={{ width: '100%', maxWidth: FIGURE_MAX, display: 'block', borderRadius: 8, background: '#000' }}
+            />
+            <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+              SOURCE in production.
+            </figcaption>
+          </figure>
         </Section>
 
       </div>
@@ -3218,10 +3505,258 @@ function SourceCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate
         </div>
 
         <SourceCaseContent />
-        <SiteFooter />
         <NavClearance />
       </div>
       <CaseSectionRail scrollRef={scrollRef} sections={SOURCE_SECTIONS} />
+    </div>
+  );
+}
+
+
+// ─── TNG eWallet Visa Card case study ─────────────────────────────
+// Public, unlike the two TNG pieces under Business Acumen: the card shipped,
+// was launched publicly and was written about, so there is nothing here to
+// gate. Built on SOURCE's shapes so a reader coming from one case does not
+// have to relearn the next.
+const VC_SECTIONS: { id: string; label: string }[] = [
+  { id: "vc-overview",    label: "Overview" },
+  { id: "vc-turn",        label: "The Turn" },
+  { id: "vc-choice",      label: "The Choice" },
+  { id: "vc-numberless",  label: "A Card With No Number" },
+  { id: "vc-shipped",     label: "What Shipped" },
+];
+
+function VisaCardContent() {
+  const isDark = useContext(DarkModeCtx);
+  const fg   = GOLD;
+  const sub  = isDark ? "rgba(255,255,255,0.75)" : DIM;
+  const body = isDark ? "rgba(255,255,255,0.72)" : DIM;
+  const rule = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
+  const MEASURE = '68ch';
+  const FIGURE_MAX = 760;
+
+  // Five fields. Team size is absent on purpose rather than empty — a field
+  // with nothing in it says the page is unfinished, which is not what is meant.
+  const META: [string, React.ReactNode][] = [
+    ["Year", "Feb 2022 to Jan 2023"],
+    ["Client", (
+      <a href={TNG_DIGITAL_URL} target="_blank" rel="noopener noreferrer"
+        className="link-underline" style={{ color: fg }}>Touch &apos;n Go eWallet</a>
+    )],
+    ["Goal", "Launch a physical prepaid card alongside the app's new financial services"],
+    ["Scope", "Card design, artwork selection, user survey, welcome pack, in-app card experience, print production"],
+    ["Role", "Head of Product Design"],
+  ];
+
+  // Stands in for artwork still to come. A dashed outline in the section
+  // rule's own colour, holding its ratio — not a grey block, which reads as an
+  // image that failed to load. The frame is decoration and says nothing, so it
+  // is hidden from a screen reader and the caption carries the meaning.
+  // Swapping real artwork in is one line: FigPlaceholder to Fig.
+  const FigPlaceholder = ({ caption, ratio = "16/9" }: { caption: string; ratio?: string }) => (
+    <figure style={{ margin: '28px 0 0', width: '100%', maxWidth: FIGURE_MAX }}>
+      <div aria-hidden="true" className="flex items-center justify-center"
+        style={{ aspectRatio: ratio, border: `1px dashed ${rule}`, borderRadius: 12, background: 'transparent', padding: 16 }} />
+      <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+        {caption}
+      </figcaption>
+    </figure>
+  );
+
+  const Label = ({ children }: { children: React.ReactNode }) => (
+    <h3 className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{children}</h3>
+  );
+
+  const P = ({ children, top = 8 }: { children: React.ReactNode; top?: number }) => (
+    <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: top, maxWidth: MEASURE }}>{children}</p>
+  );
+
+  const H2 = ({ children }: { children: React.ReactNode }) => (
+    <h2 className="font-['Museo',sans-serif] font-light"
+      style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.25rem)', lineHeight: 1.15, margin: '0 0 24px' }}>{children}</h2>
+  );
+
+  const Section = ({ id, children }: { id: string; children: React.ReactNode }) => (
+    <section id={id} style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+      {children}
+    </section>
+  );
+
+  return (
+    <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10" style={{ maxWidth: 'max(900px, 80%)' }}>
+
+      <dl id="vc-overview" className="grid gap-x-6 gap-y-6"
+        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(128px, 1fr))', margin: 0, scrollMarginTop: 140 }}>
+        {META.map(([label, value]) => (
+          <div key={label}>
+            <dt className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{label}</dt>
+            <dd className="font-['Nunito_Sans',sans-serif]" style={{ color: body, margin: '6px 0 0' }}>{value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+        <P top={0}>
+          The card was to launch alongside a set of new financial services in the app. It also closed a real
+          gap: the eWallet could only be spent where a DuitNow QR code was accepted, and the card opened the
+          rest, including merchants without QR, ATM withdrawals and payments overseas.
+        </P>
+        <P top={16}>
+          It launched on <Figures>18 January 2023</Figures> as two firsts for Malaysia. The first CSR-linked
+          Visa prepaid card, with <Figures>RM2</Figures> donated to United Voice for every application. And
+          the first numberless card, with the credentials held inside the eWallet rather than printed on the
+          plastic.
+        </P>
+        <P top={16}>
+          I took the card design on in February 2022 and it did not ship for eleven months. Rounds of review,
+          presentations to CEOs, a user survey to choose between design directions, mock cards test-printed
+          overseas to check how the colours held on the real substrate. None of it converged. The work was not
+          the problem. The card had no reason that anyone could agree on, so every design was arguable and none
+          was decidable.
+        </P>
+        <FigPlaceholder ratio="1/1"
+          caption="Mock card, test-printed overseas to check how the gradient and the yellow edge held on the real substrate." />
+      </section>
+
+      {/* ── The turn ── */}
+      <Section id="vc-turn">
+        <H2>The Turn</H2>
+        <P top={0}>
+          In August 2022 group leadership set the direction: the card would be tied to United Voice, a Malaysian
+          self-advocacy society for people with learning disabilities. <Figures>RM2</Figures> from every card
+          applied for would be donated, and the card face would carry an artist&apos;s work.
+        </P>
+        <P top={16}>
+          That answered the question six months of design review had not. The card now had something to be right
+          about, and the arguments about how it should look resolved themselves almost immediately.
+        </P>
+        {/* No figure here on purpose: the turn was a decision, not an artefact. */}
+      </Section>
+
+      {/* ── The choice ── */}
+      <Section id="vc-choice">
+        <H2>The Choice</H2>
+        <P top={0}>
+          Selecting from the artists&apos; work, I chose a painting by Damien Wong. Two reasons, at once: it
+          would still look right in five years, and its colours already sat inside our brand palette. A card
+          lives in a wallet for years and cannot be reissued on a whim, so ageing well was a requirement, not a
+          preference.
+        </P>
+        <P top={16}>
+          Blue, green and yellow, mostly splashes. Damien describes it as &ldquo;In my eyes, this is how the
+          world looks to me, a splash of colors.&rdquo;
+        </P>
+        <P top={16}>
+          The painting had been rejected by the client it was made for, because the canvas was an odd size, and
+          had sat unsold for years. The proceeds from its purchase went directly to him.
+        </P>
+        <FigPlaceholder ratio="4/3"
+          caption="The card carrier, which tells Damien's story alongside the activation steps in English and Malay." />
+      </Section>
+
+      {/* ── A card with no number ── */}
+      <Section id="vc-numberless">
+        <H2>A Card With No Number</H2>
+        <P top={0}>
+          A numberless card moves the credentials off the plastic and into the app, so the app has to do the
+          work the card used to. Reveal and hide the details. Lock and unlock. Set the PIN, order a replacement,
+          track the delivery. Temporarily deactivating a card is destructive enough to need a confirmation
+          before it happens.
+        </P>
+        <P top={16}>
+          We benchmarked the onboarding against Wise, which was solving the same problem of getting a physical
+          card into use from inside an app.
+        </P>
+        {/* TODO: the three app screens — details revealed, details hidden, and
+            the deactivation confirmation — are still to come. The finished
+            card stands in for them until they land, and the caption is about
+            the card rather than about screens that are not here. */}
+        <FigPlaceholder ratio="3/2"
+          caption="The card face carries no number. The credentials live in the app." />
+
+        <div style={{ marginTop: 40 }}>
+          <Label>Onboarding benchmarks</Label>
+          <FigPlaceholder ratio="3/4"
+            caption="The Wise welcome pack, reviewed for how it carries a user from a posted card to a working one." />
+        </div>
+      </Section>
+
+      {/* ── What shipped ── */}
+      <Section id="vc-shipped">
+        <H2>What Shipped</H2>
+        <P top={0}>
+          The card launched on <Figures>18 January 2023</Figures> as Malaysia&apos;s first CSR-linked Visa
+          prepaid card, and its first numberless one.
+        </P>
+        <P top={16}>
+          At the launch, Damien&apos;s mother spoke. She said she had never seen him paint with the enthusiasm
+          he brought to that canvas.
+        </P>
+        <P top={16}>
+          A year later, in January 2024, TNG Digital and Visa presented United Voice with
+          <Figures> RM1,000,000</Figures>, raised at <Figures>RM2</Figures> per card application. From October
+          2023 the funds went into United Voice&apos;s Skills Training for Employment programme and a Health
+          and Wellness programme.
+        </P>
+        <P top={16}>
+          The card has since been discontinued.
+        </P>
+        {/* TODO: the launch photograph needs Tiffany's crop — the slide behind
+            the speaker names her, and this page deliberately does not. */}
+        <FigPlaceholder ratio="3/4" caption="Launch, 18 January 2023." />
+        <FigPlaceholder ratio="2/1" caption="RM1,000,000 presented to United Voice, January 2024." />
+      </Section>
+
+    </div>
+  );
+}
+
+function VisaCardPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
+  const isDark = useContext(DarkModeCtx);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const onDark = useOnDarkBackdrop(headerRef);
+  const headingColor = onDark ? "#ffffff" : isDark ? GOLD_BRIGHT : GOLD;
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+      <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+          background: headerScrolled
+            ? (onDark
+                ? "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), rgba(248,247,245,0.55)"
+                : isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)")
+            : "transparent",
+          backdropFilter: headerScrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
+          borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
+          paddingBottom: headerScrolled ? 16 : 24,
+          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
+        }}>
+          <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
+          <Breadcrumbs color={headingColor} items={[
+            { label: "Work", onClick: () => onNavigate("work") },
+            { label: "Case Studies", onClick: onBack },
+          ]} />
+          <h1 className="font-['Museo',sans-serif] font-light"
+            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: headingColor, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
+            TNG eWallet Visa Card
+          </h1>
+        </div>
+
+        <VisaCardContent />
+        <NavClearance />
+      </div>
+      <CaseSectionRail scrollRef={scrollRef} sections={VC_SECTIONS} />
     </div>
   );
 }
@@ -3236,8 +3771,7 @@ const FT_SECTIONS: { id: string; label: string }[] = [
   { id: "ft-outcome",  label: "Outcome" },
   { id: "ft-pitfalls", label: "Pitfalls" },
   { id: "ft-findings", label: "Findings" },
-  { id: "ft-decision", label: "Decision" },
-  { id: "ft-learning", label: "Learnings" },
+  { id: "ft-decision", label: "Decision & Learning" },
 ];
 
 // The evidence for the outcome comes from three directions and they are not a
@@ -3286,21 +3820,38 @@ function FinTechContent() {
   const [tab, setTab] = useState<FtEvidence>("Business");
 
   const META: [string, React.ReactNode][] = [
-    ["Year", "2022 – 2023"],
+    ["Year", "2021"],
     ["Client", (
       <a href={TNG_DIGITAL_URL} target="_blank" rel="noopener noreferrer"
         className="link-underline" style={{ color: fg }}>TNG Digital (TNG eWallet)</a>
     )],
-    ["Goal", "Keep GO+ funded without forcing users into it"],
-    ["Scope", "Design sprint facilitation, focus group research, concept validation, product strategy"],
-    ["Role", "Head of Product Design & UX Research"],
+    ["Goal", "Encourage users to enable auto-sweep"],
+    ["Scope", "Concept and design validation"],
+    ["Role", "Product Design Lead"],
     ["Launched", "20 February 2023"],
   ];
 
-  const Fig = ({ src, alt, caption, max = FIGURE_MAX }: { src: string; alt: string; caption?: string; max?: number }) => (
-    <figure style={{ margin: '28px 0 0' }}>
-      <img src={src} alt={alt} loading="lazy"
-        style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
+  // `radius` for the two device mockups, whose body is cropped to its own
+  // bounding box: the corner the artwork draws runs off the square edge of the
+  // file, so the 8px every other figure takes leaves them with four hard
+  // corners. Not for the raw app captures on the Users tab — there is no bezel
+  // there for the arc to cut into, only the status bar and the tab labels.
+  const PHONE_RADIUS = 60;
+  const PHONE_WIDTH = "md:w-[60%]";
+  // `top` so a figure can head a column flush with the heading beside it —
+  // 28px of clear air is right when it follows a paragraph, wrong when it is
+  // the first thing in its own column.
+  // `imgClass` for the phone shots sitting beside their own copy. A device
+  // mockup given the whole column is a life-size phone pinned to the page — it
+  // takes the eye before the words it is there to illustrate. It is a class
+  // rather than a width so the cap can start at md: below that the figure has
+  // the row to itself and there is nothing for it to shout over. The caption
+  // still runs the column's width; it is a line of text, not part of the
+  // picture.
+  const Fig = ({ src, alt, caption, max = FIGURE_MAX, radius, top = 28, imgClass = '' }: { src: string; alt: string; caption?: string; max?: number; radius?: number; top?: number; imgClass?: string }) => (
+    <figure style={{ margin: `${top}px 0 0` }}>
+      <img src={src} alt={alt} loading="lazy" className={`mx-auto md:mx-0 w-full ${imgClass}`}
+        style={{ maxWidth: max, display: 'block', borderRadius: radius ?? 8 }} />
       {caption && (
         <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
           {caption}
@@ -3387,37 +3938,47 @@ function FinTechContent() {
             <div>
               <Label>My responsibilities</Label>
               <P>
-                I opened the project with a two-day design sprint and then led the team through focus group
-                interviews. Analysing the responses gave us the first user persona for GO+, and the basis for the
-                solutions I put to the business owners. The project was deprioritised for a time; the final
-                production launched on 20 February 2023.
+                I ran a two-day design sprint to frame the problem, then led the team through focus group
+                interviews. The analysis produced the first user persona for GO+ and the evidence behind the
+                solutions I took to the business owners. It was deprioritised for several months, then picked
+                back up and shipped on 20 February 2023.
               </P>
             </div>
           </div>
-          <Fig src={ftAccount} alt="The GO+ account screen inside TNG eWallet" max={320}
-            caption="GO+: balance, daily earnings, and the cash in and cash out the feature had to sit between." />
         </section>
 
         {/* ── Outcome ── */}
+        {/* The GO+ screen and what the feature did to it, side by side: the
+            shot used to sit alone at the end of the brief with the outcome
+            starting below it, so the screen being described was already off
+            the top by the time you read the numbers. */}
         <Section id="ft-outcome">
-          <H2>A middle ground for users and business</H2>
-          <P>
-            Quick Cash In — the refined version of what started as 'auto-sweeping' — struck the balance. It routes
-            future reloads, transfers and cashback into GO+ rather than taking control of the wallet, and it has
-            been written up in the press as the fix to a market problem.
-          </P>
-          <P>
-            Post-launch there were no major customer complaints, and users who understand the product applaud the
-            convenience. A minority still prefer to keep day-to-day spending separate from their investment
-            account, which is useful for the next iteration rather than a mark against this one.
-          </P>
-          <div style={{ marginTop: 24 }}>
-          <Label>What it delivered</Label>
-          <Bullets items={[
-            <Figures>30% increment in Assets Under Management (AUM) within the first three months</Figures>,
-            <Figures>4x more fund-in transactions</Figures>,
-            <Figures>1.25x growth in the user base</Figures>,
-          ]} />
+          <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
+            <div>
+              <Fig src={ftAccount} top={0} imgClass={PHONE_WIDTH} alt="The GO+ account screen inside TNG eWallet" radius={PHONE_RADIUS}
+                caption="GO+: balance, daily earnings, and the cash in and cash out the feature had to sit between." />
+            </div>
+            <div>
+              <H2>A middle ground for users and business</H2>
+              <P>
+                Quick Cash In — the refined version of what started as 'auto-sweeping' — struck the balance. It routes
+                future reloads, transfers and cashback into GO+ rather than taking control of the wallet, and it has
+                been written up in the press as the fix to a market problem.
+              </P>
+              <P>
+                Post-launch there were no major customer complaints, and users who understand the product applaud the
+                convenience. A minority still prefer to keep day-to-day spending separate from their investment
+                account, which is useful for the next iteration rather than a mark against this one.
+              </P>
+              <div style={{ marginTop: 24 }}>
+                <Label>What it delivered</Label>
+                <Bullets items={[
+                  <Figures>30% increment in Assets Under Management (AUM) within the first three months</Figures>,
+                  <Figures>4x more fund-in transactions</Figures>,
+                  <Figures>1.25x growth in the user base</Figures>,
+                ]} />
+              </div>
+            </div>
           </div>
 
           {/* Three directions of evidence, one at a time. */}
@@ -3426,7 +3987,15 @@ function FinTechContent() {
           <div role="tabpanel" id={`ft-panel-${tab}`} aria-labelledby={`ft-tab-${tab}`}
             style={{ marginTop: 20, border: `1px solid ${rule}`, borderRadius: 12, padding: '24px' }}>
             {tab === "Business" && (
-              <div className="grid gap-6 md:grid-cols-2" style={{ alignItems: 'start' }}>
+              <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
+                <div>
+                  <Fig src={ftGrowth} top={0}
+                    alt="2023 QCI and AUM growth — monthly total AUM against fund-in amount" />
+                  <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+                    Organic cash-in fell while users kept reloading their eWallets — the behaviour that held AUM up
+                    through 2023.
+                  </p>
+                </div>
                 <div>
                   <p className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: 'clamp(1.25rem, 2vw, 1.75rem)', margin: 0, lineHeight: 1.2 }}>
                     <Figures>1.7x AUM growth year on year</Figures>
@@ -3435,10 +4004,9 @@ function FinTechContent() {
                     AUM of MYR 685.6 million across 3.54 million users, with QCI contributing 91.6% of it, as of
                     March 2024 — against MYR 395.3 million and 2.83 million users in January 2023.
                   </P>
-                </div>
-                <div>
-                  <Label>Daily QCI transactions</Label>
-                  <Bullets items={[<Figures>Feb 2023: 152k → Feb 2024: 467k</Figures>]} />
+                  <div style={{ marginTop: 20 }}><Label>Daily QCI transactions</Label>
+                    <Bullets items={[<Figures>Feb 2023: 152k → Feb 2024: 467k</Figures>]} />
+                  </div>
                   <div style={{ marginTop: 16 }}><Label>Daily amount</Label>
                     <Bullets items={[<Figures>Feb 2023: RM 16 mil → Feb 2024: RM 58 mil</Figures>]} />
                   </div>
@@ -3449,18 +4017,25 @@ function FinTechContent() {
                     ]} />
                   </div>
                 </div>
-                <div className="md:col-span-2">
-                  <Fig src={ftGrowth} alt="2023 QCI and AUM growth — monthly total AUM against fund-in amount" max={620} />
-                  <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
-                    Organic cash-in fell while users kept reloading their eWallets — the behaviour that held AUM up
-                    through 2023.
-                  </p>
-                </div>
               </div>
             )}
 
             {tab === "Users" && (
-              <div className="grid gap-6 md:grid-cols-2" style={{ alignItems: 'start' }}>
+              <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
+                {/* Both sources — the point of the tab is that the reaction is
+                    mixed, and one screenshot only shows one side of it. Side by
+                    side inside the column: stacked, two full-height phone
+                    captures ran about 1,700px against 300 of text and the tab
+                    was mostly scrolling. */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* The ordinary 8px, not the phone radius: these are raw
+                      captures, so a device corner cuts into the status bar and
+                      the tab labels rather than into a bezel. */}
+                  <img src={ftReviews} alt="App Store ratings and reviews for TNG eWallet" loading="lazy"
+                    style={{ width: '100%', display: 'block', borderRadius: 8 }} />
+                  <img src={ftFacebook} alt="A Facebook thread discussing the GO+ change" loading="lazy"
+                    style={{ width: '100%', display: 'block', borderRadius: 8 }} />
+                </div>
                 <div>
                   <p className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: 'clamp(1.25rem, 2vw, 1.75rem)', margin: 0, lineHeight: 1.2 }}>
                     App Store and Facebook responses are a mix of positive and negative
@@ -3474,32 +4049,27 @@ function FinTechContent() {
                     one for saving or investment. That is consistent with what the focus group interviews found.
                   </P>
                 </div>
-                {/* Both sources, side by side — the point of the tab is that
-                    the reaction is mixed, and one screenshot only shows one
-                    side of it. */}
-                <div className="grid grid-cols-2 gap-4">
-                  <img src={ftReviews} alt="App Store ratings and reviews for TNG eWallet" loading="lazy"
-                    style={{ width: '100%', display: 'block', borderRadius: 8 }} />
-                  <img src={ftFacebook} alt="A Facebook thread discussing the GO+ change" loading="lazy"
-                    style={{ width: '100%', display: 'block', borderRadius: 8 }} />
-                </div>
               </div>
             )}
 
             {tab === "Media" && (
-              <div>
-                <p className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: 'clamp(1.25rem, 2vw, 1.75rem)', margin: 0, lineHeight: 1.2 }}>
-                  “TNG eWallet finally solves the biggest problem of its Go+ investment feature”
-                </p>
-                <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 8 }}>
-                  Alexander Wong, SoyaCincau — 3 January 2023
-                </p>
-                <P>
-                  The article names the problem the project existed to solve: a GO+ balance is hard to keep high
-                  because it is spent on tolls, parking and merchant payments. Quick Cash In transfers future
-                  reloads, transfers and cashback above RM10 into GO+ instead.
-                </P>
-                <Fig src={ftPress} alt="SoyaCincau coverage of the Quick Cash In feature" max={620} />
+              <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
+                <div>
+                  <Fig src={ftPress} top={0} alt="SoyaCincau coverage of the Quick Cash In feature" />
+                </div>
+                <div>
+                  <p className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: 'clamp(1.25rem, 2vw, 1.75rem)', margin: 0, lineHeight: 1.2 }}>
+                    “TNG eWallet finally solves the biggest problem of its Go+ investment feature”
+                  </p>
+                  <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 8 }}>
+                    Alexander Wong, SoyaCincau — 3 January 2023
+                  </p>
+                  <P>
+                    The article names the problem the project existed to solve: a GO+ balance is hard to keep high
+                    because it is spent on tolls, parking and merchant payments. Quick Cash In transfers future
+                    reloads, transfers and cashback above RM10 into GO+ instead.
+                  </P>
+                </div>
               </div>
             )}
           </div>
@@ -3545,7 +4115,7 @@ function FinTechContent() {
           ]} />
           <div className="grid gap-6 md:grid-cols-2" style={{ marginTop: 8 }}>
             <div>
-              <img src={ftOptIn} alt="89% of testers agreed to opt in, 11% did not" loading="lazy"
+              <img src={ftOptIn} alt="89% of testers agreed to opt in, 11% did not" loading="lazy" className="mx-auto md:mx-0"
                 style={{ width: '100%', maxWidth: 320, display: 'block' }} />
               <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
                 89% of testers agreed to opt in to auto-sweeping on the condition of informed understanding —
@@ -3570,31 +4140,40 @@ function FinTechContent() {
         </Section>
 
         {/* ── Decision ── */}
+        {/* ── Decision & Learning ── */}
+        {/* One section, one dot. The decision and what it taught were two
+            stops on the rail with one screen between them; read together they
+            are the same argument, and the consent screen is the thing both
+            halves are about. */}
         <Section id="ft-decision">
-          <H2>Decision: product and business versus UX</H2>
-          <P>
-            The factor that shaped the final GO+ design was a mandatory user consent requirement identified with
-            Bank Negara Malaysia, the central bank. Working closely with the product and business teams, our User
-            Experience Design team's recommended option was what the final solution was built on — meeting the
-            regulatory demand while keeping the experience usable and compliant.
-          </P>
-          <Fig src={ftConsent} alt="The final Quick Cash In consent screen" max={320}
-            caption="The shipped screen: the benefit, the terms it consents to, and an equally available way out." />
-          <Lesson n={4} title="Take calculated risk">
-            Striking the product-design balance means assessing user input fairly while knowing the business
-            must-dos. This project underlined the importance of understanding the risks, managing user
-            expectations, and making brave, informed decisions.
-          </Lesson>
-        </Section>
-
-        {/* ── Learnings ── */}
-        <Section id="ft-learning">
-          <H2>Learnings</H2>
-          <Bullets items={[
-            <><strong style={{ color: ink, fontWeight: 600 }}>Design vision is crucial.</strong> For a design lead it is paramount to have absolute clarity on the business need and on the feasibility of design solutions, short and long term. That is what keeps a team moving in one direction.</>,
-            <><strong style={{ color: ink, fontWeight: 600 }}>Informed decision-making.</strong> For a product with no precedent in the market, collective decision-making from business stakeholders, combined with a deep understanding of user needs, becomes the guiding factor.</>,
-            <><strong style={{ color: ink, fontWeight: 600 }}>Consistent communication.</strong> Leadership has to keep communicating with both internal and external teams. It builds a habit of learning from challenges and the awareness to head off the same problem next time — even when the approach that ships is simpler than the one planned.</>,
-          ]} />
+          <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
+            <div>
+              <Fig src={ftConsent} top={0} imgClass={PHONE_WIDTH} alt="The final Quick Cash In consent screen" radius={PHONE_RADIUS}
+                caption="The shipped screen: the benefit, the terms it consents to, and an equally available way out." />
+            </div>
+            <div>
+              <H2>Decision &amp; Learning: product and business versus UX</H2>
+              <P>
+                The factor that shaped the final GO+ design was a mandatory user consent requirement identified with
+                Bank Negara Malaysia, the central bank. Working closely with the product and business teams, our User
+                Experience Design team's recommended option was what the final solution was built on — meeting the
+                regulatory demand while keeping the experience usable and compliant.
+              </P>
+              <Lesson n={4} title="Take calculated risk">
+                Striking the product-design balance means assessing user input fairly while knowing the business
+                must-dos. This project underlined the importance of understanding the risks, managing user
+                expectations, and making brave, informed decisions.
+              </Lesson>
+              <div style={{ marginTop: 24 }}>
+                <Label>Learnings</Label>
+                <Bullets items={[
+                  <><strong style={{ color: ink, fontWeight: 600 }}>Design vision is crucial.</strong> For a design lead it is paramount to have absolute clarity on the business need and on the feasibility of design solutions, short and long term. That is what keeps a team moving in one direction.</>,
+                  <><strong style={{ color: ink, fontWeight: 600 }}>Informed decision-making.</strong> For a product with no precedent in the market, collective decision-making from business stakeholders, combined with a deep understanding of user needs, becomes the guiding factor.</>,
+                  <><strong style={{ color: ink, fontWeight: 600 }}>Consistent communication.</strong> Leadership has to keep communicating with both internal and external teams. It builds a habit of learning from challenges and the awareness to head off the same problem next time — even when the approach that ships is simpler than the one planned.</>,
+                ]} />
+              </div>
+            </div>
+          </div>
         </Section>
 
       </div>
@@ -3656,11 +4235,15 @@ function FinTechPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
           <>
             <FinTechContent />
             <NdaNotice />
-            <SiteFooter />
             <NavClearance />
           </>
         ) : (
-          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560 }}>
+          // content-box, so the 560 caps the column and not the column plus its
+          // gutter. Border-box made it 560 including md:px-20, leaving a 400px
+          // measure that the NDA line missed fitting on one line by nine
+          // pixels — so it wrapped, on a desktop screen with the whole
+          // right-hand side empty.
+          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560, boxSizing: 'content-box' }}>
             <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>This work was produced under NDA. Access available on request.</p>
             <p className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM, marginTop: 8 }}>This page requires passcode</p>
 
@@ -3695,6 +4278,9 @@ function FinTechPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
           </div>
         )}
       </div>
+      {/* Only behind the gate, and only once it is open — never on the
+          passcode screen, and never on a public page. */}
+      {unlocked && <NdaWatermark />}
       {unlocked && <CaseSectionRail scrollRef={scrollRef} sections={FT_SECTIONS} />}
     </div>
   );
@@ -3704,8 +4290,11 @@ function FinTechPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
 // ─── Apple Health case study ──────────────────────────────────────
 
 const AH_SECTIONS: { id: string; label: string }[] = [
+  // The Solution has no dot of its own: it reads as the back half of the
+  // overview, and the rail stays with Overview while you are in it — the same
+  // way Background & Brief sits under KAI's. The section itself stays in the
+  // page, heading, anchor and all.
   { id: "ah-overview",  label: "Overview" },
-  { id: "ah-solution",  label: "The Solution" },
   { id: "ah-research",  label: "Research" },
   { id: "ah-design",    label: "Design Solutions" },
   { id: "ah-priority",  label: "Prioritisation" },
@@ -3741,7 +4330,7 @@ function AppleHealthContent() {
 
   const Fig = ({ src, alt, caption, max = FIGURE_MAX }: { src: string; alt: string; caption?: string; max?: number }) => (
     <figure style={{ margin: '28px 0 0' }}>
-      <img src={src} alt={alt} loading="lazy"
+      <img src={src} alt={alt} loading="lazy" className="mx-auto md:mx-0"
         style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
       {caption && (
         <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
@@ -4059,7 +4648,6 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
         </div>
 
         <AppleHealthContent />
-        <SiteFooter />
         <NavClearance />
       </div>
       <CaseSectionRail scrollRef={scrollRef} sections={AH_SECTIONS} />
@@ -4077,51 +4665,156 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
 // Wraps PageBottomNav with a full-width fade scrim behind it, so content
 // scrolling up from underneath fades into the page background before it
 // would otherwise be visible peeking past the nav's side margins/edges.
-// Pages that drill three levels deep (Work > category > case study).
-// These are the only pages that show the standalone hamburger pill on mobile;
-// every other non-home page shows the full gradient bar.
-const DEEP_PAGES = new Set<Page>(["businessCase", "kaiCase", "appleHealthCase", "brandPerceptionCase", "sourceCase", "finTechCase"]);
+// Third-level pages — Work > category > case study, and the gated pieces that
+// sit the same depth under Business Acumen and Product & UX Strategies. These
+// are the only pages that show the hamburger on a phone; first and second
+// level both carry the full bar.
+// The same track the homepage deck runs, as routes. Swiping a section page
+// moves along it; the hero is index 0, so the indicator's proportions match
+// the deck's and the two read as one sequence rather than two.
+const SWIPE_PAGES: Page[] = ["home", "work", "awards", "testimonials", "coaching", "connect"];
 
-function StickyPageNav({ activePage, tint, onNavigate, isDeepPage = false }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void; isDeepPage?: boolean }) {
+// The deck's carousel indicator, for the standalone section pages. Same
+// design deliberately: a gold bar covering what you have passed, small dots
+// for what is ahead. A second style here would say the two were different
+// things when they are the same track.
+function SectionProgress({ idx }: { idx: number }) {
+  const isDark = useContext(DarkModeCtx);
+  return (
+    <div className="md:hidden fixed z-30 flex items-center pointer-events-none"
+      style={{ bottom: `calc(${NAV_UNDERLINE_BOTTOM} + env(safe-area-inset-bottom))`, left: 24, right: 24 }}>
+      <div className="rounded-full transition-all duration-300"
+        style={{ width: `${((idx + 1) / SWIPE_PAGES.length) * 100}%`, height: 2, background: GOLD, flexShrink: 0 }} />
+      {idx < SWIPE_PAGES.length - 1 && (
+        <div className="flex items-center gap-1.5" style={{ marginLeft: 8 }}>
+          {SWIPE_PAGES.slice(idx + 1).map((_, i) => (
+            <div key={i} className="rounded-full"
+              style={{ width: 4, height: 4, background: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.25)" }} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// The section each page belongs to, for the phone pill's right-hand label.
+// Second-level pages name their parent, which is what the desktop bar's active
+// state does too.
+const NAV_LABELS: Partial<Record<Page, string>> = {
+  work: "Work",
+  awards: "Awards & Speaking",
+  testimonials: "Testimonials",
+  coaching: "Coaching",
+  connect: "Connect",
+};
+
+const DEEP_PAGES = new Set<Page>(["businessCase", "kaiCase", "appleHealthCase", "brandPerceptionCase", "sourceCase", "finTechCase", "visaCardCase"]);
+
+function StickyPageNav({ activePage, tint, onNavigate, isSubPage = false }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void; isSubPage?: boolean }) {
   const isDark = useContext(DarkModeCtx);
   const [menuOpen, setMenuOpen] = useState(false);
   const goHome = useContext(GoHomeCtx);
   // Desktop bar height (px) — used for the fade scrim sizing.
   const BAR_H = 64;
-  // Mobile fade: pill height on deep pages, full bar on others.
-  const mobileNavH = isDeepPage ? MOBILE_NAV_PILL : BAR_H;
+  // Shrunk on a third-level page, and while the menu is open.
+  const phoneShrunk = isSubPage || menuOpen;
+  // The pill's full width in pixels, because motion cannot tween a calc().
+  // Measured off the viewport rather than a container, so the element can be
+  // positioned on its own and animate without anything clipping it.
+  const [vw, setVw] = useState(typeof window === "undefined" ? 390 : window.innerWidth);
+  useEffect(() => {
+    const onResize = () => setVw(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const phoneWide = Math.max(MOBILE_NAV_PILL, vw - 48);
+  // Mobile fade: sized to whichever height the control is at.
+  const mobileNavH = phoneShrunk ? MOBILE_NAV_PILL : 56;
   return (
     <>
       <div className="fixed inset-x-0 z-20 pointer-events-none"
         style={{
-          top: `calc(100% - (3% + env(safe-area-inset-bottom) + ${mobileNavH + NAV_FADE_LEAD}px))`,
+          top: `calc(100% - (${NAV_BOTTOM} + env(safe-area-inset-bottom) + ${mobileNavH + NAV_FADE_LEAD}px))`,
           bottom: 0,
           ...navFade(isDark),
         }} />
       <div className="fixed z-20 pointer-events-none hidden md:block"
         style={{
           left: RAIL_GUTTER, right: RAIL_GUTTER,
-          top: `calc(100% - (3% + ${BAR_H + NAV_FADE_LEAD}px))`,
+          top: `calc(100% - (${NAV_BOTTOM} + ${BAR_H + NAV_FADE_LEAD}px))`,
           bottom: 0,
           ...navFade(isDark),
         }} />
-      {/* Deep pages: pill only on mobile (left-anchored, auto right).
-          All other pages: full-width bar on every breakpoint.
-          Desktop spans the page either way, rail or no rail: run the bar in
-          to the rail's edge and the left column reads as a separate panel
-          rather than as part of the page. Crossing it ties the two back
-          together. */}
-      <div className={`fixed overflow-hidden ${isDeepPage ? "left-6 right-auto md:left-20 md:right-20" : "left-0 right-0 md:left-20 md:right-20"}`}
+      {/* Desktop: the bar spans the page, rail or no rail. Run it in to the
+          rail's edge and the left column reads as a separate panel rather than
+          as part of the page; crossing it ties the two back together. */}
+      <div className="fixed overflow-hidden hidden md:block md:left-20 md:right-20"
         style={{
-          zIndex: menuOpen ? 60 : 30,
-          bottom: "calc(3% + env(safe-area-inset-bottom))",
+          zIndex: 30,
+          bottom: `calc(${NAV_BOTTOM} + env(safe-area-inset-bottom))`,
           borderRadius: 0,
-          boxShadow: menuOpen ? "none" : "0 8px 32px rgba(0,0,0,0.18)",
-          transition: "box-shadow 0.3s ease",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}>
-        <PageBottomNav activePage={activePage} tint={tint} onNavigate={onNavigate} menuOpen={menuOpen} setMenuOpen={setMenuOpen} isDeepPage={isDeepPage} />
+        <PageBottomNav activePage={activePage} tint={tint} onNavigate={onNavigate} />
       </div>
-      {isDeepPage && (
+
+      {/* The phone control, as one element rather than two. Going from second
+          level into a case study it was a wide pill and a square swapping by
+          display, which cut from one to the other with nothing in between. It
+          animates its own width now, the way the homepage's bar does when a
+          section expands: the pill draws in from the right to the square, and
+          the symbol never moves because it sits in a 44-wide block at the left
+          edge the whole time.
+
+          Opening the menu is the same move, so the symbol you pressed is the
+          symbol that closes it. */}
+      <motion.button
+        className="md:hidden flex items-center overflow-hidden"
+        onClick={() => setMenuOpen(!menuOpen)}
+        aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+        aria-expanded={menuOpen}
+        style={{
+          position: "fixed", left: 24,
+          bottom: `calc(${NAV_BOTTOM} + env(safe-area-inset-bottom))`,
+          zIndex: menuOpen ? 60 : 30,
+          border: "none", padding: 0, borderRadius: 0,
+          // Wide it carries the nav's gradient; shrunk to a 44 square that
+          // same five-stop sweep reads as noise, so it takes the page's own
+          // heading colour, flat. Open it goes altogether and the x sits on
+          // the menu's cream.
+          background: menuOpen ? "transparent"
+            : phoneShrunk ? (tint ?? HEADING_COLOUR[activePage] ?? GOLD)
+            : navGradient(isDark),
+          boxShadow: menuOpen ? "none" : "0 8px 32px rgba(0,0,0,0.18)",
+          transition: "background 0.3s ease, box-shadow 0.3s ease",
+        }}
+        animate={{
+          width: phoneShrunk ? MOBILE_NAV_PILL : phoneWide,
+          height: phoneShrunk ? MOBILE_NAV_PILL : 56,
+        }}
+        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}>
+        {/* 44 wide, centred: at the square size the symbol is exactly in the
+            middle, and at full width it is in the same place it will end up. */}
+        <span className="flex items-center justify-center flex-shrink-0"
+          style={{ width: MOBILE_NAV_PILL }}>
+          <MenuIcon open={menuOpen} color={menuOpen ? (isDark ? "white" : INK) : "white"} />
+        </span>
+        <motion.span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap"
+          animate={{ opacity: phoneShrunk ? 0 : 1 }}
+          transition={{ duration: phoneShrunk ? 0.15 : 0.3, delay: phoneShrunk ? 0 : 0.12 }}>
+          Tiffany C.
+        </motion.span>
+        <motion.span className="ml-auto font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap"
+          style={{ paddingLeft: 12, paddingRight: 20 }}
+          animate={{ opacity: phoneShrunk ? 0 : 1 }}
+          transition={{ duration: phoneShrunk ? 0.15 : 0.3, delay: phoneShrunk ? 0 : 0.12 }}>
+          {NAV_LABELS[activePage] ?? ""}
+        </motion.span>
+      </motion.button>
+      {/* Reachable from the pill on deep pages and from the bar everywhere
+          else, so it is no longer conditional. menuOpen can only be set on a
+          phone, so desktop never sees it. */}
+      {(
         <MobileMenu
           open={menuOpen}
           hideClose
@@ -4137,36 +4830,49 @@ function StickyPageNav({ activePage, tint, onNavigate, isDeepPage = false }: { a
 
 function PageBottomNav({
   activePage,
-  tint,
   onNavigate,
-  menuOpen,
-  setMenuOpen,
-  isDeepPage = false,
 }: {
   activePage: Page;
-  // The page's own heading colour, where that differs from its nav
-  // section's — Speaking Inquiry sits under Connect but heads in gold.
-  tint?: string;
   onNavigate: (p: Page) => void;
-  menuOpen: boolean;
-  setMenuOpen: (v: boolean) => void;
-  isDeepPage?: boolean;
 }) {
   const isDark = useContext(DarkModeCtx);
+  // On a phone the bar scrolls instead of squeezing. Equal flex shares gave
+  // each of six items a sixth of 390px, so the labels ellipsised to "Award",
+  // "Testim", "Coach" and "Conne" ran off the end. Sized to their content and
+  // scrolled, nothing is ever cut; the active one is brought into view.
+  const isPhone = useIsPhone();
+  const barRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!isPhone) return;
+    const el = barRef.current?.querySelector('[data-nav-active="true"]');
+    el?.scrollIntoView({ inline: "center", block: "nearest" });
+  }, [isPhone, activePage]);
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
 
+  // `short` is the phone label. Six full labels do not fit 360px however they
+  // are sized, and the alternatives are worse: squeezed they ellipsise to
+  // "Award" and "Testim", scrolled they sit cut off at the right edge, which
+  // reads as broken rather than as scrollable. Only Awards & Speaking actually
+  // needs shortening, and the page it opens says the full name at the top.
   const NAV_ITEMS = [
-    { key: "work",     label: "Work",             page: "work" as Page },
-    { key: "awards",   label: "Awards & Speaking", page: "awards" as Page },
-    { key: "testimonials", label: "Testimonials", page: "testimonials" as Page },
-    { key: "coaching", label: "Coaching",         page: "coaching" as Page },
-    { key: "connect",  label: "Connect",          page: "connect" as Page },
+    { key: "work",     label: "Work",             short: "Work",         page: "work" as Page },
+    { key: "awards",   label: "Awards & Speaking", short: "Awards",      page: "awards" as Page },
+    { key: "testimonials", label: "Testimonials", short: "Testimonials", page: "testimonials" as Page },
+    { key: "coaching", label: "Coaching",         short: "Coaching",     page: "coaching" as Page },
+    { key: "connect",  label: "Connect",          short: "Connect",      page: "connect" as Page },
   ];
 
   return (
     <>
-      {/* Full gradient bar — always visible on 1st-level pages, desktop-only on deep pages */}
-      <div className={`${isDeepPage ? "hidden md:flex" : "flex"} items-stretch h-16 overflow-hidden`}
+      {/* Full gradient bar — on a phone only where the page is one of the five
+          the bar names; desktop always.
+          On a phone the whole bar is one control that opens the menu, not six
+          small ones: at 390px a six-way split gives each about 60px, which is
+          under the 44px floor once padding is taken off, and the labels past
+          the edge could not be reached at all. Tapping anywhere opens the full
+          list, which is where the navigating happens. Desktop keeps its six
+          separate targets, where there is room for them. */}
+      <div className="hidden md:flex items-stretch h-16 overflow-hidden"
         style={{ background: navGradient(isDark) }}>
         <button
           className="flex items-center gap-3 overflow-hidden"
@@ -4174,50 +4880,48 @@ function PageBottomNav({
           onMouseLeave={() => setHoveredNav(null)}
           onClick={() => onNavigate("home")}
           style={{
-            flex: hoveredNav === "about" ? "3 1 0%" : "1 1 0%",
-            minWidth: 0, padding: "0 20px",
+            flex: isPhone ? "0 0 auto" : hoveredNav === "about" ? "3 1 0%" : "1 1 0%",
+            pointerEvents: isPhone ? "none" : undefined,
+            minWidth: 0, padding: isPhone ? "0 12px" : "0 20px",
             opacity: hoveredNav === "about" ? 1 : 0.52,
             transition: "flex 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease",
             borderRight: "1px solid rgba(255,255,255,0.18)",
           }}>
           <HamburgerIcon />
-          <span className="font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap overflow-hidden text-ellipsis">Tiffany C.</span>
+          {/* The name is desktop-only: on a phone its ~70px is what the five
+              labels need to fit, and the icon alone already says "menu". */}
+          <span className="hidden md:inline font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap overflow-hidden text-ellipsis">Tiffany C.</span>
         </button>
+        {/* No scroller: the labels fit. `md:contents` dissolves this wrapper
+            above the breakpoint so the desktop row is untouched. */}
+        <div className="flex items-stretch min-w-0 flex-1 md:contents"
+          style={{ pointerEvents: isPhone ? "none" : undefined }}>
         {NAV_ITEMS.map(item => (
           <button key={item.key}
             onMouseEnter={() => setHoveredNav(item.key)}
             onMouseLeave={() => setHoveredNav(null)}
             onClick={() => item.page && onNavigate(item.page)}
             className="flex items-center font-['Museo',sans-serif] font-light text-small whitespace-nowrap overflow-hidden text-ellipsis text-white"
+            data-nav-active={activePage === item.page ? "true" : undefined}
             style={{
-              flex: activePage === item.page || hoveredNav === item.key ? "3 1 0%" : "1 1 0%",
-              minWidth: 0, padding: "0 20px",
+              flex: isPhone ? "1 1 auto" : activePage === item.page || hoveredNav === item.key ? "3 1 0%" : "1 1 0%",
+              minWidth: 0, padding: isPhone ? "0 6px" : "0 20px",
+              fontSize: isPhone ? 11 : undefined,
+              justifyContent: isPhone ? "center" : undefined,
               opacity: activePage === item.page || hoveredNav === item.key ? 1 : 0.52,
               transition: "flex 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease",
               borderLeft: "1px solid rgba(255,255,255,0.18)",
             }}>
-            {item.label}
+            {isPhone ? item.short : item.label}
           </button>
         ))}
+        </div>
       </div>
 
-      {/* Hamburger pill — only on deep (3rd-level) pages on mobile */}
-      <button onClick={() => setMenuOpen(!menuOpen)}
-        aria-label={menuOpen ? "Close navigation" : "Open navigation"} aria-expanded={menuOpen}
-        className={`${isDeepPage ? "md:hidden flex" : "hidden"} items-center justify-center`}
-        style={{
-          // One flat colour, the page's own heading colour — at 44px square
-          // the full nav gradient was a five-stop sweep compressed into a
-          // thumbnail, which read as noise rather than as the bar it came
-          // from. Open, it goes altogether and the × sits on the menu's
-          // cream in ink, the way the menu's own close button used to.
-          background: menuOpen ? "transparent" : (tint ?? HEADING_COLOUR[activePage] ?? GOLD),
-          width: MOBILE_NAV_PILL, height: MOBILE_NAV_PILL, border: "none", padding: 0,
-          transition: "background 0.3s ease",
-        }}>
-        <MenuIcon open={menuOpen} color={menuOpen ? (isDark ? "white" : INK) : "white"} />
-      </button>
-
+      {/* The pill: the nav below first level, and the close control everywhere
+          else once the bar has opened the menu. One × in one place, morphing
+          from the same icon, with the credit on its row — rather than a second
+          close button that the menu would have had to grow for this case. */}
     </>
   );
 }
@@ -4335,7 +5039,6 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
         {/* Takes up whatever the rows leave, so the credit line lands on the
             nav rather than floating under the last divider. */}
         {!embedded && <div className="flex-1" />}
-        {!embedded && <SiteFooter />}
         <NavClearance />
       </div>
 
@@ -4405,7 +5108,6 @@ function ContactListPage({
         </div>
       </div>
 
-      <SiteFooter />
       <NavClearance />
     </div>
   );
@@ -4503,7 +5205,7 @@ const TESTIMONIALS: {
   {
     key: "shin", group: "leadership",
     name: "Shin L.", title: "Lead UX Writer",
-    source: "Worked in Tiffany's team", date: null,
+    source: "Reported to Tiffany", date: null,
     quote: [
       "I had the privilege of working under Tiffany, and she stood out as an exceptional leader who masterfully combines strategic thinking with actionable execution. Tiffany showed me how to translate high-level organisational goals into actionable plans that deliver measurable impact.",
       "One of her key contributions was leveraging content strategy to improve brand perception. Under her leadership, our efforts contributed to a remarkable 14% increase in our brand perception score in 2024. Additionally, Tiffany and I collaborated to implement strategies that harnessed artificial intelligence to enhance team efficiency. These initiatives resulted in a 20% improvement in overall efficiency, setting a benchmark for innovation within the team.",
@@ -4521,7 +5223,7 @@ const TESTIMONIALS: {
   },
   {
     key: "junhoe", group: "leadership",
-    name: "Junhoe W.", title: "Sr. Product Designer, BigPay",
+    name: "Junhoe W.", title: "Design Manager",
     source: "Reported to Tiffany", date: null,
     quote: [
       "Few people have the opportunity to report to a manager who is also a coach and mentor but I did when I worked for Tiffany Chew. I had the pleasure of working with Tiffany for two years at Plus Solar Systems, collaborating on several project teams. Tiffany's ability to juggle multiple projects was unlike any I've seen before and made a dramatic difference in the productivity level of our team. As a team member, Tiffany earns my highest recommendation.",
@@ -4787,7 +5489,6 @@ function TestimonialsPage({
               className="link-underline" style={{ color: accent }}>ADPList</a>.
           </p>
 
-          {!embedded && <SiteFooter gutter={false} />}
           <NavClearance />
         </div>
     </>
@@ -4818,7 +5519,7 @@ const SPEAKING_EVENTS = [
   { key: "rotterdam", year: "2026", role: "Speaker",  event: "UX Rotterdam",                  location: "Rotterdam, NL", region: "Europe",    topic: "The Human Cost of Human-Centred-Design",                           link: null,                                               img: awardsRotterdam, caption: "2026 @ Rotterdam, NL", dark: true },
   { key: "ux-camp",   year: "2025", role: "Speaker",  event: "UX Camp Melbourne",             location: "Melbourne, AU", region: "Australia", topic: "404: System Burnout — An error message to my UX career",            link: null, youtubeId: "hJIJB3di6T4",                                img: null,          caption: null,             dark: false },
   { key: "taipei",    year: "2025", role: "Panelist", event: "Ladies that UX Taipei",         location: "Taipei, TW",    region: "Taiwan",    topic: "Driving Organisational Change and Creating Meaningful Impact",     link: null,                                               img: awardsTaipei,  caption: "2025 @ Taipei, TW",  dark: false },
-  { key: "fusecon",   year: "2025", role: "Panelist", event: "FUSECON 2025",                  location: "Malaysia",      region: "Malaysia",  topic: "Mental Health: From Awareness to Action",                          link: null,                                               img: awardsFuseCon, img2: awardsFuseConPanelist, caption: "FUSECON 2025, MY",    dark: true  },
+  { key: "fusecon",   year: "2025", role: "Panelist", event: "FUSECON 2025",                  location: "Malaysia",      region: "Malaysia",  topic: "Mental Health In Tech: From Awareness to Action",                 link: null,                                               img: awardsFuseCon, img2: awardsFuseConPanelist, mobileImgOnly: 2, caption: "FUSECON 2025, MY",    dark: true  },
   { key: "fusecon-2024", year: "2024", role: "Panelist", event: "FUSECON 2024",               location: "Malaysia",      region: "Malaysia",  topic: "UX in Malaysia & beyond",                                          link: null,                                               img: awardsFuseCon2024, caption: "FUSECON 2024, MY", dark: false },
   { key: "figma-kl",  year: "2024", role: "Panelist", event: "Friends of Figma KL × adplist", location: "KL, MY",        region: "Malaysia",  topic: "The Journey to Senior Designer: Skills, Insights and Experiences", link: null,                                               img: awardsFoF2024Desktop, caption: "Friends of Figma KL × adplist, 2024", dark: false },
   { key: "design-kl", year: "2023", role: "Speaker",  event: "Design Leadership Kuala Lumpur",location: "KL, MY",        region: "Malaysia",  topic: "Synergy for Sustainable Growth: Empowering UX Team",               link: null,                                               img: awardsDesignKL, img2: awardsDesignKLTiff, caption: "Design Leadership KL 2023", dark: false },
@@ -4900,9 +5601,9 @@ function SpeakingEventRow({
         <div className="flex-1 flex flex-col md:flex-row md:items-start md:justify-between gap-1 md:gap-6 min-w-0">
           <div className="flex flex-col gap-1 min-w-0">
             <span className="md:hidden font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub }}>{ev.year} · {ev.region}</span>
-            <p className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(0.95rem, 1.6vw, 1.4rem)", color: fg }}>
+            <h2 className="font-['Museo',sans-serif] font-light" style={{ fontSize: LIST_TITLE_SIZE, color: fg }}>
               {ev.role} — {ev.event}
-            </p>
+            </h2>
             <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub }}>{ev.topic}</p>
           </div>
           <span className="hidden md:block flex-shrink-0 font-['Nunito_Sans',sans-serif] text-small text-right" style={{ color: sub }}>{ev.year} · {ev.region}</span>
@@ -4921,12 +5622,17 @@ function SpeakingEventRow({
               // its width from its height, which is what stops the crop.
               // Mobile still fills its box, but from the upper part of the
               // frame, where the faces are.
+              // `mobileImgOnly` drops the other one below md, where the pair
+              // stacks and the row costs two screens. Which one goes is per
+              // event, not a rule: FUSECON pairs a portrait of Tiffany with
+              // the panel, and the panel is the one that says what the event
+              // was, but Design Leadership KL pairs them the other way round.
               <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-5">
-                <div className="relative w-full h-[220px] md:h-[340px] md:w-auto overflow-hidden flex-shrink-0">
+                <div className={`relative w-full h-[220px] md:h-[340px] md:w-auto overflow-hidden flex-shrink-0${ev.mobileImgOnly === 2 ? " hidden md:block" : ""}`}>
                   <img src={ev.img} alt={`${ev.event} — ${ev.topic}`}
                     className="absolute inset-0 w-full h-full object-cover object-[center_20%] md:static md:inset-auto md:w-auto md:h-full md:max-w-full md:object-contain" />
                 </div>
-                <div className="relative w-full h-[220px] md:h-[340px] md:w-auto overflow-hidden min-w-0">
+                <div className={`relative w-full h-[220px] md:h-[340px] md:w-auto overflow-hidden min-w-0${ev.mobileImgOnly === 1 ? " hidden md:block" : ""}`}>
                   <img src={ev.img2} alt={`${ev.event} panel discussion`}
                     className="absolute inset-0 w-full h-full object-cover object-[center_20%] md:static md:inset-auto md:w-auto md:h-full md:max-w-full md:object-contain" />
                 </div>
@@ -5015,9 +5721,9 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
         <div className="flex-1 flex flex-col md:flex-row md:items-start md:justify-between gap-1 md:gap-6 min-w-0">
           <div className="flex flex-col gap-1 min-w-0">
             <span className="md:hidden font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub }}>2025 · Australia</span>
-            <p className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.5rem)", color: fg }}>
+            <h2 className="font-['Museo',sans-serif] font-light" style={{ fontSize: LIST_TITLE_SIZE, color: fg }}>
               UX Leader of the Year — Finalist
-            </p>
+            </h2>
             <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub }}>Women in Digital National Awards</p>
           </div>
           <span className="hidden md:block flex-shrink-0 font-['Nunito_Sans',sans-serif] text-small text-right" style={{ color: sub }}>2025 · Australia</span>
@@ -5124,6 +5830,13 @@ function AwardsSpeakingPage({
     return () => { window.clearTimeout(t); window.removeEventListener("resize", check); };
   }, [embedded, selfExpanded]);
   const scrolled = embedded ? headerScrolled : selfScrolled;
+  // The heading shrinks on the same signal that frosts the band behind it.
+  // It was driven by `compact`, which only the homepage deck ever sets, so on
+  // /awards the band appeared and the heading stayed full size — an opened row
+  // then scrolled under a full-height header and could not be read. Same shape
+  // as TestimonialsPage: the deck's flag when embedded, this page's own scroll
+  // when standalone.
+  const shrunk = embedded ? compact : selfScrolled;
   const visibleEvents = capped ? SPEAKING_EVENTS.slice(0, 3) : SPEAKING_EVENTS;
 
   const headerRef = useRef<HTMLDivElement>(null);
@@ -5154,16 +5867,16 @@ function AwardsSpeakingPage({
           backdropFilter: scrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: scrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${scrolled ? brd : "transparent"}`,
-          paddingBottom: compact ? 16 : undefined,
+          paddingBottom: shrunk ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
           {!embedded && <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : HEADING_COLOUR.awards} />}
         <motion.p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.22em] mb-2" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -10 }} transition={{ duration: 0.5 }}>
-          Recognition &amp; voice in community
+          Ideas · Voices · Community
         </motion.p>
         <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg"
-          style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: onDark ? "#fff" : HEADING_COLOUR.awards, transition: "font-size 0.35s ease, color 0.3s ease" }}
+          style={{ fontSize: shrunk ? "1.5rem" : undefined, lineHeight: 1.05, color: onDark ? "#fff" : HEADING_COLOUR.awards, transition: "font-size 0.35s ease, color 0.3s ease" }}
           initial={false} animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : -16 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Awards &amp; Speaking
         </motion.h1>
@@ -5184,7 +5897,6 @@ function AwardsSpeakingPage({
         ))}
       </div>
 
-      {!embedded && <SiteFooter />}
       <NavClearance />
     </>
   );
@@ -5281,7 +5993,7 @@ const SPEAKING_DETAIL: Record<string, {
   "fusecon": {
     pageLabel: "FUSECON 2025, MY",
     year: "2025", role: "Panelist", event: "FUSECON 2025", location: "Malaysia",
-    topic: "Mental Health: From Awareness to Action",
+    topic: "Mental Health In Tech: From Awareness to Action",
     heroImg: awardsFuseCon, additionalImg: null, link: null, dark: true, finalistLink: null,
   },
   "fusecon-2024": {
@@ -5432,7 +6144,6 @@ function SpeakingDetailPage({
       )}
 
       <div className="flex-1" />
-      <SiteFooter />
       <NavClearance />
     </div>
   );
@@ -5573,7 +6284,7 @@ function BusinessCaseContent() {
       <a href="https://cottonon.com" target="_blank" rel="noopener noreferrer"
         className="link-underline" style={{ color: fg }}>Cotton On Group</a>
     )],
-    ["Goal", "Increase checkout rate"],
+    ["Goal", "Increase checkout completion rate"],
     ["Scope", "Design workshop facilitation, research analysis"],
     ["Role", "Product Design Lead"],
     ["Team size", "1"],
@@ -5709,29 +6420,45 @@ function BusinessCaseContent() {
 
         {/* ── Result ── */}
         <section id="results" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
-          <p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>
-            Result from the tested group — voucher owners
-          </p>
-          <dl className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginTop: 20 }}>
-            {[["Revenue", "+57%"], ["Checkout rate", "2×"], ["Conversion rate", "+0.28%"]].map(([label, value]) => (
-              <div key={label}>
-                <dd className="font-['Museo',sans-serif] font-light"
-                  style={{ color: fg, fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', lineHeight: 1.1, margin: 0, fontVariantNumeric: 'tabular-nums' }}>{value}</dd>
-                <dt className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 6 }}>{label}</dt>
-              </div>
-            ))}
-          </dl>
-          <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 16 }}>
-            Measured from checkout entry to purchase.
-          </p>
+          {/* The chart and the figures it produced, side by side from md. The
+              numbers used to run the section's full width with the chart
+              starting below them, so the evidence for a figure was off the
+              screen by the time you read it.
 
-          <figure style={{ margin: '32px 0 0' }}>
-            <img src={graphResult} alt="Google Analytics funnel: view bag, enter checkout at 70.1%, purchase at 79.6%"
-              style={{ width: '100%', maxWidth: FIGURE_MAX, display: 'block', borderRadius: 8 }} />
-            <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
-              Chart: Google Analytics funnel from bag to successful checkout.
-            </figcaption>
-          </figure>
+              DOM order is the mobile order — headline figures first, chart
+              after — and `md:order-first` moves the chart to the left column
+              on a wide screen without reordering the phone. */}
+          <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
+            <div>
+              <p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>
+                Result from the tested group — voucher owners
+              </p>
+              {/* One per row here rather than three across: in half a column
+                  the values are set at up to 2.5rem and auto-fit would break
+                  three of them into an uneven two-and-one. */}
+              <dl className="grid gap-6" style={{ gridTemplateColumns: '1fr', marginTop: 20 }}>
+                {[["Revenue", "+57%"], ["Checkout completion", "2×"], ["Conversion rate", "+0.28pp"]].map(([label, value]) => (
+                  <div key={label}>
+                    <dd className="font-['Museo',sans-serif] font-light"
+                      style={{ color: fg, fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', lineHeight: 1.1, margin: 0, fontVariantNumeric: 'tabular-nums' }}>{value}</dd>
+                    <dt className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 6 }}>{label}</dt>
+                  </div>
+                ))}
+              </dl>
+              <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 16 }}>
+                Checkout completion is purchases as a share of checkout entries.
+                Conversion rate is in percentage points.
+              </p>
+            </div>
+
+            <figure className="md:order-first" style={{ margin: 0 }}>
+              <img src={graphResult} alt="Google Analytics funnel: view bag, enter checkout at 70.1%, purchase at 79.6%"
+                style={{ width: '100%', maxWidth: FIGURE_MAX, display: 'block', borderRadius: 8 }} />
+              <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
+                Chart: Google Analytics funnel from bag to successful checkout.
+              </figcaption>
+            </figure>
+          </div>
         </section>
       </div>
     </div>
@@ -5774,16 +6501,21 @@ function BrandPerceptionContent() {
     ["Team size", "TBC"],
   ];
 
-  // Stands in for artwork that lands in the next pass. A dashed outline in
-  // the section rule's own colour, holding its ratio — not a grey block,
-  // which reads as an image that failed to load.
-  const FigPlaceholder = ({ label, ratio = "16/9", max = FIGURE_MAX }: { label: string; ratio?: string; max?: number }) => (
-    <div style={{ margin: '28px 0 0', width: '100%', maxWidth: max }}>
-      <div className="flex items-center justify-center"
-        style={{ aspectRatio: ratio, border: `1px dashed ${rule}`, borderRadius: 8, background: 'transparent', padding: 16 }}>
-        <span className="font-['Nunito_Sans',sans-serif] text-small text-center" style={{ color: DIM }}>{label}</span>
-      </div>
-    </div>
+  // Stands in for artwork that lands in the next pass. A dashed outline in the
+  // section rule's own colour, holding its ratio — not a grey block, which
+  // reads as an image that failed to load.
+  //
+  // The frame is decoration and says nothing; the caption carries what will go
+  // there, so the frame is hidden from a screen reader and the caption is not.
+  // Same call shape as Fig, so swapping real artwork in is one line.
+  const FigPlaceholder = ({ caption, ratio = "16/9", max = FIGURE_MAX }: { caption: string; ratio?: string; max?: number }) => (
+    <figure style={{ margin: '28px 0 0', width: '100%', maxWidth: max }}>
+      <div aria-hidden="true" className="flex items-center justify-center"
+        style={{ aspectRatio: ratio, border: `1px dashed ${rule}`, borderRadius: 12, background: 'transparent', padding: 16 }} />
+      <figcaption className="font-['Nunito_Sans',sans-serif] text-small text-center" style={{ color: sub, marginTop: 12 }}>
+        {caption}
+      </figcaption>
+    </figure>
   );
 
   const Label = ({ children }: { children: React.ReactNode }) => (
@@ -5902,7 +6634,7 @@ function BrandPerceptionContent() {
             The value proposition it produced: the convenient and secure daily app to save, earn and
             spend for people in Malaysia.
           </P>
-          <FigPlaceholder label="Four-pillar nested diagram" ratio="1/1" max={560} />
+          <FigPlaceholder caption="Four-pillar nested diagram" ratio="1/1" max={560} />
 
           <div style={{ marginTop: 40 }}>
             <Label>Two principles</Label>
@@ -5923,7 +6655,7 @@ function BrandPerceptionContent() {
               through financial services, then security, then convenience. The work could not be
               organised by feature. It had to be organised by perception.
             </P>
-            <FigPlaceholder label="Perception journey — five onboarding screens with perception tags" ratio="16/5" />
+            <FigPlaceholder caption="Perception journey — five onboarding screens with perception tags" ratio="16/5" />
           </div>
 
           <div style={{ marginTop: 40 }}>
@@ -5954,7 +6686,7 @@ function BrandPerceptionContent() {
             <div key={b.title} style={{ marginTop: i === 0 ? 32 : 48 }}>
               <Label>{b.title}</Label>
               <P><Figures>{b.body}</Figures></P>
-              <FigPlaceholder label={b.figure} />
+              <FigPlaceholder caption={b.figure} />
               {b.result && (
                 <p className="font-['Nunito_Sans',sans-serif]" style={{ color: ink, marginTop: 16, maxWidth: MEASURE }}>
                   <span className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub, marginRight: 8 }}>Result</span>
@@ -6082,11 +6814,15 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
           <>
             <BusinessCaseContent />
             <NdaNotice />
-            <SiteFooter />
             <NavClearance />
           </>
         ) : (
-          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560 }}>
+          // content-box, so the 560 caps the column and not the column plus its
+          // gutter. Border-box made it 560 including md:px-20, leaving a 400px
+          // measure that the NDA line missed fitting on one line by nine
+          // pixels — so it wrapped, on a desktop screen with the whole
+          // right-hand side empty.
+          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560, boxSizing: 'content-box' }}>
             <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>This work was produced under NDA. Access available on request.</p>
             <p className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM, marginTop: 8 }}>This page requires passcode</p>
 
@@ -6127,6 +6863,9 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
           </div>
         )}
       </div>
+      {/* Only behind the gate, and only once it is open — never on the
+          passcode screen, and never on a public page. */}
+      {unlocked && <NdaWatermark />}
       {unlocked && <CaseSectionRail scrollRef={scrollRef} />}
     </div>
   );
@@ -6192,11 +6931,15 @@ function BrandPerceptionPage({ onBack, onNavigate }: { onBack: () => void; onNav
           <>
             <BrandPerceptionContent />
             <NdaNotice />
-            <SiteFooter />
             <NavClearance />
           </>
         ) : (
-          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560 }}>
+          // content-box, so the 560 caps the column and not the column plus its
+          // gutter. Border-box made it 560 including md:px-20, leaving a 400px
+          // measure that the NDA line missed fitting on one line by nine
+          // pixels — so it wrapped, on a desktop screen with the whole
+          // right-hand side empty.
+          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560, boxSizing: 'content-box' }}>
             <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>This work was produced under NDA. Access available on request.</p>
             <p className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM, marginTop: 8 }}>This page requires passcode</p>
 
@@ -6237,6 +6980,9 @@ function BrandPerceptionPage({ onBack, onNavigate }: { onBack: () => void; onNav
           </div>
         )}
       </div>
+      {/* Only behind the gate, and only once it is open — never on the
+          passcode screen, and never on a public page. */}
+      {unlocked && <NdaWatermark />}
       {unlocked && <CaseSectionRail scrollRef={scrollRef} sections={BP_SECTIONS} />}
     </div>
   );
@@ -6263,6 +7009,7 @@ function pathOf(page: Page, detailKey?: string | null): string {
     case "kaiCase":         return "/work/case-studies/kai";
     case "appleHealthCase": return "/work/case-studies/apple-health";
     case "sourceCase":      return "/work/case-studies/source";
+    case "visaCardCase":    return "/work/case-studies/visa-card";
     case "finTechCase":     return "/work/business-acumen/fintech";
     case "brandPerceptionCase": return "/work/product-ux-strategies/brand-perception";
     case "awards":          return "/awards";
@@ -6306,6 +7053,7 @@ function routeOf(pathname: string): { page: Page; detailKey: string | null } {
     if (seg[1] === "case-studies" && seg[2] === "source") return at("sourceCase");
     if (seg[1] === "business-acumen" && seg[2] === "fintech") return at("finTechCase");
     if (seg[1] === "product-ux-strategies" && seg[2] === "brand-perception") return at("brandPerceptionCase");
+    if (seg[1] === "case-studies" && seg[2] === "visa-card") return at("visaCardCase");
     const card = EXPERTISE_CARDS.find(c => c.slug === seg[1]);
     // an unknown child falls back to the section rather than a dead end
     return card ? at("workDetail", card.key) : at("work");
@@ -6336,6 +7084,7 @@ function descriptionOf(page: Page, detailKey?: string | null): string {
     case "appleHealthCase": return "A five-day design challenge: repositioning Apple Health as a daily habit tool to drive daily active users.";
     case "finTechCase":     return "A passcode-gated case study: Quick Cash In for TNG eWallet's GO+, and the balance between an aggressive business goal and what users would accept.";
     case "sourceCase":      return "A year-long case study: SOURCE, the energy performance management dashboard that made building and solar data visible to the people who owned it.";
+    case "visaCardCase": return "Malaysia's first CSR-linked and first numberless Visa prepaid card — the artwork, the numberless in-app experience, and the RM1,000,000 it raised for United Voice.";
     case "brandPerceptionCase": return "Shifting how 23 million people saw a wallet app — a brand perception framework, the UX strategy behind it, and how it was measured.";
     case "kaiCase": return "A design sprint case study: KAI, a mobile app for controlling a building's IoT machines and cutting Maximum Demand charges.";
     case "awards":       return "UX Leader of the Year finalist, with speaking and panel appearances across Australia, Europe and Asia.";
@@ -6361,6 +7110,7 @@ function titleOf(page: Page, detailKey?: string | null): string {
     case "appleHealthCase": return `Apple Health: Design Challenge — ${SITE_TITLE}`;
     case "sourceCase":      return `SOURCE: Energy Performance Management Dashboard — ${SITE_TITLE}`;
     case "finTechCase":     return `FinTech: Balancing User Preference & Business Result — ${SITE_TITLE}`;
+    case "visaCardCase": return `TNG eWallet Visa Card — ${SITE_TITLE}`;
     case "brandPerceptionCase": return `Brand Perception & UX Strategy — ${SITE_TITLE}`;
     case "awards":          return `Awards & Speaking — ${SITE_TITLE}`;
     case "speaking":        return ev ? `${ev.role} — ${ev.event} — ${SITE_TITLE}` : `Awards & Speaking — ${SITE_TITLE}`;
@@ -6380,6 +7130,7 @@ export default function App() {
   const [detailKey, setDetailKey] = useState<string | null>(first.detailKey);
   const [isDark, setIsDark]       = useState(false);
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
+  const reduceMotion = useReducedMotion();
 
   // Reset the shared accordion state whenever the page changes so a
   // stale open id from the previous page can't accidentally collide.
@@ -6403,6 +7154,13 @@ export default function App() {
   const [workDetailOrigin, setWorkDetailOrigin] = useState<Page>("work");
   const workSectionIdx = SECTIONS.findIndex(s => s.key === "work");
   const [homeInitialIdx, setHomeInitialIdx] = useState(0);
+  // Where the one logomark is on its journey: 0 over the hero's corner, 1 in
+  // the rail. A motion value, not state, because on the homepage the deck
+  // writes the scroll into it frame by frame and App has no business
+  // re-rendering for that.
+  const heroProgress = useMotionValue(0);
+  // Bumped by goHome to send the deck back to the hero slide.
+  const [homeReset, setHomeReset] = useState(0);
 
   const navigateToWorkDetail = (key: string) => {
     setWorkDetailOrigin(page === "home" ? "home" : "work");
@@ -6433,7 +7191,9 @@ export default function App() {
   // Case-study pages are a drill-in from the Work list; they animate as an
   // expansion of the row rather than as a new screen sliding in.
   const drillIn = page === "workDetail" || page === "businessCase" || page === "kaiCase"
-    || page === "appleHealthCase" || page === "brandPerceptionCase" || page === "sourceCase" || page === "finTechCase";
+    || page === "appleHealthCase" || page === "brandPerceptionCase" || page === "sourceCase" || page === "finTechCase"
+    || page === "visaCardCase";
+
 
   useEffect(() => {
     setDetailHeaderScrolled(false);
@@ -6445,17 +7205,45 @@ export default function App() {
   // study read as the whole window reloading. It now lives out here, mounted
   // once, and only its active item changes as the route does — the bar itself
   // never moves. The homepage is the exception; its nav travels with the deck.
-  // The rail is desktop chrome for every page but the homepage, whose deck
-  // owns the full width.
-  const railOn = page !== "home";
+  // The rail is desktop chrome everywhere except the homepage's first slide,
+  // which is where the mark is introduced and still carries its own. Swiping
+  // the deck past that slide is a section change without a page change, so it
+  // has to count: otherwise the deck runs from Work to Connect with the hero's
+  // mark scrolled off and the rail's not yet shown.
+  // The boolean the rest of the site asks for — is the mark in the rail —
+  // taken off the same journey at its midpoint. React only re-renders when it
+  // crosses.
+  const [railOn, setRailOn] = useState(false);
+  useMotionValueEvent(heroProgress, "change", t => setRailOn(t > 0.5));
+  // Leaving the homepage there is no deck scroll to ride, so the mark tweens.
+  // The first route of a session is not a journey at all — a deep link opens
+  // with the mark already in the rail.
+  const routed = useRef(false);
+  useEffect(() => {
+    const first = !routed.current;
+    routed.current = true;
+    if (page === "home") return;   // the deck owns the value while it is mounted
+    if (first) { heroProgress.set(1); setRailOn(true); return; }
+    const controls = animate(heroProgress, 1, reduceMotion ? { duration: 0 } : { duration: 0.55, ease: [0.22, 1, 0.36, 1] });
+    return () => controls.stop();
+  }, [page, heroProgress, reduceMotion]);
+  // The mark showing and the page making room for it are different questions.
+  // The homepage deck is a full-bleed track whose slides are each a viewport
+  // wide; insetting it mid-swipe shoved it 126px sideways and narrowed every
+  // slide. On the deck the mark simply sits over it, as chrome.
+  const railInset = page !== "home";
   // The strip the rail occupies is root, not page, so it has to take the
   // page's own colour or the mark sits on a band of the wrong one beside the
   // content. Two pages set their own: the KAI case is a white document, and
   // a speaking event flagged `dark` runs near-black behind its hero.
   // Everything else is the site's cream.
+  // A case study is a document, and a document is on white. The site's cream
+  // is the ground the portfolio sits on; inside a case the work is the page.
+  // KAI had this to itself — the rest of the cases now read the same way.
+  // DEEP_PAGES is the same six routes the phone nav treats as third level.
   const groundBg = isDark
     ? "#282828"
-    : page === "kaiCase"
+    : DEEP_PAGES.has(page)
       ? "#ffffff"
       : page === "speaking" && SPEAKING_DETAIL[detailKey ?? ""]?.dark
         ? "#030303"
@@ -6465,10 +7253,55 @@ export default function App() {
       page === "home" ? null
     : page === "work" || page === "workDetail" || page === "businessCase"
       || page === "kaiCase" || page === "appleHealthCase" || page === "brandPerceptionCase"
-      || page === "sourceCase" || page === "finTechCase" ? "work"
+      || page === "sourceCase" || page === "finTechCase" || page === "visaCardCase" ? "work"
     : page === "awards" || page === "speaking" ? "awards"
     : page === "speakingInquiry" ? "connect"
     : page;
+  // Which way the page travels. The mark does not move between pages — it is
+  // a fixed layer and the page slides under it — so the page has to carry the
+  // motion, or the mark reads as re-drawn on each load rather than as the one
+  // thing that stayed. Direction follows the nav's own order, the same left to
+  // right the homepage deck runs in, so moving forward through the bar sends
+  // the new page in from the right and going back sends it in from the left.
+  const navIdx = navActive ? SECTION_ORDER.indexOf(navActive as typeof SECTION_ORDER[number]) : 0;
+  const prevNavIdx = useRef(navIdx);
+  const slideDir = navIdx === prevNavIdx.current ? 0 : navIdx > prevNavIdx.current ? 1 : -1;
+  useEffect(() => { prevNavIdx.current = navIdx; }, [navIdx]);
+  const pageMotion = { dir: slideDir, drill: drillIn };
+
+  // Swiping between section pages. The homepage deck is a real scroll track;
+  // these are separate routes, so rather than mount all five at once the
+  // gesture is read and turned into a navigation — the page transition is
+  // already a cross-slide in the nav's own direction, so it lands the same way
+  // a deck slide would, and every page keeps its URL.
+  const swipeIdx = SWIPE_PAGES.indexOf(page);
+  const canSwipe = swipeIdx > 0;   // the hero has the deck's own gesture
+  const touchStart = useRef<{ x: number; y: number; t: number } | null>(null);
+  const onPageTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStart.current = { x: t.clientX, y: t.clientY, t: Date.now() };
+  };
+  const onPageTouchEnd = (e: React.TouchEvent) => {
+    const start = touchStart.current;
+    touchStart.current = null;
+    if (!start || !canSwipe) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    // Four ways a gesture is not this gesture: it began in the edge strip iOS
+    // uses for its own back swipe; it did not travel far enough to be
+    // deliberate; it was mostly vertical, which is the page scrolling; or it
+    // was slow, which is a drag rather than a flick.
+    if (start.x < 24) return;
+    if (Math.abs(dx) < 60) return;
+    if (Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    if (Date.now() - start.t > 600) return;
+    const next = swipeIdx + (dx < 0 ? 1 : -1);
+    if (next < 0 || next >= SWIPE_PAGES.length) return;
+    const target = SWIPE_PAGES[next];
+    if (target === "home") { goHome(); return; }
+    setPage(target);
+  };
   const toggleDark = useCallback(() => setIsDark(d => !d), []);
 
   // Router state -> address bar. The guard matters: without it the first
@@ -6476,6 +7309,21 @@ export default function App() {
   // push the entry it just came from, trapping the back button.
   useEffect(() => {
     applyRoute(page, detailKey, "push");
+  }, [page, detailKey]);
+
+  // Hover has to be asked for. A navigation leaves the pointer exactly where it
+  // was, so whatever the new page puts under it comes up hovered on arrival —
+  // on Business Acumen that was the second bullet, underlining itself before
+  // the reader had done anything. The class goes on at every route change and
+  // comes off at the first genuine pointer movement. Touch never sets it off:
+  // a tap emits pointermove at the tap point, which clears the flag with
+  // nothing hovered.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.add("nav-settling");
+    const clear = () => root.classList.remove("nav-settling");
+    window.addEventListener("pointermove", clear, { once: true });
+    return () => { window.removeEventListener("pointermove", clear); clear(); };
   }, [page, detailKey]);
 
   // Address bar -> router state, so back and forward move through the site
@@ -6495,9 +7343,14 @@ export default function App() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  // The mark always lands on the hero, whose own mark it grows into.
+  // The mark always lands on the hero, growing back into the corner it
+  // started from. Clearing leftHero here as well as on the deck's own mount
+  // means the flight back begins with the navigation rather than after it.
   const goHome = useCallback(() => {
     setHomeInitialIdx(0);
+    // Bumped every time, because the deck may already be mounted and on
+    // another slide — setPage alone is a no-op then.
+    setHomeReset(n => n + 1);
     setPage("home");
   }, []);
 
@@ -6505,7 +7358,6 @@ export default function App() {
     <DarkModeCtx.Provider value={isDark}>
     <DarkModeToggleCtx.Provider value={toggleDark}>
     <GoHomeCtx.Provider value={goHome}>
-    <RailCtx.Provider value={railOn}>
     <AccordionCtx.Provider value={{ openId: openAccordionId, setOpenId: setOpenAccordionId }}>
     <div className="relative w-screen h-dvh overflow-hidden"
       style={{ background: groundBg, transition: "background 0.3s ease", ["--rail-w" as string]: RAIL_W }}>
@@ -6526,12 +7378,20 @@ export default function App() {
           a white case study. Padding the page instead of insetting it would
           do the same in one line, but the pages whose roots are absolutely
           positioned ignore it. */}
-      <motion.div key={motionKey} className={`absolute inset-0${railOn ? " lg:left-[var(--rail-w)]" : ""}`}
-        style={{ zIndex: 1, transformOrigin: "50% 0%" }}
-        initial={drillIn ? { opacity: 0, scale: 0.965, y: 18 } : { opacity: 0, x: 0 }}
-        animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
+      <AnimatePresence initial={false} custom={pageMotion}>
+      <motion.div key={motionKey} className={`absolute inset-0${railInset ? " lg:left-[var(--rail-w)]" : ""}`}
+        onTouchStart={onPageTouchStart}
+        onTouchEnd={onPageTouchEnd}
+        // Horizontal overscroll stays inside the page: without this a swipe
+        // right hands the gesture to the browser's own back navigation, which
+        // leaves the site rather than moving a section. The OS edge swipe is
+        // untouched — that one starts in the strip the handler ignores.
+        style={{ zIndex: 1, transformOrigin: "50% 0%", overscrollBehaviorX: "contain" }}
+        custom={pageMotion}
+        variants={pageVariants}
+        initial="enter" animate="center" exit="exit"
         transition={{ duration: drillIn ? 0.5 : 0.45, ease: [0.42, 0, 0.58, 1] }}>
-        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} />}
+        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} heroProgress={heroProgress} resetSignal={homeReset} />}
         {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} /></div>}
         {page === "awards"   && <div className="absolute inset-0"><AwardsSpeakingPage onNavigate={navigateGeneral} /></div>}
         {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={navigateGeneral} /></div>}
@@ -6571,19 +7431,32 @@ export default function App() {
         {page === "sourceCase" && (
           <SourceCasePage onBack={() => { setDetailKey("cases"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
+        {page === "visaCardCase" && (
+          <VisaCardPage onBack={() => { setDetailKey("cases"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
+        )}
         {page === "finTechCase" && (
           <FinTechPage onBack={() => { setDetailKey("business"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
       </motion.div>
-      {railOn && <IdentityRail onNavigate={navigateGeneral} />}
+      </AnimatePresence>
+      {/* Outside the transition layer, and mounted for every page including
+          the homepage, so it is one element that persists rather than one
+          drawn again per route. On the homepage the hero carries its own mark,
+          so this one fades out rather than unmounting — unmounted, it popped
+          back on the first step away from home, which is the blink that made
+          the whole thing read as reloaded. */}
+      {canSwipe && <SectionProgress idx={swipeIdx} />}
+      <IdentityRail onNavigate={navigateGeneral} progress={heroProgress} visible={railOn} />
       {navActive && (
         <StickyPageNav activePage={navActive} onNavigate={navigateGeneral}
           tint={page === "speakingInquiry" || page === "speaking" ? GOLD : undefined}
-          isDeepPage={DEEP_PAGES.has(page)} />
+          isSubPage={DEEP_PAGES.has(page)} />
       )}
+      {/* Chrome, like the nav above it: one credit for the site rather than
+          one per page, outside the layer pages slide through. */}
+      <SiteCreditBar />
     </div>
     </AccordionCtx.Provider>
-    </RailCtx.Provider>
     </GoHomeCtx.Provider>
     </DarkModeToggleCtx.Provider>
     </DarkModeCtx.Provider>

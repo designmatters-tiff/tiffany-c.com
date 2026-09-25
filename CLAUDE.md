@@ -11,7 +11,7 @@ and the code disagree, the code wins.
 
 - **`BRAND.md`** — voice, tone, colour, motion, and the rules behind them. Read it
   before writing user-facing copy or adding anything visual. It also tracks open
-  brand items (including a broken form endpoint that blocks launch).
+  brand items.
 - `guidelines/Guidelines.md` is an untouched Figma Make template. Ignore it.
 - `README.md` is the generic Figma Make export blurb.
 
@@ -171,21 +171,30 @@ have each been walked back once already.
 
 - **360px is the narrowest width to check.** Not 390. The tight cases — the
   eCommerce breadcrumb, the paired social row on Connect — only bite there.
-  375x667 (iPhone SE) is worth a look too: the hero genuinely overflows at
-  that height and the slide scrolls. That is by design, not a bug to fix.
-- **Chrome is deliberately bare.** The bottom nav is a 44px hamburger pill at
-  bottom left — no name, no page label. Both only repeated what the page
-  already said, and cost the full width of the screen to do it.
+  375x667 (iPhone SE) is worth a look too: the hero now fits every phone size
+  checked, 360x667 through 430x932, with nothing scrolling. It took the body
+  copy dropping to `text-small` — the size the Work card descriptions use — on
+  top of the smaller mark and tighter top padding. Desktop keeps `text-body`.
+- **The phone nav is the homepage's pill, at every level.** First and second
+  level carry the wide pill — gradient, inset 24 each side, 56 tall, the
+  symbol with "Tiffany C." beside it and the section name on the right. Third
+  level carries the 44px square. It is one element that animates its own
+  width between the two, so the symbol never moves; `DEEP_PAGES` holds the six
+  third-level routes and decides which size. The desktop six-cell gradient bar
+  never appears on a phone: its labels either ellipsise or run off the edge,
+  and it repeats what the page heading says.
 - **The eyebrow line is shared, and something must hold it open.** The header
   logomark sits on that line, centred on it. Whatever else is there —
   breadcrumbs on a third-level page, a `text-label` eyebrow elsewhere — the
   row has to keep its height, or the heading rides up underneath the mark.
   When the breadcrumbs were briefly desktop-only, mobile needed an empty 18px
   spacer in their place for exactly this reason.
-- **The logomark is 24px on mobile, 28px on desktop.** Mobile centres it on
-  the eyebrow's line rather than hanging it from the top; the tap target stays
-  44px around it. The hover ring is desktop-only — nothing on a phone can
-  hover to reveal it.
+- **There is no logomark in a phone's top corner.** The pill carries
+  "Tiffany C." at the bottom of every page, so a second identity up there only
+  spent the eyebrow's line. `HeaderLogo` survives the md-to-lg band, where
+  there is no rail yet and the pill has given way to the bar; from lg the
+  identity rail carries it. The hero's own mark is 36px on a phone, sized so
+  the hero fits a screen.
 - **44px is the floor for anything tappable**, however small the thing inside
   it looks.
 - **Returning home lands on the hero, not on a matching slide.** The homepage
@@ -194,9 +203,16 @@ have each been walked back once already.
   the forward swipe dead on arrival. That reads as a broken gesture. Both the
   logomark and the menu's "Tiffany C." go to slide 0.
 - **Keep the hero above the fold.** `HERO_BOTTOM_RESERVE` accounts for the
-  floating nav, its offset and the safe-area inset. Anything added to the hero
-  competes with the body copy for the same screen — check it at 375x667 before
-  assuming it fits.
+  floating nav, its offset and the safe-area inset, and is not a place to
+  reclaim height — it is what holds the copy clear of the nav and the "swipe
+  to explore" line. Anything added to the hero competes with the body copy for
+  the same screen — check it at 375x667 before assuming it fits.
+- **Section pages swipe on a phone.** The five first-level routes read a
+  horizontal flick and navigate along the same track the homepage deck runs,
+  with the deck's own indicator. A flick is rejected if it starts in the 24px
+  OS edge strip, travels under 60px, is more vertical than horizontal, or
+  takes over 600ms. `overscroll-behavior-x: none` on html and body stops the
+  browser turning a swipe right into back-navigation out of the site.
 
 ## Analytics
 
@@ -231,9 +247,6 @@ case study images.
 
 Don't "fix" these as drive-by changes — they're known:
 
-- `SPEAKING_FORM_ENDPOINT` now points at a real Formspree form. Formspree only
-  starts forwarding once the registered address is confirmed, so one live
-  submission still needs sending to check it reaches the inbox.
 - The business case passcode (`PASSCODE` in `BusinessCasePage`) is a hardcoded
   client-side string. It's obfuscation for a portfolio piece, not security — the
   case study content ships in the JS bundle regardless. Fine as-is, but don't put

@@ -200,6 +200,15 @@
   a:not(.no-link-underline):not(:has(.link-underline)):hover::after {
     width: 100%;
   }
+  /* A navigation does not move the mouse, so whatever now sits under the
+     cursor comes up hovered before the reader has touched anything — landing
+     on Business Acumen, the second bullet drew its own underline. `nav-settling`
+     goes on <html> at every route change and comes off at the first real
+     pointer movement, so hover waits to be asked for. */
+  html.nav-settling .link-underline:hover::after,
+  html.nav-settling a:not(.no-link-underline):not(:has(.link-underline)):hover::after {
+    width: 0;
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .link-underline::after,
@@ -307,4 +316,39 @@
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
+}
+
+/* Horizontal overscroll must not become browser back-navigation. The section
+   pages read a horizontal flick as "move to the next section"; left to the
+   browser, a swipe right walks out of the site instead. The OS edge swipe is
+   unaffected — that is a system gesture, and the handler ignores anything
+   starting in the edge strip so the two never compete. */
+html, body {
+  overscroll-behavior-x: none;
+}
+
+/* The NDA watermark prints. It is the one thing on a gated page that has to
+   survive leaving the screen, so it is kept on paper rather than hidden
+   there — a printout or a print-to-PDF of the client work carries the terms
+   the same way a screenshot does.
+
+   Two adjustments for paper: browsers drop light backgrounds and washed-out
+   text when printing unless told not to, and 4% does not survive a printer's
+   own contrast handling, so the mark is set a little heavier here. */
+@media print {
+  [data-nda-watermark] {
+    display: block !important;
+    opacity: 0.1 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* Museo at display sizes sets a touch loose for a headline. Every h1 on the
+   site is a page title in it — "Work", "Awards & Speaking", a case study's
+   name — so the tightening belongs on the element rather than on each of the
+   twenty-odd places one is written. -2% of the font size, so it scales with
+   the clamp rather than being a fixed nudge that over-tightens the small end. */
+h1 {
+  letter-spacing: -0.02em;
 }
