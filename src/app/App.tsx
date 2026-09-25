@@ -58,15 +58,6 @@ import awardsFoF2024Mobile from "@/imports/AwardsSpeaking/FoF 2024/mobile_fof202
 import awardsDesignKL from "@/imports/AwardsSpeaking/Design Leadership KL/DLKL2023.avif";
 import awardsDesignKLTiff from "@/imports/AwardsSpeaking/Design Leadership KL/DLKL2023-tiff.avif";
 import profilePhoto from "@/imports/Profile/tiff-headshot.avif";
-import vcTestCard from "@/work/case/visacsr/test-card.avif";
-import vcWelcomePack from "@/work/case/visacsr/welcome-pack.avif";
-import vcAppDetails from "@/work/case/visacsr/app-card-details.avif";
-import vcAppDeactivate from "@/work/case/visacsr/app-deactivate.avif";
-import vcAppHideDetails from "@/work/case/visacsr/app-hide-details.avif";
-import vcBenchWise from "@/work/case/visacsr/bench-wise.avif";
-import vcBenchBigPay from "@/work/case/visacsr/bench-bigpay.avif";
-import vcLaunch from "@/work/case/visacsr/launch.avif";
-import vcCheque from "@/work/case/visacsr/cheque.avif";
 import foggModel from "@/work/business/eCommerce/Fogg behavioural model.avif";
 import graphResult from "@/work/business/eCommerce/graph-result.avif";
 import interventionImg from "@/work/business/eCommerce/the intervention.avif";
@@ -2267,15 +2258,16 @@ const EXPERTISE_CARDS = [
 
 // Work-card bullets that are really links into a case study. Keyed on the
 // bullet's exact text, so the copy above stays the single place it is written.
-// Brand Perception is deliberately absent: the page is finished enough to
-// read at its own URL but not signed off, so the Work index names it without
-// opening it. Putting the line back here is all it takes to link it.
+// Brand Perception and the Visa card are deliberately absent: both are
+// finished enough to read at their own URL but not signed off — Brand
+// Perception pending review, the Visa card pending its images — so the Work
+// index names them without opening them. A line here is all it takes to link
+// either one.
 const BULLET_LINKS: Record<string, Page> = {
   "eCommerce: Behavioural UX Design (passcode required)": "businessCase",
   "KAI — Mobile app for IoT device control": "kaiCase",
   "Apple Health — Design Challenge": "appleHealthCase",
   "SOURCE — Energy performance management dashboard": "sourceCase",
-  "TNG eWallet Visa Card — Malaysia's first numberless card": "visaCardCase",
   "FinTech: Balancing user preference & business result (passcode required)": "finTechCase",
 };
 
@@ -3543,39 +3535,42 @@ function VisaCardContent() {
   const MEASURE = '68ch';
   const FIGURE_MAX = 760;
 
+  // Five fields. Team size is absent on purpose rather than empty — a field
+  // with nothing in it says the page is unfinished, which is not what is meant.
   const META: [string, React.ReactNode][] = [
     ["Year", "Feb 2022 to Jan 2023"],
     ["Client", (
       <a href={TNG_DIGITAL_URL} target="_blank" rel="noopener noreferrer"
         className="link-underline" style={{ color: fg }}>Touch &apos;n Go eWallet</a>
     )],
-    ["Goal", "Extend the eWallet beyond DuitNow QR"],
+    ["Goal", "Launch a physical prepaid card alongside the app's new financial services"],
     ["Scope", "Card design, artwork selection, user survey, welcome pack, in-app card experience, print production"],
-    // TODO: Tiffany to fill these two.
-    ["Role", "[Role]"],
-    ["Team size", "[Team size]"],
+    ["Role", "Head of Product Design"],
   ];
 
-  const Fig = ({ src, alt, caption, max = FIGURE_MAX }: { src: string; alt: string; caption?: string; max?: number }) => (
-    <figure style={{ margin: '28px 0 0' }}>
-      <img src={src} alt={alt} loading="lazy" className="mx-auto md:mx-0"
-        style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
-      {caption && (
-        <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
-          {caption}
-        </figcaption>
-      )}
+  // Stands in for artwork still to come. A dashed outline in the section
+  // rule's own colour, holding its ratio — not a grey block, which reads as an
+  // image that failed to load. The frame is decoration and says nothing, so it
+  // is hidden from a screen reader and the caption carries the meaning.
+  // Swapping real artwork in is one line: FigPlaceholder to Fig.
+  const FigPlaceholder = ({ caption, ratio = "16/9" }: { caption: string; ratio?: string }) => (
+    <figure style={{ margin: '28px 0 0', width: '100%', maxWidth: FIGURE_MAX }}>
+      <div aria-hidden="true" className="flex items-center justify-center"
+        style={{ aspectRatio: ratio, border: `1px dashed ${rule}`, borderRadius: 12, background: 'transparent', padding: 16 }} />
+      <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+        {caption}
+      </figcaption>
     </figure>
   );
 
-  // A row of shots that belong together, with one caption under the set. The
-  // grid is the figure; a caption per image would read as three figures.
-  const FigRow = ({ items, cols, caption }: { items: { src: string; alt: string }[]; cols: string; caption: string }) => (
+  // A set of frames that belong together, under one caption. The row is the
+  // figure; a caption each would read as three figures rather than one.
+  const FigRow = ({ count, cols, ratio, caption }: { count: number; cols: string; ratio: string; caption: string }) => (
     <figure style={{ margin: '28px 0 0', maxWidth: FIGURE_MAX }}>
       <div className={`grid gap-4 ${cols}`}>
-        {items.map(it => (
-          <img key={it.src} src={it.src} alt={it.alt} loading="lazy"
-            style={{ width: '100%', display: 'block', borderRadius: 8 }} />
+        {Array.from({ length: count }, (_, i) => (
+          <div key={i} aria-hidden="true"
+            style={{ aspectRatio: ratio, border: `1px dashed ${rule}`, borderRadius: 12, background: 'transparent' }} />
         ))}
       </div>
       <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
@@ -3618,8 +3613,9 @@ function VisaCardContent() {
 
       <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
         <P top={0}>
-          The eWallet could only be spent where a DuitNow QR code was accepted. The TNG eWallet Visa card
-          opened the rest: merchants without QR, ATM withdrawals, and payments overseas.
+          The card was to launch alongside a set of new financial services in the app. It also closed a real
+          gap: the eWallet could only be spent where a DuitNow QR code was accepted, and the card opened the
+          rest, including merchants without QR, ATM withdrawals and payments overseas.
         </P>
         <P top={16}>
           It launched on <Figures>18 January 2023</Figures> as two firsts for Malaysia. The first CSR-linked
@@ -3634,11 +3630,11 @@ function VisaCardContent() {
           the problem. The card had no reason that anyone could agree on, so every design was arguable and none
           was decidable.
         </P>
-        <Fig src={vcTestCard} alt="An unprinted mock test card"
+        <FigPlaceholder ratio="3/2"
           caption="Mock card, test-printed overseas to check how the gradient and the yellow edge held on the real substrate." />
       </section>
 
-      {/* ── The Turn ── */}
+      {/* ── The turn ── */}
       <Section id="vc-turn">
         <H2>The Turn</H2>
         <P top={0}>
@@ -3653,14 +3649,14 @@ function VisaCardContent() {
         {/* No figure here on purpose: the turn was a decision, not an artefact. */}
       </Section>
 
-      {/* ── The Choice ── */}
+      {/* ── The choice ── */}
       <Section id="vc-choice">
         <H2>The Choice</H2>
         <P top={0}>
           Selecting from the artists&apos; work, I chose a painting by Damien Wong. Two reasons, at once: it
           would still look right in five years, and its colours already sat inside our brand palette. A card
           lives in a wallet for years and cannot be reissued on a whim, so ageing well was a requirement, not a
-          preference. [Colleague] seconded it.
+          preference.
         </P>
         <P top={16}>
           Blue, green and yellow, mostly splashes. Damien describes it as &ldquo;In my eyes, this is how the
@@ -3670,7 +3666,7 @@ function VisaCardContent() {
           The painting had been rejected by the client it was made for, because the canvas was an odd size, and
           had sat unsold for years. The proceeds from its purchase went directly to him.
         </P>
-        <Fig src={vcWelcomePack} alt="The physical card carrier"
+        <FigPlaceholder ratio="4/3"
           caption="The card carrier, which tells Damien's story alongside the activation steps in English and Malay." />
       </Section>
 
@@ -3687,21 +3683,12 @@ function VisaCardContent() {
           We benchmarked the onboarding against Wise and BigPay, both of which were solving the same problem of
           getting a physical card into use from inside an app.
         </P>
-        <FigRow cols="md:grid-cols-3"
-          items={[
-            { src: vcAppDetails, alt: "The Visa Card screen with the card details visible" },
-            { src: vcAppHideDetails, alt: "The Visa Card screen with the card details hidden" },
-            { src: vcAppDeactivate, alt: "The confirmation dialog for temporarily deactivating the card" },
-          ]}
+        <FigRow count={3} cols="md:grid-cols-3" ratio="9/16"
           caption="Details revealed, details hidden, and the confirmation before a card is deactivated." />
 
         <div style={{ marginTop: 40 }}>
           <Label>Onboarding benchmarks</Label>
-          <FigRow cols="md:grid-cols-2"
-            items={[
-              { src: vcBenchWise, alt: "The Wise welcome pack" },
-              { src: vcBenchBigPay, alt: "The BigPay welcome pack" },
-            ]}
+          <FigRow count={2} cols="md:grid-cols-2" ratio="3/4"
             caption="Wise and BigPay welcome packs, reviewed for how they carry a user from a posted card to a working one." />
         </div>
       </Section>
@@ -3714,8 +3701,8 @@ function VisaCardContent() {
           prepaid card, and its first numberless one.
         </P>
         <P top={16}>
-          At the launch, Damien&apos;s mother, Nora Tan, spoke. She said she had never seen him paint with the
-          enthusiasm he brought to that canvas.
+          At the launch, Damien&apos;s mother spoke. She said she had never seen him paint with the enthusiasm
+          he brought to that canvas.
         </P>
         <P top={16}>
           A year later, in January 2024, TNG Digital and Visa presented United Voice with
@@ -3726,10 +3713,8 @@ function VisaCardContent() {
         <P top={16}>
           The card has since been discontinued.
         </P>
-        <Fig src={vcLaunch} alt="The launch event on 18 January 2023"
-          caption="Launch, 18 January 2023." />
-        <Fig src={vcCheque} alt="The RM1,000,000 presentation to United Voice in January 2024"
-          caption="RM1,000,000 presented to United Voice, January 2024." />
+        <FigPlaceholder ratio="3/2" caption="Launch, 18 January 2023." />
+        <FigPlaceholder ratio="3/2" caption="RM1,000,000 presented to United Voice, January 2024." />
       </Section>
 
     </div>
