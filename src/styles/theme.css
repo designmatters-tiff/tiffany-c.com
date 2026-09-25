@@ -343,3 +343,12 @@ html, body {
     print-color-adjust: exact;
   }
 }
+
+/* Museo at display sizes sets a touch loose for a headline. Every h1 on the
+   site is a page title in it — "Work", "Awards & Speaking", a case study's
+   name — so the tightening belongs on the element rather than on each of the
+   twenty-odd places one is written. -2% of the font size, so it scales with
+   the clamp rather than being a fixed nudge that over-tightens the small end. */
+h1 {
+  letter-spacing: -0.02em;
+}

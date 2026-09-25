@@ -3517,8 +3517,7 @@ const FT_SECTIONS: { id: string; label: string }[] = [
   { id: "ft-outcome",  label: "Outcome" },
   { id: "ft-pitfalls", label: "Pitfalls" },
   { id: "ft-findings", label: "Findings" },
-  { id: "ft-decision", label: "Decision" },
-  { id: "ft-learning", label: "Learnings" },
+  { id: "ft-decision", label: "Decision & Learning" },
 ];
 
 // The evidence for the outcome comes from three directions and they are not a
@@ -3578,19 +3577,15 @@ function FinTechContent() {
     ["Launched", "20 February 2023"],
   ];
 
-  // `radius` for the shots that are a device rather than a picture of one.
-  // The GO+ screen is a phone body cropped to its own bounding box, so the
-  // corner the artwork draws runs off the square edge of the file and the 8px
-  // every other figure takes leaves it with four hard corners. Given as a
-  // horizontal and vertical percentage pair, not one number — a single
-  // percentage on a box this tall resolves to an ellipse. The pair is 75px of
-  // the file's own 425x858 either way, which is the arc the device is drawn
-  // with, so it holds at whatever width the column gives it.
-  const PHONE_RADIUS = "17.6% / 8.7%";
+  // `radius` for the shots that are a phone rather than a picture of one: the
+  // two device mockups, which are a body cropped to its own bounding box, and
+  // the two raw app screenshots, which are edge-to-edge captures. All four end
+  // in four hard corners at the 8px every other figure takes.
+  const PHONE_RADIUS = 60;
   // `top` so a figure can head a column flush with the heading beside it —
   // 28px of clear air is right when it follows a paragraph, wrong when it is
   // the first thing in its own column.
-  const Fig = ({ src, alt, caption, max = FIGURE_MAX, radius, top = 28 }: { src: string; alt: string; caption?: string; max?: number; radius?: string; top?: number }) => (
+  const Fig = ({ src, alt, caption, max = FIGURE_MAX, radius, top = 28 }: { src: string; alt: string; caption?: string; max?: number; radius?: number; top?: number }) => (
     <figure style={{ margin: `${top}px 0 0` }}>
       <img src={src} alt={alt} loading="lazy" className="mx-auto md:mx-0"
         style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: radius ?? 8 }} />
@@ -3687,30 +3682,40 @@ function FinTechContent() {
               </P>
             </div>
           </div>
-          <Fig src={ftAccount} alt="The GO+ account screen inside TNG eWallet" max={320} radius={PHONE_RADIUS}
-            caption="GO+: balance, daily earnings, and the cash in and cash out the feature had to sit between." />
         </section>
 
         {/* ── Outcome ── */}
+        {/* The GO+ screen and what the feature did to it, side by side: the
+            shot used to sit alone at the end of the brief with the outcome
+            starting below it, so the screen being described was already off
+            the top by the time you read the numbers. */}
         <Section id="ft-outcome">
-          <H2>A middle ground for users and business</H2>
-          <P>
-            Quick Cash In — the refined version of what started as 'auto-sweeping' — struck the balance. It routes
-            future reloads, transfers and cashback into GO+ rather than taking control of the wallet, and it has
-            been written up in the press as the fix to a market problem.
-          </P>
-          <P>
-            Post-launch there were no major customer complaints, and users who understand the product applaud the
-            convenience. A minority still prefer to keep day-to-day spending separate from their investment
-            account, which is useful for the next iteration rather than a mark against this one.
-          </P>
-          <div style={{ marginTop: 24 }}>
-          <Label>What it delivered</Label>
-          <Bullets items={[
-            <Figures>30% increment in Assets Under Management (AUM) within the first three months</Figures>,
-            <Figures>4x more fund-in transactions</Figures>,
-            <Figures>1.25x growth in the user base</Figures>,
-          ]} />
+          <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
+            <div>
+              <Fig src={ftAccount} top={0} alt="The GO+ account screen inside TNG eWallet" radius={PHONE_RADIUS}
+                caption="GO+: balance, daily earnings, and the cash in and cash out the feature had to sit between." />
+            </div>
+            <div>
+              <H2>A middle ground for users and business</H2>
+              <P>
+                Quick Cash In — the refined version of what started as 'auto-sweeping' — struck the balance. It routes
+                future reloads, transfers and cashback into GO+ rather than taking control of the wallet, and it has
+                been written up in the press as the fix to a market problem.
+              </P>
+              <P>
+                Post-launch there were no major customer complaints, and users who understand the product applaud the
+                convenience. A minority still prefer to keep day-to-day spending separate from their investment
+                account, which is useful for the next iteration rather than a mark against this one.
+              </P>
+              <div style={{ marginTop: 24 }}>
+                <Label>What it delivered</Label>
+                <Bullets items={[
+                  <Figures>30% increment in Assets Under Management (AUM) within the first three months</Figures>,
+                  <Figures>4x more fund-in transactions</Figures>,
+                  <Figures>1.25x growth in the user base</Figures>,
+                ]} />
+              </div>
+            </div>
           </div>
 
           {/* Three directions of evidence, one at a time. */}
@@ -3755,15 +3760,15 @@ function FinTechContent() {
             {tab === "Users" && (
               <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
                 {/* Both sources — the point of the tab is that the reaction is
-                    mixed, and one screenshot only shows one side of it. Stacked
-                    rather than side by side: in half a column a pair of
-                    screenshots of small type is a picture of reviews rather
-                    than something you can read. */}
-                <div className="flex flex-col gap-4">
+                    mixed, and one screenshot only shows one side of it. Side by
+                    side inside the column: stacked, two full-height phone
+                    captures ran about 1,700px against 300 of text and the tab
+                    was mostly scrolling. */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <img src={ftReviews} alt="App Store ratings and reviews for TNG eWallet" loading="lazy"
-                    style={{ width: '100%', display: 'block', borderRadius: 8 }} />
+                    style={{ width: '100%', display: 'block', borderRadius: PHONE_RADIUS }} />
                   <img src={ftFacebook} alt="A Facebook thread discussing the GO+ change" loading="lazy"
-                    style={{ width: '100%', display: 'block', borderRadius: 8 }} />
+                    style={{ width: '100%', display: 'block', borderRadius: PHONE_RADIUS }} />
                 </div>
                 <div>
                   <p className="font-['Museo',sans-serif] font-light" style={{ color: fg, fontSize: 'clamp(1.25rem, 2vw, 1.75rem)', margin: 0, lineHeight: 1.2 }}>
@@ -3869,31 +3874,40 @@ function FinTechContent() {
         </Section>
 
         {/* ── Decision ── */}
+        {/* ── Decision & Learning ── */}
+        {/* One section, one dot. The decision and what it taught were two
+            stops on the rail with one screen between them; read together they
+            are the same argument, and the consent screen is the thing both
+            halves are about. */}
         <Section id="ft-decision">
-          <H2>Decision: product and business versus UX</H2>
-          <P>
-            The factor that shaped the final GO+ design was a mandatory user consent requirement identified with
-            Bank Negara Malaysia, the central bank. Working closely with the product and business teams, our User
-            Experience Design team's recommended option was what the final solution was built on — meeting the
-            regulatory demand while keeping the experience usable and compliant.
-          </P>
-          <Fig src={ftConsent} alt="The final Quick Cash In consent screen" max={320}
-            caption="The shipped screen: the benefit, the terms it consents to, and an equally available way out." />
-          <Lesson n={4} title="Take calculated risk">
-            Striking the product-design balance means assessing user input fairly while knowing the business
-            must-dos. This project underlined the importance of understanding the risks, managing user
-            expectations, and making brave, informed decisions.
-          </Lesson>
-        </Section>
-
-        {/* ── Learnings ── */}
-        <Section id="ft-learning">
-          <H2>Learnings</H2>
-          <Bullets items={[
-            <><strong style={{ color: ink, fontWeight: 600 }}>Design vision is crucial.</strong> For a design lead it is paramount to have absolute clarity on the business need and on the feasibility of design solutions, short and long term. That is what keeps a team moving in one direction.</>,
-            <><strong style={{ color: ink, fontWeight: 600 }}>Informed decision-making.</strong> For a product with no precedent in the market, collective decision-making from business stakeholders, combined with a deep understanding of user needs, becomes the guiding factor.</>,
-            <><strong style={{ color: ink, fontWeight: 600 }}>Consistent communication.</strong> Leadership has to keep communicating with both internal and external teams. It builds a habit of learning from challenges and the awareness to head off the same problem next time — even when the approach that ships is simpler than the one planned.</>,
-          ]} />
+          <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
+            <div>
+              <Fig src={ftConsent} top={0} alt="The final Quick Cash In consent screen" radius={PHONE_RADIUS}
+                caption="The shipped screen: the benefit, the terms it consents to, and an equally available way out." />
+            </div>
+            <div>
+              <H2>Decision &amp; Learning: product and business versus UX</H2>
+              <P>
+                The factor that shaped the final GO+ design was a mandatory user consent requirement identified with
+                Bank Negara Malaysia, the central bank. Working closely with the product and business teams, our User
+                Experience Design team's recommended option was what the final solution was built on — meeting the
+                regulatory demand while keeping the experience usable and compliant.
+              </P>
+              <Lesson n={4} title="Take calculated risk">
+                Striking the product-design balance means assessing user input fairly while knowing the business
+                must-dos. This project underlined the importance of understanding the risks, managing user
+                expectations, and making brave, informed decisions.
+              </Lesson>
+              <div style={{ marginTop: 24 }}>
+                <Label>Learnings</Label>
+                <Bullets items={[
+                  <><strong style={{ color: ink, fontWeight: 600 }}>Design vision is crucial.</strong> For a design lead it is paramount to have absolute clarity on the business need and on the feasibility of design solutions, short and long term. That is what keeps a team moving in one direction.</>,
+                  <><strong style={{ color: ink, fontWeight: 600 }}>Informed decision-making.</strong> For a product with no precedent in the market, collective decision-making from business stakeholders, combined with a deep understanding of user needs, becomes the guiding factor.</>,
+                  <><strong style={{ color: ink, fontWeight: 600 }}>Consistent communication.</strong> Leadership has to keep communicating with both internal and external teams. It builds a habit of learning from challenges and the awareness to head off the same problem next time — even when the approach that ships is simpler than the one planned.</>,
+                ]} />
+              </div>
+            </div>
+          </div>
         </Section>
 
       </div>
