@@ -1299,7 +1299,7 @@ const HERO_BOTTOM_RESERVE = "calc(5% + 80px + env(safe-area-inset-bottom))";
 
 // ─── Homepage ─────────────────────────────────────────────────────
 
-export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onLeftHero }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number; onLeftHero?: (left: boolean) => void }) {
+export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onLeftHero, resetSignal = 0 }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number; onLeftHero?: (left: boolean) => void; resetSignal?: number }) {
   const isDark = useContext(DarkModeCtx);
   const pageBg  = isDark ? "#282828" : "#f8f7f5";
   const fg      = isDark ? GOLD : INK;
@@ -1374,6 +1374,16 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onLeftHero 
     el.scrollTo({ left: clamped * el.clientWidth, behavior: "smooth" });
     resetTimer();
   }, [resetTimer]);
+
+  // "Go home" from anywhere in the site means the hero. From another page
+  // that is a mount and initialIdx handles it, but from inside the deck the
+  // page is already "home", so setPage("home") changes nothing, nothing
+  // moved, and the address bar kept the section's route. This is the deck's
+  // half of it: a bumped signal scrolls the track back to slide 0, and the
+  // scroll rewrites the URL on its way.
+  useEffect(() => {
+    if (resetSignal > 0) goTo(0);
+  }, [resetSignal, goTo]);
 
   // Restores horizontal-swipe position when returning from a Work
   // detail page — jumps instantly (no smooth scroll) so it doesn't
@@ -6714,6 +6724,8 @@ export default function App() {
   // Whether the homepage deck has moved off the hero slide, which is what
   // decides where the one logomark lives.
   const [leftHero, setLeftHero] = useState(false);
+  // Bumped by goHome to send the deck back to the hero slide.
+  const [homeReset, setHomeReset] = useState(0);
 
   const navigateToWorkDetail = (key: string) => {
     setWorkDetailOrigin(page === "home" ? "home" : "work");
@@ -6881,6 +6893,9 @@ export default function App() {
   const goHome = useCallback(() => {
     setHomeInitialIdx(0);
     setLeftHero(false);
+    // Bumped every time, because the deck may already be mounted and on
+    // another slide — setPage alone is a no-op then.
+    setHomeReset(n => n + 1);
     setPage("home");
   }, []);
 
@@ -6922,7 +6937,7 @@ export default function App() {
         variants={pageVariants}
         initial="enter" animate="center" exit="exit"
         transition={{ duration: drillIn ? 0.5 : 0.45, ease: [0.42, 0, 0.58, 1] }}>
-        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} onLeftHero={setLeftHero} />}
+        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} onLeftHero={setLeftHero} resetSignal={homeReset} />}
         {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} /></div>}
         {page === "awards"   && <div className="absolute inset-0"><AwardsSpeakingPage onNavigate={navigateGeneral} /></div>}
         {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={navigateGeneral} /></div>}
