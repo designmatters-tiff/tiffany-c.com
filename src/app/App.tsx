@@ -3984,7 +3984,12 @@ function FinTechPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
             <NavClearance />
           </>
         ) : (
-          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560 }}>
+          // content-box, so the 560 caps the column and not the column plus its
+          // gutter. Border-box made it 560 including md:px-20, leaving a 400px
+          // measure that the NDA line missed fitting on one line by nine
+          // pixels — so it wrapped, on a desktop screen with the whole
+          // right-hand side empty.
+          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560, boxSizing: 'content-box' }}>
             <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>This work was produced under NDA. Access available on request.</p>
             <p className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM, marginTop: 8 }}>This page requires passcode</p>
 
@@ -6537,7 +6542,12 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
             <NavClearance />
           </>
         ) : (
-          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560 }}>
+          // content-box, so the 560 caps the column and not the column plus its
+          // gutter. Border-box made it 560 including md:px-20, leaving a 400px
+          // measure that the NDA line missed fitting on one line by nine
+          // pixels — so it wrapped, on a desktop screen with the whole
+          // right-hand side empty.
+          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560, boxSizing: 'content-box' }}>
             <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>This work was produced under NDA. Access available on request.</p>
             <p className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM, marginTop: 8 }}>This page requires passcode</p>
 
@@ -6649,7 +6659,12 @@ function BrandPerceptionPage({ onBack, onNavigate }: { onBack: () => void; onNav
             <NavClearance />
           </>
         ) : (
-          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560 }}>
+          // content-box, so the 560 caps the column and not the column plus its
+          // gutter. Border-box made it 560 including md:px-20, leaving a 400px
+          // measure that the NDA line missed fitting on one line by nine
+          // pixels — so it wrapped, on a desktop screen with the whole
+          // right-hand side empty.
+          <div className="px-6 md:px-20 pt-8 pb-10" style={{ maxWidth: 560, boxSizing: 'content-box' }}>
             <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>This work was produced under NDA. Access available on request.</p>
             <p className="font-['Nunito_Sans',sans-serif]" style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM, marginTop: 8 }}>This page requires passcode</p>
 
