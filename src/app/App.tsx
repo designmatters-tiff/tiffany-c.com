@@ -3578,10 +3578,19 @@ function FinTechContent() {
     ["Launched", "20 February 2023"],
   ];
 
-  const Fig = ({ src, alt, caption, max = FIGURE_MAX }: { src: string; alt: string; caption?: string; max?: number }) => (
+  // `radius` for the shots that are a device rather than a picture of one.
+  // The GO+ screen is a phone body cropped to its own bounding box, so the
+  // corner the artwork draws runs off the square edge of the file and the 8px
+  // every other figure takes leaves it with four hard corners. Given as a
+  // horizontal and vertical percentage pair, not one number — a single
+  // percentage on a box this tall resolves to an ellipse. The pair is 75px of
+  // the file's own 425x858 either way, which is the arc the device is drawn
+  // with, so it holds at whatever width the column gives it.
+  const PHONE_RADIUS = "17.6% / 8.7%";
+  const Fig = ({ src, alt, caption, max = FIGURE_MAX, radius }: { src: string; alt: string; caption?: string; max?: number; radius?: string }) => (
     <figure style={{ margin: '28px 0 0' }}>
       <img src={src} alt={alt} loading="lazy" className="mx-auto md:mx-0"
-        style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
+        style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: radius ?? 8 }} />
       {caption && (
         <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
           {caption}
@@ -3675,7 +3684,7 @@ function FinTechContent() {
               </P>
             </div>
           </div>
-          <Fig src={ftAccount} alt="The GO+ account screen inside TNG eWallet" max={320}
+          <Fig src={ftAccount} alt="The GO+ account screen inside TNG eWallet" max={320} radius={PHONE_RADIUS}
             caption="GO+: balance, daily earnings, and the cash in and cash out the feature had to sit between." />
         </section>
 
