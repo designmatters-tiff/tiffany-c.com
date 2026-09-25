@@ -4959,6 +4959,28 @@ const OPEN_PUSH = 140;
 function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true, compact = false, headerScrolled = false }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; embedded?: boolean; isActive?: boolean; compact?: boolean; headerScrolled?: boolean }) {
   const isDark = useContext(DarkModeCtx);
   const bg = "transparent";
+  // Embedded, the deck tells this page whether it has been scrolled. Standalone
+  // nothing did, so the prop stayed false and the sticky header never picked up
+  // its frosted ground — the rows slid straight through the heading.
+  //
+  // Work is the one section page that does not bring its own scroll container:
+  // standalone it sits inside App's page wrapper. So it finds that wrapper and
+  // listens to it, rather than growing a scroller of its own and changing how
+  // the page is laid out.
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [selfScrolled, setSelfScrolled] = useState(false);
+  useEffect(() => {
+    if (embedded) return;
+    let el: HTMLElement | null = rootRef.current?.parentElement ?? null;
+    while (el && !/auto|scroll/.test(getComputedStyle(el).overflowY)) el = el.parentElement;
+    if (!el) return;
+    const scroller = el;
+    const onScroll = () => setSelfScrolled(scroller.scrollTop > 24);
+    onScroll();
+    scroller.addEventListener("scroll", onScroll, { passive: true });
+    return () => scroller.removeEventListener("scroll", onScroll);
+  }, [embedded]);
+  const scrolled = embedded ? headerScrolled : selfScrolled;
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
 
   // Opening a card is an animation, not a jump: the chosen row's rules part —
@@ -4990,7 +5012,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
     // Standalone, a column: on a tall screen the five rows do not reach the
     // bottom, and the credit line has to end up 16px off the nav wherever the
     // list stops. Embedded in the deck the slide owns its own height.
-    <div className={`relative w-full${embedded ? "" : " flex flex-col"}`} style={{ minHeight: embedded ? "100%" : "100dvh", background: bg }}>
+    <div ref={rootRef} className={`relative w-full${embedded ? "" : " flex flex-col"}`} style={{ minHeight: embedded ? "100%" : "100dvh", background: bg }}>
       {/* Page heading — sticky so it stays visible while the rows below
           scroll past it, shrinking once the mobile "View more" cap lifts.
           Transparent at rest so the multicolour background shows through;
@@ -4999,10 +5021,10 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           behind it. */}
       <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
         style={{
-          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
-          backdropFilter: headerScrolled ? "blur(8px)" : "none",
-          WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
-          borderBottom: `1px solid ${headerScrolled ? brd : "transparent"}`,
+          background: scrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
+          backdropFilter: scrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(8px)" : "none",
+          borderBottom: `1px solid ${scrolled ? brd : "transparent"}`,
           paddingBottom: compact ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
