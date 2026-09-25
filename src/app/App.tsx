@@ -308,7 +308,6 @@ const HERO_MARK = {
 const GoHomeCtx = createContext<(() => void) | null>(null);
 // True wherever the identity rail is on screen, so the desktop credit knows
 // to hang off the rail's edge rather than the page's.
-const RailCtx = createContext(false);
 
 // `className` is how a caller makes the mark responsive: the width/height
 // attributes are the default, and Tailwind sizing classes override them.
@@ -856,7 +855,6 @@ function SpeakingInquiryPage({ onBack, onNavigate, headerScrolled = false, scrol
         {/* Fills whatever the content leaves, so the credit line lands on
             the nav rather than stopping wherever the copy happens to end. */}
         <div className="flex-1" />
-        <SiteFooter gutter={false} />
         <NavClearance />
       </div>
 
@@ -1089,17 +1087,23 @@ function SiteCredit({ align = "left" }: { align?: "left" | "right" }) {
   );
 }
 
-// Desktop only. On a phone the credit lives in the menu, on the row that
-// closes it — the two viewports carry it differently on purpose, so a small
-// screen does not spend its last line on a credit.
-function SiteFooter({ gutter = true }: { gutter?: boolean }) {
-  // With the rail on, the credit pulls back across it so it starts on the
-  // logomark's column, not the page's. It is the site's byline rather than
-  // this page's, and the mark is where the site signs itself.
-  const rail = useContext(RailCtx);
+// Desktop only, and site chrome rather than page content — one line under the
+// nav bar, in the strip the phone gives its page indicator, at the same offset
+// from the bottom. On a phone the credit lives in the menu instead, on the row
+// that closes it, so a small screen does not spend its last line on a byline.
+//
+// It used to end each page's content and pull back across the rail to start on
+// the logomark's column. That column is unreachable from inside a page: past
+// the homepage the page layer is offset to clear the rail and it scrolls, so
+// it clips horizontally too, and the pull took the line straight into the
+// clipped strip — it read as "and built by Tiffany Chew" with the first word
+// gone. Out here the left inset is simply the bar's own, which is the mark's
+// column as well.
+function SiteCreditBar() {
   return (
-    <div className={`hidden md:block${gutter ? " px-6 md:px-20" : ""}${rail ? " lg:-ml-[var(--rail-w)]" : ""}`}
-      style={{ marginTop: 24 }}>
+    <div className="hidden md:block fixed z-30 pointer-events-none"
+      style={{ left: RAIL_GUTTER, right: RAIL_GUTTER,
+               bottom: `calc(${NAV_UNDERLINE_BOTTOM} + env(safe-area-inset-bottom))` }}>
       <SiteCredit />
     </div>
   );
@@ -1245,6 +1249,9 @@ const navFade = (isDark: boolean): React.CSSProperties => ({
 // spacing — ended up touching the pill.
 const NAV_BOTTOM = "5%";
 const NAV_BOTTOM_DVH = "5dvh";
+// The strip beneath the nav bar. A phone puts its page indicator there; a
+// desktop screen puts the credit there. One constant so the two cannot drift.
+const NAV_UNDERLINE_BOTTOM = "2%";
 // The wide pill's height. Clearance is figured from this rather than from the
 // 44px square, so the taller of the two is always cleared.
 const MOBILE_NAV_BAR = 56;
@@ -2304,7 +2311,6 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
         {/* Fills whatever the content leaves, so the credit line lands on
             the nav rather than stopping wherever the copy happens to end. */}
         <div className="flex-1" />
-        <SiteFooter gutter={false} />
         <NavClearance />
       </div>
     </div>
@@ -2994,7 +3000,6 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
         </div>
 
         <KaiCaseContent />
-        <SiteFooter />
         <NavClearance />
       </div>
       <CaseSectionRail scrollRef={scrollRef} sections={KAI_SECTIONS} />
@@ -3414,7 +3419,6 @@ function SourceCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate
         </div>
 
         <SourceCaseContent />
-        <SiteFooter />
         <NavClearance />
       </div>
       <CaseSectionRail scrollRef={scrollRef} sections={SOURCE_SECTIONS} />
@@ -3852,7 +3856,6 @@ function FinTechPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
           <>
             <FinTechContent />
             <NdaNotice />
-            <SiteFooter />
             <NavClearance />
           </>
         ) : (
@@ -4255,7 +4258,6 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
         </div>
 
         <AppleHealthContent />
-        <SiteFooter />
         <NavClearance />
       </div>
       <CaseSectionRail scrollRef={scrollRef} sections={AH_SECTIONS} />
@@ -4290,7 +4292,7 @@ function SectionProgress({ idx }: { idx: number }) {
   const isDark = useContext(DarkModeCtx);
   return (
     <div className="md:hidden fixed z-30 flex items-center pointer-events-none"
-      style={{ bottom: "calc(2% + env(safe-area-inset-bottom))", left: 24, right: 24 }}>
+      style={{ bottom: `calc(${NAV_UNDERLINE_BOTTOM} + env(safe-area-inset-bottom))`, left: 24, right: 24 }}>
       <div className="rounded-full transition-all duration-300"
         style={{ width: `${((idx + 1) / SWIPE_PAGES.length) * 100}%`, height: 2, background: GOLD, flexShrink: 0 }} />
       {idx < SWIPE_PAGES.length - 1 && (
@@ -4647,7 +4649,6 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
         {/* Takes up whatever the rows leave, so the credit line lands on the
             nav rather than floating under the last divider. */}
         {!embedded && <div className="flex-1" />}
-        {!embedded && <SiteFooter />}
         <NavClearance />
       </div>
 
@@ -4717,7 +4718,6 @@ function ContactListPage({
         </div>
       </div>
 
-      <SiteFooter />
       <NavClearance />
     </div>
   );
@@ -5099,7 +5099,6 @@ function TestimonialsPage({
               className="link-underline" style={{ color: accent }}>ADPList</a>.
           </p>
 
-          {!embedded && <SiteFooter gutter={false} />}
           <NavClearance />
         </div>
     </>
@@ -5508,7 +5507,6 @@ function AwardsSpeakingPage({
         ))}
       </div>
 
-      {!embedded && <SiteFooter />}
       <NavClearance />
     </>
   );
@@ -5756,7 +5754,6 @@ function SpeakingDetailPage({
       )}
 
       <div className="flex-1" />
-      <SiteFooter />
       <NavClearance />
     </div>
   );
@@ -6406,7 +6403,6 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
           <>
             <BusinessCaseContent />
             <NdaNotice />
-            <SiteFooter />
             <NavClearance />
           </>
         ) : (
@@ -6516,7 +6512,6 @@ function BrandPerceptionPage({ onBack, onNavigate }: { onBack: () => void; onNav
           <>
             <BrandPerceptionContent />
             <NdaNotice />
-            <SiteFooter />
             <NavClearance />
           </>
         ) : (
@@ -6927,7 +6922,6 @@ export default function App() {
     <DarkModeCtx.Provider value={isDark}>
     <DarkModeToggleCtx.Provider value={toggleDark}>
     <GoHomeCtx.Provider value={goHome}>
-    <RailCtx.Provider value={railOn}>
     <AccordionCtx.Provider value={{ openId: openAccordionId, setOpenId: setOpenAccordionId }}>
     <div className="relative w-screen h-dvh overflow-hidden"
       style={{ background: groundBg, transition: "background 0.3s ease", ["--rail-w" as string]: RAIL_W }}>
@@ -7019,9 +7013,11 @@ export default function App() {
           tint={page === "speakingInquiry" || page === "speaking" ? GOLD : undefined}
           isSubPage={DEEP_PAGES.has(page)} />
       )}
+      {/* Chrome, like the nav above it: one credit for the site rather than
+          one per page, outside the layer pages slide through. */}
+      <SiteCreditBar />
     </div>
     </AccordionCtx.Provider>
-    </RailCtx.Provider>
     </GoHomeCtx.Provider>
     </DarkModeToggleCtx.Provider>
     </DarkModeCtx.Provider>
