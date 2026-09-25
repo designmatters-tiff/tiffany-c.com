@@ -2257,9 +2257,11 @@ const EXPERTISE_CARDS = [
 
 // Work-card bullets that are really links into a case study. Keyed on the
 // bullet's exact text, so the copy above stays the single place it is written.
+// Brand Perception is deliberately absent: the page is finished enough to
+// read at its own URL but not signed off, so the Work index names it without
+// opening it. Putting the line back here is all it takes to link it.
 const BULLET_LINKS: Record<string, Page> = {
   "eCommerce: Behavioural UX Design (passcode required)": "businessCase",
-  "Brand Perception & UX Strategy — TNG eWallet (passcode required)": "brandPerceptionCase",
   "KAI — Mobile app for IoT device control": "kaiCase",
   "Apple Health — Design Challenge": "appleHealthCase",
   "SOURCE — Energy performance management dashboard": "sourceCase",
@@ -6231,16 +6233,21 @@ function BrandPerceptionContent() {
     ["Team size", "TBC"],
   ];
 
-  // Stands in for artwork that lands in the next pass. A dashed outline in
-  // the section rule's own colour, holding its ratio — not a grey block,
-  // which reads as an image that failed to load.
-  const FigPlaceholder = ({ label, ratio = "16/9", max = FIGURE_MAX }: { label: string; ratio?: string; max?: number }) => (
-    <div style={{ margin: '28px 0 0', width: '100%', maxWidth: max }}>
-      <div className="flex items-center justify-center"
-        style={{ aspectRatio: ratio, border: `1px dashed ${rule}`, borderRadius: 8, background: 'transparent', padding: 16 }}>
-        <span className="font-['Nunito_Sans',sans-serif] text-small text-center" style={{ color: DIM }}>{label}</span>
-      </div>
-    </div>
+  // Stands in for artwork that lands in the next pass. A dashed outline in the
+  // section rule's own colour, holding its ratio — not a grey block, which
+  // reads as an image that failed to load.
+  //
+  // The frame is decoration and says nothing; the caption carries what will go
+  // there, so the frame is hidden from a screen reader and the caption is not.
+  // Same call shape as Fig, so swapping real artwork in is one line.
+  const FigPlaceholder = ({ caption, ratio = "16/9", max = FIGURE_MAX }: { caption: string; ratio?: string; max?: number }) => (
+    <figure style={{ margin: '28px 0 0', width: '100%', maxWidth: max }}>
+      <div aria-hidden="true" className="flex items-center justify-center"
+        style={{ aspectRatio: ratio, border: `1px dashed ${rule}`, borderRadius: 12, background: 'transparent', padding: 16 }} />
+      <figcaption className="font-['Nunito_Sans',sans-serif] text-small text-center" style={{ color: sub, marginTop: 12 }}>
+        {caption}
+      </figcaption>
+    </figure>
   );
 
   const Label = ({ children }: { children: React.ReactNode }) => (
@@ -6359,7 +6366,7 @@ function BrandPerceptionContent() {
             The value proposition it produced: the convenient and secure daily app to save, earn and
             spend for people in Malaysia.
           </P>
-          <FigPlaceholder label="Four-pillar nested diagram" ratio="1/1" max={560} />
+          <FigPlaceholder caption="Four-pillar nested diagram" ratio="1/1" max={560} />
 
           <div style={{ marginTop: 40 }}>
             <Label>Two principles</Label>
@@ -6380,7 +6387,7 @@ function BrandPerceptionContent() {
               through financial services, then security, then convenience. The work could not be
               organised by feature. It had to be organised by perception.
             </P>
-            <FigPlaceholder label="Perception journey — five onboarding screens with perception tags" ratio="16/5" />
+            <FigPlaceholder caption="Perception journey — five onboarding screens with perception tags" ratio="16/5" />
           </div>
 
           <div style={{ marginTop: 40 }}>
@@ -6411,7 +6418,7 @@ function BrandPerceptionContent() {
             <div key={b.title} style={{ marginTop: i === 0 ? 32 : 48 }}>
               <Label>{b.title}</Label>
               <P><Figures>{b.body}</Figures></P>
-              <FigPlaceholder label={b.figure} />
+              <FigPlaceholder caption={b.figure} />
               {b.result && (
                 <p className="font-['Nunito_Sans',sans-serif]" style={{ color: ink, marginTop: 16, maxWidth: MEASURE }}>
                   <span className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub, marginRight: 8 }}>Result</span>
