@@ -2258,16 +2258,15 @@ const EXPERTISE_CARDS = [
 
 // Work-card bullets that are really links into a case study. Keyed on the
 // bullet's exact text, so the copy above stays the single place it is written.
-// Brand Perception and the Visa card are deliberately absent: both are
-// finished enough to read at their own URL but not signed off — Brand
-// Perception pending review, the Visa card pending its images — so the Work
-// index names them without opening them. A line here is all it takes to link
-// either one.
+// Brand Perception is deliberately absent: the page is finished enough to
+// read at its own URL but not signed off, so the Work index names it without
+// opening it. Putting the line back here is all it takes to link it.
 const BULLET_LINKS: Record<string, Page> = {
   "eCommerce: Behavioural UX Design (passcode required)": "businessCase",
   "KAI — Mobile app for IoT device control": "kaiCase",
   "Apple Health — Design Challenge": "appleHealthCase",
   "SOURCE — Energy performance management dashboard": "sourceCase",
+  "TNG eWallet Visa Card — Malaysia's first numberless card": "visaCardCase",
   "FinTech: Balancing user preference & business result (passcode required)": "finTechCase",
 };
 
