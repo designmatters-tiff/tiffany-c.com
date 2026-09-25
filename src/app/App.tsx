@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback, createContext, useContext, Fragment } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion, useMotionValue, useTransform, useMotionValueEvent, animate, type MotionValue } from "motion/react";
 import { Linkedin, Instagram, X, ExternalLink, Plus, ChevronRight, ChevronLeft, PiggyBank, Heart, LineChart, Users, Layers } from "lucide-react";
 
 import ahPersona from "@/work/case/applehealth/userpersona.avif";
@@ -1164,19 +1164,24 @@ const RAIL_MARK = Math.round(RAIL_HEADING_SIZE / 1.4);
 const RAIL_MARK_TOP = RAIL_HEADING_BASELINE - RAIL_HEADING_SIZE;
 const RAIL_W = `${RAIL_GUTTER + RAIL_MARK}px`;
 
-function IdentityRail({ onNavigate, visible = true }: { onNavigate: (p: Page) => void; visible?: boolean }) {
+function IdentityRail({ onNavigate, progress, visible = true }: { onNavigate: (p: Page) => void; progress: MotionValue<number>; visible?: boolean }) {
   const goHome = useContext(GoHomeCtx);
   // There is one logomark on a desktop screen and this is it. It parks over
   // the hero's corner on the homepage — the hero leaves an empty box for it —
-  // and flies into the rail the moment the deck leaves that slide. The hero
-  // used to draw its own as well, which put two on screen for the length of
-  // that first slide change.
+  // and travels into the rail as the deck leaves that slide. The hero used to
+  // draw its own as well, which put two on screen for the length of that
+  // slide change.
+  //
+  // `progress` is the journey, 0 at the hero and 1 in the rail, and it is a
+  // motion value rather than React state because on the deck it is the scroll
+  // position: the mark is not animating on its own timer, it is pinned to how
+  // far the track has moved, the way a thing on the page would be. A tween of
+  // its own only runs where there is no scroll to ride — a page change.
   //
   // The hero mark is right-aligned inside the hero's px-20, so its left edge
   // is viewport - 80 - 70. Everything else here is a fixed delta from the
   // rail's own position, which is why the viewport width is the only thing
   // that has to be measured.
-  const reduceMotion = useReducedMotion();
   const [vw, setVw] = useState(typeof window === "undefined" ? 1440 : window.innerWidth);
   useEffect(() => {
     const onResize = () => setVw(window.innerWidth);
@@ -1189,6 +1194,10 @@ function IdentityRail({ onNavigate, visible = true }: { onNavigate: (p: Page) =>
   // re-rendered at a new size: an SVG scales cleanly, and animating a width
   // would relayout every frame.
   const homeScale = HERO_MARK.desktop.w / RAIL_MARK;
+  // 1 lands it in the rail, 0 back over the hero's empty box.
+  const x     = useTransform(progress, t => homeX * (1 - t));
+  const y     = useTransform(progress, t => homeY * (1 - t));
+  const scale = useTransform(progress, t => homeScale + (1 - homeScale) * t);
   return (
     // Never unmounted — it is the one element that stays put while pages slide
     // underneath, and an unmount would make it something each page draws for
@@ -1200,24 +1209,12 @@ function IdentityRail({ onNavigate, visible = true }: { onNavigate: (p: Page) =>
         className="absolute cursor-pointer"
         // Not a link on the homepage — you are already there, and the hero
         // is where the mark is simply itself rather than a way back.
-        style={{ left: RAIL_GUTTER, top: RAIL_MARK_TOP, background: "none", border: "none", padding: 0,
-                 transformOrigin: "top left", pointerEvents: visible ? "auto" : "none" }}
-        initial={false}
-        // Opaque at both ends. It used to fade in over the hero's own mark,
+        // Opaque throughout. It used to fade in over the hero's own mark,
         // because there were two; now this is the only mark on a desktop
         // screen, so fading it would leave the hero with none.
-        animate={visible
-          ? { x: 0, y: 0, scale: 1 }
-          : { x: homeX, y: homeY, scale: homeScale }}
-        // Eased out rather than in-and-out: this travels most of the screen,
-        // and a symmetric curve spends that distance at one speed and stops
-        // dead. Out, it leaves quickly and settles into the rail.
-        //
-        // With reduced motion the mark does not fly at all: it cuts to where
-        // it belongs.
-        transition={reduceMotion
-          ? { duration: 0 }
-          : { duration: 0.55, ease: [0.22, 1, 0.36, 1] }}>
+        style={{ left: RAIL_GUTTER, top: RAIL_MARK_TOP, background: "none", border: "none", padding: 0,
+                 transformOrigin: "top left", pointerEvents: visible ? "auto" : "none",
+                 x, y, scale }}>
         <LogoMark size={RAIL_MARK} />
       </motion.button>
     </div>
@@ -1299,7 +1296,7 @@ const HERO_BOTTOM_RESERVE = "calc(5% + 80px + env(safe-area-inset-bottom))";
 
 // ─── Homepage ─────────────────────────────────────────────────────
 
-export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onLeftHero, resetSignal = 0 }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number; onLeftHero?: (left: boolean) => void; resetSignal?: number }) {
+export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, heroProgress, resetSignal = 0 }: { onNavigate: (p: Page) => void; onOpenDetail?: (key: string) => void; initialIdx?: number; heroProgress?: MotionValue<number>; resetSignal?: number }) {
   const isDark = useContext(DarkModeCtx);
   const pageBg  = isDark ? "#282828" : "#f8f7f5";
   const fg      = isDark ? GOLD : INK;
@@ -1311,10 +1308,14 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onLeftHero,
   const scrollEl  = useRef<HTMLDivElement>(null);
   const dragState = useRef<{ active: boolean; startX: number; scrollLeft: number }>({ active: false, startX: 0, scrollLeft: 0 });
   const [activeIdx, setActiveIdx]   = useState(initialIdx);
-  // Held in a ref because the scroll listener is bound once, on mount.
-  const onLeftHeroRef = useRef(onLeftHero);
-  onLeftHeroRef.current = onLeftHero;
-  const leftHeroRef = useRef(false);
+  // Held in a ref because the scroll listener is bound once, on mount. A
+  // motion value is stable across renders, so it needs no ref of its own.
+  const heroProgressRef = useRef(heroProgress);
+  heroProgressRef.current = heroProgress;
+  // The tween that carries the mark home when the deck mounts. The first
+  // scroll stops it: past that the scroll is the animation.
+  const heroTween = useRef<{ stop: () => void } | null>(null);
+  const reduceMotion = useReducedMotion();
   const [hoveredNav, setHoveredNav] = useState<string | null>(null);
   const [progress, setProgress]     = useState(0);
   const [menuOpen, setMenuOpen]     = useState(false);
@@ -1477,15 +1478,16 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onLeftHero,
     const el = scrollEl.current;
     if (!el) return;
     const onScroll = () => {
-      // The rail takes the mark over the moment the deck leaves the hero, not
-      // when activeIdx flips at the halfway point. At the halfway point the
-      // mark is still sitting in the hero's corner, so it would hang there for
-      // half the slide and then fly — and the rail's own mark would arrive
-      // over a hero mark that has not left yet.
-      const left = el.scrollLeft > 0;
-      if (left !== leftHeroRef.current) {
-        leftHeroRef.current = left;
-        onLeftHeroRef.current?.(left);
+      // The logomark rides this, rather than firing a tween of its own once
+      // the slide has changed. Tied to a threshold it waited — going back to
+      // the hero it only knew at scrollLeft 0, so it sat in the rail for the
+      // whole return and then shot right. Tied to the scroll it simply comes
+      // with the page, and stops where the page stops.
+      const p = heroProgressRef.current;
+      if (p) {
+        heroTween.current?.stop();
+        heroTween.current = null;
+        p.set(Math.max(0, Math.min(1, el.scrollLeft / el.clientWidth)));
       }
       const idx = Math.round(el.scrollLeft / el.clientWidth);
       if (idx !== activeIdxRef.current) {
@@ -1518,13 +1520,17 @@ export function HomePage({ onNavigate, onOpenDetail, initialIdx = 0, onLeftHero,
   const navShrunk = currentEmbedScrollable && navMinimized;
 
   useEffect(() => { setNavMinimized(false); }, [activeIdx]);
-  // The deck is the one place where the page does not change but the section
-  // does. The rail needs to know, because past the hero the mark belongs in it
-  // rather than in the slide.
-  // Reported on mount so a return to the homepage puts the mark back on the
-  // hero: the deck is at scrollLeft 0 then and fires no scroll event of its
-  // own.
-  useEffect(() => { onLeftHeroRef.current?.(false); }, []);
+  // Arriving from another page there is no scroll to ride — the deck mounts
+  // already at slide 0 — so this one stretch of the journey is a tween. It is
+  // cancelled by the first scroll, which takes over.
+  useEffect(() => {
+    const p = heroProgressRef.current;
+    if (!p || p.get() === 0) return;
+    const controls = animate(p, 0, reduceMotion ? { duration: 0 } : { duration: 0.55, ease: [0.22, 1, 0.36, 1] });
+    heroTween.current = controls;
+    return () => controls.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Swiping the deck is how most people read this site on a phone, so the
   // section you're looking at owns the address bar: land on Awards and the
@@ -6698,6 +6704,7 @@ export default function App() {
   const [detailKey, setDetailKey] = useState<string | null>(first.detailKey);
   const [isDark, setIsDark]       = useState(false);
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
+  const reduceMotion = useReducedMotion();
 
   // Reset the shared accordion state whenever the page changes so a
   // stale open id from the previous page can't accidentally collide.
@@ -6721,9 +6728,11 @@ export default function App() {
   const [workDetailOrigin, setWorkDetailOrigin] = useState<Page>("work");
   const workSectionIdx = SECTIONS.findIndex(s => s.key === "work");
   const [homeInitialIdx, setHomeInitialIdx] = useState(0);
-  // Whether the homepage deck has moved off the hero slide, which is what
-  // decides where the one logomark lives.
-  const [leftHero, setLeftHero] = useState(false);
+  // Where the one logomark is on its journey: 0 over the hero's corner, 1 in
+  // the rail. A motion value, not state, because on the homepage the deck
+  // writes the scroll into it frame by frame and App has no business
+  // re-rendering for that.
+  const heroProgress = useMotionValue(0);
   // Bumped by goHome to send the deck back to the hero slide.
   const [homeReset, setHomeReset] = useState(0);
 
@@ -6774,7 +6783,23 @@ export default function App() {
   // the deck past that slide is a section change without a page change, so it
   // has to count: otherwise the deck runs from Work to Connect with the hero's
   // mark scrolled off and the rail's not yet shown.
-  const railOn = page !== "home" || leftHero;
+  // The boolean the rest of the site asks for — is the mark in the rail —
+  // taken off the same journey at its midpoint. React only re-renders when it
+  // crosses.
+  const [railOn, setRailOn] = useState(false);
+  useMotionValueEvent(heroProgress, "change", t => setRailOn(t > 0.5));
+  // Leaving the homepage there is no deck scroll to ride, so the mark tweens.
+  // The first route of a session is not a journey at all — a deep link opens
+  // with the mark already in the rail.
+  const routed = useRef(false);
+  useEffect(() => {
+    const first = !routed.current;
+    routed.current = true;
+    if (page === "home") return;   // the deck owns the value while it is mounted
+    if (first) { heroProgress.set(1); setRailOn(true); return; }
+    const controls = animate(heroProgress, 1, reduceMotion ? { duration: 0 } : { duration: 0.55, ease: [0.22, 1, 0.36, 1] });
+    return () => controls.stop();
+  }, [page, heroProgress, reduceMotion]);
   // The mark showing and the page making room for it are different questions.
   // The homepage deck is a full-bleed track whose slides are each a viewport
   // wide; insetting it mid-swipe shoved it 126px sideways and narrowed every
@@ -6892,7 +6917,6 @@ export default function App() {
   // means the flight back begins with the navigation rather than after it.
   const goHome = useCallback(() => {
     setHomeInitialIdx(0);
-    setLeftHero(false);
     // Bumped every time, because the deck may already be mounted and on
     // another slide — setPage alone is a no-op then.
     setHomeReset(n => n + 1);
@@ -6937,7 +6961,7 @@ export default function App() {
         variants={pageVariants}
         initial="enter" animate="center" exit="exit"
         transition={{ duration: drillIn ? 0.5 : 0.45, ease: [0.42, 0, 0.58, 1] }}>
-        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} onLeftHero={setLeftHero} resetSignal={homeReset} />}
+        {page === "home"     && <HomePage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} initialIdx={homeInitialIdx} heroProgress={heroProgress} resetSignal={homeReset} />}
         {page === "work"     && <div className="absolute inset-0 overflow-y-auto"><WorkPage onNavigate={navigateGeneral} onOpenDetail={navigateToWorkDetail} /></div>}
         {page === "awards"   && <div className="absolute inset-0"><AwardsSpeakingPage onNavigate={navigateGeneral} /></div>}
         {page === "coaching" && <div className="absolute inset-0 overflow-y-auto"><CoachingPage onNavigate={navigateGeneral} /></div>}
@@ -6989,7 +7013,7 @@ export default function App() {
           back on the first step away from home, which is the blink that made
           the whole thing read as reloaded. */}
       {canSwipe && <SectionProgress idx={swipeIdx} />}
-      <IdentityRail onNavigate={navigateGeneral} visible={railOn} />
+      <IdentityRail onNavigate={navigateGeneral} progress={heroProgress} visible={railOn} />
       {navActive && (
         <StickyPageNav activePage={navActive} onNavigate={navigateGeneral}
           tint={page === "speakingInquiry" || page === "speaking" ? GOLD : undefined}
