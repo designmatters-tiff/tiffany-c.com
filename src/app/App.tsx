@@ -2248,10 +2248,10 @@ const EXPERTISE_CARDS = [
     key: "cases", slug: "case-studies", title: "Case Studies", accent: GOLD, Illustration: IllustrationCases,
     description: "Hands-on product design: research, design sprints, prototyping, shipped work.",
     bullets: [
+      "TNG eWallet Visa Card — Malaysia's first numberless card",
       "Apple Health — Design Challenge",
       "KAI — Mobile app for IoT device control",
       "SOURCE — Energy performance management dashboard",
-      "TNG eWallet Visa Card — Malaysia's first numberless card",
     ],
   },
 ];
