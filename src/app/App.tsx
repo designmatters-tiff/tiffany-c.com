@@ -3563,22 +3563,6 @@ function VisaCardContent() {
     </figure>
   );
 
-  // A set of frames that belong together, under one caption. The row is the
-  // figure; a caption each would read as three figures rather than one.
-  const FigRow = ({ count, cols, ratio, caption }: { count: number; cols: string; ratio: string; caption: string }) => (
-    <figure style={{ margin: '28px 0 0', maxWidth: FIGURE_MAX }}>
-      <div className={`grid gap-4 ${cols}`}>
-        {Array.from({ length: count }, (_, i) => (
-          <div key={i} aria-hidden="true"
-            style={{ aspectRatio: ratio, border: `1px dashed ${rule}`, borderRadius: 12, background: 'transparent' }} />
-        ))}
-      </div>
-      <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
-        {caption}
-      </figcaption>
-    </figure>
-  );
-
   const Label = ({ children }: { children: React.ReactNode }) => (
     <h3 className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{children}</h3>
   );
@@ -3630,7 +3614,7 @@ function VisaCardContent() {
           the problem. The card had no reason that anyone could agree on, so every design was arguable and none
           was decidable.
         </P>
-        <FigPlaceholder ratio="3/2"
+        <FigPlaceholder ratio="1/1"
           caption="Mock card, test-printed overseas to check how the gradient and the yellow edge held on the real substrate." />
       </section>
 
@@ -3680,16 +3664,20 @@ function VisaCardContent() {
           before it happens.
         </P>
         <P top={16}>
-          We benchmarked the onboarding against Wise and BigPay, both of which were solving the same problem of
-          getting a physical card into use from inside an app.
+          We benchmarked the onboarding against Wise, which was solving the same problem of getting a physical
+          card into use from inside an app.
         </P>
-        <FigRow count={3} cols="md:grid-cols-3" ratio="9/16"
-          caption="Details revealed, details hidden, and the confirmation before a card is deactivated." />
+        {/* TODO: the three app screens — details revealed, details hidden, and
+            the deactivation confirmation — are still to come. The finished
+            card stands in for them until they land, and the caption is about
+            the card rather than about screens that are not here. */}
+        <FigPlaceholder ratio="3/2"
+          caption="The card face carries no number. The credentials live in the app." />
 
         <div style={{ marginTop: 40 }}>
           <Label>Onboarding benchmarks</Label>
-          <FigRow count={2} cols="md:grid-cols-2" ratio="3/4"
-            caption="Wise and BigPay welcome packs, reviewed for how they carry a user from a posted card to a working one." />
+          <FigPlaceholder ratio="3/4"
+            caption="The Wise welcome pack, reviewed for how it carries a user from a posted card to a working one." />
         </div>
       </Section>
 
@@ -3713,8 +3701,10 @@ function VisaCardContent() {
         <P top={16}>
           The card has since been discontinued.
         </P>
-        <FigPlaceholder ratio="3/2" caption="Launch, 18 January 2023." />
-        <FigPlaceholder ratio="3/2" caption="RM1,000,000 presented to United Voice, January 2024." />
+        {/* TODO: the launch photograph needs Tiffany's crop — the slide behind
+            the speaker names her, and this page deliberately does not. */}
+        <FigPlaceholder ratio="3/4" caption="Launch, 18 January 2023." />
+        <FigPlaceholder ratio="2/1" caption="RM1,000,000 presented to United Voice, January 2024." />
       </Section>
 
     </div>
