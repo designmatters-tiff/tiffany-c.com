@@ -58,6 +58,15 @@ import awardsFoF2024Mobile from "@/imports/AwardsSpeaking/FoF 2024/mobile_fof202
 import awardsDesignKL from "@/imports/AwardsSpeaking/Design Leadership KL/DLKL2023.avif";
 import awardsDesignKLTiff from "@/imports/AwardsSpeaking/Design Leadership KL/DLKL2023-tiff.avif";
 import profilePhoto from "@/imports/Profile/tiff-headshot.avif";
+import vcTestCard from "@/work/case/visacsr/test-card.avif";
+import vcWelcomePack from "@/work/case/visacsr/welcome-pack.avif";
+import vcAppDetails from "@/work/case/visacsr/app-card-details.avif";
+import vcAppDeactivate from "@/work/case/visacsr/app-deactivate.avif";
+import vcAppHideDetails from "@/work/case/visacsr/app-hide-details.avif";
+import vcBenchWise from "@/work/case/visacsr/bench-wise.avif";
+import vcBenchBigPay from "@/work/case/visacsr/bench-bigpay.avif";
+import vcLaunch from "@/work/case/visacsr/launch.avif";
+import vcCheque from "@/work/case/visacsr/cheque.avif";
 import foggModel from "@/work/business/eCommerce/Fogg behavioural model.avif";
 import graphResult from "@/work/business/eCommerce/graph-result.avif";
 import interventionImg from "@/work/business/eCommerce/the intervention.avif";
@@ -148,7 +157,7 @@ const HEADING_COLOUR: Record<string, string> = Object.fromEntries(
   ]),
 );
 
-type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "kaiCase" | "appleHealthCase" | "brandPerceptionCase" | "sourceCase" | "finTechCase" | "testimonials";
+type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "kaiCase" | "appleHealthCase" | "brandPerceptionCase" | "sourceCase" | "finTechCase" | "visaCardCase" | "testimonials";
 
 // ─── Dark mode context ────────────────────────────────────────────
 const DarkModeCtx = createContext(false);
@@ -2251,6 +2260,7 @@ const EXPERTISE_CARDS = [
       "Apple Health — Design Challenge",
       "KAI — Mobile app for IoT device control",
       "SOURCE — Energy performance management dashboard",
+      "TNG eWallet Visa Card — Malaysia's first numberless card",
     ],
   },
 ];
@@ -2265,6 +2275,7 @@ const BULLET_LINKS: Record<string, Page> = {
   "KAI — Mobile app for IoT device control": "kaiCase",
   "Apple Health — Design Challenge": "appleHealthCase",
   "SOURCE — Energy performance management dashboard": "sourceCase",
+  "TNG eWallet Visa Card — Malaysia's first numberless card": "visaCardCase",
   "FinTech: Balancing user preference & business result (passcode required)": "finTechCase",
 };
 
@@ -3510,6 +3521,272 @@ function SourceCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate
 }
 
 
+// ─── TNG eWallet Visa Card case study ─────────────────────────────
+// Public, unlike the two TNG pieces under Business Acumen: the card shipped,
+// was launched publicly and was written about, so there is nothing here to
+// gate. Built on SOURCE's shapes so a reader coming from one case does not
+// have to relearn the next.
+const VC_SECTIONS: { id: string; label: string }[] = [
+  { id: "vc-overview",    label: "Overview" },
+  { id: "vc-turn",        label: "The Turn" },
+  { id: "vc-choice",      label: "The Choice" },
+  { id: "vc-numberless",  label: "A Card With No Number" },
+  { id: "vc-shipped",     label: "What Shipped" },
+];
+
+function VisaCardContent() {
+  const isDark = useContext(DarkModeCtx);
+  const fg   = GOLD;
+  const sub  = isDark ? "rgba(255,255,255,0.75)" : DIM;
+  const body = isDark ? "rgba(255,255,255,0.72)" : DIM;
+  const rule = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
+  const MEASURE = '68ch';
+  const FIGURE_MAX = 760;
+
+  const META: [string, React.ReactNode][] = [
+    ["Year", "Feb 2022 to Jan 2023"],
+    ["Client", (
+      <a href={TNG_DIGITAL_URL} target="_blank" rel="noopener noreferrer"
+        className="link-underline" style={{ color: fg }}>Touch &apos;n Go eWallet</a>
+    )],
+    ["Goal", "Extend the eWallet beyond DuitNow QR"],
+    ["Scope", "Card design, artwork selection, user survey, welcome pack, in-app card experience, print production"],
+    // TODO: Tiffany to fill these two.
+    ["Role", "[Role]"],
+    ["Team size", "[Team size]"],
+  ];
+
+  const Fig = ({ src, alt, caption, max = FIGURE_MAX }: { src: string; alt: string; caption?: string; max?: number }) => (
+    <figure style={{ margin: '28px 0 0' }}>
+      <img src={src} alt={alt} loading="lazy" className="mx-auto md:mx-0"
+        style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
+      {caption && (
+        <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+          {caption}
+        </figcaption>
+      )}
+    </figure>
+  );
+
+  // A row of shots that belong together, with one caption under the set. The
+  // grid is the figure; a caption per image would read as three figures.
+  const FigRow = ({ items, cols, caption }: { items: { src: string; alt: string }[]; cols: string; caption: string }) => (
+    <figure style={{ margin: '28px 0 0', maxWidth: FIGURE_MAX }}>
+      <div className={`grid gap-4 ${cols}`}>
+        {items.map(it => (
+          <img key={it.src} src={it.src} alt={it.alt} loading="lazy"
+            style={{ width: '100%', display: 'block', borderRadius: 8 }} />
+        ))}
+      </div>
+      <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+        {caption}
+      </figcaption>
+    </figure>
+  );
+
+  const Label = ({ children }: { children: React.ReactNode }) => (
+    <h3 className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{children}</h3>
+  );
+
+  const P = ({ children, top = 8 }: { children: React.ReactNode; top?: number }) => (
+    <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: top, maxWidth: MEASURE }}>{children}</p>
+  );
+
+  const H2 = ({ children }: { children: React.ReactNode }) => (
+    <h2 className="font-['Museo',sans-serif] font-light"
+      style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.25rem)', lineHeight: 1.15, margin: '0 0 24px' }}>{children}</h2>
+  );
+
+  const Section = ({ id, children }: { id: string; children: React.ReactNode }) => (
+    <section id={id} style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+      {children}
+    </section>
+  );
+
+  return (
+    <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10" style={{ maxWidth: 'max(900px, 80%)' }}>
+
+      <dl id="vc-overview" className="grid gap-x-6 gap-y-6"
+        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(128px, 1fr))', margin: 0, scrollMarginTop: 140 }}>
+        {META.map(([label, value]) => (
+          <div key={label}>
+            <dt className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{label}</dt>
+            <dd className="font-['Nunito_Sans',sans-serif]" style={{ color: body, margin: '6px 0 0' }}>{value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+        <P top={0}>
+          The eWallet could only be spent where a DuitNow QR code was accepted. The TNG eWallet Visa card
+          opened the rest: merchants without QR, ATM withdrawals, and payments overseas.
+        </P>
+        <P top={16}>
+          It launched on <Figures>18 January 2023</Figures> as two firsts for Malaysia. The first CSR-linked
+          Visa prepaid card, with <Figures>RM2</Figures> donated to United Voice for every application. And
+          the first numberless card, with the credentials held inside the eWallet rather than printed on the
+          plastic.
+        </P>
+        <P top={16}>
+          I took the card design on in February 2022 and it did not ship for eleven months. Rounds of review,
+          presentations to CEOs, a user survey to choose between design directions, mock cards test-printed
+          overseas to check how the colours held on the real substrate. None of it converged. The work was not
+          the problem. The card had no reason that anyone could agree on, so every design was arguable and none
+          was decidable.
+        </P>
+        <Fig src={vcTestCard} alt="An unprinted mock test card"
+          caption="Mock card, test-printed overseas to check how the gradient and the yellow edge held on the real substrate." />
+      </section>
+
+      {/* ── The Turn ── */}
+      <Section id="vc-turn">
+        <H2>The Turn</H2>
+        <P top={0}>
+          In August 2022 group leadership set the direction: the card would be tied to United Voice, a Malaysian
+          self-advocacy society for people with learning disabilities. <Figures>RM2</Figures> from every card
+          applied for would be donated, and the card face would carry an artist&apos;s work.
+        </P>
+        <P top={16}>
+          That answered the question six months of design review had not. The card now had something to be right
+          about, and the arguments about how it should look resolved themselves almost immediately.
+        </P>
+        {/* No figure here on purpose: the turn was a decision, not an artefact. */}
+      </Section>
+
+      {/* ── The Choice ── */}
+      <Section id="vc-choice">
+        <H2>The Choice</H2>
+        <P top={0}>
+          Selecting from the artists&apos; work, I chose a painting by Damien Wong. Two reasons, at once: it
+          would still look right in five years, and its colours already sat inside our brand palette. A card
+          lives in a wallet for years and cannot be reissued on a whim, so ageing well was a requirement, not a
+          preference. [Colleague] seconded it.
+        </P>
+        <P top={16}>
+          Blue, green and yellow, mostly splashes. Damien describes it as &ldquo;In my eyes, this is how the
+          world looks to me, a splash of colors.&rdquo;
+        </P>
+        <P top={16}>
+          The painting had been rejected by the client it was made for, because the canvas was an odd size, and
+          had sat unsold for years. The proceeds from its purchase went directly to him.
+        </P>
+        <Fig src={vcWelcomePack} alt="The physical card carrier"
+          caption="The card carrier, which tells Damien's story alongside the activation steps in English and Malay." />
+      </Section>
+
+      {/* ── A card with no number ── */}
+      <Section id="vc-numberless">
+        <H2>A Card With No Number</H2>
+        <P top={0}>
+          A numberless card moves the credentials off the plastic and into the app, so the app has to do the
+          work the card used to. Reveal and hide the details. Lock and unlock. Set the PIN, order a replacement,
+          track the delivery. Temporarily deactivating a card is destructive enough to need a confirmation
+          before it happens.
+        </P>
+        <P top={16}>
+          We benchmarked the onboarding against Wise and BigPay, both of which were solving the same problem of
+          getting a physical card into use from inside an app.
+        </P>
+        <FigRow cols="md:grid-cols-3"
+          items={[
+            { src: vcAppDetails, alt: "The Visa Card screen with the card details visible" },
+            { src: vcAppHideDetails, alt: "The Visa Card screen with the card details hidden" },
+            { src: vcAppDeactivate, alt: "The confirmation dialog for temporarily deactivating the card" },
+          ]}
+          caption="Details revealed, details hidden, and the confirmation before a card is deactivated." />
+
+        <div style={{ marginTop: 40 }}>
+          <Label>Onboarding benchmarks</Label>
+          <FigRow cols="md:grid-cols-2"
+            items={[
+              { src: vcBenchWise, alt: "The Wise welcome pack" },
+              { src: vcBenchBigPay, alt: "The BigPay welcome pack" },
+            ]}
+            caption="Wise and BigPay welcome packs, reviewed for how they carry a user from a posted card to a working one." />
+        </div>
+      </Section>
+
+      {/* ── What shipped ── */}
+      <Section id="vc-shipped">
+        <H2>What Shipped</H2>
+        <P top={0}>
+          The card launched on <Figures>18 January 2023</Figures> as Malaysia&apos;s first CSR-linked Visa
+          prepaid card, and its first numberless one.
+        </P>
+        <P top={16}>
+          At the launch, Damien&apos;s mother, Nora Tan, spoke. She said she had never seen him paint with the
+          enthusiasm he brought to that canvas.
+        </P>
+        <P top={16}>
+          A year later, in January 2024, TNG Digital and Visa presented United Voice with
+          <Figures> RM1,000,000</Figures>, raised at <Figures>RM2</Figures> per card application. From October
+          2023 the funds went into United Voice&apos;s Skills Training for Employment programme and a Health
+          and Wellness programme.
+        </P>
+        <P top={16}>
+          The card has since been discontinued.
+        </P>
+        <Fig src={vcLaunch} alt="The launch event on 18 January 2023"
+          caption="Launch, 18 January 2023." />
+        <Fig src={vcCheque} alt="The RM1,000,000 presentation to United Voice in January 2024"
+          caption="RM1,000,000 presented to United Voice, January 2024." />
+      </Section>
+
+    </div>
+  );
+}
+
+function VisaCardPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
+  const isDark = useContext(DarkModeCtx);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const onDark = useOnDarkBackdrop(headerRef);
+  const headingColor = onDark ? "#ffffff" : isDark ? GOLD_BRIGHT : GOLD;
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+      <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+          background: headerScrolled
+            ? (onDark
+                ? "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), rgba(248,247,245,0.55)"
+                : isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)")
+            : "transparent",
+          backdropFilter: headerScrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
+          borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
+          paddingBottom: headerScrolled ? 16 : 24,
+          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
+        }}>
+          <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
+          <Breadcrumbs color={headingColor} items={[
+            { label: "Work", onClick: () => onNavigate("work") },
+            { label: "Case Studies", onClick: onBack },
+          ]} />
+          <h1 className="font-['Museo',sans-serif] font-light"
+            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: headingColor, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
+            TNG eWallet Visa Card
+          </h1>
+        </div>
+
+        <VisaCardContent />
+        <NavClearance />
+      </div>
+      <CaseSectionRail scrollRef={scrollRef} sections={VC_SECTIONS} />
+    </div>
+  );
+}
+
+
 // ─── FinTech case study (passcode-gated) ──────────────────────────
 // TNG eWallet's Quick Cash In, 2022–2023. Lives under Business Acumen: the
 // case is the balance between what the business needed and what users would
@@ -4456,7 +4733,7 @@ const NAV_LABELS: Partial<Record<Page, string>> = {
   connect: "Connect",
 };
 
-const DEEP_PAGES = new Set<Page>(["businessCase", "kaiCase", "appleHealthCase", "brandPerceptionCase", "sourceCase", "finTechCase"]);
+const DEEP_PAGES = new Set<Page>(["businessCase", "kaiCase", "appleHealthCase", "brandPerceptionCase", "sourceCase", "finTechCase", "visaCardCase"]);
 
 function StickyPageNav({ activePage, tint, onNavigate, isSubPage = false }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void; isSubPage?: boolean }) {
   const isDark = useContext(DarkModeCtx);
@@ -6742,6 +7019,7 @@ function pathOf(page: Page, detailKey?: string | null): string {
     case "kaiCase":         return "/work/case-studies/kai";
     case "appleHealthCase": return "/work/case-studies/apple-health";
     case "sourceCase":      return "/work/case-studies/source";
+    case "visaCardCase":    return "/work/case-studies/visa-card";
     case "finTechCase":     return "/work/business-acumen/fintech";
     case "brandPerceptionCase": return "/work/product-ux-strategies/brand-perception";
     case "awards":          return "/awards";
@@ -6785,6 +7063,7 @@ function routeOf(pathname: string): { page: Page; detailKey: string | null } {
     if (seg[1] === "case-studies" && seg[2] === "source") return at("sourceCase");
     if (seg[1] === "business-acumen" && seg[2] === "fintech") return at("finTechCase");
     if (seg[1] === "product-ux-strategies" && seg[2] === "brand-perception") return at("brandPerceptionCase");
+    if (seg[1] === "case-studies" && seg[2] === "visa-card") return at("visaCardCase");
     const card = EXPERTISE_CARDS.find(c => c.slug === seg[1]);
     // an unknown child falls back to the section rather than a dead end
     return card ? at("workDetail", card.key) : at("work");
@@ -6815,6 +7094,7 @@ function descriptionOf(page: Page, detailKey?: string | null): string {
     case "appleHealthCase": return "A five-day design challenge: repositioning Apple Health as a daily habit tool to drive daily active users.";
     case "finTechCase":     return "A passcode-gated case study: Quick Cash In for TNG eWallet's GO+, and the balance between an aggressive business goal and what users would accept.";
     case "sourceCase":      return "A year-long case study: SOURCE, the energy performance management dashboard that made building and solar data visible to the people who owned it.";
+    case "visaCardCase": return "Malaysia's first CSR-linked and first numberless Visa prepaid card — the artwork, the numberless in-app experience, and the RM1,000,000 it raised for United Voice.";
     case "brandPerceptionCase": return "Shifting how 23 million people saw a wallet app — a brand perception framework, the UX strategy behind it, and how it was measured.";
     case "kaiCase": return "A design sprint case study: KAI, a mobile app for controlling a building's IoT machines and cutting Maximum Demand charges.";
     case "awards":       return "UX Leader of the Year finalist, with speaking and panel appearances across Australia, Europe and Asia.";
@@ -6840,6 +7120,7 @@ function titleOf(page: Page, detailKey?: string | null): string {
     case "appleHealthCase": return `Apple Health: Design Challenge — ${SITE_TITLE}`;
     case "sourceCase":      return `SOURCE: Energy Performance Management Dashboard — ${SITE_TITLE}`;
     case "finTechCase":     return `FinTech: Balancing User Preference & Business Result — ${SITE_TITLE}`;
+    case "visaCardCase": return `TNG eWallet Visa Card — ${SITE_TITLE}`;
     case "brandPerceptionCase": return `Brand Perception & UX Strategy — ${SITE_TITLE}`;
     case "awards":          return `Awards & Speaking — ${SITE_TITLE}`;
     case "speaking":        return ev ? `${ev.role} — ${ev.event} — ${SITE_TITLE}` : `Awards & Speaking — ${SITE_TITLE}`;
@@ -6920,7 +7201,8 @@ export default function App() {
   // Case-study pages are a drill-in from the Work list; they animate as an
   // expansion of the row rather than as a new screen sliding in.
   const drillIn = page === "workDetail" || page === "businessCase" || page === "kaiCase"
-    || page === "appleHealthCase" || page === "brandPerceptionCase" || page === "sourceCase" || page === "finTechCase";
+    || page === "appleHealthCase" || page === "brandPerceptionCase" || page === "sourceCase" || page === "finTechCase"
+    || page === "visaCardCase";
 
 
   useEffect(() => {
@@ -6981,7 +7263,7 @@ export default function App() {
       page === "home" ? null
     : page === "work" || page === "workDetail" || page === "businessCase"
       || page === "kaiCase" || page === "appleHealthCase" || page === "brandPerceptionCase"
-      || page === "sourceCase" || page === "finTechCase" ? "work"
+      || page === "sourceCase" || page === "finTechCase" || page === "visaCardCase" ? "work"
     : page === "awards" || page === "speaking" ? "awards"
     : page === "speakingInquiry" ? "connect"
     : page;
@@ -7158,6 +7440,9 @@ export default function App() {
         )}
         {page === "sourceCase" && (
           <SourceCasePage onBack={() => { setDetailKey("cases"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
+        )}
+        {page === "visaCardCase" && (
+          <VisaCardPage onBack={() => { setDetailKey("cases"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
         {page === "finTechCase" && (
           <FinTechPage onBack={() => { setDetailKey("business"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
