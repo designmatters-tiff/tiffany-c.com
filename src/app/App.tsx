@@ -4981,6 +4981,11 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
     return () => scroller.removeEventListener("scroll", onScroll);
   }, [embedded]);
   const scrolled = embedded ? headerScrolled : selfScrolled;
+  // The heading shrinks on the same signal that frosts the band behind it —
+  // the arrangement Awards already uses. It was driven by `compact`, which
+  // only the homepage deck sets, so standalone the band appeared and the
+  // heading stayed full size, which is neither state.
+  const shrunk = embedded ? compact : selfScrolled;
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
 
   // Opening a card is an animation, not a jump: the chosen row's rules part —
@@ -5025,7 +5030,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           backdropFilter: scrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: scrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${scrolled ? brd : "transparent"}`,
-          paddingBottom: compact ? 16 : undefined,
+          paddingBottom: shrunk ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
           {!embedded && <HeaderLogo onNavigate={onNavigate} color={HEADING_COLOUR.work} />}
@@ -5034,7 +5039,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           Fintech · eCommerce · SaaS
         </motion.p>
         <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg"
-          style={{ fontSize: compact ? "1.5rem" : undefined, lineHeight: 1.05, color: HEADING_COLOUR.work,
+          style={{ fontSize: shrunk ? "1.5rem" : undefined, lineHeight: 1.05, color: HEADING_COLOUR.work,
                    transition: "font-size 0.35s ease", transformOrigin: "left center" }}
           initial={replay ? { opacity: 0, scale: 0.74, y: -8 } : false}
           animate={opening
