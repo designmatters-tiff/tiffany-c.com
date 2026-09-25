@@ -294,6 +294,13 @@ const HERO_MARK = {
   desktop: { w: 70, h: 98 },
 };
 
+// Every list row on the site names its item at this size, in Museo: the Work
+// categories, the award, and the speaking events. They are the same kind of
+// thing — one line naming what a row opens — and they were three separate
+// clamps drifting apart, the speaking rows a step larger than Work and the
+// award a step larger again.
+const LIST_TITLE_SIZE = "clamp(1rem, 1.6vw, 1.25rem)";
+
 // Clicking the mark goes to the top of the homepage, not to the slide the
 // page you were on corresponds to. It is the brand mark; the top of the site
 // is what it means. The rest of the nav stays section-aware.
@@ -2274,10 +2281,10 @@ function ExpertiseCard({ card, onOpen }: { card: typeof EXPERTISE_CARDS[0]; onOp
       </div>
       <div className="flex-1 min-w-0">
         {/* Title — Museo, matching the Awards and Speaking rows. */}
-        <h3 className="font-['Museo',sans-serif] font-light"
-          style={{ fontSize: "clamp(1rem, 1.6vw, 1.25rem)", color: titleColor }}>
+        <h2 className="font-['Museo',sans-serif] font-light"
+          style={{ fontSize: LIST_TITLE_SIZE, color: titleColor }}>
           {card.title}
-        </h3>
+        </h2>
         <p className="font-['Nunito_Sans',sans-serif] text-small leading-relaxed mt-1" style={{ color: isDark ? "rgba(255,255,255,0.55)" : DIM, maxWidth: 600 }}>
           {card.description}
         </p>
@@ -5280,9 +5287,9 @@ function SpeakingEventRow({
         <div className="flex-1 flex flex-col md:flex-row md:items-start md:justify-between gap-1 md:gap-6 min-w-0">
           <div className="flex flex-col gap-1 min-w-0">
             <span className="md:hidden font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub }}>{ev.year} · {ev.region}</span>
-            <p className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(0.95rem, 1.6vw, 1.4rem)", color: fg }}>
+            <h2 className="font-['Museo',sans-serif] font-light" style={{ fontSize: LIST_TITLE_SIZE, color: fg }}>
               {ev.role} — {ev.event}
-            </p>
+            </h2>
             <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub }}>{ev.topic}</p>
           </div>
           <span className="hidden md:block flex-shrink-0 font-['Nunito_Sans',sans-serif] text-small text-right" style={{ color: sub }}>{ev.year} · {ev.region}</span>
@@ -5400,9 +5407,9 @@ function WomenInDigitalRow({ isDark, fg, sub }: { isDark: boolean; fg: string; s
         <div className="flex-1 flex flex-col md:flex-row md:items-start md:justify-between gap-1 md:gap-6 min-w-0">
           <div className="flex flex-col gap-1 min-w-0">
             <span className="md:hidden font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub }}>2025 · Australia</span>
-            <p className="font-['Museo',sans-serif] font-light" style={{ fontSize: "clamp(1.1rem, 1.8vw, 1.5rem)", color: fg }}>
+            <h2 className="font-['Museo',sans-serif] font-light" style={{ fontSize: LIST_TITLE_SIZE, color: fg }}>
               UX Leader of the Year — Finalist
-            </p>
+            </h2>
             <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub }}>Women in Digital National Awards</p>
           </div>
           <span className="hidden md:block flex-shrink-0 font-['Nunito_Sans',sans-serif] text-small text-right" style={{ color: sub }}>2025 · Australia</span>
