@@ -6430,30 +6430,45 @@ function BusinessCaseContent() {
 
         {/* ── Result ── */}
         <section id="results" style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
-          <p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>
-            Result from the tested group — voucher owners
-          </p>
-          <dl className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginTop: 20 }}>
-            {[["Revenue", "+57%"], ["Checkout completion", "2×"], ["Conversion rate", "+0.28pp"]].map(([label, value]) => (
-              <div key={label}>
-                <dd className="font-['Museo',sans-serif] font-light"
-                  style={{ color: fg, fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', lineHeight: 1.1, margin: 0, fontVariantNumeric: 'tabular-nums' }}>{value}</dd>
-                <dt className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 6 }}>{label}</dt>
-              </div>
-            ))}
-          </dl>
-          <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 16 }}>
-            Checkout completion is purchases as a share of checkout entries.
-            Conversion rate is in percentage points.
-          </p>
+          {/* The chart and the figures it produced, side by side from md. The
+              numbers used to run the section's full width with the chart
+              starting below them, so the evidence for a figure was off the
+              screen by the time you read it.
 
-          <figure style={{ margin: '32px 0 0' }}>
-            <img src={graphResult} alt="Google Analytics funnel: view bag, enter checkout at 70.1%, purchase at 79.6%"
-              style={{ width: '100%', maxWidth: FIGURE_MAX, display: 'block', borderRadius: 8 }} />
-            <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
-              Chart: Google Analytics funnel from bag to successful checkout.
-            </figcaption>
-          </figure>
+              DOM order is the mobile order — headline figures first, chart
+              after — and `md:order-first` moves the chart to the left column
+              on a wide screen without reordering the phone. */}
+          <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
+            <div>
+              <p className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>
+                Result from the tested group — voucher owners
+              </p>
+              {/* One per row here rather than three across: in half a column
+                  the values are set at up to 2.5rem and auto-fit would break
+                  three of them into an uneven two-and-one. */}
+              <dl className="grid gap-6" style={{ gridTemplateColumns: '1fr', marginTop: 20 }}>
+                {[["Revenue", "+57%"], ["Checkout completion", "2×"], ["Conversion rate", "+0.28pp"]].map(([label, value]) => (
+                  <div key={label}>
+                    <dd className="font-['Museo',sans-serif] font-light"
+                      style={{ color: fg, fontSize: 'clamp(1.75rem, 5vw, 2.5rem)', lineHeight: 1.1, margin: 0, fontVariantNumeric: 'tabular-nums' }}>{value}</dd>
+                    <dt className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 6 }}>{label}</dt>
+                  </div>
+                ))}
+              </dl>
+              <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 16 }}>
+                Checkout completion is purchases as a share of checkout entries.
+                Conversion rate is in percentage points.
+              </p>
+            </div>
+
+            <figure className="md:order-first" style={{ margin: 0 }}>
+              <img src={graphResult} alt="Google Analytics funnel: view bag, enter checkout at 70.1%, purchase at 79.6%"
+                style={{ width: '100%', maxWidth: FIGURE_MAX, display: 'block', borderRadius: 8 }} />
+              <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
+                Chart: Google Analytics funnel from bag to successful checkout.
+              </figcaption>
+            </figure>
+          </div>
         </section>
       </div>
     </div>
