@@ -2128,7 +2128,7 @@ function IllustrationCases() {
 
 const EXPERTISE_CARDS = [
   {
-    key: "ai", slug: "ai-ux", title: "AI + UX", accent: GOLD, Illustration: IllustrationAI,
+    key: "ai", slug: "ai-ux", title: "AI + UX DesignOps", accent: GOLD, Illustration: IllustrationAI,
     description: "Designing and iterating AI-native workflows and infrastructure from the ground up.",
     bullets: ["2023 TNG eWallet: Reduced trilingual UX copy turnaround by 20% through AI tooling", "AI-native hiring standards & team norms at Cotton On Group"],
   },
