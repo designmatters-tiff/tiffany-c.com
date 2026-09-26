@@ -2225,9 +2225,13 @@ const EXPERTISE_CARDS = [
   {
     key: "ai", slug: "ai-ux", title: "AI + UX DesignOps", accent: GOLD, Illustration: IllustrationAI,
     description: "Designing and iterating AI-native workflows and infrastructure from the ground up.",
-    // Dated and newest first, so the card opens on what is in build rather
-    // than on the oldest thing there.
-    bullets: ["2026 - Multi-platform, multi-brand design system meeting accessibility standards, in build at Cotton On Group", "2023 - TNG eWallet: Reduced trilingual UX copy turnaround by 20% through AI tooling"],
+    // Chronological on purpose, so the 2023 date leads and is visible.
+    bullets: [
+      "2023 TNG eWallet: reduced trilingual UX copy turnaround by 20% through AI tooling",
+      "Cotton On Group: built the team's own card sorting tool rather than buying one, funded and in use",
+      "Rebuilt personas as synthetic users from de-identified behavioural data, to pressure-test UX hypotheses before testing with real users",
+      "Connect: a multi-brand design system for the Shopify re-platform, in build",
+    ],
   },
   {
     key: "business", slug: "business-acumen", title: "Business Acumen", accent: "#8A6E2E", Illustration: IllustrationBusiness,
@@ -2240,13 +2244,21 @@ const EXPERTISE_CARDS = [
   {
     key: "ux", slug: "product-ux-strategies", title: "Product & UX Strategies", accent: "#5070A0", Illustration: IllustrationUX,
     description: "Setting design direction and the systems to measure whether it worked, from 0-to-1 SaaS to platforms used by millions daily.",
-    bullets: ["Brand Perception & UX Strategy — TNG eWallet (passcode required)", "Built UX Research function & company-wide NPS benchmarks from scratch"],
+    bullets: [
+      "Brand Perception & UX Strategy — TNG eWallet (passcode required)",
+      "Built UX Research function & company-wide NPS benchmarks from scratch",
+    ],
   },
   {
     key: "people", slug: "people-process", title: "People & Process", accent: "#5070A0", Illustration: IllustrationPeople,
     description: "Built high-performing multidisciplinary teams and cross-unit prioritisation frameworks.",
     // Newest first, oldest last.
-    bullets: ["2026 - Hiring process redesigned around how candidates think with AI, not what they produce with it", "Cross-border QR payments — TNG eWallet", "Team growth: 7 → 22 designers, writers and built UX research function from scratch across B2C, B2B & Research (2022–2024)", "Chapter Lead — Ladies that UX, Kuala Lumpur (2022–2024)"],
+    bullets: [
+      "Rebuilt hiring to test judgement rather than output, once AI made output cheap",
+      "Cross-border QR payments — TNG eWallet",
+      "Team growth: 7 → 22 designers, writers and built UX research function from scratch across B2C, B2B & Research (2022–2024)",
+      "Chapter Lead — Ladies that UX, Kuala Lumpur (2022–2024)",
+    ],
     resources: [
       {
         label: "Coaching Guide for Product Designers at all levels",
