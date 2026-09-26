@@ -3671,7 +3671,10 @@ function VisaCardContent() {
       {/* ── What shipped ── */}
       <Section id="vc-shipped">
         <H2>What Shipped</H2>
-        <Fig src={vcHero} top={0}
+        {/* Capped at 400 alone, not by changing FIGURE_MAX. The source is
+            800px wide, so 400 CSS pixels is an exact 2x and stays crisp on a
+            retina screen; at the usual 760 it was being upscaled. */}
+        <Fig src={vcHero} top={0} max={400}
           alt="The finished card carrying Damien Wong's painting, beside the eWallet app"
           caption="The card, as it shipped." />
         <P top={32}>
