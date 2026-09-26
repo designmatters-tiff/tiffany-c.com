@@ -3548,7 +3548,7 @@ function VisaCardContent() {
         className="link-underline" style={{ color: fg }}>Touch &apos;n Go eWallet</a>
     )],
     ["Goal", "Launch a physical prepaid card alongside the app's new financial services"],
-    ["Scope", "Card design, artwork selection, user survey, welcome pack, in-app card experience, print production"],
+    ["Scope", "Problem framing, design direction, review"],
     ["Role", "Head of Product Design"],
   ];
 
