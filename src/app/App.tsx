@@ -58,6 +58,13 @@ import awardsFoF2024Mobile from "@/imports/AwardsSpeaking/FoF 2024/mobile_fof202
 import awardsDesignKL from "@/imports/AwardsSpeaking/Design Leadership KL/DLKL2023.avif";
 import awardsDesignKLTiff from "@/imports/AwardsSpeaking/Design Leadership KL/DLKL2023-tiff.avif";
 import profilePhoto from "@/imports/Profile/tiff-headshot.avif";
+import iphoneFrame from "@/work/shared/iphone-15-pro.png";
+import cbHome from "@/work/people/crossborder/cb-home.avif";
+import cbChina from "@/work/people/crossborder/cb-china.avif";
+import cbYew1 from "@/work/people/crossborder/yew1.avif";
+import cbYew2 from "@/work/people/crossborder/yew2.avif";
+import cbYew3 from "@/work/people/crossborder/yew3.avif";
+import cbRednote from "@/work/people/crossborder/rednote-web.mp4";
 import vcTestCard from "@/work/case/visacsr/testcard.avif";
 import vcCardMailer from "@/work/case/visacsr/cardmailer.avif";
 import vcHero from "@/work/case/visacsr/herovisa.avif";
@@ -155,7 +162,7 @@ const HEADING_COLOUR: Record<string, string> = Object.fromEntries(
   ]),
 );
 
-type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "kaiCase" | "appleHealthCase" | "brandPerceptionCase" | "sourceCase" | "finTechCase" | "visaCardCase" | "testimonials";
+type Page = "home" | "work" | "workDetail" | "awards" | "speaking" | "coaching" | "connect" | "speakingInquiry" | "businessCase" | "kaiCase" | "appleHealthCase" | "brandPerceptionCase" | "sourceCase" | "finTechCase" | "visaCardCase" | "crossBorderCase" | "testimonials";
 
 // ─── Dark mode context ────────────────────────────────────────────
 const DarkModeCtx = createContext(false);
@@ -2220,7 +2227,7 @@ const EXPERTISE_CARDS = [
     description: "Designing and iterating AI-native workflows and infrastructure from the ground up.",
     // Dated and newest first, so the card opens on what is in build rather
     // than on the oldest thing there.
-    bullets: ["2026 - Multi-platform, multi-brand design system meeting accessibility standards, in build at Cotton On Group", "2026 - AI-native hiring standards & team norms at Cotton On Group", "2023 - TNG eWallet: Reduced trilingual UX copy turnaround by 20% through AI tooling"],
+    bullets: ["2026 - Multi-platform, multi-brand design system meeting accessibility standards, in build at Cotton On Group", "2023 - TNG eWallet: Reduced trilingual UX copy turnaround by 20% through AI tooling"],
   },
   {
     key: "business", slug: "business-acumen", title: "Business Acumen", accent: "#8A6E2E", Illustration: IllustrationBusiness,
@@ -2238,7 +2245,8 @@ const EXPERTISE_CARDS = [
   {
     key: "people", slug: "people-process", title: "People & Process", accent: "#5070A0", Illustration: IllustrationPeople,
     description: "Built high-performing multidisciplinary teams and cross-unit prioritisation frameworks.",
-    bullets: ["Team growth: 7 → 22 designers, writers and built UX research function from scratch across B2C, B2B & Research (2022–2024)", "Chapter Lead — Ladies that UX, Kuala Lumpur (2022–2024)"],
+    // Newest first, oldest last.
+    bullets: ["2026 - Hiring process redesigned around how candidates think with AI, not what they produce with it", "Cross-border QR payments — TNG eWallet", "Team growth: 7 → 22 designers, writers and built UX research function from scratch across B2C, B2B & Research (2022–2024)", "Chapter Lead — Ladies that UX, Kuala Lumpur (2022–2024)"],
     resources: [
       {
         label: "Coaching Guide for Product Designers at all levels",
@@ -2276,6 +2284,7 @@ const BULLET_LINKS: Record<string, Page> = {
   "Apple Health — Design Challenge": "appleHealthCase",
   "SOURCE — Energy performance management dashboard": "sourceCase",
   "TNG eWallet Visa Card — Malaysia's first numberless card": "visaCardCase",
+  "Cross-border QR payments — TNG eWallet": "crossBorderCase",
   "FinTech: Balancing user preference & business result (passcode required)": "finTechCase",
 };
 
@@ -3772,6 +3781,372 @@ function VisaCardContent() {
   );
 }
 
+
+// ─── Cross-border QR payments case study ──────────────────────────
+// TNG eWallet's country switcher, 2024. Public. Built on SOURCE's shapes.
+//
+// The case argues that the call was someone else's, so the verbs have to
+// agree with that: what the page says about the outcome is what happened,
+// not what I did.
+
+// The prototype, as an embed. Same rules as the eCommerce one: embed.figma.com
+// rather than the www share link, no session-bound `t=` token, and
+// `scaling=contain` so the whole frame is letterboxed inside the box instead
+// of running off the bottom.
+// TODO: starting-point-node-id and page-id were carried over from the
+// eCommerce prototype's share link. Verify them against the real flow — the
+// embed may be opening at the wrong frame.
+const CB_PROTO_EMBED =
+  "https://embed.figma.com/proto/hy4NQmlE9WX1sCHaVD9aNh/Portfolio-2026" +
+  "?node-id=315-66&starting-point-node-id=315%3A66&page-id=25%3A519" +
+  "&scaling=contain&content-scaling=fixed&embed-host=share";
+
+// The bezel is a 863x1771 PNG whose screen aperture is fully transparent and
+// whose Dynamic Island is not, so whatever is placed behind it shows through
+// the screen and is covered by the island. Every number here is that file's
+// own geometry as a percentage, so the frame scales without a pixel radius
+// that would stop matching the moment it did.
+//
+// The corner radius is two values, not one: a single percentage resolves
+// against width for the horizontal radius and height for the vertical, which
+// on a box this tall draws ovals.
+function PhoneFrame({ children, max = 320 }: { children: React.ReactNode; max?: number }) {
+  return (
+    <div style={{ position: 'relative', width: '100%', maxWidth: max, margin: 0 }}>
+      <div style={{
+        position: 'absolute', zIndex: 1, overflow: 'hidden',
+        left: '4.519%', top: '1.920%', width: '90.846%', height: '96.160%',
+        borderRadius: '13.094% / 6.386%',
+      }}>
+        {children}
+      </div>
+      <img src={iphoneFrame} alt="" aria-hidden="true" width="100%"
+        style={{ display: 'block', position: 'relative', zIndex: 2, pointerEvents: 'none' }} />
+    </div>
+  );
+}
+
+const CB_SECTIONS: { id: string; label: string }[] = [
+  { id: "cb-overview",   label: "Overview" },
+  { id: "cb-conditions", label: "The Conditions" },
+  { id: "cb-bet",        label: "The Bet" },
+  { id: "cb-call",       label: "The Call" },
+  { id: "cb-happened",   label: "What Happened" },
+];
+
+function CrossBorderContent() {
+  const isDark = useContext(DarkModeCtx);
+  const fg   = GOLD;
+  const sub  = isDark ? "rgba(255,255,255,0.75)" : DIM;
+  const body = isDark ? "rgba(255,255,255,0.72)" : DIM;
+  const rule = isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
+  const ink  = isDark ? "white" : INK;
+  const MEASURE = '68ch';
+  const FIGURE_MAX = 760;
+
+  const META: [string, React.ReactNode][] = [
+    ["Year", "2024"],
+    ["Client", (
+      <a href={TNG_DIGITAL_URL} target="_blank" rel="noopener noreferrer"
+        className="link-underline" style={{ color: fg }}>Touch &apos;n Go eWallet</a>
+    )],
+    ["Goal", "Get users exploring cross-border payment before and during travel"],
+    ["Scope", "Problem framing, design direction, review"],
+    ["Role", "Head of Product Design"],
+  ];
+
+  const Fig = ({ src, alt, caption, max = FIGURE_MAX, eager = false, top = 28 }: { src: string; alt: string; caption?: string; max?: number; eager?: boolean; top?: number }) => (
+    <figure style={{ margin: `${top}px 0 0` }}>
+      <img src={src} alt={alt} loading={eager ? undefined : "lazy"} className="mx-auto md:mx-0"
+        style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
+      {caption && (
+        <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+          {caption}
+        </figcaption>
+      )}
+    </figure>
+  );
+
+  const Label = ({ children }: { children: React.ReactNode }) => (
+    <h3 className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{children}</h3>
+  );
+
+  const P = ({ children, top = 8 }: { children: React.ReactNode; top?: number }) => (
+    <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: top, maxWidth: MEASURE }}>{children}</p>
+  );
+
+  const H2 = ({ children }: { children: React.ReactNode }) => (
+    <h2 className="font-['Museo',sans-serif] font-light"
+      style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.25rem)', lineHeight: 1.15, margin: '0 0 24px' }}>{children}</h2>
+  );
+
+  const Section = ({ id, children }: { id: string; children: React.ReactNode }) => (
+    <section id={id} style={{ scrollMarginTop: 140, marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+      {children}
+    </section>
+  );
+
+  // The Xiaohongshu post, inside the phone frame. Same control as the Visa
+  // card's print test: no browser control bar over somebody's video, one
+  // button beneath that says which state it is in, and the label read off the
+  // element's own events rather than assumed — play() can reject.
+  const RednoteVideo = () => {
+    const ref = useRef<HTMLVideoElement | null>(null);
+    const reduceMotion = useReducedMotion();
+    const [playing, setPlaying] = useState(!reduceMotion);
+    useEffect(() => {
+      const el = ref.current;
+      if (!el) return;
+      const sync = () => setPlaying(!el.paused);
+      sync();
+      el.addEventListener("play", sync);
+      el.addEventListener("pause", sync);
+      return () => { el.removeEventListener("play", sync); el.removeEventListener("pause", sync); };
+    }, []);
+    const toggle = () => {
+      const el = ref.current;
+      if (!el) return;
+      if (el.paused) el.play().catch(() => {}); else el.pause();
+    };
+    return (
+      <figure style={{ margin: '28px 0 0' }}>
+        <PhoneFrame max={280}>
+          <video ref={ref} src={cbRednote}
+            autoPlay={!reduceMotion} muted loop playsInline preload="metadata"
+            aria-label="A Xiaohongshu post showing the location switcher being changed between countries, each with its own illustrated header"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+        </PhoneFrame>
+        <button onClick={toggle}
+          className="font-['Nunito_Sans',sans-serif] text-small uppercase tracking-[0.18em]"
+          aria-label={playing ? "Pause the Xiaohongshu video" : "Play the Xiaohongshu video"}
+          style={{ background: 'none', border: 'none', padding: 0, marginTop: 12, color: sub, cursor: 'pointer' }}>
+          {playing ? "Pause" : "Play"}
+        </button>
+        <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+          A travel and food creator made this, unprompted. Liked by the Touch &apos;n Go eWallet account and
+          <Figures> 3,674</Figures> others.
+        </figcaption>
+      </figure>
+    );
+  };
+
+  const WRAP = [
+    { src: cbYew1, alt: "A year-end wrap screen showing illustrated panels for Malaysia, Australia and Singapore" },
+    { src: cbYew2, alt: "A year-end wrap screen showing the year's spending summary" },
+    { src: cbYew3, alt: "A year-end wrap screen showing points earned and redeemed" },
+  ];
+
+  return (
+    <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10" style={{ maxWidth: 'max(900px, 80%)' }}>
+
+      <dl id="cb-overview" className="grid gap-x-6 gap-y-6"
+        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(128px, 1fr))', margin: 0, scrollMarginTop: 140 }}>
+        {META.map(([label, value]) => (
+          <div key={label}>
+            <dt className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{label}</dt>
+            <dd className="font-['Nunito_Sans',sans-serif]" style={{ color: body, margin: '6px 0 0' }}>{value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
+        <P top={0}>
+          Cross-border payment already had a prominent place in the app, sitting at the top of the wallet above
+          the total balance. The goal was to get people exploring it before a trip, or while they were on one.
+        </P>
+        <P top={16}>
+          Placement was not the problem. It was already in the best spot we had, and people were not touching
+          it. The switcher told you which country you were in. It never gave you a reason to open it.
+        </P>
+        {/* The before, in two shots: what you saw, and what was behind it. Each
+            at its own ratio — the home screen a crop, the switched wallet a
+            full phone capture. */}
+        <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
+          <Fig src={cbHome} eager top={28}
+            alt="The eWallet home screen, with the country selector as a small chip in the header"
+            caption="The switcher, as a chip." />
+          <Fig src={cbChina} top={28}
+            alt="The wallet switched to Mainland China, showing a converted balance and the services available there"
+            caption="And what was behind it: a converted balance and local services, for anyone who found the chip." />
+        </div>
+      </section>
+
+      {/* ── The conditions ── */}
+      <Section id="cb-conditions">
+        <H2>The Conditions</H2>
+        <P top={0}>
+          Nothing in the app had been playful before. It was a payments app used by millions of people every
+          day, and in a product like that charm is usually the first thing cut, because it is the easiest thing
+          to argue is unnecessary.
+        </P>
+        <P top={16}>
+          There was no fight over this one. The product manager backed it, and Jin illustrated the seven
+          destination headers himself. Nobody assigned that. It was well past what the work asked for, and he
+          did it because the room allowed for it.
+        </P>
+        <P top={16}>
+          A good idea that needs a champion is a sign of a team that does not have one.
+        </P>
+      </Section>
+
+      {/* ── The bet ── */}
+      <Section id="cb-bet">
+        <H2>The Bet</H2>
+        <P top={0}>
+          A country switcher is a setting. It tells you what you have. It gives you no reason to open it.
+        </P>
+        <P top={16}>
+          The bet was that it could be a place instead. Somewhere you browse before a trip, see what each
+          destination offers, and want to look at.
+        </P>
+      </Section>
+
+      {/* ── The call ── */}
+      <Section id="cb-call">
+        <H2>The Call</H2>
+        <P top={0}>
+          The decision was Jin&apos;s, a product designer on the team.
+        </P>
+        <P top={16}>
+          Rather than making the switcher more prominent, he made it worth opening. Each destination got its own
+          illustrated header, and a small aeroplane animation moved when you switched. Gardens by the Bay for
+          Singapore, Namsan tower for Korea, the Petronas Towers for Malaysia. The balance converts and the
+          artwork changes with it.
+        </P>
+        <P top={16}>
+          Making a currency switcher pleasurable is not an obvious call, and it is not one I would have
+          specified.
+        </P>
+        <figure style={{ margin: '28px 0 0', maxWidth: 420 }}>
+          {/* Portrait, because what is inside is a phone. */}
+          <div style={{
+            width: '100%', aspectRatio: '3 / 4', borderRadius: 8, overflow: 'hidden',
+            border: `1px solid ${rule}`, background: isDark ? 'rgba(255,255,255,0.03)' : '#fff',
+          }}>
+            <iframe
+              src={CB_PROTO_EMBED}
+              title="Cross-border location switcher prototype"
+              loading="lazy"
+              allowFullScreen
+              style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+            />
+          </div>
+          <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+            Lived prototype: the location switcher, clickable.
+          </figcaption>
+        </figure>
+      </Section>
+
+      {/* ── What happened ── */}
+      <Section id="cb-happened">
+        <H2>What Happened</H2>
+        <P top={0}>
+          Traffic to the switcher went up <Figures>5x</Figures>, immediately.
+        </P>
+        <P top={16}>
+          Then something we had not planned for.
+        </P>
+        <blockquote className="font-['Museo',sans-serif] font-light"
+          style={{ color: ink, margin: '28px 0 0', paddingLeft: 20, borderLeft: `2px solid ${rule}`,
+                   fontSize: 'clamp(1.125rem, 1.8vw, 1.375rem)', lineHeight: 1.35, maxWidth: MEASURE }}>
+          不同国家还有不同图案哦
+          <span className="font-['Nunito_Sans',sans-serif] text-small block" style={{ color: sub, marginTop: 8 }}>
+            Different countries even have different artwork.
+          </span>
+        </blockquote>
+        <RednoteVideo />
+        <P top={28}>
+          A travel and food creator made a video about it, unprompted. What she pointed at was not the exchange
+          rates or the convenience.
+        </P>
+        <P top={16}>
+          Revenue did not follow straight away, and it could not have. Nobody books a flight because a header
+          looked good. The people who explored the switcher came back to it months later, when they actually
+          travelled, and used it to scan and pay overseas. Then it took off: <Figures>10x</Figures>.
+        </P>
+        <P top={16}>
+          The eyeballs came first. The revenue arrived on the travel cycle&apos;s schedule, not ours.
+        </P>
+        <P top={16}>
+          A year-end spending wrap followed, borrowed openly from Spotify. Not an original format, and it did
+          not need to be. The point is that a payments app shipped one at all.
+        </P>
+        <figure style={{ margin: '28px 0 0' }}>
+          <div className="grid gap-4 md:grid-cols-3" style={{ maxWidth: 760 }}>
+            {WRAP.map(w => (
+              <PhoneFrame key={w.src} max={220}>
+                <img src={w.src} alt={w.alt} loading="lazy"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              </PhoneFrame>
+            ))}
+          </div>
+          <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+            Back in Time, December 2024. The destination illustrations from the switcher carried straight into it.
+          </figcaption>
+        </figure>
+        {/* The confound, named. A multiple this size in a travel product over a
+            recovery year is not the design's alone, and saying so is cheaper
+            than having a reader work it out. */}
+        <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 32, maxWidth: MEASURE }}>
+          Regional travel volumes were recovering over the same period, so the revenue multiple is not cleanly
+          attributable to the change alone. The traffic is, and traffic was what the design was aimed at.
+        </p>
+      </Section>
+
+    </div>
+  );
+}
+
+function CrossBorderPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
+  const isDark = useContext(DarkModeCtx);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const onDark = useOnDarkBackdrop(headerRef);
+  const headingColor = onDark ? "#ffffff" : isDark ? GOLD_BRIGHT : GOLD;
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
+      <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+          background: headerScrolled
+            ? (onDark
+                ? "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), rgba(248,247,245,0.55)"
+                : isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)")
+            : "transparent",
+          backdropFilter: headerScrolled ? "blur(8px)" : "none",
+          WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
+          borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
+          paddingBottom: headerScrolled ? 16 : 24,
+          transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
+        }}>
+          <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
+          <Breadcrumbs color={headingColor} items={[
+            { label: "Work", onClick: () => onNavigate("work") },
+            { label: "People & Process", onClick: onBack },
+          ]} />
+          <h1 className="font-['Museo',sans-serif] font-light"
+            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: headingColor, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
+            Cross-border QR payments
+          </h1>
+        </div>
+
+        <CrossBorderContent />
+        <NavClearance />
+      </div>
+      <CaseSectionRail scrollRef={scrollRef} sections={CB_SECTIONS} />
+    </div>
+  );
+}
+
 function VisaCardPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
   const [headerScrolled, setHeaderScrolled] = useState(false);
@@ -4769,7 +5144,7 @@ const NAV_LABELS: Partial<Record<Page, string>> = {
   connect: "Connect",
 };
 
-const DEEP_PAGES = new Set<Page>(["businessCase", "kaiCase", "appleHealthCase", "brandPerceptionCase", "sourceCase", "finTechCase", "visaCardCase"]);
+const DEEP_PAGES = new Set<Page>(["businessCase", "kaiCase", "appleHealthCase", "brandPerceptionCase", "sourceCase", "finTechCase", "visaCardCase", "crossBorderCase"]);
 
 function StickyPageNav({ activePage, tint, onNavigate, isSubPage = false }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void; isSubPage?: boolean }) {
   const isDark = useContext(DarkModeCtx);
@@ -7098,6 +7473,7 @@ function pathOf(page: Page, detailKey?: string | null): string {
     case "appleHealthCase": return "/work/case-studies/apple-health";
     case "sourceCase":      return "/work/case-studies/source";
     case "visaCardCase":    return "/work/case-studies/visa-card";
+    case "crossBorderCase": return "/work/people-process/cross-border-qr";
     case "finTechCase":     return "/work/business-acumen/fintech";
     case "brandPerceptionCase": return "/work/product-ux-strategies/brand-perception";
     case "awards":          return "/awards";
@@ -7142,6 +7518,7 @@ function routeOf(pathname: string): { page: Page; detailKey: string | null } {
     if (seg[1] === "business-acumen" && seg[2] === "fintech") return at("finTechCase");
     if (seg[1] === "product-ux-strategies" && seg[2] === "brand-perception") return at("brandPerceptionCase");
     if (seg[1] === "case-studies" && seg[2] === "visa-card") return at("visaCardCase");
+    if (seg[1] === "people-process" && seg[2] === "cross-border-qr") return at("crossBorderCase");
     const card = EXPERTISE_CARDS.find(c => c.slug === seg[1]);
     // an unknown child falls back to the section rather than a dead end
     return card ? at("workDetail", card.key) : at("work");
@@ -7172,6 +7549,7 @@ function descriptionOf(page: Page, detailKey?: string | null): string {
     case "appleHealthCase": return "A five-day design challenge: repositioning Apple Health as a daily habit tool to drive daily active users.";
     case "finTechCase":     return "A passcode-gated case study: Quick Cash In for TNG eWallet's GO+, and the balance between an aggressive business goal and what users would accept.";
     case "sourceCase":      return "A year-long case study: SOURCE, the energy performance management dashboard that made building and solar data visible to the people who owned it.";
+    case "crossBorderCase": return "A country switcher nobody opened, made worth opening — illustrated destination headers, a 5x lift in traffic, and the revenue that arrived on the travel cycle's schedule.";
     case "visaCardCase": return "Malaysia's first CSR-linked and first numberless Visa prepaid card — the artwork, the numberless in-app experience, and the RM1,000,000 it raised for United Voice.";
     case "brandPerceptionCase": return "Shifting how 23 million people saw a wallet app — a brand perception framework, the UX strategy behind it, and how it was measured.";
     case "kaiCase": return "A design sprint case study: KAI, a mobile app for controlling a building's IoT machines and cutting Maximum Demand charges.";
@@ -7199,6 +7577,7 @@ function titleOf(page: Page, detailKey?: string | null): string {
     case "sourceCase":      return `SOURCE: Energy Performance Management Dashboard — ${SITE_TITLE}`;
     case "finTechCase":     return `FinTech: Balancing User Preference & Business Result — ${SITE_TITLE}`;
     case "visaCardCase": return `TNG eWallet Visa Card — ${SITE_TITLE}`;
+    case "crossBorderCase": return `Cross-border QR payments — ${SITE_TITLE}`;
     case "brandPerceptionCase": return `Brand Perception & UX Strategy — ${SITE_TITLE}`;
     case "awards":          return `Awards & Speaking — ${SITE_TITLE}`;
     case "speaking":        return ev ? `${ev.role} — ${ev.event} — ${SITE_TITLE}` : `Awards & Speaking — ${SITE_TITLE}`;
@@ -7280,7 +7659,7 @@ export default function App() {
   // expansion of the row rather than as a new screen sliding in.
   const drillIn = page === "workDetail" || page === "businessCase" || page === "kaiCase"
     || page === "appleHealthCase" || page === "brandPerceptionCase" || page === "sourceCase" || page === "finTechCase"
-    || page === "visaCardCase";
+    || page === "visaCardCase" || page === "crossBorderCase";
 
 
   useEffect(() => {
@@ -7341,7 +7720,7 @@ export default function App() {
       page === "home" ? null
     : page === "work" || page === "workDetail" || page === "businessCase"
       || page === "kaiCase" || page === "appleHealthCase" || page === "brandPerceptionCase"
-      || page === "sourceCase" || page === "finTechCase" || page === "visaCardCase" ? "work"
+      || page === "sourceCase" || page === "finTechCase" || page === "visaCardCase" || page === "crossBorderCase" ? "work"
     : page === "awards" || page === "speaking" ? "awards"
     : page === "speakingInquiry" ? "connect"
     : page;
@@ -7521,6 +7900,9 @@ export default function App() {
         )}
         {page === "visaCardCase" && (
           <VisaCardPage onBack={() => { setDetailKey("cases"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
+        )}
+        {page === "crossBorderCase" && (
+          <CrossBorderPage onBack={() => { setDetailKey("people"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
         {page === "finTechCase" && (
           <FinTechPage onBack={() => { setDetailKey("business"); setPage("workDetail"); }} onNavigate={navigateGeneral} />

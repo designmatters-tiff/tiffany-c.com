@@ -43,6 +43,7 @@ const ROUTES = [
   { path: '/work/case-studies/apple-health' },
   { path: '/work/case-studies/source' },
   { path: '/work/case-studies/visa-card' },
+  { path: '/work/people-process/cross-border-qr' },
   { path: '/awards' },
   { path: '/awards/rotterdam' },
   { path: '/awards/ux-camp' },
