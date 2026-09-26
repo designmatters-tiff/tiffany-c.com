@@ -3556,8 +3556,8 @@ function VisaCardContent() {
   // No aspect-ratio here: each file carries its own, and the ones on this page
   // are all different — a square test card, two 3:4 portraits, a 8:5 hero and
   // a 2:1 cheque presentation. `eager` for the one figure above the fold.
-  const Fig = ({ src, alt, caption, max = FIGURE_MAX, eager = false }: { src: string; alt: string; caption?: string; max?: number; eager?: boolean }) => (
-    <figure style={{ margin: '28px 0 0' }}>
+  const Fig = ({ src, alt, caption, max = FIGURE_MAX, eager = false, top = 28 }: { src: string; alt: string; caption?: string; max?: number; eager?: boolean; top?: number }) => (
+    <figure style={{ margin: `${top}px 0 0` }}>
       <img src={src} alt={alt} loading={eager ? undefined : "lazy"} className="mx-auto md:mx-0"
         style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
       {caption && (
@@ -3601,7 +3601,13 @@ function VisaCardContent() {
       </dl>
 
       <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
-        <P top={0}>
+        {/* The hero: the finished thing, before the eleven months it took to
+            get there. Placed as KAI places its own — straight after the meta
+            block, ahead of the body copy. */}
+        <Fig src={vcHero} eager top={0}
+          alt="The finished card, its face carrying no number, beside the eWallet app that holds the credentials"
+          caption="The card face carries no number. The credentials live in the app." />
+        <P top={32}>
           The card was to launch alongside a set of new financial services in the app. It also closed a real
           gap: the eWallet could only be spent where a DuitNow QR code was accepted, and the card opened the
           rest, including merchants without QR, ATM withdrawals and payments overseas.
@@ -3619,7 +3625,7 @@ function VisaCardContent() {
           the problem. The card had no reason that anyone could agree on, so every design was arguable and none
           was decidable.
         </P>
-        <Fig src={vcTestCard} eager
+        <Fig src={vcTestCard}
           alt="An unprinted TNG eWallet Visa card, test-printed overseas"
           caption="Mock card, test-printed overseas to check how the gradient and the yellow edge held on the real substrate." />
       </section>
@@ -3674,13 +3680,11 @@ function VisaCardContent() {
           We benchmarked the onboarding against Wise, which was solving the same problem of getting a physical
           card into use from inside an app.
         </P>
-        {/* TODO: the three app screens — details revealed, details hidden, and
-            the deactivation confirmation — are still to come. The finished
-            card stands in for them until they land, and the caption is about
-            the card rather than about screens that are not here. */}
-        <Fig src={vcHero}
-          alt="The finished card, its face carrying no number, beside the eWallet app that holds the credentials"
-          caption="The card face carries no number. The credentials live in the app." />
+        {/* TODO: no figure here yet. The three app screens — details revealed,
+            details hidden, and the deactivation confirmation — are still to
+            come, and the shot that was standing in for them is the page's hero
+            now. Better a section with no picture than one illustrated by
+            something it is not about. */}
 
         <div style={{ marginTop: 40 }}>
           <Label>Onboarding benchmarks</Label>
