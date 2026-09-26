@@ -2217,7 +2217,7 @@ const EXPERTISE_CARDS = [
   {
     key: "ai", slug: "ai-ux", title: "AI + UX DesignOps", accent: GOLD, Illustration: IllustrationAI,
     description: "Designing and iterating AI-native workflows and infrastructure from the ground up.",
-    bullets: ["2023 TNG eWallet: Reduced trilingual UX copy turnaround by 20% through AI tooling", "AI-native hiring standards & team norms at Cotton On Group"],
+    bullets: ["2023 TNG eWallet: Reduced trilingual UX copy turnaround by 20% through AI tooling", "AI-native hiring standards & team norms at Cotton On Group", "Multi-platform, multi-brand design system meeting accessibility standards, in build at Cotton On Group"],
   },
   {
     key: "business", slug: "business-acumen", title: "Business Acumen", accent: "#8A6E2E", Illustration: IllustrationBusiness,
@@ -2230,7 +2230,7 @@ const EXPERTISE_CARDS = [
   {
     key: "ux", slug: "product-ux-strategies", title: "Product & UX Strategies", accent: "#5070A0", Illustration: IllustrationUX,
     description: "Setting design direction and the systems to measure whether it worked, from 0-to-1 SaaS to platforms used by millions daily.",
-    bullets: ["Brand Perception & UX Strategy — TNG eWallet (passcode required)", "Built UX Research function & company-wide NPS benchmarks from scratch", "Multi-platform, multi-brand design system adhering to accessibility standards", "End-to-end product design: discovery → delivery across fintech, retail & SaaS"],
+    bullets: ["Brand Perception & UX Strategy — TNG eWallet (passcode required)", "Built UX Research function & company-wide NPS benchmarks from scratch", "End-to-end product design: discovery → delivery across fintech, retail & SaaS"],
   },
   {
     key: "people", slug: "people-process", title: "People & Process", accent: "#5070A0", Illustration: IllustrationPeople,
