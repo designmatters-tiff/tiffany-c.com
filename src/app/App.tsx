@@ -62,7 +62,8 @@ import vcTestCard from "@/work/case/visacsr/testcard.avif";
 import vcCardMailer from "@/work/case/visacsr/cardmailer.avif";
 import vcHero from "@/work/case/visacsr/herovisa.avif";
 import vcResearchWise from "@/work/case/visacsr/researchwise.avif";
-import vcLaunch from "@/work/case/visacsr/launch.avif";
+import vcPressMingle from "@/work/case/visacsr/pressmingle.avif";
+import vcTestPrint from "@/work/case/visacsr/testprint.mp4";
 import vcDonation from "@/work/case/visacsr/donation.avif";
 import foggModel from "@/work/business/eCommerce/Fogg behavioural model.avif";
 import graphResult from "@/work/business/eCommerce/graph-result.avif";
@@ -3525,7 +3526,8 @@ function SourceCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate
 // have to relearn the next.
 const VC_SECTIONS: { id: string; label: string }[] = [
   { id: "vc-overview",    label: "Overview" },
-  { id: "vc-turn",        label: "The Turn" },
+  { id: "vc-iterations",  label: "The Iterations" },
+  { id: "vc-direction",   label: "The Direction" },
   { id: "vc-choice",      label: "The Choice" },
   { id: "vc-shipped",     label: "What Shipped" },
 ];
@@ -3548,7 +3550,7 @@ function VisaCardContent() {
         className="link-underline" style={{ color: fg }}>Touch &apos;n Go eWallet</a>
     )],
     ["Goal", "Launch a physical prepaid card alongside the app's new financial services"],
-    ["Scope", "Problem framing, design direction, review"],
+    ["Scope", "Card design, artwork selection, user survey, welcome pack, print production"],
     ["Role", "Head of Product Design"],
   ];
 
@@ -3586,6 +3588,55 @@ function VisaCardContent() {
     </section>
   );
 
+  // The print test, as a plain figure: it is a card held in a hand, not a
+  // screen, so it takes no phone frame.
+  //
+  // No `controls` — a browser's control bar is a video player pinned over a
+  // photograph. One button beneath it does the only thing that matters here,
+  // and says which state it is in, so it works for a screen reader too. The
+  // video carries the description; the button is the control.
+  const TestPrintVideo = () => {
+    const ref = useRef<HTMLVideoElement | null>(null);
+    const reduceMotion = useReducedMotion();
+    // Autoplay is motion nobody asked for. With reduce-motion set the video
+    // holds its first frame and the button is how it starts.
+    // Read off the element rather than assumed: play() returns a promise and
+    // can reject — no decoder for the codec, a policy block — and a label that
+    // says Pause over a video that never started is worse than no label.
+    const [playing, setPlaying] = useState(!reduceMotion);
+    useEffect(() => {
+      const el = ref.current;
+      if (!el) return;
+      const sync = () => setPlaying(!el.paused);
+      sync();
+      el.addEventListener("play", sync);
+      el.addEventListener("pause", sync);
+      return () => { el.removeEventListener("play", sync); el.removeEventListener("pause", sync); };
+    }, []);
+    const toggle = () => {
+      const el = ref.current;
+      if (!el) return;
+      if (el.paused) el.play().catch(() => {}); else el.pause();
+    };
+    return (
+      <figure style={{ margin: 0 }}>
+        <video ref={ref} src={vcTestPrint}
+          autoPlay={!reduceMotion} muted loop playsInline preload="metadata"
+          aria-label="A blue test-printed card tilted in the hand to see how the gradient behaves under light"
+          style={{ width: '100%', borderRadius: 8, display: 'block' }} />
+        <button onClick={toggle}
+          className="font-['Nunito_Sans',sans-serif] text-small uppercase tracking-[0.18em]"
+          aria-label={playing ? "Pause the test print video" : "Play the test print video"}
+          style={{ background: 'none', border: 'none', padding: 0, marginTop: 12, color: sub, cursor: 'pointer' }}>
+          {playing ? "Pause" : "Play"}
+        </button>
+        <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+          An early test print, checked under light. One of several directions before the artwork existed.
+        </figcaption>
+      </figure>
+    );
+  };
+
   return (
     <div className="px-6 md:px-20 pt-10 md:pt-14 pb-10" style={{ maxWidth: 'max(900px, 80%)' }}>
 
@@ -3611,29 +3662,37 @@ function VisaCardContent() {
           first numberless card. The numberless decision had already been made when the design started, and it
           mattered: with no digits on the face, the artwork had the whole surface.
         </P>
-        <P top={16}>
-          I took the card design on in February 2022 and it did not ship for eleven months. Rounds of review,
-          presentations to CEOs, a user survey to choose between design directions, mock cards test-printed
-          overseas to check how the colours held on the real substrate. None of it converged. The work was not
-          the problem. The card had no reason that anyone could agree on, so every design was arguable and none
-          was decidable.
-        </P>
-        {/* The two things the research produced: a print test and a pile of
-            other people's onboarding packs. Side by side from md, each at its
-            own ratio — the card square, the pack 3:4. */}
-        <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
-          <Fig src={vcTestCard} eager top={0}
-            alt="An unprinted TNG eWallet Visa card, test-printed overseas"
-            caption="Mock card, test-printed overseas to check how the gradient and the yellow edge held on the real substrate." />
-          <Fig src={vcResearchWise} top={0}
-            alt="A Wise welcome pack, opened"
-            caption="One of several card onboarding packs pulled apart during the research." />
-        </div>
       </section>
 
-      {/* ── The turn ── */}
-      <Section id="vc-turn">
-        <H2>The Turn</H2>
+      {/* ── The iterations ── */}
+      <Section id="vc-iterations">
+        <H2>The Iterations</H2>
+        <P top={0}>
+          I took the card design on in February 2022 and it did not ship for eleven months. Rounds of review,
+          presentations to CEOs, a user survey to choose between design directions, mock cards test-printed
+          overseas to check how the colours held on the real substrate.
+        </P>
+        <P top={16}>
+          None of it converged. The work was not the problem. The card had no reason that anyone could agree
+          on, so every design was arguable and none was decidable.
+        </P>
+        {/* What eleven months of it left behind: a print test under light, a
+            later unprinted sample, and other people's packs. The video and the
+            sample pair off; the pack sits under them on its own. */}
+        <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
+          <TestPrintVideo />
+          <Fig src={vcTestCard} eager top={0}
+            alt="An unprinted TNG eWallet Visa card, test-printed overseas"
+            caption="A later unprinted sample." />
+        </div>
+        <Fig src={vcResearchWise}
+          alt="A Wise welcome pack, opened"
+          caption="One of several card onboarding packs pulled apart during the research." />
+      </Section>
+
+      {/* ── The direction ── */}
+      <Section id="vc-direction">
+        <H2>The Direction</H2>
         <P top={0}>
           In August 2022 group leadership set the direction: the card would be tied to United Voice, a Malaysian
           self-advocacy society for people with learning disabilities. <Figures>RM2</Figures> from every card
@@ -3682,8 +3741,8 @@ function VisaCardContent() {
           prepaid card, and its first numberless one.
         </P>
         <P top={16}>
-          At the launch, Damien&apos;s mother spoke. She said she had never seen him paint with the enthusiasm
-          he brought to that canvas.
+          At a media session after the launch, Damien&apos;s mother spoke. She said she had never seen him
+          paint with the enthusiasm he brought to that canvas.
         </P>
         <P top={16}>
           A year later, in January 2024, TNG Digital and Visa presented United Voice with
@@ -3697,10 +3756,11 @@ function VisaCardContent() {
         {/* The press-mingle photograph goes in uncropped. The slide behind the
             speaker names her; that is a press photograph of a public event and
             was published as one. The body copy above still does not name her —
-            that is a choice about the writing, not about the picture. */}
-        <Fig src={vcLaunch}
-          alt="Damien's mother speaking at the launch, with his painting on an easel beside her"
-          caption="Launch, 18 January 2023." />
+            that is a choice about the writing, not about the picture. It is a
+            media session after the launch, not the launch itself. */}
+        <Fig src={vcPressMingle}
+          alt="Damien's mother speaking at the media session, with his painting on an easel beside her"
+          caption="The media session after the launch." />
         <Fig src={vcDonation}
           alt="TNG Digital and Visa presenting United Voice with a cheque for RM1,000,000"
           caption="RM1,000,000 presented to United Voice, January 2024." />
