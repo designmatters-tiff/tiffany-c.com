@@ -3527,7 +3527,6 @@ const VC_SECTIONS: { id: string; label: string }[] = [
   { id: "vc-overview",    label: "Overview" },
   { id: "vc-turn",        label: "The Turn" },
   { id: "vc-choice",      label: "The Choice" },
-  { id: "vc-numberless",  label: "A Card With No Number" },
   { id: "vc-shipped",     label: "What Shipped" },
 ];
 
@@ -3601,22 +3600,16 @@ function VisaCardContent() {
       </dl>
 
       <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
-        {/* The hero: the finished thing, before the eleven months it took to
-            get there. Placed as KAI places its own — straight after the meta
-            block, ahead of the body copy. */}
-        <Fig src={vcHero} eager top={0}
-          alt="The finished card, its face carrying no number, beside the eWallet app that holds the credentials"
-          caption="The card face carries no number. The credentials live in the app." />
-        <P top={32}>
+        <P top={0}>
           The card was to launch alongside a set of new financial services in the app. It also closed a real
           gap: the eWallet could only be spent where a DuitNow QR code was accepted, and the card opened the
           rest, including merchants without QR, ATM withdrawals and payments overseas.
         </P>
         <P top={16}>
-          It launched on <Figures>18 January 2023</Figures> as two firsts for Malaysia. The first CSR-linked
-          Visa prepaid card, with <Figures>RM2</Figures> donated to United Voice for every application. And
-          the first numberless card, with the credentials held inside the eWallet rather than printed on the
-          plastic.
+          It launched on <Figures>18 January 2023</Figures> as two firsts for Malaysia: the first CSR-linked
+          Visa prepaid card, with <Figures>RM2</Figures> donated to United Voice for every application, and the
+          first numberless card. The numberless decision had already been made when the design started, and it
+          mattered: with no digits on the face, the artwork had the whole surface.
         </P>
         <P top={16}>
           I took the card design on in February 2022 and it did not ship for eleven months. Rounds of review,
@@ -3625,9 +3618,17 @@ function VisaCardContent() {
           the problem. The card had no reason that anyone could agree on, so every design was arguable and none
           was decidable.
         </P>
-        <Fig src={vcTestCard}
-          alt="An unprinted TNG eWallet Visa card, test-printed overseas"
-          caption="Mock card, test-printed overseas to check how the gradient and the yellow edge held on the real substrate." />
+        {/* The two things the research produced: a print test and a pile of
+            other people's onboarding packs. Side by side from md, each at its
+            own ratio — the card square, the pack 3:4. */}
+        <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
+          <Fig src={vcTestCard} eager top={0}
+            alt="An unprinted TNG eWallet Visa card, test-printed overseas"
+            caption="Mock card, test-printed overseas to check how the gradient and the yellow edge held on the real substrate." />
+          <Fig src={vcResearchWise} top={0}
+            alt="A Wise welcome pack, opened"
+            caption="One of several card onboarding packs pulled apart during the research." />
+        </div>
       </section>
 
       {/* ── The turn ── */}
@@ -3667,37 +3668,13 @@ function VisaCardContent() {
           caption="The card carrier, which tells Damien's story alongside the activation steps in English and Malay." />
       </Section>
 
-      {/* ── A card with no number ── */}
-      <Section id="vc-numberless">
-        <H2>A Card With No Number</H2>
-        <P top={0}>
-          A numberless card moves the credentials off the plastic and into the app, so the app has to do the
-          work the card used to. Reveal and hide the details. Lock and unlock. Set the PIN, order a replacement,
-          track the delivery. Temporarily deactivating a card is destructive enough to need a confirmation
-          before it happens.
-        </P>
-        <P top={16}>
-          We benchmarked the onboarding against Wise, which was solving the same problem of getting a physical
-          card into use from inside an app.
-        </P>
-        {/* TODO: no figure here yet. The three app screens — details revealed,
-            details hidden, and the deactivation confirmation — are still to
-            come, and the shot that was standing in for them is the page's hero
-            now. Better a section with no picture than one illustrated by
-            something it is not about. */}
-
-        <div style={{ marginTop: 40 }}>
-          <Label>Onboarding benchmarks</Label>
-          <Fig src={vcResearchWise}
-            alt="The Wise welcome pack, opened"
-            caption="The Wise welcome pack, reviewed for how it carries a user from a posted card to a working one." />
-        </div>
-      </Section>
-
       {/* ── What shipped ── */}
       <Section id="vc-shipped">
         <H2>What Shipped</H2>
-        <P top={0}>
+        <Fig src={vcHero} top={0}
+          alt="The finished card carrying Damien Wong's painting, beside the eWallet app"
+          caption="The card, as it shipped." />
+        <P top={32}>
           The card launched on <Figures>18 January 2023</Figures> as Malaysia&apos;s first CSR-linked Visa
           prepaid card, and its first numberless one.
         </P>
