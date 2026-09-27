@@ -3898,11 +3898,16 @@ function CrossBorderContent() {
     </section>
   );
 
-  // The Xiaohongshu post, inside the phone frame. Same control as the Visa
-  // card's print test: no browser control bar over somebody's video, one
-  // button beneath that says which state it is in, and the label read off the
-  // element's own events rather than assumed — play() can reject.
-  const RednoteVideo = () => {
+  // A video inside the phone frame. Same control as the Visa card's print
+  // test: no browser control bar over the footage, one button beneath that
+  // says which state it is in, and the label read off the element's own
+  // events rather than assumed — play() can reject.
+  //
+  // Each usage is its own instance, so each button holds its own ref and
+  // toggles only its own video.
+  const PhoneVideo = ({ src, ariaLabel, buttonNoun, caption, max = 280 }: {
+    src: string; ariaLabel: string; buttonNoun: string; caption: React.ReactNode; max?: number;
+  }) => {
     const ref = useRef<HTMLVideoElement | null>(null);
     const reduceMotion = useReducedMotion();
     const [playing, setPlaying] = useState(!reduceMotion);
@@ -3922,21 +3927,20 @@ function CrossBorderContent() {
     };
     return (
       <figure style={{ margin: '28px 0 0' }}>
-        <PhoneFrame max={280}>
-          <video ref={ref} src={cbRednote}
+        <PhoneFrame max={max}>
+          <video ref={ref} src={src}
             autoPlay={!reduceMotion} muted loop playsInline preload="metadata"
-            aria-label="A Xiaohongshu post showing the location switcher being changed between countries, each with its own illustrated header"
+            aria-label={ariaLabel}
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         </PhoneFrame>
         <button onClick={toggle}
           className="font-['Nunito_Sans',sans-serif] text-small uppercase tracking-[0.18em]"
-          aria-label={playing ? "Pause the Xiaohongshu video" : "Play the Xiaohongshu video"}
+          aria-label={playing ? `Pause the ${buttonNoun}` : `Play the ${buttonNoun}`}
           style={{ background: 'none', border: 'none', padding: 0, marginTop: 12, color: sub, cursor: 'pointer' }}>
           {playing ? "Pause" : "Play"}
         </button>
         <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
-          A travel and food creator made this, unprompted. Liked by the Touch &apos;n Go eWallet account and
-          <Figures> 3,674</Figures> others.
+          {caption}
         </figcaption>
       </figure>
     );
@@ -3993,7 +3997,7 @@ function CrossBorderContent() {
         </P>
         <P top={16}>
           There was no fight over this one. The product manager backed it, and Jin illustrated the seven
-          destination headers himself. Nobody assigned that. It was well past what the work asked for, and he
+          destination headers herself. Nobody assigned that. It was well past what the work asked for, and she
           did it because the room allowed for it.
         </P>
         <P top={16}>
@@ -4020,7 +4024,7 @@ function CrossBorderContent() {
           The decision was Jin&apos;s, a product designer on the team.
         </P>
         <P top={16}>
-          Rather than making the switcher more prominent, he made it worth opening. Each destination got its own
+          Rather than making the switcher more prominent, she made it worth opening. Each destination got its own
           illustrated header, and a small aeroplane animation moved when you switched. Gardens by the Bay for
           Singapore, Namsan tower for Korea, the Petronas Towers for Malaysia. The balance converts and the
           artwork changes with it.
@@ -4029,6 +4033,16 @@ function CrossBorderContent() {
           Making a currency switcher pleasurable is not an obvious call, and it is not one I would have
           specified.
         </P>
+        {/* TODO: this embed is to be replaced by the shipped-switcher screen
+            recording, as a <PhoneVideo src={cbAfter} .../> matching the
+            Xiaohongshu figure below. Blocked on the file: the source
+            "crossborder UI change.mov" is gitignored, so it is only on the
+            Mac and never reached this clone. Compress it there with
+              ffmpeg -i "crossborder UI change.mov" -an -vf "scale=720:-2,fps=30" \
+                -c:v libx264 -crf 30 -preset slow -pix_fmt yuv420p \
+                -movflags +faststart cb-after.mp4
+            (re-run at -crf 33 if over 4MB), commit cb-after.mp4, and this
+            figure, CB_PROTO_EMBED and the note above it all come out. */}
         <figure style={{ margin: '28px 0 0', maxWidth: 420 }}>
           {/* Portrait, because what is inside is a phone. */}
           <div style={{
@@ -4066,7 +4080,10 @@ function CrossBorderContent() {
             Different countries even have different artwork.
           </span>
         </blockquote>
-        <RednoteVideo />
+        <PhoneVideo src={cbRednote}
+          ariaLabel="A Xiaohongshu post showing the location switcher being changed between countries, each with its own illustrated header"
+          buttonNoun="Xiaohongshu video"
+          caption={<>A travel and food creator made this, unprompted. Liked by the Touch &apos;n Go eWallet account and<Figures> 3,674</Figures> others.</>} />
         <P top={28}>
           A travel and food creator made a video about it, unprompted. What she pointed at was not the exchange
           rates or the convenience.
