@@ -5697,6 +5697,14 @@ const TESTIMONIALS: {
     ],
   },
   {
+    key: "freddie", group: "leadership",
+    name: "Freddie Lee", title: "Head of Product (Commercial), TNG eWallet",
+    source: "Worked with Tiffany", date: null,
+    quote: [
+      "What truly sets Tiffany apart is her sense of ownership. She takes full responsibility for her work, ensuring not only that the design is of the highest quality, but also that it aligns perfectly with the overall product vision. She proactively anticipates challenges and finds innovative ways to overcome them.",
+    ],
+  },
+  {
     key: "junhoe", group: "leadership",
     name: "Junhoe W.", title: "Design Manager",
     source: "Reported to Tiffany", date: null,
