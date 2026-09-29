@@ -4075,9 +4075,15 @@ function CrossBorderContent() {
 
       {/* ── Design solution ── */}
       <Section id="cb-solution">
-        <H2>Design Solution</H2>
         <SplitRow>
+          {/* The heading rides in the column with the copy it belongs to,
+              rather than above the row: the reading is one block on the
+              right and the video is the whole of the left. Source order is
+              still heading, copy, video — what a phone should read — and
+              `md:order-first` moves the video across only where there are
+              two columns to move it between. */}
           <div>
+            <H2>Design Solution</H2>
             <P top={0}>
               I did not make this call. Jin, a product designer on the team, did.
             </P>
@@ -4096,21 +4102,23 @@ function CrossBorderContent() {
               specified.
             </P>
           </div>
-          <PhoneVideo src={cbAfter} top={0}
-            ariaLabel="The shipped location switcher: the wallet moving between countries, each with its own illustrated header and a plane animation"
-            buttonNoun="switcher recording"
-            caption="The shipped switcher. Recorded July 2025, after the Malaysia header animation had been changed; the destination headers are as shipped." />
+          <div className="md:order-first">
+            <PhoneVideo src={cbAfter} top={0}
+              ariaLabel="The shipped location switcher: the wallet moving between countries, each with its own illustrated header and a plane animation"
+              buttonNoun="switcher recording"
+              caption="The shipped switcher. Recorded July 2025, after the Malaysia header animation had been changed; the destination headers are as shipped." />
+          </div>
         </SplitRow>
       </Section>
 
       {/* ── Result ── */}
       <Section id="cb-result">
-        <H2>Result</H2>
-        <P top={0}>
-          Traffic to the switcher went up <Figures>5x</Figures> at once. Then the users made it a topic.
-        </P>
         <SplitRow>
           <div>
+            <H2>Result</H2>
+            <P top={0}>
+              Traffic to the switcher went up <Figures>5x</Figures> at once. Then the users made it a topic.
+            </P>
             <blockquote className="font-['Museo',sans-serif] font-light"
               style={{ color: ink, margin: '28px 0 0', paddingLeft: 20, borderLeft: `2px solid ${rule}`,
                        fontSize: 'clamp(1.125rem, 1.8vw, 1.375rem)', lineHeight: 1.35, maxWidth: MEASURE }}>
@@ -4132,19 +4140,30 @@ function CrossBorderContent() {
               The eyeballs came first. The revenue arrived on the travel cycle&apos;s schedule, not ours.
             </P>
           </div>
-          <PhoneVideo src={cbRednote} top={28}
-            ariaLabel="A Xiaohongshu post showing the location switcher being changed between countries, each with its own illustrated header"
-            buttonNoun="Xiaohongshu video"
-            caption={<>A travel and food creator made this, unprompted. Liked by the Touch &apos;n Go eWallet account and<Figures> 3,674</Figures> others.</>} />
+          <div className="md:order-first">
+            <PhoneVideo src={cbRednote} top={0}
+              ariaLabel="A Xiaohongshu post showing the location switcher being changed between countries, each with its own illustrated header"
+              buttonNoun="Xiaohongshu video"
+              caption={<>A travel and food creator made this, unprompted. Liked by the Touch &apos;n Go eWallet account and<Figures> 3,674</Figures> others.</>} />
+          </div>
         </SplitRow>
-        <P top={16}>
+        {/* The wrap is a second thing that happened, not the next sentence
+            about the first, so it gets the rule a Section would give it
+            without being one — it belongs under Result. */}
+        <div style={{ borderTop: `1px solid ${rule}`, marginTop: 40 }} />
+        <P top={32}>
           A year-end spending wrap followed, borrowed openly from Spotify. Not an original format, and it did
           not need to be. The point is that a payments app shipped one at all.
         </P>
         <figure style={{ margin: '28px 0 0' }}>
-          <div className="grid gap-4 md:grid-cols-4" style={{ maxWidth: 760 }}>
+          {/* No maxWidth: the page container is already max(900px, 80%), which
+              is what keeps every full-width element clear of the fixed rail
+              on the right. Capped at 760 these four sat well short of it. */}
+          <div className="grid gap-4 md:grid-cols-4">
+            {/* max 320, not 220: the row fills the content column now, and a
+                220 cap left the four frames short of their own cells. */}
             {WRAP.map(w => (
-              <PhoneFrame key={w.src} max={220}>
+              <PhoneFrame key={w.src} max={320}>
                 <img src={w.src} alt={w.alt} loading="lazy"
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               </PhoneFrame>
