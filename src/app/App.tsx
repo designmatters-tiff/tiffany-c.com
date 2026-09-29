@@ -3974,21 +3974,26 @@ function CrossBorderContent() {
             at its own ratio — the home screen a crop, the switched wallet a
             full phone capture.
 
-            The left shot sits in the text column, so its edges are the
-            paragraph's above it. That leaves the second shot whatever is
-            left of the row, which is nothing worth showing until the window
-            is wide: 78px at 1280, 264px at 1512. So the two stack — each one
-            still the text column — and only pair up from 1700, where the
-            second column clears 400px. The threshold is a width the content
-            asks for rather than a named breakpoint, so it is written as one.
-            `ch` resolves against the element's own font, so the grid carries
-            the body face or 68ch would measure a different character. */}
-        <div className="grid gap-8 grid-cols-[minmax(0,68ch)] min-[1700px]:grid-cols-[minmax(0,68ch)_minmax(0,1fr)] font-['Nunito_Sans',sans-serif]"
+            The left shot wants the text column, so its edges are the
+            paragraph's above it, and the second sits beside it rather than
+            under it — stacked, the second ran the full column and dwarfed
+            what it is a detail of.
+
+            Hence the pair of minmax: the left is capped at the measure and
+            the right is floored at 240px, so the right never gets squeezed
+            to the 78px a rigid 68ch left it at 1280. Below that the left
+            gives up width instead. `ch` resolves against the element's own
+            font, so the grid carries the body face or 68ch would measure a
+            different character than the paragraph it matches. */}
+        <div className="grid gap-8 md:grid-cols-[minmax(0,68ch)_minmax(240px,1fr)] font-['Nunito_Sans',sans-serif]"
           style={{ alignItems: 'start' }}>
           <Fig src={cbHome} eager top={28}
             alt="The eWallet home screen, with the country selector as a small chip in the header"
             caption="The switcher, as a chip." />
-          <Fig src={cbChina} top={28}
+          {/* Capped well under the left shot's measure: on a wide monitor the
+              column grows past 700px, and at that size a supporting detail
+              starts competing with the thing it is a detail of. */}
+          <Fig src={cbChina} top={28} max={420}
             alt="The wallet switched to Mainland China, showing a converted balance and the services available there"
             caption="And what was behind it: a converted balance and local services, for anyone who found the chip." />
         </div>
