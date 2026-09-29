@@ -64,6 +64,7 @@ import cbChina from "@/work/people/crossborder/cb-china.avif";
 import cbYew1 from "@/work/people/crossborder/yew1.avif";
 import cbYew2 from "@/work/people/crossborder/yew2.avif";
 import cbYew3 from "@/work/people/crossborder/yew3.avif";
+import cbYew4 from "@/work/people/crossborder/yew4.avif";
 import cbRednote from "@/work/people/crossborder/rednote-web.mp4";
 import vcTestCard from "@/work/case/visacsr/testcard.avif";
 import vcCardMailer from "@/work/case/visacsr/cardmailer.avif";
@@ -3822,9 +3823,12 @@ const CB_PROTO_EMBED =
 // The corner radius is two values, not one: a single percentage resolves
 // against width for the horizontal radius and height for the vertical, which
 // on a box this tall draws ovals.
+// `mx-auto md:mx-0`: a frame narrower than its column reads as a mistake when
+// it sits against the left edge of a phone. It centres below md and goes back
+// to the text's left edge from md up, the same rule `Fig` follows.
 function PhoneFrame({ children, max = 320 }: { children: React.ReactNode; max?: number }) {
   return (
-    <div style={{ position: 'relative', width: '100%', maxWidth: max, margin: 0 }}>
+    <div className="mx-auto md:mx-0" style={{ position: 'relative', width: '100%', maxWidth: max }}>
       <div style={{
         position: 'absolute', zIndex: 1, overflow: 'hidden',
         left: '4.519%', top: '1.920%', width: '90.846%', height: '96.160%',
@@ -3927,18 +3931,20 @@ function CrossBorderContent() {
     };
     return (
       <figure style={{ margin: '28px 0 0' }}>
-        <PhoneFrame max={max}>
-          <video ref={ref} src={src}
-            autoPlay={!reduceMotion} muted loop playsInline preload="metadata"
-            aria-label={ariaLabel}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-        </PhoneFrame>
-        <button onClick={toggle}
-          className="font-['Nunito_Sans',sans-serif] text-small uppercase tracking-[0.18em]"
-          aria-label={playing ? `Pause the ${buttonNoun}` : `Play the ${buttonNoun}`}
-          style={{ background: 'none', border: 'none', padding: 0, marginTop: 12, color: sub, cursor: 'pointer' }}>
-          {playing ? "Pause" : "Play"}
-        </button>
+        <div className="flex flex-col items-center md:items-start">
+          <PhoneFrame max={max}>
+            <video ref={ref} src={src}
+              autoPlay={!reduceMotion} muted loop playsInline preload="metadata"
+              aria-label={ariaLabel}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          </PhoneFrame>
+          <button onClick={toggle}
+            className="font-['Nunito_Sans',sans-serif] text-small uppercase tracking-[0.18em]"
+            aria-label={playing ? `Pause the ${buttonNoun}` : `Play the ${buttonNoun}`}
+            style={{ background: 'none', border: 'none', padding: 0, marginTop: 12, color: sub, cursor: 'pointer' }}>
+            {playing ? "Pause" : "Play"}
+          </button>
+        </div>
         <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
           {caption}
         </figcaption>
@@ -3950,6 +3956,7 @@ function CrossBorderContent() {
     { src: cbYew1, alt: "A year-end wrap screen showing illustrated panels for Malaysia, Australia and Singapore" },
     { src: cbYew2, alt: "A year-end wrap screen showing the year's spending summary" },
     { src: cbYew3, alt: "A year-end wrap screen showing points earned and redeemed" },
+    { src: cbYew4, alt: "A year-end wrap screen assigning a superhero identity, Dynamic Kaya & Egg Duo, with the achievements unlocked that year" },
   ];
 
   return (
@@ -4101,7 +4108,7 @@ function CrossBorderContent() {
           not need to be. The point is that a payments app shipped one at all.
         </P>
         <figure style={{ margin: '28px 0 0' }}>
-          <div className="grid gap-4 md:grid-cols-3" style={{ maxWidth: 760 }}>
+          <div className="grid gap-4 md:grid-cols-4" style={{ maxWidth: 760 }}>
             {WRAP.map(w => (
               <PhoneFrame key={w.src} max={220}>
                 <img src={w.src} alt={w.alt} loading="lazy"
