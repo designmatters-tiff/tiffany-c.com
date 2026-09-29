@@ -66,6 +66,7 @@ import cbYew2 from "@/work/people/crossborder/yew2.avif";
 import cbYew3 from "@/work/people/crossborder/yew3.avif";
 import cbYew4 from "@/work/people/crossborder/yew4.avif";
 import cbRednote from "@/work/people/crossborder/rednote-web.mp4";
+import cbAfter from "@/work/people/crossborder/cb-after.mp4";
 import vcTestCard from "@/work/case/visacsr/testcard.avif";
 import vcCardMailer from "@/work/case/visacsr/cardmailer.avif";
 import vcHero from "@/work/case/visacsr/herovisa.avif";
@@ -2246,6 +2247,7 @@ const EXPERTISE_CARDS = [
     key: "ux", slug: "product-ux-strategies", title: "Product & UX Strategies", accent: "#5070A0", Illustration: IllustrationUX,
     description: "Setting design direction and the systems to measure whether it worked, from 0-to-1 SaaS to platforms used by millions daily.",
     bullets: [
+      "Cross-border QR payments — TNG eWallet",
       "Brand Perception & UX Strategy — TNG eWallet (passcode required)",
       "Built UX Research function & company-wide NPS benchmarks from scratch",
     ],
@@ -2256,7 +2258,6 @@ const EXPERTISE_CARDS = [
     // Newest first, oldest last.
     bullets: [
       "Rebuilt hiring to test judgement rather than output, once AI made output cheap",
-      "Cross-border QR payments — TNG eWallet",
       "Team growth: 7 → 22 designers, writers and built UX research function from scratch across B2C, B2B & Research (2022–2024)",
       "Chapter Lead — Ladies that UX, Kuala Lumpur (2022–2024)",
     ],
@@ -3802,18 +3803,6 @@ function VisaCardContent() {
 // agree with that: what the page says about the outcome is what happened,
 // not what I did.
 
-// The prototype, as an embed. Same rules as the eCommerce one: embed.figma.com
-// rather than the www share link, no session-bound `t=` token, and
-// `scaling=contain` so the whole frame is letterboxed inside the box instead
-// of running off the bottom.
-// TODO: starting-point-node-id and page-id were carried over from the
-// eCommerce prototype's share link. Verify them against the real flow — the
-// embed may be opening at the wrong frame.
-const CB_PROTO_EMBED =
-  "https://embed.figma.com/proto/hy4NQmlE9WX1sCHaVD9aNh/Portfolio-2026" +
-  "?node-id=315-66&starting-point-node-id=315%3A66&page-id=25%3A519" +
-  "&scaling=contain&content-scaling=fixed&embed-host=share";
-
 // The bezel is a 863x1771 PNG whose screen aperture is fully transparent and
 // whose Dynamic Island is not, so whatever is placed behind it shows through
 // the screen and is covered by the island. Every number here is that file's
@@ -4040,34 +4029,10 @@ function CrossBorderContent() {
           Making a currency switcher pleasurable is not an obvious call, and it is not one I would have
           specified.
         </P>
-        {/* TODO: this embed is to be replaced by the shipped-switcher screen
-            recording, as a <PhoneVideo src={cbAfter} .../> matching the
-            Xiaohongshu figure below. Blocked on the file: the source
-            "crossborder UI change.mov" is gitignored, so it is only on the
-            Mac and never reached this clone. Compress it there with
-              ffmpeg -i "crossborder UI change.mov" -an -vf "scale=720:-2,fps=30" \
-                -c:v libx264 -crf 30 -preset slow -pix_fmt yuv420p \
-                -movflags +faststart cb-after.mp4
-            (re-run at -crf 33 if over 4MB), commit cb-after.mp4, and this
-            figure, CB_PROTO_EMBED and the note above it all come out. */}
-        <figure style={{ margin: '28px 0 0', maxWidth: 420 }}>
-          {/* Portrait, because what is inside is a phone. */}
-          <div style={{
-            width: '100%', aspectRatio: '3 / 4', borderRadius: 8, overflow: 'hidden',
-            border: `1px solid ${rule}`, background: isDark ? 'rgba(255,255,255,0.03)' : '#fff',
-          }}>
-            <iframe
-              src={CB_PROTO_EMBED}
-              title="Cross-border location switcher prototype"
-              loading="lazy"
-              allowFullScreen
-              style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-            />
-          </div>
-          <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
-            Lived prototype: the location switcher, clickable.
-          </figcaption>
-        </figure>
+        <PhoneVideo src={cbAfter}
+          ariaLabel="The shipped location switcher: the wallet moving between countries, each with its own illustrated header and a plane animation"
+          buttonNoun="switcher recording"
+          caption="The shipped switcher. Recorded July 2025, after the Malaysia header animation had been changed; the destination headers are as shipped." />
       </Section>
 
       {/* ── What happened ── */}
@@ -4167,7 +4132,7 @@ function CrossBorderPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
           <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
           <Breadcrumbs color={headingColor} items={[
             { label: "Work", onClick: () => onNavigate("work") },
-            { label: "People & Process", onClick: onBack },
+            { label: "Product & UX Strategies", onClick: onBack },
           ]} />
           <h1 className="font-['Museo',sans-serif] font-light"
             style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: headingColor, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
@@ -7517,7 +7482,7 @@ function pathOf(page: Page, detailKey?: string | null): string {
     case "appleHealthCase": return "/work/case-studies/apple-health";
     case "sourceCase":      return "/work/case-studies/source";
     case "visaCardCase":    return "/work/case-studies/visa-card";
-    case "crossBorderCase": return "/work/people-process/cross-border-qr";
+    case "crossBorderCase": return "/work/product-ux-strategies/cross-border-qr";
     case "finTechCase":     return "/work/business-acumen/fintech";
     case "brandPerceptionCase": return "/work/product-ux-strategies/brand-perception";
     case "awards":          return "/awards";
@@ -7562,6 +7527,11 @@ function routeOf(pathname: string): { page: Page; detailKey: string | null } {
     if (seg[1] === "business-acumen" && seg[2] === "fintech") return at("finTechCase");
     if (seg[1] === "product-ux-strategies" && seg[2] === "brand-perception") return at("brandPerceptionCase");
     if (seg[1] === "case-studies" && seg[2] === "visa-card") return at("visaCardCase");
+    if (seg[1] === "product-ux-strategies" && seg[2] === "cross-border-qr") return at("crossBorderCase");
+    // The case moved out of People & Process. vercel.json redirects the old
+    // path before the SPA rewrite sees it, but a client-side visit — an old
+    // link pasted into a tab that is already running the app, or the back
+    // button — never reaches the server, so the route keeps answering to it.
     if (seg[1] === "people-process" && seg[2] === "cross-border-qr") return at("crossBorderCase");
     const card = EXPERTISE_CARDS.find(c => c.slug === seg[1]);
     // an unknown child falls back to the section rather than a dead end
@@ -7946,7 +7916,7 @@ export default function App() {
           <VisaCardPage onBack={() => { setDetailKey("cases"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
         {page === "crossBorderCase" && (
-          <CrossBorderPage onBack={() => { setDetailKey("people"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
+          <CrossBorderPage onBack={() => { setDetailKey("ux"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
         )}
         {page === "finTechCase" && (
           <FinTechPage onBack={() => { setDetailKey("business"); setPage("workDetail"); }} onNavigate={navigateGeneral} />
