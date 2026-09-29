@@ -3972,8 +3972,19 @@ function CrossBorderContent() {
         </P>
         {/* The before, in two shots: what you saw, and what was behind it. Each
             at its own ratio — the home screen a crop, the switched wallet a
-            full phone capture. */}
-        <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
+            full phone capture.
+
+            The left shot sits in the text column, so its edges are the
+            paragraph's above it. That leaves the second shot whatever is
+            left of the row, which is nothing worth showing until the window
+            is wide: 78px at 1280, 264px at 1512. So the two stack — each one
+            still the text column — and only pair up from 1700, where the
+            second column clears 400px. The threshold is a width the content
+            asks for rather than a named breakpoint, so it is written as one.
+            `ch` resolves against the element's own font, so the grid carries
+            the body face or 68ch would measure a different character. */}
+        <div className="grid gap-8 grid-cols-[minmax(0,68ch)] min-[1700px]:grid-cols-[minmax(0,68ch)_minmax(0,1fr)] font-['Nunito_Sans',sans-serif]"
+          style={{ alignItems: 'start' }}>
           <Fig src={cbHome} eager top={28}
             alt="The eWallet home screen, with the country selector as a small chip in the header"
             caption="The switcher, as a chip." />
