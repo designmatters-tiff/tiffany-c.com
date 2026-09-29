@@ -3831,12 +3831,21 @@ function PhoneFrame({ children, max = 320 }: { children: React.ReactNode; max?: 
   );
 }
 
+// The copy and the thing it is about, side by side: even halves from md, one
+// column below it. A phone-framed video is 280 wide against a text column
+// two and a half times that, so under the paragraphs it left a long ribbon of
+// white down one side; beside them the row is as tall as the reading and the
+// video is next to the sentence that describes it. `items-start` so the
+// shorter column does not stretch to match the taller.
+function SplitRow({ children }: { children: React.ReactNode }) {
+  return <div className="grid gap-8 md:grid-cols-2 items-start">{children}</div>;
+}
+
 const CB_SECTIONS: { id: string; label: string }[] = [
   { id: "cb-overview",   label: "Overview" },
-  { id: "cb-conditions", label: "The Conditions" },
-  { id: "cb-bet",        label: "The Bet" },
-  { id: "cb-call",       label: "The Call" },
-  { id: "cb-happened",   label: "What Happened" },
+  { id: "cb-direction",  label: "Design Direction" },
+  { id: "cb-solution",   label: "Design Solution" },
+  { id: "cb-result",     label: "Result" },
 ];
 
 function CrossBorderContent() {
@@ -3898,8 +3907,8 @@ function CrossBorderContent() {
   //
   // Each usage is its own instance, so each button holds its own ref and
   // toggles only its own video.
-  const PhoneVideo = ({ src, ariaLabel, buttonNoun, caption, max = 280 }: {
-    src: string; ariaLabel: string; buttonNoun: string; caption: React.ReactNode; max?: number;
+  const PhoneVideo = ({ src, ariaLabel, buttonNoun, caption, max = 280, top = 28 }: {
+    src: string; ariaLabel: string; buttonNoun: string; caption: React.ReactNode; max?: number; top?: number;
   }) => {
     const ref = useRef<HTMLVideoElement | null>(null);
     const reduceMotion = useReducedMotion();
@@ -3919,7 +3928,7 @@ function CrossBorderContent() {
       if (el.paused) el.play().catch(() => {}); else el.pause();
     };
     return (
-      <figure style={{ margin: '28px 0 0' }}>
+      <figure style={{ margin: `${top}px 0 0` }}>
         <div className="flex flex-col items-center md:items-start">
           <PhoneFrame max={max}>
             <video ref={ref} src={src}
@@ -4021,91 +4030,105 @@ function CrossBorderContent() {
         </div>
       </section>
 
-      {/* ── The conditions ── */}
-      <Section id="cb-conditions">
-        <H2>The Conditions</H2>
+      {/* ── Design direction ── */}
+      <Section id="cb-direction">
+        <H2>Design Direction</H2>
         <P top={0}>
+          Each year I ran a workshop that asked the team to bring the ideas they wanted to push, and to fit
+          them to where the company was going. That year the company&apos;s frame was farming and hunting:
+          hunting for new users, and farming the ones already in the app every day. Cross-border came from the
+          CEO as a farming problem. People opened the wallet every day. How do we get them doing one more thing
+          while they are there?
+        </P>
+        <P top={16}>
+          Product and design set the direction together. Freddie, who led product, and I gave the team the
+          outcome and the frame, and deliberately not the solution. The brief was to make people want to open
+          the switcher, not to make it more prominent.
+        </P>
+        <P top={16}>
           Nothing in the app had been playful before. It was a payments app used by millions of people every
           day, and in a product like that charm is usually the first thing cut, because it is the easiest thing
           to argue is unnecessary.
         </P>
         <P top={16}>
-          There was no fight over this one. The product manager backed it, and Jin illustrated the seven
-          destination headers herself. Nobody assigned that. It was well past what the work asked for, and she
-          did it because the room allowed for it.
-        </P>
-        <P top={16}>
-          A good idea that needs a champion is a sign of a team that does not have one.
-        </P>
-      </Section>
-
-      {/* ── The bet ── */}
-      <Section id="cb-bet">
-        <H2>The Bet</H2>
-        <P top={0}>
-          A country switcher is a setting. It tells you what you have. It gives you no reason to open it.
-        </P>
-        <P top={16}>
-          The bet was that it could be a place instead. Somewhere you browse before a trip, see what each
-          destination offers, and want to look at.
-        </P>
-      </Section>
-
-      {/* ── The call ── */}
-      <Section id="cb-call">
-        <H2>The Call</H2>
-        <P top={0}>
-          The decision was Jin&apos;s, a product designer on the team.
-        </P>
-        <P top={16}>
-          Rather than making the switcher more prominent, she made it worth opening. Each destination got its own
-          illustrated header, and a small aeroplane animation moved when you switched. Gardens by the Bay for
-          Singapore, Namsan tower for Korea, the Petronas Towers for Malaysia. The balance converts and the
-          artwork changes with it.
-        </P>
-        <P top={16}>
-          Making a currency switcher pleasurable is not an obvious call, and it is not one I would have
-          specified.
-        </P>
-        <PhoneVideo src={cbAfter}
-          ariaLabel="The shipped location switcher: the wallet moving between countries, each with its own illustrated header and a plane animation"
-          buttonNoun="switcher recording"
-          caption="The shipped switcher. Recorded July 2025, after the Malaysia header animation had been changed; the destination headers are as shipped." />
-      </Section>
-
-      {/* ── What happened ── */}
-      <Section id="cb-happened">
-        <H2>What Happened</H2>
-        <P top={0}>
-          Traffic to the switcher went up <Figures>5x</Figures>, immediately.
-        </P>
-        <P top={16}>
-          Then something we had not planned for.
+          There was no fight over this one. What we did was not stand in the way when the answer turned out to
+          be charm. A good idea that needs a champion is a sign of a team that does not have one.
         </P>
         <blockquote className="font-['Museo',sans-serif] font-light"
           style={{ color: ink, margin: '28px 0 0', paddingLeft: 20, borderLeft: `2px solid ${rule}`,
                    fontSize: 'clamp(1.125rem, 1.8vw, 1.375rem)', lineHeight: 1.35, maxWidth: MEASURE }}>
-          不同国家还有不同图案哦
+          As my Head of Design, Tiffany provided an environment that balanced creative freedom with the
+          structure needed to execute ambitious ideas.
           <span className="font-['Nunito_Sans',sans-serif] text-small block" style={{ color: sub, marginTop: 8 }}>
-            Different countries even have different artwork.
+            Sebastian Wang, who reported to me at TNG
           </span>
         </blockquote>
-        <PhoneVideo src={cbRednote}
-          ariaLabel="A Xiaohongshu post showing the location switcher being changed between countries, each with its own illustrated header"
-          buttonNoun="Xiaohongshu video"
-          caption={<>A travel and food creator made this, unprompted. Liked by the Touch &apos;n Go eWallet account and<Figures> 3,674</Figures> others.</>} />
-        <P top={28}>
-          A travel and food creator made a video about it, unprompted. What she pointed at was not the exchange
-          rates or the convenience.
+      </Section>
+
+      {/* ── Design solution ── */}
+      <Section id="cb-solution">
+        <H2>Design Solution</H2>
+        <SplitRow>
+          <div>
+            <P top={0}>
+              I did not make this call. Jin, a product designer on the team, did.
+            </P>
+            <P top={16}>
+              Rather than making the switcher more prominent, she made it worth opening. Each destination got
+              its own illustrated header, and a small aeroplane animation moved when you switched. Gardens by
+              the Bay for Singapore, Namsan tower for Korea, the Petronas Towers for Malaysia. The balance
+              converts and the artwork changes with it.
+            </P>
+            <P top={16}>
+              She illustrated all seven destination headers herself. Nobody assigned that. It was well past
+              what the work asked for.
+            </P>
+            <P top={16}>
+              Making a currency switcher pleasurable is not an obvious call, and it is not one I would have
+              specified.
+            </P>
+          </div>
+          <PhoneVideo src={cbAfter} top={0}
+            ariaLabel="The shipped location switcher: the wallet moving between countries, each with its own illustrated header and a plane animation"
+            buttonNoun="switcher recording"
+            caption="The shipped switcher. Recorded July 2025, after the Malaysia header animation had been changed; the destination headers are as shipped." />
+        </SplitRow>
+      </Section>
+
+      {/* ── Result ── */}
+      <Section id="cb-result">
+        <H2>Result</H2>
+        <P top={0}>
+          Traffic to the switcher went up <Figures>5x</Figures> at once. Then the users made it a topic.
         </P>
-        <P top={16}>
-          Revenue did not follow straight away, and it could not have. Nobody books a flight because a header
-          looked good. The people who explored the switcher came back to it months later, when they actually
-          travelled, and used it to scan and pay overseas. Then it took off: <Figures>10x</Figures>.
-        </P>
-        <P top={16}>
-          The eyeballs came first. The revenue arrived on the travel cycle&apos;s schedule, not ours.
-        </P>
+        <SplitRow>
+          <div>
+            <blockquote className="font-['Museo',sans-serif] font-light"
+              style={{ color: ink, margin: '28px 0 0', paddingLeft: 20, borderLeft: `2px solid ${rule}`,
+                       fontSize: 'clamp(1.125rem, 1.8vw, 1.375rem)', lineHeight: 1.35, maxWidth: MEASURE }}>
+              不同国家还有不同图案哦
+              <span className="font-['Nunito_Sans',sans-serif] text-small block" style={{ color: sub, marginTop: 8 }}>
+                Different countries even have different artwork.
+              </span>
+            </blockquote>
+            <P top={28}>
+              A travel and food creator made a video about it, unprompted. What she pointed at was not the
+              exchange rates or the convenience.
+            </P>
+            <P top={16}>
+              Revenue did not follow straight away, and it could not have. Nobody books a flight because a
+              header looked good. The people who explored the switcher came back to it months later, when they
+              actually travelled, and used it to scan and pay overseas. Then it took off: <Figures>10x</Figures>.
+            </P>
+            <P top={16}>
+              The eyeballs came first. The revenue arrived on the travel cycle&apos;s schedule, not ours.
+            </P>
+          </div>
+          <PhoneVideo src={cbRednote} top={28}
+            ariaLabel="A Xiaohongshu post showing the location switcher being changed between countries, each with its own illustrated header"
+            buttonNoun="Xiaohongshu video"
+            caption={<>A travel and food creator made this, unprompted. Liked by the Touch &apos;n Go eWallet account and<Figures> 3,674</Figures> others.</>} />
+        </SplitRow>
         <P top={16}>
           A year-end spending wrap followed, borrowed openly from Spotify. Not an original format, and it did
           not need to be. The point is that a payments app shipped one at all.
