@@ -3961,41 +3961,63 @@ function CrossBorderContent() {
         ))}
       </dl>
 
+      {/* The before, in two shots: what you saw, and what was behind it.
+
+          Two even columns. The left one is the read — the copy, then the home
+          screen under it, two rows of one column. The right shot spans both
+          of those rows, so it runs the height of everything beside it rather
+          than sitting at its own natural height with space under it.
+
+          Placement is explicit from md because the right shot is third in the
+          source: on a phone the order is copy, then what you saw, then what
+          was behind it, and auto-placement would put it in the left column's
+          second row. The three items stay in source order below md, where the
+          grid is one column. */}
       <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
-        <P top={0}>
-          Cross-border payment already had a prominent place in the app, sitting at the top of the wallet above
-          the total balance. The goal was to get people exploring it before a trip, or while they were on one.
-        </P>
-        <P top={16}>
-          Placement was not the problem. It was already in the best spot we had, and people were not touching
-          it. The switcher told you which country you were in. It never gave you a reason to open it.
-        </P>
-        {/* The before, in two shots: what you saw, and what was behind it. Each
-            at its own ratio — the home screen a crop, the switched wallet a
-            full phone capture.
+        <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'stretch' }}>
+          <div className="md:col-start-1 md:row-start-1">
+            <P top={0}>
+              Cross-border payment already had a prominent place in the app, sitting at the top of the wallet
+              above the total balance. The goal was to get people exploring it before a trip, or while they
+              were on one.
+            </P>
+            <P top={16}>
+              Placement was not the problem. It was already in the best spot we had, and people were not
+              touching it. The switcher told you which country you were in. It never gave you a reason to open
+              it.
+            </P>
+          </div>
+          <div className="md:col-start-1 md:row-start-2">
+            <Fig src={cbHome} eager top={0}
+              alt="The eWallet home screen, with the country selector as a small chip in the header"
+              caption="The switcher, as a chip." />
+          </div>
+          {/* From md this shot fills the height the left column asks for, and
+              must not be what decides that height — it is a tall portrait
+              capture and would otherwise set the row and leave the copy
+              floating in white space. So above md the image is taken out of
+              flow, absolute inside a well that flexes to whatever is left
+              after the caption. Out of flow it contributes no height, so the
+              row is the left column's and the image fills it. Anchored to
+              the top, because the chip and the converted balance are what
+              the shot is of.
 
-            The left shot wants the text column, so its edges are the
-            paragraph's above it, and the second sits beside it rather than
-            under it — stacked, the second ran the full column and dwarfed
-            what it is a detail of.
-
-            Hence the pair of minmax: the left is capped at the measure and
-            the right is floored at 240px, so the right never gets squeezed
-            to the 78px a rigid 68ch left it at 1280. Below that the left
-            gives up width instead. `ch` resolves against the element's own
-            font, so the grid carries the body face or 68ch would measure a
-            different character than the paragraph it matches. */}
-        <div className="grid gap-8 md:grid-cols-[minmax(0,68ch)_minmax(240px,1fr)] font-['Nunito_Sans',sans-serif]"
-          style={{ alignItems: 'start' }}>
-          <Fig src={cbHome} eager top={28}
-            alt="The eWallet home screen, with the country selector as a small chip in the header"
-            caption="The switcher, as a chip." />
-          {/* Capped well under the left shot's measure: on a wide monitor the
-              column grows past 700px, and at that size a supporting detail
-              starts competing with the thing it is a detail of. */}
-          <Fig src={cbChina} top={28} max={420}
-            alt="The wallet switched to Mainland China, showing a converted balance and the services available there"
-            caption="And what was behind it: a converted balance and local services, for anyone who found the chip." />
+              Below md there is no second column and nothing to match, so the
+              image goes back in flow at its own ratio. It has to: with no
+              height to fill, a flexed well collapses and the image measured
+              0px tall on a phone. */}
+          <figure className="md:col-start-2 md:row-start-1 md:row-span-2 flex flex-col"
+            style={{ margin: 0, minHeight: 0 }}>
+            <div className="relative w-full md:flex-1 md:min-h-0">
+              <img src={cbChina} loading="lazy"
+                className="w-full h-auto md:absolute md:inset-0 md:h-full md:object-cover md:object-top"
+                alt="The wallet switched to Mainland China, showing a converted balance and the services available there"
+                style={{ display: 'block', borderRadius: 8 }} />
+            </div>
+            <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
+              And what was behind it: a converted balance and local services, for anyone who found the chip.
+            </figcaption>
+          </figure>
         </div>
       </section>
 
