@@ -3972,18 +3972,24 @@ function CrossBorderContent() {
 
       {/* The before, in two shots: what you saw, and what was behind it.
 
-          Two even columns. The left one is the read — the copy, then the home
-          screen under it, two rows of one column. The right shot spans both
-          of those rows, so it runs the height of everything beside it rather
-          than sitting at its own natural height with space under it.
+          Three rows, two even columns. The left column reads down — copy,
+          then the home screen. The right shot spans the first two rows, so
+          both images end on the same line, and the two captions sit together
+          in the third, so both start on it. That is why the captions are
+          grid items in their own right rather than each figure closing with
+          its own: as figures the right caption ran two lines to the left
+          one's one, and the images finished 45px apart.
 
-          Placement is explicit from md because the right shot is third in the
-          source: on a phone the order is copy, then what you saw, then what
-          was behind it, and auto-placement would put it in the left column's
-          second row. The three items stay in source order below md, where the
-          grid is one column. */}
+          Row gap is 0 and the spacing is on the items, because the gap
+          between an image and its caption is 12 and between the copy and the
+          image below it is 32 — one gap cannot be both. Column gap stays 32.
+
+          Placement is explicit from md because source order is what a phone
+          reads: copy, what you saw and its caption, then what was behind it
+          and its caption. Auto-placement would put the second shot in the
+          left column. */}
       <section style={{ marginTop: 48, borderTop: `1px solid ${rule}`, paddingTop: 32 }}>
-        <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'stretch' }}>
+        <div className="grid gap-x-8 gap-y-0 md:grid-cols-2" style={{ alignItems: 'stretch' }}>
           <div className="md:col-start-1 md:row-start-1">
             <P top={0}>
               Cross-border payment already had a prominent place in the app, sitting at the top of the wallet
@@ -3996,37 +4002,39 @@ function CrossBorderContent() {
               it.
             </P>
           </div>
-          <div className="md:col-start-1 md:row-start-2">
-            <Fig src={cbHome} eager top={0}
-              alt="The eWallet home screen, with the country selector as a small chip in the header"
-              caption="The switcher, as a chip." />
-          </div>
-          {/* From md this shot fills the height the left column asks for, and
-              must not be what decides that height — it is a tall portrait
-              capture and would otherwise set the row and leave the copy
-              floating in white space. So above md the image is taken out of
-              flow, absolute inside a well that flexes to whatever is left
-              after the caption. Out of flow it contributes no height, so the
-              row is the left column's and the image fills it. Anchored to
-              the top, because the chip and the converted balance are what
-              the shot is of.
 
-              Below md there is no second column and nothing to match, so the
-              image goes back in flow at its own ratio. It has to: with no
-              height to fill, a flexed well collapses and the image measured
-              0px tall on a phone. */}
-          <figure className="md:col-start-2 md:row-start-1 md:row-span-2 flex flex-col"
-            style={{ margin: 0, minHeight: 0 }}>
-            <div className="relative w-full md:flex-1 md:min-h-0">
-              <img src={cbChina} loading="lazy"
-                className="w-full h-auto md:absolute md:inset-0 md:h-full md:object-cover md:object-top"
-                alt="The wallet switched to Mainland China, showing a converted balance and the services available there"
-                style={{ display: 'block', borderRadius: 8 }} />
-            </div>
-            <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12 }}>
-              And what was behind it: a converted balance and local services, for anyone who found the chip.
-            </figcaption>
-          </figure>
+          <div className="mt-8 md:col-start-1 md:row-start-2">
+            <img src={cbHome} alt="The eWallet home screen, with the country selector as a small chip in the header"
+              style={{ width: '100%', display: 'block', borderRadius: 8 }} />
+          </div>
+          <p className="font-['Nunito_Sans',sans-serif] text-small md:col-start-1 md:row-start-3"
+            style={{ color: sub, margin: '12px 0 0' }}>
+            The switcher, as a chip.
+          </p>
+
+          {/* From md this shot fills the two rows beside it and must not be
+              what decides their height — it is a tall portrait capture and
+              would otherwise set them and leave the copy floating in white
+              space. So above md it is taken out of flow, absolute inside a
+              well that spans the rows. Out of flow it contributes no height,
+              so the rows are the left column's and the image fills them.
+              Anchored to the top, because the chip and the converted balance
+              are what the shot is of.
+
+              Below md there is no second column and nothing to match, so it
+              goes back in flow at its own ratio. It has to: with no height to
+              fill, the well collapses and the image measured 0px tall on a
+              phone. */}
+          <div className="relative w-full mt-8 md:mt-0 md:col-start-2 md:row-start-1 md:row-span-2 md:min-h-0">
+            <img src={cbChina} loading="lazy"
+              className="w-full h-auto md:absolute md:inset-0 md:h-full md:object-cover md:object-top"
+              alt="The wallet switched to Mainland China, showing a converted balance and the services available there"
+              style={{ display: 'block', borderRadius: 8 }} />
+          </div>
+          <p className="font-['Nunito_Sans',sans-serif] text-small md:col-start-2 md:row-start-3"
+            style={{ color: sub, margin: '12px 0 0' }}>
+            And what was behind it: a converted balance and local services, for anyone who found the chip.
+          </p>
         </div>
       </section>
 
