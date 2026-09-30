@@ -4170,16 +4170,9 @@ function CrossBorderContent() {
             ))}
           </div>
           <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
-            Back in Time, December 2024. The destination illustrations from the switcher carried straight into it.
+            Back in Time, December 2024.
           </figcaption>
         </figure>
-        {/* The confound, named. A multiple this size in a travel product over a
-            recovery year is not the design's alone, and saying so is cheaper
-            than having a reader work it out. */}
-        <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 32, maxWidth: MEASURE }}>
-          Regional travel volumes were recovering over the same period, so the revenue multiple is not cleanly
-          attributable to the change alone. The traffic is, and traffic was what the design was aimed at.
-        </p>
       </Section>
 
     </div>
