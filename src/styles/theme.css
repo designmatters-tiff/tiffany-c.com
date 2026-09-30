@@ -184,35 +184,42 @@
   a:not(.no-link-underline):not(:has(.link-underline)) {
     position: relative;
     text-decoration: none;
+    /* The sweep is a background, not an ::after. An absolutely positioned
+       pseudo-element resolves against the inline's bounding box, so a link
+       that wrapped drew one underline across the bottom of that box — under
+       the last line only, and out past the words on it. A background with
+       `box-decoration-break: clone` is drawn once per line fragment, so every
+       line of a wrapped link gets its own, each the width of its own words. */
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    /* Flush with the bottom of the background box, not 1px past it: the
+       painting area stops there, so `calc(100% + 1px)` clipped the line away
+       entirely. The 1px the ::after used to sit below the box comes back as
+       padding, which on an inline paints without moving anything. */
+    padding-bottom: 1px;
+    background-position: 0 100%;
+    background-size: 0% 1px;
+    transition: background-size 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
   }
-  .link-underline::after,
-  a:not(.no-link-underline):not(:has(.link-underline))::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 0;
-    height: 1px;
-    background: currentColor;
-    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .link-underline:hover::after,
-  a:not(.no-link-underline):not(:has(.link-underline)):hover::after {
-    width: 100%;
+  .link-underline:hover,
+  a:not(.no-link-underline):not(:has(.link-underline)):hover {
+    background-size: 100% 1px;
   }
   /* A navigation does not move the mouse, so whatever now sits under the
      cursor comes up hovered before the reader has touched anything — landing
      on Business Acumen, the second bullet drew its own underline. `nav-settling`
      goes on <html> at every route change and comes off at the first real
      pointer movement, so hover waits to be asked for. */
-  html.nav-settling .link-underline:hover::after,
-  html.nav-settling a:not(.no-link-underline):not(:has(.link-underline)):hover::after {
-    width: 0;
+  html.nav-settling .link-underline:hover,
+  html.nav-settling a:not(.no-link-underline):not(:has(.link-underline)):hover {
+    background-size: 0% 1px;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .link-underline::after,
-    a:not(.no-link-underline):not(:has(.link-underline))::after,
+    .link-underline,
+    a:not(.no-link-underline):not(:has(.link-underline)),
     .crumb-chevron,
     .logo-ring circle,
     .menu-icon rect {
