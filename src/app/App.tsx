@@ -3948,8 +3948,11 @@ function ScreenVideo({ src, ariaLabel, buttonNoun, caption, sub, measure, rule, 
 // white down one side; beside them the row is as tall as the reading and the
 // video is next to the sentence that describes it. `items-start` so the
 // shorter column does not stretch to match the taller.
-function SplitRow({ children }: { children: React.ReactNode }) {
-  return <div className="grid gap-8 md:grid-cols-2 items-start">{children}</div>;
+// `cols` is passed as a literal class string from the call site, never built
+// from a variable: Tailwind reads the source, so a template it cannot see
+// spelled out is a template it never generates.
+function SplitRow({ children, cols = "md:grid-cols-2" }: { children: React.ReactNode; cols?: string }) {
+  return <div className={`grid gap-8 items-start ${cols}`}>{children}</div>;
 }
 
 const CB_SECTIONS: { id: string; label: string }[] = [
@@ -7172,13 +7175,17 @@ function BrandPerceptionContent() {
   // 500 to 700px of empty page to the right of a phone-sized image. The four
   // that run the full 760 stay stacked, since there is nothing to put next to
   // them.
-  const IN_PRODUCT: { title: string; body: string; result?: string; learning?: string; media: React.ReactNode; split?: boolean }[] = [
+  // `cols` overrides the even split for the blocks whose media is landscape
+  // and wants the room. `pair` marks the two that share a row: their artwork
+  // takes a column each and their copy shares the third.
+  const IN_PRODUCT: { title: string; body: string; result?: string; learning?: string; media: React.ReactNode; split?: boolean; cols?: string; pair?: boolean }[] = [
     {
       title: "Keyword seeding",
       body: "Seeded the phrase “for safety” into copy that already existed, rather than writing new screens.",
       result: "Security perception rose 13% over the quarter.",
       learning: "Exposing users to the same stimulus repeatedly across touchpoints shifts perception. Small edits to legacy copy carried more weight than new features did.",
       split: true,
+      cols: "md:grid-cols-[minmax(0,60fr)_minmax(0,40fr)]",
       media: (
         <ScreenVideo src={bpKeywords} ariaLabel="Scrolling the brand perception keyword library, one tab per pillar"
           buttonNoun="keyword library recording" sub={sub} measure={MEASURE} rule={rule} max={FIGURE_MAX} top={0}
@@ -7190,8 +7197,10 @@ function BrandPerceptionContent() {
       body: "Dynamic banners and push notifications in three languages, explaining what we were doing to keep users' money safe.",
       result: "Push CTR between 0.94% and 3.45% across three April campaigns.",
       learning: "Copy naming a specific benefit outperformed general reassurance. “Safe payments without entering your PIN” beat “keep your money safe.”",
+      split: true,
+      cols: "md:grid-cols-[minmax(0,60fr)_minmax(0,40fr)]",
       media: (
-        <Fig src={bpBanners}
+        <Fig src={bpBanners} top={0}
           alt="Nine security tip banners: update the app, avoid entering your PIN in public, avoid public Wi-Fi, each in English, Malay and Chinese"
           caption="Three security tips, each in English, Malay and Chinese." />
       ),
@@ -7201,7 +7210,7 @@ function BrandPerceptionContent() {
       body: "Educating users on checking transaction details before approving.",
       result: "26.24% open rate across 2.9 million sends. Perception of “safe to transact” rose 12%.",
       learning: "An education email moved a perception metric, not only an engagement one.",
-      split: true,
+      pair: true,
       media: (
         <Fig src={bpEmail} max={420} top={0}
           alt="An education email titled How to check your transactions, with four illustrated steps"
@@ -7213,7 +7222,7 @@ function BrandPerceptionContent() {
       body: "Placed money tips inside the finance centre, next to each user's own cash flow and spending breakdown, so financial guidance appears where money decisions are made.",
       // The capture already carries its own handset, so no PhoneFrame here —
       // it would put a phone inside a phone.
-      split: true,
+      pair: true,
       media: (
         <Fig src={bpGofinance} max={300} top={0}
           alt="The GOfinance cash flow screen with an expense breakdown and a money tip for saving"
@@ -7299,6 +7308,10 @@ function BrandPerceptionContent() {
 
         {/* ── Strategy ── */}
         <Section id="bp-strategy">
+          <h2 className="font-['Museo',sans-serif] font-light"
+            style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.5rem)', lineHeight: 1.15, margin: '0 0 32px' }}>
+            Strategy
+          </h2>
           <Label>Four pillars</Label>
           <P>
             The company&apos;s direction rested on four pillars: convenience, security, financial
@@ -7493,10 +7506,11 @@ function BrandPerceptionContent() {
             style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.5rem)', lineHeight: 1.15, margin: 0 }}>
             In the Product
           </h2>
-          {IN_PRODUCT.map((b, i) => {
-            const head = (<><Label>{b.title}</Label><P><Figures>{b.body}</Figures></P></>);
-            const tail = (
+          {(() => {
+            const blockCopy = (b: typeof IN_PRODUCT[number]) => (
               <>
+                <Label>{b.title}</Label>
+                <P><Figures>{b.body}</Figures></P>
                 {b.result && (
                   <p className="font-['Nunito_Sans',sans-serif]" style={{ color: ink, marginTop: 16, maxWidth: MEASURE }}>
                     <span className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub, marginRight: 8 }}>Result</span>
@@ -7511,21 +7525,47 @@ function BrandPerceptionContent() {
                 )}
               </>
             );
-            return (
-              <div key={b.title} style={{ marginTop: i === 0 ? 32 : 48 }}>
-                {b.split
-                  // Artwork on the left, the whole reading on the right: the
-                  // title, the body, and the result and learning with them.
-                  // Source order stays copy-then-media, which is what a phone
-                  // should read; `md:order-first` moves the artwork across
-                  // only where there are two columns to move it between.
-                  ? <SplitRow><div>{head}{tail}</div><div className="md:order-first">{b.media}</div></SplitRow>
-                  // Full-width media keeps the original order: what it is,
-                  // the artwork, then what came of it.
-                  : <>{head}{b.media}{tail}</>}
-              </div>
-            );
-          })}
+            const nodes: React.ReactNode[] = [];
+            for (let i = 0; i < IN_PRODUCT.length; i++) {
+              const b = IN_PRODUCT[i];
+              const gap = { marginTop: nodes.length === 0 ? 32 : 48 };
+              // The two paired blocks render as one row: a column of artwork
+              // each, and the third column carrying both readings. On a phone
+              // the grid is one column, so they fall back to artwork then
+              // copy, artwork then copy, which is the order they are in.
+              if (b.pair && IN_PRODUCT[i + 1]?.pair) {
+                const c = IN_PRODUCT[i + 1];
+                nodes.push(
+                  <div key={b.title} style={gap}>
+                    <div className="grid gap-8 items-start md:grid-cols-3">
+                      <div>{b.media}</div>
+                      <div>{c.media}</div>
+                      <div>
+                        {blockCopy(b)}
+                        <div style={{ marginTop: 32 }}>{blockCopy(c)}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+                i++;
+                continue;
+              }
+              nodes.push(
+                <div key={b.title} style={gap}>
+                  {b.split
+                    // Artwork on the left, the whole reading on the right.
+                    // Source order stays copy-then-media, which is what a
+                    // phone reads; `md:order-first` moves the artwork across
+                    // only where there are two columns to move it between.
+                    ? <SplitRow cols={b.cols}><div>{blockCopy(b)}</div><div className="md:order-first">{b.media}</div></SplitRow>
+                    // Full-width media keeps the original order: what it is,
+                    // the artwork, then what came of it.
+                    : <>{blockCopy(b)}{b.media}</>}
+                </div>
+              );
+            }
+            return nodes;
+          })()}
         </Section>
 
         {/* ── Results ── */}
