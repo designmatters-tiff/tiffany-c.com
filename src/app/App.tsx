@@ -7167,7 +7167,12 @@ function BrandPerceptionContent() {
   // Each block is title, media, result, learning — so the next one is an entry
   // in this array rather than another hand-built section. `media` is a node,
   // not a caption string, because the blocks carry stills and recordings.
-  const IN_PRODUCT: { title: string; body: string; result?: string; learning?: string; media: React.ReactNode }[] = [
+  // `split` marks the blocks whose media is narrower than the column: those
+  // read as copy on the left and the artwork beside it, rather than leaving
+  // 500 to 700px of empty page to the right of a phone-sized image. The four
+  // that run the full 760 stay stacked, since there is nothing to put next to
+  // them.
+  const IN_PRODUCT: { title: string; body: string; result?: string; learning?: string; media: React.ReactNode; split?: boolean }[] = [
     {
       title: "Keyword seeding",
       body: "Seeded the phrase “for safety” into copy that already existed, rather than writing new screens.",
@@ -7195,8 +7200,9 @@ function BrandPerceptionContent() {
       body: "Educating users on checking transaction details before approving.",
       result: "26.24% open rate across 2.9 million sends. Perception of “safe to transact” rose 12%.",
       learning: "An education email moved a perception metric, not only an engagement one.",
+      split: true,
       media: (
-        <Fig src={bpEmail} max={420}
+        <Fig src={bpEmail} max={420} top={0}
           alt="An education email titled How to check your transactions, with four illustrated steps"
           caption="The education email: four checks before approving a transaction." />
       ),
@@ -7206,8 +7212,9 @@ function BrandPerceptionContent() {
       body: "Placed money tips inside the finance centre, next to each user's own cash flow and spending breakdown, so financial guidance appears where money decisions are made.",
       // The capture already carries its own handset, so no PhoneFrame here —
       // it would put a phone inside a phone.
+      split: true,
       media: (
-        <Fig src={bpGofinance} max={300}
+        <Fig src={bpGofinance} max={300} top={0}
           alt="The GOfinance cash flow screen with an expense breakdown and a money tip for saving"
           caption="A money tip for saving, beside the user's own spending in GOfinance." />
       ),
@@ -7215,9 +7222,10 @@ function BrandPerceptionContent() {
     {
       title: "Onboarding revamp",
       body: "Rewrote the onboarding sliders away from toll and payment messaging onto the pillars: financial services, convenience, rewards and security. Motion, illustration and copy were designed together, so each slide shows the app in everyday use. Turned around in ten days.",
+      split: true,
       media: (
         <PhoneVideo src={bpOnboardAfter} ariaLabel="The revamped onboarding sliders playing in sequence"
-          buttonNoun="onboarding recording" max={280} sub={sub} measure={MEASURE}
+          buttonNoun="onboarding recording" max={280} top={0} sub={sub} measure={MEASURE}
           caption="The revamped onboarding: financial services, convenience, rewards and security, one slide each." />
       ),
     },
@@ -7451,25 +7459,37 @@ function BrandPerceptionContent() {
             style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.5rem)', lineHeight: 1.15, margin: 0 }}>
             In the Product
           </h2>
-          {IN_PRODUCT.map((b, i) => (
-            <div key={b.title} style={{ marginTop: i === 0 ? 32 : 48 }}>
-              <Label>{b.title}</Label>
-              <P><Figures>{b.body}</Figures></P>
-              {b.media}
-              {b.result && (
-                <p className="font-['Nunito_Sans',sans-serif]" style={{ color: ink, marginTop: 16, maxWidth: MEASURE }}>
-                  <span className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub, marginRight: 8 }}>Result</span>
-                  <Figures>{b.result}</Figures>
-                </p>
-              )}
-              {b.learning && (
-                <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
-                  <span className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub, marginRight: 8 }}>Learning</span>
-                  <Figures>{b.learning}</Figures>
-                </p>
-              )}
-            </div>
-          ))}
+          {IN_PRODUCT.map((b, i) => {
+            const head = (<><Label>{b.title}</Label><P><Figures>{b.body}</Figures></P></>);
+            const tail = (
+              <>
+                {b.result && (
+                  <p className="font-['Nunito_Sans',sans-serif]" style={{ color: ink, marginTop: 16, maxWidth: MEASURE }}>
+                    <span className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub, marginRight: 8 }}>Result</span>
+                    <Figures>{b.result}</Figures>
+                  </p>
+                )}
+                {b.learning && (
+                  <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: 8, maxWidth: MEASURE }}>
+                    <span className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub, marginRight: 8 }}>Learning</span>
+                    <Figures>{b.learning}</Figures>
+                  </p>
+                )}
+              </>
+            );
+            return (
+              <div key={b.title} style={{ marginTop: i === 0 ? 32 : 48 }}>
+                {b.split
+                  // Copy on the left, artwork beside it. The result and the
+                  // learning join the copy rather than sitting under the
+                  // image, so the left column is the whole reading.
+                  ? <SplitRow><div>{head}{tail}</div><div>{b.media}</div></SplitRow>
+                  // Full-width media keeps the original order: what it is,
+                  // the artwork, then what came of it.
+                  : <>{head}{b.media}{tail}</>}
+              </div>
+            );
+          })}
         </Section>
 
         {/* ── Results ── */}
