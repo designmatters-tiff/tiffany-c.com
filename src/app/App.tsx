@@ -7210,7 +7210,8 @@ function BrandPerceptionContent() {
       body: "Educating users on checking transaction details before approving.",
       result: "26.24% open rate across 2.9 million sends. Perception of “safe to transact” rose 12%.",
       learning: "An education email moved a perception metric, not only an engagement one.",
-      pair: true,
+      split: true,
+      cols: "md:grid-cols-[minmax(0,60fr)_minmax(0,40fr)]",
       media: (
         <Fig src={bpEmail} max={420} top={0}
           alt="An education email titled How to check your transactions, with four illustrated steps"
@@ -7232,7 +7233,7 @@ function BrandPerceptionContent() {
     {
       title: "Onboarding revamp",
       body: "Rewrote the onboarding sliders away from toll and payment messaging onto the pillars: financial services, convenience, rewards and security. Motion, illustration and copy were designed together, so each slide shows the app in everyday use. Turned around in ten days.",
-      split: true,
+      pair: true,
       media: (
         <PhoneVideo src={bpOnboardAfter} ariaLabel="The revamped onboarding sliders playing in sequence"
           buttonNoun="onboarding recording" max={280} top={0} sub={sub} measure={MEASURE}
@@ -7537,14 +7538,21 @@ function BrandPerceptionContent() {
                 const c = IN_PRODUCT[i + 1];
                 nodes.push(
                   <div key={b.title} style={gap}>
-                    <div className="grid gap-8 items-start md:grid-cols-3">
-                      <div>{b.media}</div>
-                      <div>{c.media}</div>
+                    <SplitRow cols="md:grid-cols-[minmax(0,60fr)_minmax(0,40fr)]">
                       <div>
                         {blockCopy(b)}
                         <div style={{ marginTop: 32 }}>{blockCopy(c)}</div>
                       </div>
-                    </div>
+                      {/* Two handsets share the 60, so the row keeps the same
+                          split as every other block instead of becoming a
+                          third kind of grid. Side by side only from md: on a
+                          phone half of 342 is 155px of screenshot, which is
+                          not a screenshot any more. */}
+                      <div className="md:order-first grid gap-8 md:grid-cols-2 items-start">
+                        <div>{b.media}</div>
+                        <div>{c.media}</div>
+                      </div>
+                    </SplitRow>
                   </div>
                 );
                 i++;
