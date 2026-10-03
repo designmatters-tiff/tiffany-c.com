@@ -71,6 +71,7 @@ import vcTestCard from "@/work/case/visacsr/testcard.avif";
 import vcCardMailer from "@/work/case/visacsr/cardmailer.avif";
 import vcHero from "@/work/case/visacsr/herovisa.avif";
 import vcResearchWise from "@/work/case/visacsr/researchwise.avif";
+import vcResearchBigPay from "@/work/case/visacsr/researchbigpay.avif";
 import vcPressMingle from "@/work/case/visacsr/pressmingle.avif";
 import vcTestPrint from "@/work/case/visacsr/testprint.mp4";
 import vcDonation from "@/work/case/visacsr/donation.avif";
@@ -3703,16 +3704,29 @@ function VisaCardContent() {
         </P>
         {/* What eleven months of it left behind: a print test under light, a
             later unprinted sample, and other people's packs. The video and the
-            sample pair off; the pack sits under them on its own. */}
+            sample pair off; the packs pair off under them. */}
         <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start' }}>
           <TestPrintVideo />
           <Fig src={vcTestCard} eager top={0}
             alt="An unprinted TNG eWallet Visa card, test-printed overseas"
             caption="A later unprinted sample." />
         </div>
-        <Fig src={vcResearchWise}
-          alt="A Wise welcome pack, opened"
-          caption="One of several card onboarding packs pulled apart during the research." />
+        {/* Two packs, one caption. Both photos are the same 3:4 portrait, so
+            they line up without cropping, and the pair stays two-up on a
+            phone — two narrow photos read better here than two tall
+            full-width ones. Gap and radius match the video and sample above. */}
+        <figure style={{ margin: '28px 0 0' }}>
+          <div className="grid gap-8 grid-cols-2" style={{ alignItems: 'start' }}>
+            <img src={vcResearchWise} alt="A Wise welcome pack, opened" loading="lazy"
+              style={{ width: '100%', display: 'block', borderRadius: 8 }} />
+            <img src={vcResearchBigPay} alt="A BigPay welcome letter with its Visa card, address blurred" loading="lazy"
+              style={{ width: '100%', display: 'block', borderRadius: 8 }} />
+          </div>
+          <figcaption className="font-['Nunito_Sans',sans-serif] text-small"
+            style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+            Two of the card onboarding packs pulled apart during the research: Wise and BigPay.
+          </figcaption>
+        </figure>
       </Section>
 
       {/* ── The direction ── */}
