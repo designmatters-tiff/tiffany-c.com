@@ -7195,9 +7195,30 @@ function BrandPerceptionContent() {
       split: true,
       cols: "md:grid-cols-[minmax(0,60fr)_minmax(0,40fr)]",
       media: (
-        <ScreenVideo src={bpKeywords} ariaLabel="Scrolling the brand perception keyword library, one tab per pillar"
-          buttonNoun="keyword library recording" sub={sub} measure={MEASURE} rule={rule} max={FIGURE_MAX} top={0}
-          caption="The keyword library in the team's UX Content Style Guide: one tab per pillar, and the words that carried it." />
+        <>
+          <ScreenVideo src={bpKeywords} ariaLabel="Scrolling the brand perception keyword library, one tab per pillar"
+            buttonNoun="keyword library recording" sub={sub} measure={MEASURE} rule={rule} max={FIGURE_MAX} top={0}
+            caption="The keyword library in the team's UX Content Style Guide: one tab per pillar, and the words that carried it." />
+          {/* The library itself is long; this is one row per pillar, which is
+              enough to show the shape of it. It sits under the recording it is
+              an excerpt of, rather than back in Strategy where it was a second
+              panel between two principles and the flow that follows them. */}
+          <div style={{ marginTop: 28, border: `1px solid ${rule}`, borderRadius: 12, padding: 20 }}>
+            <Label>Keywords library</Label>
+            <dl style={{ margin: '12px 0 0' }}>
+              {VOCAB.map(([pillar, words], i) => (
+                <div key={pillar} style={{ marginTop: i === 0 ? 0 : 12 }}>
+                  <dt className="font-['Nunito_Sans',sans-serif]" style={{ color: ink, fontWeight: 600 }}>{pillar}</dt>
+                  <dd className="font-['Nunito_Sans',sans-serif]" style={{ color: body, margin: '2px 0 0' }}>{words.join(' · ')}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+          <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+            An excerpt from the keywords library that steered every communication and in-app message,
+            applied through a copy refresh across the front end. Each set maps to one of the four pillars.
+          </p>
+        </>
       ),
     },
     {
@@ -7429,23 +7450,6 @@ function BrandPerceptionContent() {
               across every communication and every state message, including empty, error, success and
               transition states.
             </P>
-            {/* The guide itself is long; this is one row per pillar, which is
-                enough to show the shape of it. */}
-            <div style={{ marginTop: 24, maxWidth: MEASURE, border: `1px solid ${rule}`, borderRadius: 12, padding: 20 }}>
-              <Label>Vocabulary guide</Label>
-              <dl style={{ margin: '12px 0 0' }}>
-                {VOCAB.map(([pillar, words], i) => (
-                  <div key={pillar} style={{ marginTop: i === 0 ? 0 : 12 }}>
-                    <dt className="font-['Nunito_Sans',sans-serif]" style={{ color: ink, fontWeight: 600 }}>{pillar}</dt>
-                    <dd className="font-['Nunito_Sans',sans-serif]" style={{ color: body, margin: '2px 0 0' }}>{words.join(' · ')}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-            <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
-              An excerpt from the vocabulary guide that steered every communication and in-app message,
-              applied through a copy refresh across the front end. Each set maps to one of the four pillars.
-            </p>
             <P top={16}>
               The complication: one flow carries three perceptions. A single onboarding journey moves
               through financial services, then convenience, then security. The work could not be
