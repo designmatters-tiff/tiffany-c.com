@@ -7196,9 +7196,9 @@ function BrandPerceptionContent() {
       cols: "md:grid-cols-[minmax(0,60fr)_minmax(0,40fr)]",
       media: (
         <>
-          <ScreenVideo src={bpKeywords} ariaLabel="Scrolling the brand perception keyword library, one tab per pillar"
-            buttonNoun="keyword library recording" sub={sub} measure={MEASURE} rule={rule} max={FIGURE_MAX} top={0}
-            caption="The keyword library in our UX Content Style Guide, built in Zeroheight: one tab per pillar, so design, creative and business owners all worked from the same words." />
+          <ScreenVideo src={bpKeywords} ariaLabel="Scrolling the brand perception keywords library, one tab per pillar"
+            buttonNoun="keywords library recording" sub={sub} measure={MEASURE} rule={rule} max={FIGURE_MAX} top={0}
+            caption="The keywords library in our UX Content Style Guide, built in Zeroheight: one tab per pillar, so design, creative and business owners all worked from the same words." />
           {/* The library itself is long; this is one row per pillar, which is
               enough to show the shape of it. It sits under the recording it is
               an excerpt of, rather than back in Strategy where it was a second
