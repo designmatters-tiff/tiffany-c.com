@@ -7196,15 +7196,15 @@ function BrandPerceptionContent() {
       cols: "md:grid-cols-[minmax(0,60fr)_minmax(0,40fr)]",
       media: (
         <>
-          <ScreenVideo src={bpKeywords} ariaLabel="Scrolling the brand perception keywords library, one tab per pillar"
-            buttonNoun="keywords library recording" sub={sub} measure={MEASURE} rule={rule} max={FIGURE_MAX} top={0}
-            caption="The keywords library in our UX Content Style Guide, built in Zeroheight: one tab per pillar, so design, creative and business owners all worked from the same words." />
+          <ScreenVideo src={bpKeywords} ariaLabel="Scrolling the brand perception keyword library, one tab per pillar"
+            buttonNoun="keyword library recording" sub={sub} measure={MEASURE} rule={rule} max={FIGURE_MAX} top={0}
+            caption="The keyword library in our UX Content Style Guide, built in Zeroheight: one tab per pillar, so design, creative and business owners all worked from the same words." />
           {/* The library itself is long; this is one row per pillar, which is
               enough to show the shape of it. It sits under the recording it is
               an excerpt of, rather than back in Strategy where it was a second
               panel between two principles and the flow that follows them. */}
           <div style={{ marginTop: 28, border: `1px solid ${rule}`, borderRadius: 12, padding: 20 }}>
-            <Label>Keywords library</Label>
+            <Label>Keyword library</Label>
             <dl style={{ margin: '12px 0 0' }}>
               {VOCAB.map(([pillar, words], i) => (
                 <div key={pillar} style={{ marginTop: i === 0 ? 0 : 12 }}>
@@ -7215,7 +7215,7 @@ function BrandPerceptionContent() {
             </dl>
           </div>
           <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
-            An excerpt from the keywords library that steered every communication and in-app message,
+            An excerpt from the keyword library that steered every communication and in-app message,
             applied through a copy refresh across the front end. Each set maps to one of the four pillars.
           </p>
         </>
