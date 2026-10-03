@@ -2297,11 +2297,11 @@ const EXPERTISE_CARDS = [
 
 // Work-card bullets that are really links into a case study. Keyed on the
 // bullet's exact text, so the copy above stays the single place it is written.
-// Brand Perception is deliberately absent: the page is finished enough to
-// read at its own URL but not signed off, so the Work index names it without
-// opening it. Putting the line back here is all it takes to link it.
+// The three passcode-gated pages are linked from here but stay out of the
+// sitemap — see the `index: false` entries in scripts/prerender.mjs.
 const BULLET_LINKS: Record<string, Page> = {
   "eCommerce: Behavioural UX Design (passcode required)": "businessCase",
+  "Brand Perception & UX Strategy — TNG eWallet (passcode required)": "brandPerceptionCase",
   "KAI — Mobile app for IoT device control": "kaiCase",
   "Apple Health — Design Challenge": "appleHealthCase",
   "SOURCE — Energy performance management dashboard": "sourceCase",
