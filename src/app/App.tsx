@@ -7198,7 +7198,7 @@ function BrandPerceptionContent() {
         <>
           <ScreenVideo src={bpKeywords} ariaLabel="Scrolling the brand perception keyword library, one tab per pillar"
             buttonNoun="keyword library recording" sub={sub} measure={MEASURE} rule={rule} max={FIGURE_MAX} top={0}
-            caption="The keyword library in the team's UX Content Style Guide: one tab per pillar, and the words that carried it." />
+            caption="The keyword library in our UX Content Style Guide, built in Zeroheight: one tab per pillar, so design, creative and business owners all worked from the same words." />
           {/* The library itself is long; this is one row per pillar, which is
               enough to show the shape of it. It sits under the recording it is
               an excerpt of, rather than back in Strategy where it was a second
