@@ -7117,10 +7117,18 @@ function BrandPerceptionContent() {
     ["Role", "Head of Product Design & UX Research"],
   ];
 
-  const Fig = ({ src, alt, caption, max = FIGURE_MAX, top = 28 }: { src: string; alt: string; caption?: string; max?: number; top?: number }) => (
+  // `reserveToggle` holds the space a PhoneVideo's Pause button takes, so a
+  // still standing next to a recording starts its caption on the same line.
+  // An invisible copy of the button rather than a guessed margin: it is the
+  // same element, so it is the same height whatever the type does.
+  const Fig = ({ src, alt, caption, max = FIGURE_MAX, top = 28, reserveToggle = false }: { src: string; alt: string; caption?: string; max?: number; top?: number; reserveToggle?: boolean }) => (
     <figure style={{ margin: `${top}px 0 0` }}>
       <img src={src} alt={alt} loading="lazy"
         style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
+      {reserveToggle && (
+        <span aria-hidden="true" className="font-['Nunito_Sans',sans-serif] text-small uppercase tracking-[0.18em]"
+          style={{ display: 'block', marginTop: 12, visibility: 'hidden' }}>Pause</span>
+      )}
       {caption && (
         <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
           {caption}
@@ -7225,7 +7233,7 @@ function BrandPerceptionContent() {
       // it would put a phone inside a phone.
       pair: true,
       media: (
-        <Fig src={bpGofinance} max={300} top={0}
+        <Fig src={bpGofinance} max={300} top={0} reserveToggle
           alt="The GOfinance cash flow screen with an expense breakdown and a money tip for saving"
           caption="A money tip for saving, beside the user's own spending in GOfinance." />
       ),
@@ -7236,7 +7244,7 @@ function BrandPerceptionContent() {
       pair: true,
       media: (
         <PhoneVideo src={bpOnboardAfter} ariaLabel="The revamped onboarding sliders playing in sequence"
-          buttonNoun="onboarding recording" max={280} top={0} sub={sub} measure={MEASURE}
+          buttonNoun="onboarding recording" max={291} top={0} sub={sub} measure={MEASURE}
           caption="The revamped onboarding: financial services, convenience, rewards and security, one slide each." />
       ),
     },
@@ -7351,10 +7359,10 @@ function BrandPerceptionContent() {
               big enough to read, it ran past the 420 box — so it is HTML under
               the chart instead, at the page's real size, where it can also
               wrap. */}
-          <figure style={{ margin: '32px 0 0', maxWidth: FIGURE_MAX }}>
+          <figure style={{ margin: '32px 0 0' }}>
             <div className="grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
               style={{ border: `1px solid ${rule}`, borderRadius: 12, padding: 24 }}>
-              <div className="mx-auto md:mx-0 w-full" style={{ maxWidth: 360 }}>
+              <div className="mx-auto md:mx-0 w-full" style={{ maxWidth: 480 }}>
                 <svg viewBox="0 0 420 500" width="100%" role="img" aria-label="The four company pillars side by side: Convenience, Security, Financial services, Sustainability" style={{ display: "block", fontFamily: "'Nunito Sans', sans-serif" }}>
                   <text x="210" y="34" textAnchor="middle" fontSize="16" fill={sub} letterSpacing="1.6">COMPANY DIRECTION · FOUR PILLARS</text>
                   <g fontFamily="Museo, sans-serif" fontWeight="300" fontSize="23" fill={ink} textAnchor="middle">
@@ -7375,7 +7383,7 @@ function BrandPerceptionContent() {
                   <span className="hidden md:inline">→</span><span className="md:hidden">↓</span>
                 </div>
               </div>
-              <div className="mx-auto md:mx-0 w-full" style={{ maxWidth: 360 }}>
+              <div className="mx-auto md:mx-0 w-full" style={{ maxWidth: 480 }}>
                 <svg viewBox="0 0 420 500" width="100%" role="img" aria-label="The same four pillars as a nested model: Convenience and Security as the outer emotional ring, Financial services as the functional layer, Sustainability at the core" style={{ display: "block", fontFamily: "'Nunito Sans', sans-serif" }}>
                   <defs><path id="bp-arcL" d="M 38 280 A 172 172 0 0 1 210 108"/><path id="bp-arcR" d="M 210 108 A 172 172 0 0 1 382 280"/></defs>
                   <text x="210" y="34" textAnchor="middle" fontSize="16" fill={sub} letterSpacing="1.6">DESIGN TEAM · HOW WE WORKED THEM</text>
@@ -7385,10 +7393,10 @@ function BrandPerceptionContent() {
                   <circle cx="210" cy="280" r="68" fill="#9B5A88" fillOpacity="0.16" stroke="#9B5A88"/>
                   <text fontFamily="Museo, sans-serif" fontWeight="300" fontSize="23" fill={ink}><textPath href="#bp-arcL" startOffset="50%" textAnchor="middle">Convenience</textPath></text>
                   <text fontFamily="Museo, sans-serif" fontWeight="300" fontSize="23" fill={ink}><textPath href="#bp-arcR" startOffset="50%" textAnchor="middle">Security</textPath></text>
-                  <text x="210" y="168" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="23" fill={ink}>Financial services</text>
-                  <text x="210" y="188" textAnchor="middle" fontSize="15" fill={sub}>payments · banking</text>
-                  <text x="210" y="276" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="23" fill={ink}>Sustainability</text>
-                  <text x="210" y="296" textAnchor="middle" fontSize="15" fill={sub}>social responsibility</text>
+                  <text x="210" y="168" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="20" fill={ink}>Financial services</text>
+                  <text x="210" y="190" textAnchor="middle" fontSize="13" fill={sub}>payments · banking</text>
+                  <text x="210" y="274" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="19" fill={ink}>Sustainability</text>
+                  <text x="210" y="294" textAnchor="middle" fontSize="12" fill={sub}>social responsibility</text>
                 </svg>
                 <dl className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, margin: '12px 0 0' }}>
                   <div style={{ display: 'flex', gap: 8 }}>
@@ -7550,7 +7558,13 @@ function BrandPerceptionContent() {
                           not a screenshot any more. */}
                       <div className="md:order-first grid gap-8 md:grid-cols-2 items-start">
                         <div>{b.media}</div>
-                        <div>{c.media}</div>
+                        {/* The bezel is 863x1771 and the GOfinance capture
+                            780x1554, so at equal widths the bezel stands 16px
+                            taller. It takes 97.1% of its cell — one ratio
+                            divided by the other — and the two handsets end on
+                            the same line. Full width below md, where they
+                            stack and there is nothing to match. */}
+                        <div className="w-full md:w-[97.1%]">{c.media}</div>
                       </div>
                     </SplitRow>
                   </div>
@@ -7588,43 +7602,52 @@ function BrandPerceptionContent() {
 
           {/* Deltas only — the absolute index values stay with the client.
               overflow-x on the wrapper alone, so a narrow screen scrolls the
-              table rather than the page. */}
-          <div style={{ marginTop: 24, maxWidth: MEASURE, overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 300 }}>
-              <tbody>
-                {RESULTS.map(([pillar, delta, verdict]) => (
-                  <tr key={pillar} style={{ borderTop: `1px solid ${rule}` }}>
-                    <th scope="row" className="font-['Nunito_Sans',sans-serif]"
-                      style={{ color: ink, fontWeight: 400, textAlign: 'left', padding: '14px 16px 14px 0', whiteSpace: 'nowrap' }}>
-                      {pillar}
-                    </th>
-                    <td className="font-['Museo',sans-serif] font-light"
-                      style={{ color: fg, fontSize: '1.25rem', padding: '14px 16px 14px 0', whiteSpace: 'nowrap' }}>
-                      {delta}
-                    </td>
-                    <td className="font-['Nunito_Sans',sans-serif] text-small"
-                      style={{ color: sub, padding: '14px 0', whiteSpace: 'nowrap' }}>
-                      {verdict}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              table rather than the page.
 
-          <P top={32}>
-            Convenience was the only pillar that missed its target. It finished flat.
-          </P>
-          <P top={16}>
-            The diagnosis was straightforward. H1 effort concentrated on financial services, security
-            and sustainability, and convenience received the least direct intervention of the four.
-          </P>
-          <P top={16}>
-            H2 moved to convenience specifically: seeding perception vocabulary into in-app copy,
-            applying a zero-rejection rule so the benefit is always stated plainly rather than the
-            restriction, and updating legacy copy across teams. That last one came straight from the
-            security result, which had shown legacy copy to be the highest-leverage surface available.
-          </P>
+              The table and what it means sit side by side: the numbers are the
+              artefact, the three paragraphs are the reading of them, and under
+              the table they were a long way from the row they explain. */}
+          <div style={{ marginTop: 24 }}>
+            <SplitRow>
+              <div style={{ marginTop: 0, maxWidth: MEASURE, overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 300 }}>
+                  <tbody>
+                    {RESULTS.map(([pillar, delta, verdict]) => (
+                      <tr key={pillar} style={{ borderTop: `1px solid ${rule}` }}>
+                        <th scope="row" className="font-['Nunito_Sans',sans-serif]"
+                          style={{ color: ink, fontWeight: 400, textAlign: 'left', padding: '14px 16px 14px 0', whiteSpace: 'nowrap' }}>
+                          {pillar}
+                        </th>
+                        <td className="font-['Museo',sans-serif] font-light"
+                          style={{ color: fg, fontSize: '1.25rem', padding: '14px 16px 14px 0', whiteSpace: 'nowrap' }}>
+                          {delta}
+                        </td>
+                        <td className="font-['Nunito_Sans',sans-serif] text-small"
+                          style={{ color: sub, padding: '14px 0', whiteSpace: 'nowrap' }}>
+                          {verdict}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                <P top={0}>
+                  Convenience was the only pillar that missed its target. It finished flat.
+                </P>
+                <P top={16}>
+                  The diagnosis was straightforward. H1 effort concentrated on financial services, security
+                  and sustainability, and convenience received the least direct intervention of the four.
+                </P>
+                <P top={16}>
+                  H2 moved to convenience specifically: seeding perception vocabulary into in-app copy,
+                  applying a zero-rejection rule so the benefit is always stated plainly rather than the
+                  restriction, and updating legacy copy across teams. That last one came straight from the
+                  security result, which had shown legacy copy to be the highest-leverage surface available.
+                </P>
+              </div>
+            </SplitRow>
+          </div>
         </Section>
       </div>
     </div>
