@@ -7309,23 +7309,33 @@ function BrandPerceptionContent() {
             spend for people in Malaysia.
           </P>
           {/* Both halves take ink and sub from the component, so the diagram
-              follows the theme rather than carrying its own greys. The column
-              template is the two viewBox widths, so the halves keep their
-              drawn proportions instead of each taking half the row. */}
+              follows the theme rather than carrying its own greys.
+
+              One viewBox for both, 420 x 560, with the eyebrow on y 34 and the
+              drawing between y 80 and 480 in each. Identical boxes rendered at
+              identical widths means identical heights, so the two eyebrows sit
+              on one baseline and the two charts end together — without that
+              the halves were 404x470 against 420x520, which centred against
+              each other and lined up nowhere.
+
+              The outline holds the pair together, so the ring legend reads as
+              part of the drawing rather than as a second caption competing
+              with the real one underneath. */}
           <figure style={{ margin: '32px 0 0', maxWidth: FIGURE_MAX }}>
-            <div className="grid items-center gap-6 md:grid-cols-[minmax(0,404fr)_auto_minmax(0,420fr)]">
+            <div className="grid items-center gap-6 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
+              style={{ border: `1px solid ${rule}`, borderRadius: 12, padding: 24 }}>
               <div className="mx-auto md:mx-0 w-full" style={{ maxWidth: 360 }}>
-                <svg viewBox="0 0 404 470" width="100%" role="img" aria-label="The four company pillars side by side: Convenience, Security, Financial services, Sustainability" style={{ display: "block", fontFamily: "'Nunito Sans', sans-serif" }}>
-                  <text x="200" y="40" textAnchor="middle" fontSize="11" fill={sub} letterSpacing="2">COMPANY DIRECTION · FOUR PILLARS</text>
+                <svg viewBox="0 0 420 560" width="100%" role="img" aria-label="The four company pillars side by side: Convenience, Security, Financial services, Sustainability" style={{ display: "block", fontFamily: "'Nunito Sans', sans-serif" }}>
+                  <text x="210" y="34" textAnchor="middle" fontSize="11" fill={sub} letterSpacing="2">COMPANY DIRECTION · FOUR PILLARS</text>
                   <g fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink} textAnchor="middle">
-                    <rect x="28"  y="80" width="78" height="380" fill="#B2933B" fillOpacity="0.16" stroke="#B2933B"/>
-                    <rect x="118" y="80" width="78" height="380" fill="#5070A0" fillOpacity="0.14" stroke="#5070A0"/>
-                    <rect x="208" y="80" width="78" height="380" fill="#8A6E2E" fillOpacity="0.10" stroke="#8A6E2E"/>
-                    <rect x="298" y="80" width="78" height="380" fill="#9B5A88" fillOpacity="0.16" stroke="#9B5A88"/>
-                    <text transform="translate(72 270) rotate(-90)">Convenience</text>
-                    <text transform="translate(162 270) rotate(-90)">Security</text>
-                    <text transform="translate(252 270) rotate(-90)">Financial services</text>
-                    <text transform="translate(342 270) rotate(-90)">Sustainability</text>
+                    <rect x="36"  y="80" width="78" height="400" fill="#B2933B" fillOpacity="0.16" stroke="#B2933B"/>
+                    <rect x="126" y="80" width="78" height="400" fill="#5070A0" fillOpacity="0.14" stroke="#5070A0"/>
+                    <rect x="216" y="80" width="78" height="400" fill="#8A6E2E" fillOpacity="0.10" stroke="#8A6E2E"/>
+                    <rect x="306" y="80" width="78" height="400" fill="#9B5A88" fillOpacity="0.16" stroke="#9B5A88"/>
+                    <text transform="translate(75 280) rotate(-90)">Convenience</text>
+                    <text transform="translate(165 280) rotate(-90)">Security</text>
+                    <text transform="translate(255 280) rotate(-90)">Financial services</text>
+                    <text transform="translate(345 280) rotate(-90)">Sustainability</text>
                   </g>
                 </svg>
               </div>
@@ -7336,21 +7346,21 @@ function BrandPerceptionContent() {
                 </div>
               </div>
               <div className="mx-auto md:mx-0 w-full" style={{ maxWidth: 360 }}>
-                <svg viewBox="530 20 420 520" width="100%" role="img" aria-label="The same four pillars as a nested model: Convenience and Security as the outer emotional ring, Financial services as the functional layer, Sustainability at the core" style={{ display: "block", fontFamily: "'Nunito Sans', sans-serif" }}>
-                  <defs><path id="bp-arcL" d="M 568 270 A 172 172 0 0 1 740 98"/><path id="bp-arcR" d="M 740 98 A 172 172 0 0 1 912 270"/></defs>
-                  <text x="740" y="40" textAnchor="middle" fontSize="11" fill={sub} letterSpacing="2">DESIGN TEAM · HOW WE WORKED THEM</text>
-                  <path d="M740 70 A200 200 0 0 0 740 470 L740 420 A150 150 0 0 1 740 120 Z" fill="#B2933B" fillOpacity="0.16" stroke="#B2933B"/>
-                  <path d="M740 70 A200 200 0 0 1 740 470 L740 420 A150 150 0 0 0 740 120 Z" fill="#5070A0" fillOpacity="0.14" stroke="#5070A0"/>
-                  <circle cx="740" cy="270" r="150" fill="#8A6E2E" fillOpacity="0.10" stroke="#8A6E2E"/>
-                  <circle cx="740" cy="270" r="68" fill="#9B5A88" fillOpacity="0.16" stroke="#9B5A88"/>
+                <svg viewBox="0 0 420 560" width="100%" role="img" aria-label="The same four pillars as a nested model: Convenience and Security as the outer emotional ring, Financial services as the functional layer, Sustainability at the core" style={{ display: "block", fontFamily: "'Nunito Sans', sans-serif" }}>
+                  <defs><path id="bp-arcL" d="M 38 280 A 172 172 0 0 1 210 108"/><path id="bp-arcR" d="M 210 108 A 172 172 0 0 1 382 280"/></defs>
+                  <text x="210" y="34" textAnchor="middle" fontSize="11" fill={sub} letterSpacing="2">DESIGN TEAM · HOW WE WORKED THEM</text>
+                  <path d="M210 80 A200 200 0 0 0 210 480 L210 430 A150 150 0 0 1 210 130 Z" fill="#B2933B" fillOpacity="0.16" stroke="#B2933B"/>
+                  <path d="M210 80 A200 200 0 0 1 210 480 L210 430 A150 150 0 0 0 210 130 Z" fill="#5070A0" fillOpacity="0.14" stroke="#5070A0"/>
+                  <circle cx="210" cy="280" r="150" fill="#8A6E2E" fillOpacity="0.10" stroke="#8A6E2E"/>
+                  <circle cx="210" cy="280" r="68" fill="#9B5A88" fillOpacity="0.16" stroke="#9B5A88"/>
                   <text fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink}><textPath href="#bp-arcL" startOffset="50%" textAnchor="middle">Convenience</textPath></text>
                   <text fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink}><textPath href="#bp-arcR" startOffset="50%" textAnchor="middle">Security</textPath></text>
-                  <text x="740" y="158" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink}>Financial services</text>
-                  <text x="740" y="178" textAnchor="middle" fontSize="10.5" fill={sub}>payments · banking</text>
-                  <text x="740" y="266" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink}>Sustainability</text>
-                  <text x="740" y="286" textAnchor="middle" fontSize="10.5" fill={sub}>social responsibility</text>
-                  <text x="740" y="505" textAnchor="middle" fontSize="11" fill={sub} letterSpacing="1.6">OUTER RING · EMOTIONAL, HOW IT FEELS</text>
-                  <text x="740" y="525" textAnchor="middle" fontSize="11" fill={sub} letterSpacing="1.6">INNER · FUNCTIONAL, WHAT IT IS USED FOR</text>
+                  <text x="210" y="168" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink}>Financial services</text>
+                  <text x="210" y="188" textAnchor="middle" fontSize="10.5" fill={sub}>payments · banking</text>
+                  <text x="210" y="276" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink}>Sustainability</text>
+                  <text x="210" y="296" textAnchor="middle" fontSize="10.5" fill={sub}>social responsibility</text>
+                  <text x="210" y="515" textAnchor="middle" fontSize="11" fill={sub} letterSpacing="1.6">OUTER RING · EMOTIONAL, HOW IT FEELS</text>
+                  <text x="210" y="535" textAnchor="middle" fontSize="11" fill={sub} letterSpacing="1.6">INNER · FUNCTIONAL, WHAT IT IS USED FOR</text>
                 </svg>
               </div>
             </div>
