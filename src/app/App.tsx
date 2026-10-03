@@ -7178,9 +7178,10 @@ function BrandPerceptionContent() {
       body: "Seeded the phrase “for safety” into copy that already existed, rather than writing new screens.",
       result: "Security perception rose 13% over the quarter.",
       learning: "Exposing users to the same stimulus repeatedly across touchpoints shifts perception. Small edits to legacy copy carried more weight than new features did.",
+      split: true,
       media: (
         <ScreenVideo src={bpKeywords} ariaLabel="Scrolling the brand perception keyword library, one tab per pillar"
-          buttonNoun="keyword library recording" sub={sub} measure={MEASURE} rule={rule} max={FIGURE_MAX}
+          buttonNoun="keyword library recording" sub={sub} measure={MEASURE} rule={rule} max={FIGURE_MAX} top={0}
           caption="The keyword library in the team's UX Content Style Guide: one tab per pillar, and the words that carried it." />
       ),
     },
@@ -7273,20 +7274,27 @@ function BrandPerceptionContent() {
             </div>
           </div>
 
-          <P top={32}>
-            The gap between those two is where the work sat. A payment company gets used. A financial
-            service gets trusted, and trust is a perception problem before it is a product one.
-          </P>
-          <P top={16}>
-            How might we make the app a default choice that Malaysians, and people beyond Malaysia,
-            would want to use?
-          </P>
-          {/* The artwork is transparent, so it sits straight on the page. A
-              card or a fill behind it would give the sticky notes a box they
-              never had on the wall. */}
-          <Fig src={bpEmpathy} max={FIGURE_MAX}
-            alt="An empathy map of sticky notes sorted into what users hear, see, think and feel, say and do, with their pains and gains"
-            caption="An empathy map from a session with my design team, built around the same question." />
+          {/* The question and the session that answered it, side by side. The
+              artwork is transparent, so it sits straight on the page: a card
+              or a fill behind it would give the sticky notes a box they never
+              had on the wall. */}
+          <div style={{ marginTop: 32 }}>
+            <SplitRow>
+              <div>
+                <P top={0}>
+                  The gap between those two is where the work sat. A payment company gets used. A financial
+                  service gets trusted, and trust is a perception problem before it is a product one.
+                </P>
+                <P top={16}>
+                  How might we make the app a default choice that Malaysians, and people beyond Malaysia,
+                  would want to use?
+                </P>
+              </div>
+              <Fig src={bpEmpathy} top={0} max={FIGURE_MAX}
+                alt="An empathy map of sticky notes sorted into what users hear, see, think and feel, say and do, with their pains and gains"
+                caption="An empathy map from a session with my design team, built around the same question." />
+            </SplitRow>
+          </div>
         </Section>
 
         {/* ── Strategy ── */}
@@ -7320,14 +7328,22 @@ function BrandPerceptionContent() {
 
               The outline holds the pair together, so the ring legend reads as
               part of the drawing rather than as a second caption competing
-              with the real one underneath. */}
+              with the real one underneath.
+
+              Type inside an SVG is sized for the box, not for the page: 420
+              units render at about 278px, so everything is drawn at roughly
+              two thirds. The sizes here are chosen to land near the page's own
+              small text once scaled. The ring footnote could not get there —
+              big enough to read, it ran past the 420 box — so it is HTML under
+              the chart instead, at the page's real size, where it can also
+              wrap. */}
           <figure style={{ margin: '32px 0 0', maxWidth: FIGURE_MAX }}>
-            <div className="grid items-center gap-6 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
+            <div className="grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
               style={{ border: `1px solid ${rule}`, borderRadius: 12, padding: 24 }}>
               <div className="mx-auto md:mx-0 w-full" style={{ maxWidth: 360 }}>
-                <svg viewBox="0 0 420 560" width="100%" role="img" aria-label="The four company pillars side by side: Convenience, Security, Financial services, Sustainability" style={{ display: "block", fontFamily: "'Nunito Sans', sans-serif" }}>
-                  <text x="210" y="34" textAnchor="middle" fontSize="11" fill={sub} letterSpacing="2">COMPANY DIRECTION · FOUR PILLARS</text>
-                  <g fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink} textAnchor="middle">
+                <svg viewBox="0 0 420 500" width="100%" role="img" aria-label="The four company pillars side by side: Convenience, Security, Financial services, Sustainability" style={{ display: "block", fontFamily: "'Nunito Sans', sans-serif" }}>
+                  <text x="210" y="34" textAnchor="middle" fontSize="16" fill={sub} letterSpacing="1.6">COMPANY DIRECTION · FOUR PILLARS</text>
+                  <g fontFamily="Museo, sans-serif" fontWeight="300" fontSize="23" fill={ink} textAnchor="middle">
                     <rect x="36"  y="80" width="78" height="400" fill="#B2933B" fillOpacity="0.16" stroke="#B2933B"/>
                     <rect x="126" y="80" width="78" height="400" fill="#5070A0" fillOpacity="0.14" stroke="#5070A0"/>
                     <rect x="216" y="80" width="78" height="400" fill="#8A6E2E" fillOpacity="0.10" stroke="#8A6E2E"/>
@@ -7339,29 +7355,37 @@ function BrandPerceptionContent() {
                   </g>
                 </svg>
               </div>
-              <div className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em] text-center" style={{ color: sub }}>
+              <div className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em] text-center md:self-center" style={{ color: sub }}>
                 Put to work
                 <div aria-hidden="true" style={{ fontSize: '1.25rem', marginTop: 4 }}>
                   <span className="hidden md:inline">→</span><span className="md:hidden">↓</span>
                 </div>
               </div>
               <div className="mx-auto md:mx-0 w-full" style={{ maxWidth: 360 }}>
-                <svg viewBox="0 0 420 560" width="100%" role="img" aria-label="The same four pillars as a nested model: Convenience and Security as the outer emotional ring, Financial services as the functional layer, Sustainability at the core" style={{ display: "block", fontFamily: "'Nunito Sans', sans-serif" }}>
+                <svg viewBox="0 0 420 500" width="100%" role="img" aria-label="The same four pillars as a nested model: Convenience and Security as the outer emotional ring, Financial services as the functional layer, Sustainability at the core" style={{ display: "block", fontFamily: "'Nunito Sans', sans-serif" }}>
                   <defs><path id="bp-arcL" d="M 38 280 A 172 172 0 0 1 210 108"/><path id="bp-arcR" d="M 210 108 A 172 172 0 0 1 382 280"/></defs>
-                  <text x="210" y="34" textAnchor="middle" fontSize="11" fill={sub} letterSpacing="2">DESIGN TEAM · HOW WE WORKED THEM</text>
+                  <text x="210" y="34" textAnchor="middle" fontSize="16" fill={sub} letterSpacing="1.6">DESIGN TEAM · HOW WE WORKED THEM</text>
                   <path d="M210 80 A200 200 0 0 0 210 480 L210 430 A150 150 0 0 1 210 130 Z" fill="#B2933B" fillOpacity="0.16" stroke="#B2933B"/>
                   <path d="M210 80 A200 200 0 0 1 210 480 L210 430 A150 150 0 0 0 210 130 Z" fill="#5070A0" fillOpacity="0.14" stroke="#5070A0"/>
                   <circle cx="210" cy="280" r="150" fill="#8A6E2E" fillOpacity="0.10" stroke="#8A6E2E"/>
                   <circle cx="210" cy="280" r="68" fill="#9B5A88" fillOpacity="0.16" stroke="#9B5A88"/>
-                  <text fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink}><textPath href="#bp-arcL" startOffset="50%" textAnchor="middle">Convenience</textPath></text>
-                  <text fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink}><textPath href="#bp-arcR" startOffset="50%" textAnchor="middle">Security</textPath></text>
-                  <text x="210" y="168" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink}>Financial services</text>
-                  <text x="210" y="188" textAnchor="middle" fontSize="10.5" fill={sub}>payments · banking</text>
-                  <text x="210" y="276" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink}>Sustainability</text>
-                  <text x="210" y="296" textAnchor="middle" fontSize="10.5" fill={sub}>social responsibility</text>
-                  <text x="210" y="515" textAnchor="middle" fontSize="11" fill={sub} letterSpacing="1.6">OUTER RING · EMOTIONAL, HOW IT FEELS</text>
-                  <text x="210" y="535" textAnchor="middle" fontSize="11" fill={sub} letterSpacing="1.6">INNER · FUNCTIONAL, WHAT IT IS USED FOR</text>
+                  <text fontFamily="Museo, sans-serif" fontWeight="300" fontSize="23" fill={ink}><textPath href="#bp-arcL" startOffset="50%" textAnchor="middle">Convenience</textPath></text>
+                  <text fontFamily="Museo, sans-serif" fontWeight="300" fontSize="23" fill={ink}><textPath href="#bp-arcR" startOffset="50%" textAnchor="middle">Security</textPath></text>
+                  <text x="210" y="168" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="23" fill={ink}>Financial services</text>
+                  <text x="210" y="188" textAnchor="middle" fontSize="15" fill={sub}>payments · banking</text>
+                  <text x="210" y="276" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="23" fill={ink}>Sustainability</text>
+                  <text x="210" y="296" textAnchor="middle" fontSize="15" fill={sub}>social responsibility</text>
                 </svg>
+                <dl className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, margin: '12px 0 0' }}>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <dt className="uppercase tracking-[0.12em] whitespace-nowrap">Outer ring</dt>
+                    <dd style={{ margin: 0 }}>emotional, how it feels</dd>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 2 }}>
+                    <dt className="uppercase tracking-[0.12em] whitespace-nowrap">Inner</dt>
+                    <dd style={{ margin: 0 }}>functional, what it is used for</dd>
+                  </div>
+                </dl>
               </div>
             </div>
             <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
@@ -7490,10 +7514,12 @@ function BrandPerceptionContent() {
             return (
               <div key={b.title} style={{ marginTop: i === 0 ? 32 : 48 }}>
                 {b.split
-                  // Copy on the left, artwork beside it. The result and the
-                  // learning join the copy rather than sitting under the
-                  // image, so the left column is the whole reading.
-                  ? <SplitRow><div>{head}{tail}</div><div>{b.media}</div></SplitRow>
+                  // Artwork on the left, the whole reading on the right: the
+                  // title, the body, and the result and learning with them.
+                  // Source order stays copy-then-media, which is what a phone
+                  // should read; `md:order-first` moves the artwork across
+                  // only where there are two columns to move it between.
+                  ? <SplitRow><div>{head}{tail}</div><div className="md:order-first">{b.media}</div></SplitRow>
                   // Full-width media keeps the original order: what it is,
                   // the artwork, then what came of it.
                   : <>{head}{b.media}{tail}</>}
