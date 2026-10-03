@@ -67,6 +67,13 @@ import cbYew3 from "@/work/people/crossborder/yew3.avif";
 import cbYew4 from "@/work/people/crossborder/yew4.avif";
 import cbRednote from "@/work/people/crossborder/rednote-web.mp4";
 import cbAfter from "@/work/people/crossborder/cb-after.mp4";
+import bpEmpathy from "@/work/product/brandperception/empathy-map.avif";
+import bpOnboardBefore from "@/work/product/brandperception/onboarding-before.avif";
+import bpBanners from "@/work/product/brandperception/security-banners.avif";
+import bpEmail from "@/work/product/brandperception/email-education.avif";
+import bpGofinance from "@/work/product/brandperception/gofinance-money-tip.avif";
+import bpKeywords from "@/work/product/brandperception/keywords-list.mp4";
+import bpOnboardAfter from "@/work/product/brandperception/onboarding-after.mp4";
 import vcTestCard from "@/work/case/visacsr/testcard.avif";
 import vcCardMailer from "@/work/case/visacsr/cardmailer.avif";
 import vcHero from "@/work/case/visacsr/herovisa.avif";
@@ -3845,6 +3852,96 @@ function PhoneFrame({ children, max = 320 }: { children: React.ReactNode; max?: 
   );
 }
 
+// The label is read off the element's own play/pause events rather than
+// assumed, because play() can reject — autoplay policy, a codec the browser
+// will not decode — and a button that lies about the state is worse than no
+// button. Shared by the two video components below.
+function useVideoToggle() {
+  const ref = useRef<HTMLVideoElement | null>(null);
+  const reduceMotion = useReducedMotion();
+  const [playing, setPlaying] = useState(!reduceMotion);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const sync = () => setPlaying(!el.paused);
+    sync();
+    el.addEventListener("play", sync);
+    el.addEventListener("pause", sync);
+    return () => { el.removeEventListener("play", sync); el.removeEventListener("pause", sync); };
+  }, []);
+  const toggle = () => {
+    const el = ref.current;
+    if (!el) return;
+    if (el.paused) el.play().catch(() => {}); else el.pause();
+  };
+  return { ref, reduceMotion, playing, toggle };
+}
+
+function VideoToggleButton({ playing, buttonNoun, onClick, sub }: {
+  playing: boolean; buttonNoun: string; onClick: () => void; sub: string;
+}) {
+  return (
+    <button onClick={onClick}
+      className="font-['Nunito_Sans',sans-serif] text-small uppercase tracking-[0.18em]"
+      aria-label={playing ? `Pause the ${buttonNoun}` : `Play the ${buttonNoun}`}
+      style={{ background: 'none', border: 'none', padding: 0, marginTop: 12, color: sub, cursor: 'pointer' }}>
+      {playing ? "Pause" : "Play"}
+    </button>
+  );
+}
+
+// A video inside the phone frame. Same control as the Visa card's print test:
+// no browser control bar over the footage, one button beneath that says which
+// state it is in. Each usage is its own instance, so each button holds its own
+// ref and toggles only its own video.
+//
+// Module level rather than inside a case study, since two of them want it;
+// `sub` and `measure` come in as props because each page computes its own.
+function PhoneVideo({ src, ariaLabel, buttonNoun, caption, sub, measure, max = 280, top = 28 }: {
+  src: string; ariaLabel: string; buttonNoun: string; caption: React.ReactNode;
+  sub: string; measure: string; max?: number; top?: number;
+}) {
+  const { ref, reduceMotion, playing, toggle } = useVideoToggle();
+  return (
+    <figure style={{ margin: `${top}px 0 0` }}>
+      <div className="flex flex-col items-center md:items-start">
+        <PhoneFrame max={max}>
+          <video ref={ref} src={src}
+            autoPlay={!reduceMotion} muted loop playsInline preload="metadata"
+            aria-label={ariaLabel}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+        </PhoneFrame>
+        <VideoToggleButton playing={playing} buttonNoun={buttonNoun} onClick={toggle} sub={sub} />
+      </div>
+      <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: measure }}>
+        {caption}
+      </figcaption>
+    </figure>
+  );
+}
+
+// The same control, no phone frame: a screen recording rather than a handset.
+// It carries a border because these recordings are mostly white and would
+// otherwise bleed into the cream page with no edge to them.
+function ScreenVideo({ src, ariaLabel, buttonNoun, caption, sub, measure, rule, max = 760, top = 28 }: {
+  src: string; ariaLabel: string; buttonNoun: string; caption: React.ReactNode;
+  sub: string; measure: string; rule: string; max?: number; top?: number;
+}) {
+  const { ref, reduceMotion, playing, toggle } = useVideoToggle();
+  return (
+    <figure style={{ margin: `${top}px 0 0` }}>
+      <video ref={ref} src={src}
+        autoPlay={!reduceMotion} muted loop playsInline preload="metadata"
+        aria-label={ariaLabel}
+        style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8, border: `1px solid ${rule}` }} />
+      <VideoToggleButton playing={playing} buttonNoun={buttonNoun} onClick={toggle} sub={sub} />
+      <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: measure }}>
+        {caption}
+      </figcaption>
+    </figure>
+  );
+}
+
 // The copy and the thing it is about, side by side: even halves from md, one
 // column below it. A phone-framed video is 280 wide against a text column
 // two and a half times that, so under the paragraphs it left a long ribbon of
@@ -3913,56 +4010,6 @@ function CrossBorderContent() {
       {children}
     </section>
   );
-
-  // A video inside the phone frame. Same control as the Visa card's print
-  // test: no browser control bar over the footage, one button beneath that
-  // says which state it is in, and the label read off the element's own
-  // events rather than assumed — play() can reject.
-  //
-  // Each usage is its own instance, so each button holds its own ref and
-  // toggles only its own video.
-  const PhoneVideo = ({ src, ariaLabel, buttonNoun, caption, max = 280, top = 28 }: {
-    src: string; ariaLabel: string; buttonNoun: string; caption: React.ReactNode; max?: number; top?: number;
-  }) => {
-    const ref = useRef<HTMLVideoElement | null>(null);
-    const reduceMotion = useReducedMotion();
-    const [playing, setPlaying] = useState(!reduceMotion);
-    useEffect(() => {
-      const el = ref.current;
-      if (!el) return;
-      const sync = () => setPlaying(!el.paused);
-      sync();
-      el.addEventListener("play", sync);
-      el.addEventListener("pause", sync);
-      return () => { el.removeEventListener("play", sync); el.removeEventListener("pause", sync); };
-    }, []);
-    const toggle = () => {
-      const el = ref.current;
-      if (!el) return;
-      if (el.paused) el.play().catch(() => {}); else el.pause();
-    };
-    return (
-      <figure style={{ margin: `${top}px 0 0` }}>
-        <div className="flex flex-col items-center md:items-start">
-          <PhoneFrame max={max}>
-            <video ref={ref} src={src}
-              autoPlay={!reduceMotion} muted loop playsInline preload="metadata"
-              aria-label={ariaLabel}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-          </PhoneFrame>
-          <button onClick={toggle}
-            className="font-['Nunito_Sans',sans-serif] text-small uppercase tracking-[0.18em]"
-            aria-label={playing ? `Pause the ${buttonNoun}` : `Play the ${buttonNoun}`}
-            style={{ background: 'none', border: 'none', padding: 0, marginTop: 12, color: sub, cursor: 'pointer' }}>
-            {playing ? "Pause" : "Play"}
-          </button>
-        </div>
-        <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
-          {caption}
-        </figcaption>
-      </figure>
-    );
-  };
 
   const WRAP = [
     { src: cbYew1, alt: "A year-end wrap screen showing illustrated panels for Malaysia, Australia and Singapore" },
@@ -4117,7 +4164,7 @@ function CrossBorderContent() {
             </P>
           </div>
           <div className="md:order-first">
-            <PhoneVideo src={cbAfter} top={0}
+            <PhoneVideo src={cbAfter} top={0} sub={sub} measure={MEASURE}
               ariaLabel="The shipped location switcher: the wallet moving between countries, each with its own illustrated header and a plane animation"
               buttonNoun="switcher recording"
               caption="The shipped switcher. Recorded July 2025, after the Malaysia header animation had been changed; the destination headers are as shipped." />
@@ -4155,7 +4202,7 @@ function CrossBorderContent() {
             </P>
           </div>
           <div className="md:order-first">
-            <PhoneVideo src={cbRednote} top={0}
+            <PhoneVideo src={cbRednote} top={0} sub={sub} measure={MEASURE}
               ariaLabel="A Xiaohongshu post showing the location switcher being changed between countries, each with its own illustrated header"
               buttonNoun="Xiaohongshu video"
               caption={<>A travel and food creator made this, unprompted. Liked by the Touch &apos;n Go eWallet account and<Figures> 3,674</Figures> others.</>} />
@@ -7040,7 +7087,7 @@ function BusinessCaseContent() {
 
 const BP_SECTIONS: { id: string; label: string }[] = [
   { id: "bp-overview", label: "Overview" },
-  { id: "bp-problem",  label: "The Problem" },
+  { id: "bp-problem",  label: "Problem Framing" },
   { id: "bp-strategy", label: "Strategy" },
   { id: "bp-product",  label: "In the Product" },
   { id: "bp-results",  label: "Results" },
@@ -7065,23 +7112,17 @@ function BrandPerceptionContent() {
     ["Goal", "Shift perception beyond payments and tolls"],
     ["Scope", "Brand perception framework, UX strategy, cross-functional roadmap, measurement design"],
     ["Role", "Head of Product Design & UX Research"],
-    ["Team size", "TBC"],
   ];
 
-  // Stands in for artwork that lands in the next pass. A dashed outline in the
-  // section rule's own colour, holding its ratio — not a grey block, which
-  // reads as an image that failed to load.
-  //
-  // The frame is decoration and says nothing; the caption carries what will go
-  // there, so the frame is hidden from a screen reader and the caption is not.
-  // Same call shape as Fig, so swapping real artwork in is one line.
-  const FigPlaceholder = ({ caption, ratio = "16/9", max = FIGURE_MAX }: { caption: string; ratio?: string; max?: number }) => (
-    <figure style={{ margin: '28px 0 0', width: '100%', maxWidth: max }}>
-      <div aria-hidden="true" className="flex items-center justify-center"
-        style={{ aspectRatio: ratio, border: `1px dashed ${rule}`, borderRadius: 12, background: 'transparent', padding: 16 }} />
-      <figcaption className="font-['Nunito_Sans',sans-serif] text-small text-center" style={{ color: sub, marginTop: 12 }}>
-        {caption}
-      </figcaption>
+  const Fig = ({ src, alt, caption, max = FIGURE_MAX, top = 28 }: { src: string; alt: string; caption?: string; max?: number; top?: number }) => (
+    <figure style={{ margin: `${top}px 0 0` }}>
+      <img src={src} alt={alt} loading="lazy"
+        style={{ width: '100%', maxWidth: max, display: 'block', borderRadius: 8 }} />
+      {caption && (
+        <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+          {caption}
+        </figcaption>
+      )}
     </figure>
   );
 
@@ -7100,40 +7141,85 @@ function BrandPerceptionContent() {
     </section>
   );
 
+  const VOCAB: [string, string[]][] = [
+    ["Convenience",        ["easy", "at ease", "right away", "effortless", "time saving"]],
+    ["Security",           ["safeguard", "privacy", "safe", "protect", "lock", "verify"]],
+    ["Financial services", ["banking", "account"]],
+    ["Sustainability",     ["pay forward", "contribute", "community", "future", "give", "equivalent to n trees", "good causes"]],
+  ];
+
+  // One entry per onboarding screen, null where the screen was left alone, so
+  // the tags stay aligned with the five-up image above them.
+  const JOURNEY_TAGS: (null | [string, string])[] = [
+    ["Tolls and parking", "Financial services"],
+    ["Cashless, locally", "Convenience"],
+    null,
+    ["Money-back guarantee", "Security"],
+    null,
+  ];
+
   const PRIORITISATION: [string, string, string][] = [
     ["01", "Desirability", "NPS and brand perception feedback, CES tickets, UX audit"],
     ["02", "Reach", "Traffic flow and user reach"],
     ["03", "Impact", "The sum of the two, used to sequence"],
   ];
 
-  // Each block is title, figure, result, learning — so the next one is an
-  // entry in this array rather than another hand-built section.
-  const IN_PRODUCT: { title: string; body: string; result?: string; learning?: string; figure: string }[] = [
+  // Each block is title, media, result, learning — so the next one is an entry
+  // in this array rather than another hand-built section. `media` is a node,
+  // not a caption string, because the blocks carry stills and recordings.
+  const IN_PRODUCT: { title: string; body: string; result?: string; learning?: string; media: React.ReactNode }[] = [
     {
       title: "Keyword seeding",
       body: "Seeded the phrase “for safety” into copy that already existed, rather than writing new screens.",
       result: "Security perception rose 13% over the quarter.",
       learning: "Exposing users to the same stimulus repeatedly across touchpoints shifts perception. Small edits to legacy copy carried more weight than new features did.",
-      figure: "Before / after copy comparison",
+      media: (
+        <ScreenVideo src={bpKeywords} ariaLabel="Scrolling the brand perception keyword library, one tab per pillar"
+          buttonNoun="keyword library recording" sub={sub} measure={MEASURE} rule={rule} max={FIGURE_MAX}
+          caption="The keyword library in the team's UX Content Style Guide: one tab per pillar, and the words that carried it." />
+      ),
     },
     {
       title: "In-app education",
       body: "Dynamic banners and push notifications in three languages, explaining what we were doing to keep users' money safe.",
       result: "Push CTR between 0.94% and 3.45% across three April campaigns.",
       learning: "Copy naming a specific benefit outperformed general reassurance. “Safe payments without entering your PIN” beat “keep your money safe.”",
-      figure: "Trilingual banner set",
+      media: (
+        <Fig src={bpBanners}
+          alt="Nine security tip banners: update the app, avoid entering your PIN in public, avoid public Wi-Fi, each in English, Malay and Chinese"
+          caption="Three security tips, each in English, Malay and Chinese." />
+      ),
     },
     {
       title: "Email education",
       body: "Educating users on checking transaction details before approving.",
       result: "26.24% open rate across 2.9 million sends. Perception of “safe to transact” rose 12%.",
       learning: "An education email moved a perception metric, not only an engagement one.",
-      figure: "Email and banner set",
+      media: (
+        <Fig src={bpEmail} max={420}
+          alt="An education email titled How to check your transactions, with four illustrated steps"
+          caption="The education email: four checks before approving a transaction." />
+      ),
+    },
+    {
+      title: "Money literacy in GOfinance",
+      body: "Placed money tips inside the finance centre, next to each user's own cash flow and spending breakdown, so financial guidance appears where money decisions are made.",
+      // The capture already carries its own handset, so no PhoneFrame here —
+      // it would put a phone inside a phone.
+      media: (
+        <Fig src={bpGofinance} max={300}
+          alt="The GOfinance cash flow screen with an expense breakdown and a money tip for saving"
+          caption="A money tip for saving, beside the user's own spending in GOfinance." />
+      ),
     },
     {
       title: "Onboarding revamp",
-      body: "Rewrote the onboarding sliders away from toll and payment messaging onto the new pillars: convenient, confident, rewarding. Turned around in ten days.",
-      figure: "Onboarding slider set",
+      body: "Rewrote the onboarding sliders away from toll and payment messaging onto the pillars: financial services, convenience, rewards and security. Motion, illustration and copy were designed together, so each slide shows the app in everyday use. Turned around in ten days.",
+      media: (
+        <PhoneVideo src={bpOnboardAfter} ariaLabel="The revamped onboarding sliders playing in sequence"
+          buttonNoun="onboarding recording" max={280} sub={sub} measure={MEASURE}
+          caption="The revamped onboarding: financial services, convenience, rewards and security, one slide each." />
+      ),
     },
   ];
 
@@ -7187,21 +7273,83 @@ function BrandPerceptionContent() {
             How might we make the app a default choice that Malaysians, and people beyond Malaysia,
             would want to use?
           </P>
+          {/* The artwork is transparent, so it sits straight on the page. A
+              card or a fill behind it would give the sticky notes a box they
+              never had on the wall. */}
+          <Fig src={bpEmpathy} max={FIGURE_MAX}
+            alt="An empathy map of sticky notes sorted into what users hear, see, think and feel, say and do, with their pains and gains"
+            caption="An empathy map from a session with my design team, built around the same question." />
         </Section>
 
         {/* ── Strategy ── */}
         <Section id="bp-strategy">
           <Label>Four pillars</Label>
           <P>
-            A nested model that separates how users feel from what they use. Convenience and security
-            as the emotional layer, payment and banking services as the functional layer, and social
-            responsibility inside that.
+            The company&apos;s direction rested on four pillars: convenience, security, financial
+            services and sustainability. To help my team turn them into everyday design decisions, I
+            organised them by how people experience the app. Convenience and security are how it
+            feels. Financial services are what it is used for. Social responsibility sits at the
+            centre.
+          </P>
+          <P top={16}>
+            It was a working model for the design team rather than a company framework: a way for
+            designers to see which pillar a piece of work was serving, in the day-to-day of the design
+            process.
           </P>
           <P top={16}>
             The value proposition it produced: the convenient and secure daily app to save, earn and
             spend for people in Malaysia.
           </P>
-          <FigPlaceholder caption="Four-pillar nested diagram" ratio="1/1" max={560} />
+          {/* Both halves take ink and sub from the component, so the diagram
+              follows the theme rather than carrying its own greys. The column
+              template is the two viewBox widths, so the halves keep their
+              drawn proportions instead of each taking half the row. */}
+          <figure style={{ margin: '32px 0 0', maxWidth: FIGURE_MAX }}>
+            <div className="grid items-center gap-6 md:grid-cols-[minmax(0,404fr)_auto_minmax(0,420fr)]">
+              <div className="mx-auto md:mx-0 w-full" style={{ maxWidth: 360 }}>
+                <svg viewBox="0 0 404 470" width="100%" role="img" aria-label="The four company pillars side by side: Convenience, Security, Financial services, Sustainability" style={{ display: "block", fontFamily: "'Nunito Sans', sans-serif" }}>
+                  <text x="200" y="40" textAnchor="middle" fontSize="11" fill={sub} letterSpacing="2">COMPANY DIRECTION · FOUR PILLARS</text>
+                  <g fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink} textAnchor="middle">
+                    <rect x="28"  y="80" width="78" height="380" fill="#B2933B" fillOpacity="0.16" stroke="#B2933B"/>
+                    <rect x="118" y="80" width="78" height="380" fill="#5070A0" fillOpacity="0.14" stroke="#5070A0"/>
+                    <rect x="208" y="80" width="78" height="380" fill="#8A6E2E" fillOpacity="0.10" stroke="#8A6E2E"/>
+                    <rect x="298" y="80" width="78" height="380" fill="#9B5A88" fillOpacity="0.16" stroke="#9B5A88"/>
+                    <text transform="translate(72 270) rotate(-90)">Convenience</text>
+                    <text transform="translate(162 270) rotate(-90)">Security</text>
+                    <text transform="translate(252 270) rotate(-90)">Financial services</text>
+                    <text transform="translate(342 270) rotate(-90)">Sustainability</text>
+                  </g>
+                </svg>
+              </div>
+              <div className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em] text-center" style={{ color: sub }}>
+                Put to work
+                <div aria-hidden="true" style={{ fontSize: '1.25rem', marginTop: 4 }}>
+                  <span className="hidden md:inline">→</span><span className="md:hidden">↓</span>
+                </div>
+              </div>
+              <div className="mx-auto md:mx-0 w-full" style={{ maxWidth: 360 }}>
+                <svg viewBox="530 20 420 520" width="100%" role="img" aria-label="The same four pillars as a nested model: Convenience and Security as the outer emotional ring, Financial services as the functional layer, Sustainability at the core" style={{ display: "block", fontFamily: "'Nunito Sans', sans-serif" }}>
+                  <defs><path id="bp-arcL" d="M 568 270 A 172 172 0 0 1 740 98"/><path id="bp-arcR" d="M 740 98 A 172 172 0 0 1 912 270"/></defs>
+                  <text x="740" y="40" textAnchor="middle" fontSize="11" fill={sub} letterSpacing="2">DESIGN TEAM · HOW WE WORKED THEM</text>
+                  <path d="M740 70 A200 200 0 0 0 740 470 L740 420 A150 150 0 0 1 740 120 Z" fill="#B2933B" fillOpacity="0.16" stroke="#B2933B"/>
+                  <path d="M740 70 A200 200 0 0 1 740 470 L740 420 A150 150 0 0 0 740 120 Z" fill="#5070A0" fillOpacity="0.14" stroke="#5070A0"/>
+                  <circle cx="740" cy="270" r="150" fill="#8A6E2E" fillOpacity="0.10" stroke="#8A6E2E"/>
+                  <circle cx="740" cy="270" r="68" fill="#9B5A88" fillOpacity="0.16" stroke="#9B5A88"/>
+                  <text fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink}><textPath href="#bp-arcL" startOffset="50%" textAnchor="middle">Convenience</textPath></text>
+                  <text fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink}><textPath href="#bp-arcR" startOffset="50%" textAnchor="middle">Security</textPath></text>
+                  <text x="740" y="158" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink}>Financial services</text>
+                  <text x="740" y="178" textAnchor="middle" fontSize="10.5" fill={sub}>payments · banking</text>
+                  <text x="740" y="266" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="16" fill={ink}>Sustainability</text>
+                  <text x="740" y="286" textAnchor="middle" fontSize="10.5" fill={sub}>social responsibility</text>
+                  <text x="740" y="505" textAnchor="middle" fontSize="11" fill={sub} letterSpacing="1.6">OUTER RING · EMOTIONAL, HOW IT FEELS</text>
+                  <text x="740" y="525" textAnchor="middle" fontSize="11" fill={sub} letterSpacing="1.6">INNER · FUNCTIONAL, WHAT IT IS USED FOR</text>
+                </svg>
+              </div>
+            </div>
+            <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+              The company&apos;s four pillars, and how the design team worked them.
+            </figcaption>
+          </figure>
 
           <div style={{ marginTop: 40 }}>
             <Label>Two principles</Label>
@@ -7217,12 +7365,66 @@ function BrandPerceptionContent() {
               across every communication and every state message, including empty, error, success and
               transition states.
             </P>
+            {/* The guide itself is long; this is one row per pillar, which is
+                enough to show the shape of it. */}
+            <div style={{ marginTop: 24, maxWidth: MEASURE, border: `1px solid ${rule}`, borderRadius: 12, padding: 20 }}>
+              <Label>Vocabulary guide</Label>
+              <dl style={{ margin: '12px 0 0' }}>
+                {VOCAB.map(([pillar, words], i) => (
+                  <div key={pillar} style={{ marginTop: i === 0 ? 0 : 12 }}>
+                    <dt className="font-['Nunito_Sans',sans-serif]" style={{ color: ink, fontWeight: 600 }}>{pillar}</dt>
+                    <dd className="font-['Nunito_Sans',sans-serif]" style={{ color: body, margin: '2px 0 0' }}>{words.join(' · ')}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+            <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+              An excerpt from the vocabulary guide that steered every communication and in-app message,
+              applied through a copy refresh across the front end. Each set maps to one of the four pillars.
+            </p>
             <P top={16}>
               The complication: one flow carries three perceptions. A single onboarding journey moves
-              through financial services, then security, then convenience. The work could not be
+              through financial services, then convenience, then security. The work could not be
               organised by feature. It had to be organised by perception.
             </P>
-            <FigPlaceholder caption="Perception journey — five onboarding screens with perception tags" ratio="16/5" />
+            {/* Five screens in equal fifths, so a 5-column grid underneath puts
+                each tag under its own screen. Below about 720 the screens stop
+                being readable, so the image and its tags scroll together inside
+                their own box rather than the page scrolling sideways. */}
+            <figure style={{ margin: '28px 0 0' }}>
+              <div style={{ overflowX: 'auto' }}>
+                <div style={{ minWidth: 720, maxWidth: FIGURE_MAX }}>
+                  <img src={bpOnboardBefore} loading="lazy" style={{ width: '100%', display: 'block', borderRadius: 8 }}
+                    alt="The original five onboarding screens: Your Journey's A Breeze, Less Cash Less Hassle, Convenient Online Payments, Money-back Guarantee and Enjoy Great Savings" />
+                  <div className="grid grid-cols-5 gap-2" style={{ marginTop: 12 }}>
+                    {JOURNEY_TAGS.map((t, i) => (
+                      <div key={i} className="text-center">
+                        {t && (<>
+                          <div className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, textDecoration: 'line-through' }}>{t[0]}</div>
+                          <div className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: fg, marginTop: 4 }}>{t[1]}</div>
+                        </>)}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
+                The original onboarding, and the three screens we saw as chances to shift
+                perception. It opened on tolls and parking: exactly what users already
+                believed we were.
+              </figcaption>
+            </figure>
+            {/* Not wrapped in Figures: it takes a string, and this paragraph
+                carries a link. */}
+            <P top={24}>
+              Sustainability was left out of onboarding on purpose. It was meant to sit in
+              what the product made possible. In June 2024, TNG Digital signed an{' '}
+              <a href="https://www.touchngo.com.my/news/tng-ewallet-and-unhcr-sign-mou-on-world-refugee-day-to-enhance-financial-inclusion-for-refugees-in-malaysia"
+                 target="_blank" rel="noopener noreferrer" className="link-underline" style={{ color: fg }}>MoU with UNHCR</a>{' '}
+              on financial inclusion for refugees, and in my final months the team
+              designed registration for UNHCR card holders, a group largely shut out of
+              banking. It opened to them at the end of 2024, after I left.
+            </P>
           </div>
 
           <div style={{ marginTop: 40 }}>
@@ -7253,7 +7455,7 @@ function BrandPerceptionContent() {
             <div key={b.title} style={{ marginTop: i === 0 ? 32 : 48 }}>
               <Label>{b.title}</Label>
               <P><Figures>{b.body}</Figures></P>
-              <FigPlaceholder caption={b.figure} />
+              {b.media}
               {b.result && (
                 <p className="font-['Nunito_Sans',sans-serif]" style={{ color: ink, marginTop: 16, maxWidth: MEASURE }}>
                   <span className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub, marginRight: 8 }}>Result</span>
@@ -7276,6 +7478,9 @@ function BrandPerceptionContent() {
             style={{ color: fg, fontSize: 'clamp(1.5rem, 2.6vw, 2.5rem)', lineHeight: 1.15, margin: 0 }}>
             Results
           </h2>
+          <p className="font-['Nunito_Sans',sans-serif]" style={{ color: ink, marginTop: 16, maxWidth: MEASURE }}>
+            <Figures>Brand perception rose 14.6% on average across the four pillars from Q1 to Q2 2024, against a target of about 10% for each.</Figures>
+          </p>
 
           {/* Deltas only — the absolute index values stay with the client.
               overflow-x on the wrapper alone, so a narrow screen scrolls the
@@ -7304,8 +7509,7 @@ function BrandPerceptionContent() {
           </div>
 
           <P top={32}>
-            Convenience carried the most ambitious target of the four and was the only one we missed.
-            It finished flat.
+            Convenience was the only pillar that missed its target. It finished flat.
           </P>
           <P top={16}>
             The diagnosis was straightforward. H1 effort concentrated on financial services, security
