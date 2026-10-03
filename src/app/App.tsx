@@ -7272,25 +7272,25 @@ function BrandPerceptionContent() {
             <Figures>A 23-million-user wallet that people thought of as a toll company.</Figures>
           </p>
 
-          <div className="grid gap-8 md:grid-cols-2" style={{ marginTop: 32, maxWidth: `calc(${MEASURE} * 2)` }}>
-            <div>
-              <Label>What users believed</Label>
-              <P>Users saw us as a payment and toll company. Most were unaware of any product or service beyond payment.</P>
-            </div>
-            <div>
-              <Label>What they did</Label>
-              <P>Reload just enough to use, just in time. They would not park money in the wallet even when the rate beat a fixed deposit.</P>
-            </div>
-          </div>
+          {/* One split for the whole section: the reading on the left, from
+              what users believed through to the question, and the session that
+              answered it on the right. The two observations stack rather than
+              sitting side by side, since a column half this wide would give
+              each of them about twenty characters a line.
 
-          {/* The question and the session that answered it, side by side. The
-              artwork is transparent, so it sits straight on the page: a card
-              or a fill behind it would give the sticky notes a box they never
-              had on the wall. */}
+              The artwork is transparent, so it sits straight on the page: a
+              card or a fill behind it would give the sticky notes a box they
+              never had on the wall. */}
           <div style={{ marginTop: 32 }}>
             <SplitRow>
               <div>
-                <P top={0}>
+                <Label>What users believed</Label>
+                <P>Users saw us as a payment and toll company. Most were unaware of any product or service beyond payment.</P>
+                <div style={{ marginTop: 24 }}>
+                  <Label>What they did</Label>
+                  <P>Reload just enough to use, just in time. They would not park money in the wallet even when the rate beat a fixed deposit.</P>
+                </div>
+                <P top={24}>
                   The gap between those two is where the work sat. A payment company gets used. A financial
                   service gets trusted, and trust is a perception problem before it is a product one.
                 </P>
