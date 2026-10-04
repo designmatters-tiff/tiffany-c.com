@@ -7147,8 +7147,11 @@ function BrandPerceptionContent() {
     <h3 className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]" style={{ color: sub }}>{children}</h3>
   );
 
-  const P = ({ children, top = 8 }: { children: React.ReactNode; top?: number }) => (
-    <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: top, maxWidth: MEASURE }}>{children}</p>
+  // `wide` drops the measure for copy that runs the container's width rather
+  // than a reading column — the four pillars, which sit above a diagram that
+  // spans the same width.
+  const P = ({ children, top = 8, wide = false }: { children: React.ReactNode; top?: number; wide?: boolean }) => (
+    <p className="font-['Nunito_Sans',sans-serif]" style={{ color: body, marginTop: top, maxWidth: wide ? 'none' : MEASURE }}>{children}</p>
   );
 
   // Section heads all carry the same rule, spacing and Museo gold.
@@ -7349,19 +7352,19 @@ function BrandPerceptionContent() {
             Strategy
           </h2>
           <Label>Four pillars</Label>
-          <P>
+          <P wide>
             The company&apos;s direction rested on four pillars: convenience, security, financial
             services and sustainability. To help my team turn them into everyday design decisions, I
             organised them by how people experience the app. Convenience and security are how it
             feels. Financial services are what it is used for. Social responsibility sits at the
             centre.
           </P>
-          <P top={16}>
+          <P top={16} wide>
             It was a working model for the design team rather than a company framework: a way for
             designers to see which pillar a piece of work was serving, in the day-to-day of the design
             process.
           </P>
-          <P top={16}>
+          <P top={16} wide>
             The value proposition it produced: the convenient and secure daily app to save, earn and
             spend for people in Malaysia.
           </P>
