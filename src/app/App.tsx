@@ -6180,7 +6180,7 @@ function TestimonialsPage({
               text would leave ragged dead space inside each column. The
               body-font class is here so `ch` resolves against the quote's own
               font, not the inherited default. */}
-          <div style={{ marginTop: 28, columnGap: 24, maxWidth: "calc(68ch * 2 + 24px)" }}
+          <div style={{ marginTop: 28, columnGap: 48, maxWidth: "calc(68ch * 2 + 48px)" }}
             className="font-['Nunito_Sans',sans-serif] [column-count:1] md:[column-count:2]">
             {shown.map(t => (
               <div key={t.key} style={{ breakInside: 'avoid', marginBottom: 44 }}>
