@@ -767,7 +767,7 @@ function SpeakingInquiryPage({ onBack, onNavigate, headerScrolled = false, scrol
 
   return (
     <div className="relative w-full flex flex-col" style={{ minHeight: "100dvh", background: "transparent" }}>
-      <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
+      <div data-header-frost className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
         style={{
           background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
@@ -1271,7 +1271,89 @@ const RAIL_MARK = Math.round(RAIL_HEADING_SIZE / 1.4);
 const RAIL_MARK_TOP = RAIL_HEADING_BASELINE - RAIL_HEADING_SIZE;
 const RAIL_W = `${RAIL_GUTTER + RAIL_MARK}px`;
 
-function IdentityRail({ onNavigate, progress, visible = true }: { onNavigate: (p: Page) => void; progress: MotionValue<number>; visible?: boolean }) {
+// The frosted band behind the logomark, from the viewport's left edge to the
+// rail's. Each page's sticky header frosts when it minimises, but that header
+// lives in the page layer, which starts at the rail's right edge — so the band
+// stopped in a hard vertical line beside the mark, with content scrolling past
+// in the gap.
+//
+// It mirrors the live header rather than restating its rules: the header
+// carries `data-header-frost`, and this reads that element's own computed
+// background, border and height. The tint, the dark-mode value, the onDark
+// variant and any later change to them are matched by construction, because
+// there is only one place they are written.
+//
+// Event-driven, not polled: a ResizeObserver catches the height easing as the
+// header's padding shrinks, and a MutationObserver on `style` catches React
+// flipping the frost on and off. The band carries the header's own transition
+// string, so the two ease together.
+function HeaderFrostBand() {
+  const [frost, setFrost] = useState<{ h: number; bg: string; border: string; transition: string } | null>(null);
+  useEffect(() => {
+    // Below lg there is no rail and nothing to fill.
+    const mq = window.matchMedia("(min-width: 1024px)");
+    let header: HTMLElement | null = null;
+    let ro: ResizeObserver | null = null;
+    let mo: MutationObserver | null = null;
+
+    const read = () => {
+      if (!header || !mq.matches) { setFrost(null); return; }
+      const cs = getComputedStyle(header);
+      // `background-color` alone misses the onDark variant, which is a
+      // gradient layered over a tint.
+      const bg = cs.backgroundImage !== "none"
+        ? `${cs.backgroundImage}, ${cs.backgroundColor}`
+        : cs.backgroundColor;
+      const transparent = cs.backgroundColor === "rgba(0, 0, 0, 0)" && cs.backgroundImage === "none";
+      setFrost(transparent ? null : {
+        h: header.getBoundingClientRect().height,
+        bg,
+        border: cs.borderBottomColor,
+        transition: cs.transition,
+      });
+    };
+
+    const attach = () => {
+      // During a page change both the leaving and the entering page are in the
+      // DOM. The entering one is appended last.
+      const all = document.querySelectorAll<HTMLElement>("[data-header-frost]");
+      const next = all.length ? all[all.length - 1] : null;
+      if (next === header) { read(); return; }
+      ro?.disconnect(); mo?.disconnect();
+      header = next;
+      if (!header) { setFrost(null); return; }
+      ro = new ResizeObserver(read); ro.observe(header);
+      mo = new MutationObserver(read); mo.observe(header, { attributes: true, attributeFilter: ["style"] });
+      read();
+    };
+
+    // The header element itself is swapped on navigation, so watch the tree
+    // for one arriving or leaving as well.
+    const tree = new MutationObserver(attach);
+    tree.observe(document.body, { childList: true, subtree: true });
+    mq.addEventListener("change", attach);
+    attach();
+    return () => {
+      tree.disconnect(); ro?.disconnect(); mo?.disconnect();
+      mq.removeEventListener("change", attach);
+    };
+  }, []);
+
+  if (!frost) return null;
+  return (
+    <div aria-hidden="true" className="absolute top-0 left-0 right-0" style={{
+      height: frost.h,
+      background: frost.bg,
+      backdropFilter: "blur(8px)",
+      WebkitBackdropFilter: "blur(8px)",
+      borderBottom: `1px solid ${frost.border}`,
+      transition: frost.transition,
+      pointerEvents: "none",
+    }} />
+  );
+}
+
+function IdentityRail({ onNavigate, progress, visible = true, frosted = true }: { onNavigate: (p: Page) => void; progress: MotionValue<number>; visible?: boolean; frosted?: boolean }) {
   const goHome = useContext(GoHomeCtx);
   // There is one logomark on a desktop screen and this is it. It parks over
   // the hero's corner on the homepage — the hero leaves an empty box for it —
@@ -1311,6 +1393,9 @@ function IdentityRail({ onNavigate, progress, visible = true }: { onNavigate: (p
     // itself.
     <div className="hidden lg:block fixed top-0 bottom-0 left-0 z-20 pointer-events-none"
       style={{ width: "var(--rail-w)" }}>
+      {/* Before the button in source order, so the mark paints over it and is
+          never the thing being blurred. */}
+      {frosted && <HeaderFrostBand />}
       <motion.button onClick={() => (goHome ? goHome() : onNavigate("home"))}
         aria-label="Tiffany C. — home"
         className="absolute cursor-pointer"
@@ -2368,7 +2453,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
   const bodyText  = isDark ? "rgba(255,255,255,0.72)" : DIM;
   return (
     <div className="relative w-full flex flex-col" style={{ minHeight: "100dvh", background: "transparent" }}>
-      <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
+      <div data-header-frost className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
         style={{
           background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
@@ -3104,7 +3189,7 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
     // a seam across the top of every scroll.
     <div className="relative w-full" style={{ minHeight: "100dvh", background: isDark ? "transparent" : "#ffffff" }}>
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+        <div data-header-frost ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
           background: headerScrolled
             // A 20% black tint under the frost while the heading is white,
             // so the words have something to sit against rather than
@@ -3526,7 +3611,7 @@ function SourceCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate
     // make the rail's strip the odd colour again for no gain.
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+        <div data-header-frost ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
           background: headerScrolled
             ? (onDark
                 ? "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), rgba(248,247,245,0.55)"
@@ -4268,7 +4353,7 @@ function CrossBorderPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+        <div data-header-frost ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
           background: headerScrolled
             ? (onDark
                 ? "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), rgba(248,247,245,0.55)"
@@ -4318,7 +4403,7 @@ function VisaCardPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: 
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+        <div data-header-frost ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
           background: headerScrolled
             ? (onDark
                 ? "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), rgba(248,247,245,0.55)"
@@ -4796,7 +4881,7 @@ function FinTechPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+        <div data-header-frost ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
           background: headerScrolled
             ? (onDark
                 ? "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), rgba(248,247,245,0.55)"
@@ -5209,7 +5294,7 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+        <div data-header-frost ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
           background: headerScrolled
             // A 20% black tint under the frost while the heading is white,
             // so the words have something to sit against rather than
@@ -5597,7 +5682,7 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
           only once the user scrolls does it pick up a frosted (blurred,
           80% opacity) backdrop so the now-passing content reads cleanly
           behind it. */}
-      <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
+      <div data-header-frost className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
         style={{
           background: scrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
           backdropFilter: scrolled ? "blur(8px)" : "none",
@@ -6023,7 +6108,7 @@ function TestimonialsPage({
 
   const content = (
     <>
-        <div className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+        <div data-header-frost className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
           background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
@@ -6484,7 +6569,7 @@ function AwardsSpeakingPage({
           only once the user scrolls does it pick up a frosted (blurred,
           80% opacity) backdrop so the now-passing content reads cleanly
           behind it. */}
-      <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
+      <div data-header-frost ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
         style={{
           background: scrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
           backdropFilter: scrolled ? "blur(8px)" : "none",
@@ -7712,7 +7797,7 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+        <div data-header-frost ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
           background: headerScrolled
             // A 20% black tint under the frost while the heading is white,
             // so the words have something to sit against rather than
@@ -7829,7 +7914,7 @@ function BrandPerceptionPage({ onBack, onNavigate }: { onBack: () => void; onNav
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
+        <div data-header-frost ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14" style={{
           background: headerScrolled
             // A 20% black tint under the frost while the heading is white,
             // so the words have something to sit against rather than
@@ -8383,7 +8468,7 @@ export default function App() {
           back on the first step away from home, which is the blink that made
           the whole thing read as reloaded. */}
       {canSwipe && <SectionProgress idx={swipeIdx} />}
-      <IdentityRail onNavigate={navigateGeneral} progress={heroProgress} visible={railOn} />
+      <IdentityRail onNavigate={navigateGeneral} progress={heroProgress} visible={railOn} frosted={railInset} />
       {navActive && (
         <StickyPageNav activePage={navActive} onNavigate={navigateGeneral}
           tint={page === "speakingInquiry" || page === "speaking" ? GOLD : undefined}
