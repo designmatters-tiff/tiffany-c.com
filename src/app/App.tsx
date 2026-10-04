@@ -7412,25 +7412,28 @@ function BrandPerceptionContent() {
               </div>
               <div className="mx-auto md:mx-0 w-full" style={{ maxWidth: 480 }}>
                 <svg viewBox="0 0 420 500" width="100%" role="img" aria-label="The same four pillars as a nested model: Convenience and Security as the outer emotional ring, Financial services as the functional layer, Sustainability at the core" style={{ display: "block", fontFamily: "'Nunito Sans', sans-serif" }}>
-                  <defs><path id="bp-arcL" d="M 38 280 A 172 172 0 0 1 210 108"/><path id="bp-arcR" d="M 210 108 A 172 172 0 0 1 382 280"/></defs>
+                  <defs><path id="bp-arcL" d="M 38 280 A 172 172 0 0 1 210 108"/><path id="bp-arcR" d="M 210 108 A 172 172 0 0 1 382 280"/><path id="bp-arcB" d="M 88 280 A 122 122 0 0 0 332 280"/></defs>
                   <text x="210" y="34" textAnchor="middle" fontSize="16" fill={sub} letterSpacing="1.6">DESIGN TEAM · HOW WE WORKED THEM</text>
                   <path d="M210 80 A200 200 0 0 0 210 480 L210 430 A150 150 0 0 1 210 130 Z" fill="#B2933B" fillOpacity="0.16" stroke="#B2933B"/>
                   <path d="M210 80 A200 200 0 0 1 210 480 L210 430 A150 150 0 0 0 210 130 Z" fill="#5070A0" fillOpacity="0.14" stroke="#5070A0"/>
                   <circle cx="210" cy="280" r="150" fill="#8A6E2E" fillOpacity="0.10" stroke="#8A6E2E"/>
                   <circle cx="210" cy="280" r="68" fill="#9B5A88" fillOpacity="0.16" stroke="#9B5A88"/>
-                  <text fontFamily="Museo, sans-serif" fontWeight="300" fontSize="23" fill={ink}><textPath href="#bp-arcL" startOffset="50%" textAnchor="middle">Convenience</textPath></text>
-                  <text fontFamily="Museo, sans-serif" fontWeight="300" fontSize="23" fill={ink}><textPath href="#bp-arcR" startOffset="50%" textAnchor="middle">Security</textPath></text>
+                  <text fontFamily="Museo, sans-serif" fontWeight="300" fontSize="20" fill={ink}><textPath href="#bp-arcL" startOffset="50%" textAnchor="middle">Convenience</textPath></text>
+                  <text fontFamily="Museo, sans-serif" fontWeight="300" fontSize="20" fill={ink}><textPath href="#bp-arcR" startOffset="50%" textAnchor="middle">Security</textPath></text>
                   <text x="210" y="168" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="20" fill={ink}>Financial services</text>
-                  <text x="210" y="190" textAnchor="middle" fontSize="13" fill={sub}>payments · banking</text>
-                  <text x="210" y="274" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="19" fill={ink}>Sustainability</text>
+                  <text x="210" y="274" textAnchor="middle" fontFamily="Museo, sans-serif" fontWeight="300" fontSize="20" fill={ink}>Sustainability</text>
                   <text x="210" y="294" textAnchor="middle" fontSize="12" fill={sub}>social responsibility</text>
+                  {/* On the ring rather than under the heading: the lower half
+                      of the functional band is empty, and the pair reads as
+                      one band that way. */}
+                  <text fontSize="13" fill={sub}><textPath href="#bp-arcB" startOffset="50%" textAnchor="middle">payments · banking</textPath></text>
                 </svg>
                 <dl className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, margin: '12px 0 0' }}>
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
                     <dt className="uppercase tracking-[0.12em] whitespace-nowrap">Outer ring</dt>
                     <dd style={{ margin: 0 }}>emotional, how it feels</dd>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, marginTop: 2 }}>
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 2 }}>
                     <dt className="uppercase tracking-[0.12em] whitespace-nowrap">Inner</dt>
                     <dd style={{ margin: 0 }}>functional, what it is used for</dd>
                   </div>
