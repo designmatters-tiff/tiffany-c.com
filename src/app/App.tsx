@@ -7469,7 +7469,14 @@ function BrandPerceptionContent() {
                 being readable, so the image and its tags scroll together inside
                 their own box rather than the page scrolling sideways. */}
             <figure style={{ margin: '28px 0 0' }}>
-              <div style={{ overflowX: 'auto' }}>
+              {/* overflowY hidden, not left to default. A box with
+                  overflow-x: auto and overflow-y: visible is not allowed by
+                  CSS: the visible axis computes to auto, so the box becomes a
+                  vertical scroller too, and on a machine with classic
+                  scrollbars Chrome paints a vertical bar beside the figure
+                  that scrolls nothing. Horizontal only, which is all this
+                  ever wanted. */}
+              <div style={{ overflowX: 'auto', overflowY: 'hidden' }}>
                 <div style={{ minWidth: 720, maxWidth: FIGURE_MAX }}>
                   <img src={bpOnboardBefore} loading="lazy" style={{ width: '100%', display: 'block', borderRadius: 8 }}
                     alt="The original five onboarding screens: Your Journey's A Breeze, Less Cash Less Hassle, Convenient Online Payments, Money-back Guarantee and Enjoy Great Savings" />
@@ -7622,7 +7629,11 @@ function BrandPerceptionContent() {
               the table they were a long way from the row they explain. */}
           <div style={{ marginTop: 24 }}>
             <SplitRow>
-              <div style={{ marginTop: 0, maxWidth: MEASURE, overflowX: 'auto' }}>
+              {/* Horizontal only, for the same reason as the onboarding
+                  figure: overflow-x auto with overflow-y visible is not a
+                  thing, and the implied overflow-y auto paints a vertical bar
+                  that scrolls nothing. */}
+              <div style={{ marginTop: 0, maxWidth: MEASURE, overflowX: 'auto', overflowY: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 300 }}>
                   <tbody>
                     {RESULTS.map(([pillar, delta, verdict]) => (
