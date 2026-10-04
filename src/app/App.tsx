@@ -7463,9 +7463,10 @@ function BrandPerceptionContent() {
               transition states.
             </P>
             <P top={16}>
-              The complication: one flow carries three perceptions. A single onboarding journey moves
-              through financial services, then convenience, then security. The work could not be
-              organised by feature. It had to be organised by perception.
+              We started with the most obvious place: onboarding. The old flow opened on tolls and
+              parking, so every new user&apos;s first impression anchored us as a transport payments
+              app. We reframed it as education that moves through financial services, then
+              convenience, then security.
             </P>
             {/* Five screens in equal fifths, so a 5-column grid underneath puts
                 each tag under its own screen. Below about 720 the screens stop
@@ -7497,8 +7498,7 @@ function BrandPerceptionContent() {
               </div>
               <figcaption className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 12, maxWidth: MEASURE }}>
                 The original onboarding, and the three screens we saw as chances to shift
-                perception. It opened on tolls and parking: exactly what users already
-                believed we were.
+                perception.
               </figcaption>
             </figure>
             {/* Not wrapped in Figures: it takes a string, and this paragraph
