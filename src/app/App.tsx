@@ -2629,7 +2629,7 @@ function KaiCaseContent() {
   const FIGURE_MAX = 760;
 
   const META: [string, React.ReactNode][] = [
-    ["Year", "August – October 2019"],
+    ["Year", "Aug – Oct 2019"],
     ["Client", (
       <a href={PLUS_XNERGY_URL} target="_blank" rel="noopener noreferrer"
         className="link-underline" style={{ color: fg }}>Plus Xnergy</a>
@@ -3583,7 +3583,7 @@ function VisaCardContent() {
   // Five fields. Team size is absent on purpose rather than empty — a field
   // with nothing in it says the page is unfinished, which is not what is meant.
   const META: [string, React.ReactNode][] = [
-    ["Year", "Feb 2022 to Jan 2023"],
+    ["Year", "Feb 2022 – Jan 2023"],
     ["Client", (
       <a href={TNG_DIGITAL_URL} target="_blank" rel="noopener noreferrer"
         className="link-underline" style={{ color: fg }}>Touch &apos;n Go eWallet</a>
@@ -4416,7 +4416,7 @@ function FinTechContent() {
     ["Goal", "Encourage users to enable auto-sweep"],
     ["Scope", "Concept and design validation"],
     ["Role", "Product Design Lead"],
-    ["Launched", "20 February 2023"],
+    ["Launched", "20 Feb 2023"],
   ];
 
   // `radius` for the two device mockups, whose body is cropped to its own
@@ -7113,7 +7113,7 @@ function BrandPerceptionContent() {
   const FIGURE_MAX = 760;
 
   const META: [string, React.ReactNode][] = [
-    ["Year", "January – December 2024"],
+    ["Year", "Jan – Dec 2024"],
     ["Client", (
       <a href={TNG_DIGITAL_URL} target="_blank" rel="noopener noreferrer"
         className="link-underline" style={{ color: fg }}>TNG Digital (TNG eWallet)</a>
