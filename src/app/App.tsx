@@ -1098,7 +1098,13 @@ function NdaNotice() {
   const isDark = useContext(DarkModeCtx);
   return (
     <div className="px-6 md:px-20" style={{ marginTop: 24 }}>
-      <p className="font-['Nunito_Sans',sans-serif]" style={quietText(isDark)}>
+      {/* No measure cap on this one. quietText holds the credit to 620 for
+          readability, but the notice is a single legal sentence that reads as
+          one line or not at all: at 11px it wants 696, so 620 broke it two
+          words from the end. Uncapped it sets on one line from about 860px up
+          and wraps to the column below that, which is the only thing it can
+          do there. */}
+      <p className="font-['Nunito_Sans',sans-serif]" style={{ ...quietText(isDark), maxWidth: 'none' }}>
         Shared under NDA for review purposes only, not for redistribution.
         Client data and trademarks remain the property of their respective owners.
       </p>
