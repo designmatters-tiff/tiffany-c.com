@@ -4465,7 +4465,7 @@ function CrossBorderContent() {
             <PhoneVideo src={cbRednote} top={0} sub={sub} measure={MEASURE}
               ariaLabel="A Xiaohongshu post showing the location switcher being changed between countries, each with its own illustrated header"
               buttonNoun="Xiaohongshu video"
-              caption={<>A travel and food creator made this, unprompted. Liked by the Touch &apos;n Go eWallet account and<Figures> 3,674</Figures> others.</>} />
+              caption={<>A travel and food creator made this on Rednote, unprompted. Liked by the Touch &apos;n Go eWallet account and<Figures> 3,674</Figures> others.</>} />
           </div>
         </SplitRow>
         {/* The wrap is a second thing that happened, not the next sentence
