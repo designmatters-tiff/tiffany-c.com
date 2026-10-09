@@ -6399,7 +6399,9 @@ function SpeakingEventRow({
 }
 
 // ─── Women in Digital accordion row ────────────────────────────────
-// Default-collapsed, same header pattern as SpeakingEventRow. Expanded
+// Open on arrival at /awards, collapsed in the homepage deck's awards
+// section; see the accordion reset in App. Same header pattern as
+// SpeakingEventRow. Expanded
 // panel layers the finalist-list graphic on top of the portrait photo
 // (matches the Figma composition) — portrait fits the row's height via
 // object-contain rather than being cropped/zoomed.
@@ -8151,9 +8153,15 @@ export default function App() {
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
 
-  // Reset the shared accordion state whenever the page changes so a
-  // stale open id from the previous page can't accidentally collide.
-  useEffect(() => { setOpenAccordionId(null); }, [page]);
+  // Reset the shared accordion state whenever the page changes so a stale open
+  // id from the previous page can't accidentally collide — except on Awards,
+  // which opens on Women in Digital. It is the one award rather than a talk,
+  // and the page should not read as a list of closed rows on arrival.
+  //
+  // It has to live here rather than in the row's own initial state: this
+  // effect runs on mount too, so a default set in the row would be cleared a
+  // frame later. Closing it stays closed until you leave and come back.
+  useEffect(() => { setOpenAccordionId(page === "awards" ? "women-digital" : null); }, [page]);
 
   const navigateToEvent = (key: string) => {
     setDetailKey(key);
