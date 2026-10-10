@@ -190,30 +190,30 @@ const THEME_TOGGLE_ENABLED = false;
 // Since only one page is ever mounted at once this is effectively
 // "one open accordion per page", but a single global id keeps every
 // accordion consumer trivially in sync without per-page wiring.
-// `autoRef` marks an open that came from scrolling rather than a click, so a
-// row can tell the two apart — see SpeakingEventRow's scrollIntoView.
 // `manualRef` counts clicks, so useScrollAccordion can see one land in the
-// same tick it happened rather than an effect later.
+// same tick it happened rather than an effect later. `drivenRef` says a
+// scroll controller owns where the list sits, so a row does not also scroll
+// itself into view.
 const AccordionCtx = createContext<{
   openId: string | null;
   setOpenId: (id: string | null) => void;
-  autoRef: React.MutableRefObject<boolean>;
   manualRef: React.MutableRefObject<number>;
+  drivenRef: React.MutableRefObject<boolean>;
 }>({
   openId: null,
   setOpenId: () => {},
-  autoRef: { current: false },
   manualRef: { current: 0 },
+  drivenRef: { current: false },
 });
 
 function useAccordionItem(id: string) {
-  const { openId, setOpenId, autoRef, manualRef } = useContext(AccordionCtx);
+  const { openId, setOpenId, manualRef, drivenRef } = useContext(AccordionCtx);
   const open = openId === id;
   const toggle = () => {
     manualRef.current += 1;
     setOpenId(open ? null : id);
   };
-  return { open, toggle, autoRef };
+  return { open, toggle, drivenRef };
 }
 
 
@@ -226,24 +226,35 @@ function useAccordionItem(id: string) {
 //
 // The hard part is that closing a row *above* the one that is opening pulls
 // everything below it up by the height of the closed panel — several hundred
-// pixels, mid-gesture, which reads as the page lurching out from under you.
-// So for as long as the two panels are animating, the controller pins the
-// opening row to the screen position the line found it at: this is the scroll
-// lock, and the list holds still under the reader until the swap has
-// finished. `locked` holds the selection still over the same window, so one
-// flick cannot cascade through five rows, and nothing closes while the reader
-// is above the first row — arriving at the top of /awards should not shut the
+// pixels, over the half second the panels take to animate, which reads as the
+// page lurching out from under you. So the controller parks the row: it holds
+// it at a chosen screen position on every frame of the animation. That is the
+// scroll lock, and the list holds still under the reader until the swap has
+// finished.
+//
+// A click gets parked too, and that is the whole reason the controller owns
+// the scroll rather than leaving rows to scroll themselves into view. A row's
+// own scrollIntoView reads the layout once, 60ms in, while the panel above it
+// is still collapsing — so it aimed at where the row was and landed several
+// hundred pixels past it, with the row's image scrolled up behind the header.
+// The difference between the two cases is only where the row is parked: where
+// the line found it for a scroll, gliding up to just under the header for a
+// click, which is where an opened row belongs if its panel is to have the
+// screen beneath it.
+//
+// `locked` holds the selection still over the same window, so one flick
+// cannot cascade through five rows, and nothing closes while the reader is
+// above the first row — arriving at the top of /awards should not shut the
 // row that opens on arrival.
 //
-// A click outranks the line, which at the moment of the click is almost
+// A click also outranks the line, which at the moment of the click is almost
 // certainly sitting on some other row. Collapsing the open panel reflows the
 // list and that alone fires a scroll event, so without the `hold` below the
-// selection snapped straight back and the click looked ignored. The hold has
-// to be armed from the click itself — `manualRef`, bumped synchronously in
-// `toggle` — because a passive effect does not reliably run before that
-// scroll event arrives. It stays up for as long as the swap takes to animate
-// and the clicked row's own scroll-into-view to run, and then until the
-// reader has moved a clear row's height from wherever that left them.
+// selection snapped straight back and the click looked ignored. The hold is
+// armed from the click itself — `manualRef`, bumped synchronously in `toggle`
+// — because a passive effect does not reliably run before that scroll event
+// arrives. It stays up until the swap has finished and then until the reader
+// has moved a clear row's height from wherever that left them.
 //
 // The settle is a plain timer rather than a watch for scrollTop going quiet,
 // which is what it was first: the two panels animate their heights for half a
@@ -253,12 +264,17 @@ function useAccordionItem(id: string) {
 // clicked away from.
 const SCROLL_ACCORDION_RELEASE = 120;
 const SCROLL_ACCORDION_SETTLE = 900;
+// Just past the panel's max-height ease (0.5s). The parked row's top moves
+// for as long as the panel above it is still collapsing.
+const SCROLL_ACCORDION_PIN = 560;
+// How long a clicked row takes to travel up to the header.
+const SCROLL_ACCORDION_GLIDE = 420;
 
 function useScrollAccordion(
   scrollRef: React.RefObject<HTMLElement | null>,
   { enabled, offset }: { enabled: boolean; offset: number },
 ) {
-  const { openId, setOpenId, autoRef, manualRef } = useContext(AccordionCtx);
+  const { openId, setOpenId, manualRef, drivenRef } = useContext(AccordionCtx);
   const openIdRef = useRef(openId);
   openIdRef.current = openId;
   // The sticky header shrinks on scroll, so its height changes constantly.
@@ -266,11 +282,14 @@ function useScrollAccordion(
   // otherwise tear the listener down and back up mid-animation.
   const offsetRef = useRef(offset);
   offsetRef.current = offset;
+  const parkRef = useRef<((id: string) => void) | null>(null);
+  const seenManualPark = useRef(manualRef.current);
 
   useEffect(() => {
     if (!enabled) return;
     const el = scrollRef.current;
     if (!el) return;
+    drivenRef.current = true;
 
     let raf = 0;
     let settling: number | undefined;
@@ -285,6 +304,55 @@ function useScrollAccordion(
       settling = window.setTimeout(() => {
         hold = { armed: true, from: el.scrollTop };
       }, SCROLL_ACCORDION_SETTLE);
+    };
+
+    // `rect.top + scrollTop` is the row's offset inside the content, which
+    // only reflow changes, so re-deriving scrollTop from it each frame
+    // re-asserts the wanted screen position whatever moved the scroller in
+    // between. Measuring the frame's deltas instead — the reader's scroll and
+    // the reflow cancelling out — looked equivalent and was not: Chrome's own
+    // scroll anchoring is correcting for the same reflow, and a delta cannot
+    // tell its correction from a scroll, so it got counted twice. The row
+    // overshot by the height of the panel that had just closed, which put it
+    // far enough below the line that the tail pick reopened the row above and
+    // the list walked backwards.
+    const park = (target: HTMLElement, glide: boolean) => {
+      cancelAnimationFrame(raf);
+      locked = true;
+      const start = performance.now();
+      const from = target.getBoundingClientRect().top;
+      const until = start + Math.max(glide ? SCROLL_ACCORDION_GLIDE : 0, SCROLL_ACCORDION_PIN);
+
+      const step = () => {
+        const now = performance.now();
+        let want = from;
+        if (glide) {
+          const k = Math.min(1, (now - start) / SCROLL_ACCORDION_GLIDE);
+          const e = k < 0.5 ? 2 * k * k : 1 - ((-2 * k + 2) ** 2) / 2;
+          // Read the destination every frame: a click from the top of the
+          // page starts the glide while the header is still full height and
+          // ends it after the header has shrunk, which moves the line up by
+          // about 90px. Reading it once left the row that far down the page.
+          const to = el.getBoundingClientRect().top + offsetRef.current + 8;
+          want = from + (to - from) * e;
+        }
+        const next = target.getBoundingClientRect().top + el.scrollTop - want;
+        if (Math.abs(next - el.scrollTop) >= 1) el.scrollTop = next;
+        if (now < until) {
+          raf = requestAnimationFrame(step);
+          return;
+        }
+        locked = false;
+        // The gesture may have finished during the lock, in which case no
+        // further scroll event arrives to re-check the selection.
+        pick();
+      };
+      raf = requestAnimationFrame(step);
+    };
+
+    parkRef.current = (id: string) => {
+      const target = el.querySelector<HTMLElement>(`[data-accordion-row="${id}"]`);
+      if (target) park(target, true);
     };
 
     const pick = () => {
@@ -314,48 +382,16 @@ function useScrollAccordion(
       if (idx === cur) return;
       // Going back up the list, the open row has to have clearly dropped
       // below the line rather than just grazed it. Without the margin the
-      // tail pick at the end of an anchor could flip to the row above the
-      // instant the anchor settled a pixel the wrong side of the line, then
+      // tail pick at the end of a park could flip to the row above the
+      // instant the park settled a pixel the wrong side of the line, then
       // flip forward again — a ping-pong that ate a few hundred pixels of
       // the reader's scroll on its way through.
       if (cur >= 0 && idx < cur && rows[cur].getBoundingClientRect().top <= line + 24) return;
       const id = rows[idx].dataset.accordionRow || null;
       if (!id) return;
 
-      const target = rows[idx];
-      locked = true;
-      autoRef.current = true;
       setOpenId(id);
-
-      // `rect.top + scrollTop` is the row's offset inside the content, which
-      // only reflow changes, so re-deriving scrollTop from it each frame
-      // re-asserts the same screen position whatever moved the scroller in
-      // between. Measuring the frame's deltas instead — the reader's scroll
-      // and the reflow cancelling out — looked equivalent and was not:
-      // Chrome's own scroll anchoring is correcting for the same reflow, and
-      // a delta cannot tell its correction from a scroll, so it got counted
-      // twice. The row overshot by the height of the panel that had just
-      // closed, which put it far enough below the line that the tail pick
-      // reopened the row above and the list walked backwards.
-      const want = target.getBoundingClientRect().top;
-      // Just past the panel's max-height ease (0.5s). The row's top moves for
-      // as long as the panel above it is still collapsing.
-      const until = performance.now() + 560;
-
-      const anchor = () => {
-        const next = target.getBoundingClientRect().top + el.scrollTop - want;
-        if (Math.abs(next - el.scrollTop) >= 1) el.scrollTop = next;
-        if (performance.now() < until) {
-          raf = requestAnimationFrame(anchor);
-          return;
-        }
-        locked = false;
-        autoRef.current = false;
-        // The gesture may have finished during the lock, in which case no
-        // further scroll event arrives to re-check the selection.
-        pick();
-      };
-      raf = requestAnimationFrame(anchor);
+      park(rows[idx], false);
     };
 
     el.addEventListener("scroll", pick, { passive: true });
@@ -363,9 +399,21 @@ function useScrollAccordion(
       el.removeEventListener("scroll", pick);
       cancelAnimationFrame(raf);
       window.clearTimeout(settling);
-      autoRef.current = false;
+      parkRef.current = null;
+      drivenRef.current = false;
     };
-  }, [enabled, scrollRef, setOpenId, autoRef, manualRef]);
+  }, [enabled, scrollRef, setOpenId, manualRef, drivenRef]);
+
+  // A click chooses the row; the controller still decides where it ends up.
+  // This runs after the commit, so the panels have their new max-height but
+  // have not animated anywhere yet — the row is still where the reader
+  // clicked it, which is where the glide starts from.
+  useEffect(() => {
+    if (!enabled) return;
+    if (manualRef.current === seenManualPark.current) return;
+    seenManualPark.current = manualRef.current;
+    if (openId) parkRef.current?.(openId);
+  }, [openId, enabled, manualRef]);
 }
 
 
@@ -6421,7 +6469,7 @@ function SpeakingEventRow({
   brd: string;
   stickyTop?: number;
 }) {
-  const { open, toggle, autoRef } = useAccordionItem(`speaking-event:${ev.key}`);
+  const { open, toggle, drivenRef } = useAccordionItem(`speaking-event:${ev.key}`);
   const expandable = Boolean(ev.img || ev.link || ev.youtubeId);
   const rowRef = useRef<HTMLDivElement | null>(null);
 
@@ -6429,12 +6477,12 @@ function SpeakingEventRow({
   // unfolded below the fold and the next row was nowhere near the screen.
   // Bringing the row's heading up to the top gives the panel the whole screen
   // beneath it, which is what puts the following row back in view.
-  // Only a click asks to be scrolled to. A scroll-driven open is already
-  // anchored by useScrollAccordion, and a smooth scroll on top of that would
-  // fight it for the scroll position and take the gesture away from the reader.
+  // Where a scroll controller is in charge of the list it parks the row
+  // itself, correctly, across the whole animation; this reads the layout once
+  // at 60ms, while the panel above is still collapsing, so it would aim at a
+  // position the row has since left. See useScrollAccordion.
   useEffect(() => {
-    if (!open) return;
-    if (autoRef.current) return;
+    if (!open || drivenRef.current) return;
     const el = rowRef.current;
     if (!el) return;
     const t = window.setTimeout(() => {
@@ -8328,9 +8376,10 @@ export default function App() {
   const [detailKey, setDetailKey] = useState<string | null>(first.detailKey);
   const [isDark, setIsDark]       = useState(false);
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
-  // Set by useScrollAccordion while it drives the open state; see AccordionCtx.
-  const accordionAutoRef = useRef(false);
+  // See AccordionCtx: click counter, and whether a scroll controller is
+  // driving the list.
   const accordionManualRef = useRef(0);
+  const accordionDrivenRef = useRef(false);
   const reduceMotion = useReducedMotion();
 
   // Reset the shared accordion state whenever the page changes so a stale open
@@ -8565,7 +8614,7 @@ export default function App() {
     <DarkModeCtx.Provider value={isDark}>
     <DarkModeToggleCtx.Provider value={toggleDark}>
     <GoHomeCtx.Provider value={goHome}>
-    <AccordionCtx.Provider value={{ openId: openAccordionId, setOpenId: setOpenAccordionId, autoRef: accordionAutoRef, manualRef: accordionManualRef }}>
+    <AccordionCtx.Provider value={{ openId: openAccordionId, setOpenId: setOpenAccordionId, manualRef: accordionManualRef, drivenRef: accordionDrivenRef }}>
     <div className="relative w-screen h-dvh overflow-hidden"
       style={{ background: groundBg, transition: "background 0.3s ease", ["--rail-w" as string]: RAIL_W }}>
       {/* Flat ground — warm cream in light, near-black in dark. No mesh, and
