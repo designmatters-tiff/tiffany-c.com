@@ -892,18 +892,19 @@ const FORM_FIELDS: { name: string; label: string; type?: string; required?: bool
 // It carries the same gradient bottom nav as every other page, shown as
 // "Connect / Speaking Inquiry" and shrinking on scroll — see StickyPageNav.
 function SpeakingInquiryContainer({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
-  const [headerScrolled, setHeaderScrolled] = useState(false);
+  const [flags, setFlags] = useState(HEADER_AT_REST);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   return (
     <div ref={scrollRef} className="absolute inset-0 overflow-y-auto"
-      onScroll={e => setHeaderScrolled(e.currentTarget.scrollTop > 24)}>
-      <SpeakingInquiryPage onBack={onBack} onNavigate={onNavigate} headerScrolled={headerScrolled}
+      onScroll={e => { const el = e.currentTarget; setFlags(prev => headerFlagsNext(el, prev)); }}>
+      <SpeakingInquiryPage onBack={onBack} onNavigate={onNavigate}
+        headerScrolled={flags.frosted} headerShrunk={flags.shrunk}
         scrollToTop={() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })} />
     </div>
   );
 }
 
-function SpeakingInquiryPage({ onBack, onNavigate, headerScrolled = false, scrollToTop }: { onBack: () => void; onNavigate: (p: Page) => void; headerScrolled?: boolean; scrollToTop?: () => void }) {
+function SpeakingInquiryPage({ onBack, onNavigate, headerScrolled = false, headerShrunk = false, scrollToTop }: { onBack: () => void; onNavigate: (p: Page) => void; headerScrolled?: boolean; headerShrunk?: boolean; scrollToTop?: () => void }) {
   const isDark = useContext(DarkModeCtx);
   const accent = "#9B5A88";
   const itemColor = isDark ? "white" : INK;
@@ -987,7 +988,7 @@ function SpeakingInquiryPage({ onBack, onNavigate, headerScrolled = false, scrol
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? brd : "transparent"}`,
-          paddingBottom: headerScrolled ? 16 : undefined,
+          paddingBottom: headerShrunk ? 16 : undefined,
           transition: "padding-bottom 0.35s ease, background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
           <HeaderLogo onNavigate={onNavigate} color={GOLD} />
@@ -997,7 +998,7 @@ function SpeakingInquiryPage({ onBack, onNavigate, headerScrolled = false, scrol
           <ChevronLeft size={12} strokeWidth={1.5} /> Connect
         </button>
         <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg"
-          style={{ lineHeight: 1.05, color: GOLD, fontSize: headerScrolled ? "1.5rem" : undefined, transition: "font-size 0.35s ease" }}
+          style={{ lineHeight: 1.05, color: GOLD, fontSize: headerShrunk ? "1.5rem" : undefined, transition: "font-size 0.35s ease" }}
           initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
           Speaking Inquiry
         </motion.h1>
@@ -1484,6 +1485,67 @@ const RAIL_HEADING_BASELINE = 129;
 const RAIL_MARK = Math.round(RAIL_HEADING_SIZE / 1.4);
 const RAIL_MARK_TOP = RAIL_HEADING_BASELINE - RAIL_HEADING_SIZE;
 const RAIL_W = `${RAIL_GUTTER + RAIL_MARK}px`;
+// A minimised header must not end above the mark: the frosted band is the
+// header's own height mirrored across the rail, so a header shorter than the
+// mark leaves the mark hanging below its own divider. Awards minimised to
+// 121px and did exactly that. The case studies settle at 134 and look right,
+// so that clearance is the floor for all of them. Applied from lg in
+// theme.css, via the custom property set beside --rail-w — below lg there is
+// no rail and nothing to clear.
+const HEADER_MIN_H = `${RAIL_MARK_TOP + Math.round(RAIL_MARK * 1.4) + 5}px`;
+
+// ─── Header on scroll ─────────────────────────────────────────────
+// Every page with a sticky header asks the same two questions of its
+// scroller, and they are two questions rather than one because they cost
+// different things.
+//
+// Frosting the band is free — it is a colour — so it happens as soon as
+// anything is passing underneath.
+//
+// Minimising is not free: it takes 37–116px out of the header, which makes
+// the page that much shorter, and the browser's scroll anchoring then pulls
+// the reader up by the same amount to hold the content still. If that lands
+// back under the threshold that triggered it, the header grows, the
+// anchoring reverses, and the heading flicks between its two sizes for as
+// long as you look at it. Every case study did that at a scroll offset of
+// 40, and /work did it at 1440x900, where the whole page had 35px of travel
+// and minimising left nothing to be scrolled.
+//
+// So the minimise only commits once the reader has gone further than it will
+// move them, and once committed it holds until they are properly back at the
+// top. A page with less travel than that never minimises at all, which is
+// the right answer anyway: there is nothing to reclaim the room for.
+const HEADER_FROST_ON = 24;
+const HEADER_FROST_OFF = 4;
+// Comfortably past the deepest minimise (Testimonials loses 116px), so the
+// scroll position that triggered it survives it.
+const HEADER_SHRINK_ON = 140;
+const HEADER_SHRINK_OFF = 4;
+
+type HeaderFlags = { frosted: boolean; shrunk: boolean };
+const HEADER_AT_REST: HeaderFlags = { frosted: false, shrunk: false };
+
+// Returns the previous object unchanged when nothing has crossed, so a
+// scroll event that changes neither flag does not re-render the page.
+function headerFlagsNext(el: HTMLElement, prev: HeaderFlags): HeaderFlags {
+  const t = el.scrollTop;
+  const frosted = prev.frosted ? t > HEADER_FROST_OFF : t > HEADER_FROST_ON;
+  const shrunk  = prev.shrunk  ? t > HEADER_SHRINK_OFF : t > HEADER_SHRINK_ON;
+  return frosted === prev.frosted && shrunk === prev.shrunk ? prev : { frosted, shrunk };
+}
+
+function useHeaderFlags(ref: React.RefObject<HTMLElement | null>) {
+  const [flags, setFlags] = useState(HEADER_AT_REST);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const onScroll = () => setFlags(prev => headerFlagsNext(el, prev));
+    onScroll();
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [ref]);
+  return flags;
+}
 
 // The frosted band behind the logomark, from the viewport's left edge to the
 // rail's. Each page's sticky header frosts when it minimises, but that header
@@ -3379,7 +3441,6 @@ function KaiCaseContent() {
 
 function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
-  const [headerScrolled, setHeaderScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const onDark = useOnDarkBackdrop(headerRef);
@@ -3388,13 +3449,7 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
   // switches, to white, so it stays legible against that darkened band.
   const headingColor = onDark ? "#ffffff" : isDark ? GOLD_BRIGHT : GOLD;
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+  const { frosted: headerScrolled, shrunk: headerShrunk } = useHeaderFlags(scrollRef);
 
   return (
     // The case study reads as a white document laid on the site's cream,
@@ -3415,7 +3470,7 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
-          paddingBottom: headerScrolled ? 16 : 24,
+          paddingBottom: headerShrunk ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
           <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
@@ -3424,7 +3479,7 @@ function KaiCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
             { label: "Case Studies", onClick: onBack },
           ]} />
           <h1 className="font-['Museo',sans-serif] font-light"
-            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: headingColor, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
+            style={{ fontSize: headerShrunk ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: headingColor, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
             KAI: Mobile app for IoT devices control
           </h1>
         </div>
@@ -3805,19 +3860,12 @@ function SourceCaseContent() {
 
 function SourceCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
-  const [headerScrolled, setHeaderScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const onDark = useOnDarkBackdrop(headerRef);
   const headingColor = onDark ? "#ffffff" : isDark ? GOLD_BRIGHT : GOLD;
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+  const { frosted: headerScrolled, shrunk: headerShrunk } = useHeaderFlags(scrollRef);
 
   return (
     // Cream, not KAI's white. KAI is white because its content is a white
@@ -3834,7 +3882,7 @@ function SourceCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
-          paddingBottom: headerScrolled ? 16 : 24,
+          paddingBottom: headerShrunk ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
           <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
@@ -3843,7 +3891,7 @@ function SourceCasePage({ onBack, onNavigate }: { onBack: () => void; onNavigate
             { label: "Case Studies", onClick: onBack },
           ]} />
           <h1 className="font-['Museo',sans-serif] font-light"
-            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: headingColor, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
+            style={{ fontSize: headerShrunk ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: headingColor, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
             SOURCE: Energy performance management dashboard
           </h1>
         </div>
@@ -4550,19 +4598,12 @@ function CrossBorderContent() {
 
 function CrossBorderPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
-  const [headerScrolled, setHeaderScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const onDark = useOnDarkBackdrop(headerRef);
   const headingColor = onDark ? "#ffffff" : isDark ? GOLD_BRIGHT : GOLD;
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+  const { frosted: headerScrolled, shrunk: headerShrunk } = useHeaderFlags(scrollRef);
 
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
@@ -4576,7 +4617,7 @@ function CrossBorderPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
-          paddingBottom: headerScrolled ? 16 : 24,
+          paddingBottom: headerShrunk ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
           <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
@@ -4585,7 +4626,7 @@ function CrossBorderPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
             { label: "Product & UX Strategies", onClick: onBack },
           ]} />
           <h1 className="font-['Museo',sans-serif] font-light"
-            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: headingColor, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
+            style={{ fontSize: headerShrunk ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: headingColor, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
             Cross-border QR payments
           </h1>
         </div>
@@ -4600,19 +4641,12 @@ function CrossBorderPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
 
 function VisaCardPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
-  const [headerScrolled, setHeaderScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const onDark = useOnDarkBackdrop(headerRef);
   const headingColor = onDark ? "#ffffff" : isDark ? GOLD_BRIGHT : GOLD;
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+  const { frosted: headerScrolled, shrunk: headerShrunk } = useHeaderFlags(scrollRef);
 
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
@@ -4626,7 +4660,7 @@ function VisaCardPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: 
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
-          paddingBottom: headerScrolled ? 16 : 24,
+          paddingBottom: headerShrunk ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
           <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
@@ -4635,7 +4669,7 @@ function VisaCardPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: 
             { label: "Case Studies", onClick: onBack },
           ]} />
           <h1 className="font-['Museo',sans-serif] font-light"
-            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: headingColor, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
+            style={{ fontSize: headerShrunk ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: headingColor, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
             TNG eWallet Visa Card
           </h1>
         </div>
@@ -5073,19 +5107,12 @@ function FinTechPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [unlocked, setUnlocked] = useState(false);
-  const [headerScrolled, setHeaderScrolled] = useState(false);
   const PASSCODE = "tifffolio";
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const onDark = useOnDarkBackdrop(headerRef);
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+  const { frosted: headerScrolled, shrunk: headerShrunk } = useHeaderFlags(scrollRef);
 
   const submit = () => {
     if (value.trim() === PASSCODE) { setError(""); setUnlocked(true); }
@@ -5104,7 +5131,7 @@ function FinTechPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
-          paddingBottom: headerScrolled ? 16 : 24,
+          paddingBottom: headerShrunk ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
           <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
@@ -5113,7 +5140,7 @@ function FinTechPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (
             { label: "Business Acumen", onClick: onBack },
           ]} />
           <h1 className="font-['Museo',sans-serif] font-light"
-            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: onDark ? '#fff' : GOLD, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
+            style={{ fontSize: headerShrunk ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: onDark ? '#fff' : GOLD, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
             FinTech: Balancing user preference &amp; business result
           </h1>
         </div>
@@ -5492,18 +5519,11 @@ function AppleHealthContent() {
 
 function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigate: (p: Page) => void }) {
   const isDark = useContext(DarkModeCtx);
-  const [headerScrolled, setHeaderScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const onDark = useOnDarkBackdrop(headerRef);
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+  const { frosted: headerScrolled, shrunk: headerShrunk } = useHeaderFlags(scrollRef);
 
   return (
     <div className="relative w-full" style={{ minHeight: "100dvh", background: "transparent" }}>
@@ -5520,7 +5540,7 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
-          paddingBottom: headerScrolled ? 16 : 24,
+          paddingBottom: headerShrunk ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
           <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
@@ -5529,7 +5549,7 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
             { label: "Case Studies", onClick: onBack },
           ]} />
           <h1 className="font-['Museo',sans-serif] font-light"
-            style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: onDark ? '#fff' : GOLD, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
+            style={{ fontSize: headerShrunk ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: onDark ? '#fff' : GOLD, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>
             Apple Health: Design Challenge
           </h1>
         </div>
@@ -5840,24 +5860,24 @@ function WorkPage({ onNavigate, onOpenDetail, embedded = false, isActive = true,
   // listens to it, rather than growing a scroller of its own and changing how
   // the page is laid out.
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const [selfScrolled, setSelfScrolled] = useState(false);
+  const [selfFlags, setSelfFlags] = useState(HEADER_AT_REST);
   useEffect(() => {
     if (embedded) return;
     let el: HTMLElement | null = rootRef.current?.parentElement ?? null;
     while (el && !/auto|scroll/.test(getComputedStyle(el).overflowY)) el = el.parentElement;
     if (!el) return;
     const scroller = el;
-    const onScroll = () => setSelfScrolled(scroller.scrollTop > 24);
+    const onScroll = () => setSelfFlags(prev => headerFlagsNext(scroller, prev));
     onScroll();
     scroller.addEventListener("scroll", onScroll, { passive: true });
     return () => scroller.removeEventListener("scroll", onScroll);
   }, [embedded]);
-  const scrolled = embedded ? headerScrolled : selfScrolled;
+  const scrolled = embedded ? headerScrolled : selfFlags.frosted;
   // The heading shrinks on the same signal that frosts the band behind it —
   // the arrangement Awards already uses. It was driven by `compact`, which
   // only the homepage deck sets, so standalone the band appeared and the
   // heading stayed full size, which is neither state.
-  const shrunk = embedded ? compact : selfScrolled;
+  const shrunk = embedded ? compact : selfFlags.shrunk;
   const brd = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
 
   // Opening a card is an animation, not a jump: the chosen row's rules part —
@@ -6290,11 +6310,11 @@ function TestimonialsPage({
   const [group, setGroup] = useState<TestimonialGroup>("leadership");
   // Embedded in the homepage deck, the scroll container lives one level up,
   // so the shrink flag is passed down rather than measured here.
-  const [selfScrolled, setSelfScrolled] = useState(false);
-  const headerScrolled = embedded ? embeddedScrolled : selfScrolled;
+  const [selfFlags, setSelfFlags] = useState(HEADER_AT_REST);
+  const headerScrolled = embedded ? embeddedScrolled : selfFlags.frosted;
   // Heading shrinks on the same signal the sibling sections use: the deck's
   // `compact` flag when embedded, this page's own scroll when standalone.
-  const shrunk = embedded ? compact : selfScrolled;
+  const shrunk = embedded ? compact : selfFlags.shrunk;
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const accent = HEADING_COLOUR.testimonials;
@@ -6303,7 +6323,7 @@ function TestimonialsPage({
 
   // The page always opens at the top. Leaving and coming back used to land
   // here with the browser's restored scroll offset but a freshly-mounted
-  // `selfScrolled` of false, so the full-height header painted itself over
+  // header flags of false, so the full-height header painted itself over
   // quotes that were already scrolled past. Reset the column before paint,
   // reset again on the next frame in case the browser restores after this
   // runs, and from then on take the flag from the real scrollTop so the two
@@ -6313,8 +6333,8 @@ function TestimonialsPage({
     const el = scrollRef.current;
     if (!el) return;
     el.scrollTop = 0;
-    setSelfScrolled(false);
-    const onScroll = () => setSelfScrolled(el.scrollTop > 24);
+    setSelfFlags(HEADER_AT_REST);
+    const onScroll = () => setSelfFlags(prev => headerFlagsNext(el, prev));
     const raf = requestAnimationFrame(() => { el.scrollTop = 0; onScroll(); });
     el.addEventListener('scroll', onScroll, { passive: true });
     return () => { cancelAnimationFrame(raf); el.removeEventListener('scroll', onScroll); };
@@ -6737,7 +6757,7 @@ function AwardsSpeakingPage({
   // (Embedded/mobile homepage capping is handled one level up in HomePage.)
   const [selfExpanded, setSelfExpanded] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
-  const [selfScrolled, setSelfScrolled] = useState(false);
+  const [selfFlags, setSelfFlags] = useState(HEADER_AT_REST);
   const capped = !embedded && !selfExpanded;
 
   // On a tall screen the capped list can be shorter than the viewport, so
@@ -6757,14 +6777,14 @@ function AwardsSpeakingPage({
     window.addEventListener("resize", check);
     return () => { window.clearTimeout(t); window.removeEventListener("resize", check); };
   }, [embedded, selfExpanded]);
-  const scrolled = embedded ? headerScrolled : selfScrolled;
+  const scrolled = embedded ? headerScrolled : selfFlags.frosted;
   // The heading shrinks on the same signal that frosts the band behind it.
   // It was driven by `compact`, which only the homepage deck ever sets, so on
   // /awards the band appeared and the heading stayed full size — an opened row
   // then scrolled under a full-height header and could not be read. Same shape
   // as TestimonialsPage: the deck's flag when embedded, this page's own scroll
   // when standalone.
-  const shrunk = embedded ? compact : selfScrolled;
+  const shrunk = embedded ? compact : selfFlags.shrunk;
   const visibleEvents = capped ? SPEAKING_EVENTS.slice(0, 3) : SPEAKING_EVENTS;
 
   const headerRef = useRef<HTMLDivElement>(null);
@@ -6857,7 +6877,7 @@ function AwardsSpeakingPage({
         }}
         onScroll={(e) => {
           const el = e.currentTarget;
-          setSelfScrolled(el.scrollTop > 24);
+          setSelfFlags(prev => headerFlagsNext(el, prev));
           // Reaching the end of a capped list is the request to see the rest:
           // lift the cap there so the next row is already coming up, rather
           // than making the reader stop and press a button to continue.
@@ -7998,19 +8018,12 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [unlocked, setUnlocked] = useState(false);
-  const [headerScrolled, setHeaderScrolled] = useState(false);
   const PASSCODE = "tifffolio";
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const onDark = useOnDarkBackdrop(headerRef);
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+  const { frosted: headerScrolled, shrunk: headerShrunk } = useHeaderFlags(scrollRef);
 
   const submit = () => {
     if (value.trim() === PASSCODE) {
@@ -8036,7 +8049,7 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
-          paddingBottom: headerScrolled ? 16 : 24,
+          paddingBottom: headerShrunk ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
           <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
@@ -8044,7 +8057,7 @@ function BusinessCasePage({ onBack, onNavigate }: { onBack: () => void; onNaviga
             { label: "Work", onClick: () => onNavigate("work") },
             { label: "Business Acumen", onClick: onBack },
           ]} />
-          <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: onDark ? '#fff' : GOLD, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>eCommerce: Behavioural UX Design</h1>
+          <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: headerShrunk ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: onDark ? '#fff' : GOLD, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>eCommerce: Behavioural UX Design</h1>
         </div>
 
         {unlocked ? (
@@ -8115,19 +8128,12 @@ function BrandPerceptionPage({ onBack, onNavigate }: { onBack: () => void; onNav
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [unlocked, setUnlocked] = useState(false);
-  const [headerScrolled, setHeaderScrolled] = useState(false);
   const PASSCODE = "tifffolio";
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const headerRef = useRef<HTMLDivElement | null>(null);
   const onDark = useOnDarkBackdrop(headerRef);
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onScroll = () => setHeaderScrolled(el.scrollTop > 24);
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+  const { frosted: headerScrolled, shrunk: headerShrunk } = useHeaderFlags(scrollRef);
 
   const submit = () => {
     if (value.trim() === PASSCODE) {
@@ -8153,7 +8159,7 @@ function BrandPerceptionPage({ onBack, onNavigate }: { onBack: () => void; onNav
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
-          paddingBottom: headerScrolled ? 16 : 24,
+          paddingBottom: headerShrunk ? 16 : 24,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
           <HeaderLogo onNavigate={onNavigate} color={onDark ? "#fff" : GOLD} />
@@ -8161,7 +8167,7 @@ function BrandPerceptionPage({ onBack, onNavigate }: { onBack: () => void; onNav
             { label: "Work", onClick: () => onNavigate("work") },
             { label: "Product & UX Strategies", onClick: onBack },
           ]} />
-          <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: headerScrolled ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: onDark ? '#fff' : GOLD, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>Brand Perception &amp; UX Strategy</h1>
+          <h1 className="font-['Museo',sans-serif] font-light" style={{ fontSize: headerShrunk ? '1.5rem' : 'clamp(2.25rem, 3.6vw, 3.25rem)', lineHeight: 1.05, color: onDark ? '#fff' : GOLD, margin: 0, transition: 'font-size 0.3s ease, color 0.3s ease' }}>Brand Perception &amp; UX Strategy</h1>
         </div>
 
         {unlocked ? (
@@ -8442,7 +8448,7 @@ export default function App() {
     setPage(target);
   };
 
-  const [detailHeaderScrolled, setDetailHeaderScrolled] = useState(false);
+  const [detailHeaderFlags, setDetailHeaderFlags] = useState(HEADER_AT_REST);
   const motionKey = page === "speaking" ? `speaking:${detailKey}` : page === "workDetail" ? `workDetail:${detailKey}` : page;
   // Case-study pages are a drill-in from the Work list; they animate as an
   // expansion of the row rather than as a new screen sliding in.
@@ -8452,7 +8458,7 @@ export default function App() {
 
 
   useEffect(() => {
-    setDetailHeaderScrolled(false);
+    setDetailHeaderFlags(HEADER_AT_REST);
   }, [page, detailKey]);
 
   // The bottom nav is site chrome, not page content. It used to be rendered
@@ -8616,7 +8622,8 @@ export default function App() {
     <GoHomeCtx.Provider value={goHome}>
     <AccordionCtx.Provider value={{ openId: openAccordionId, setOpenId: setOpenAccordionId, manualRef: accordionManualRef, drivenRef: accordionDrivenRef }}>
     <div className="relative w-screen h-dvh overflow-hidden"
-      style={{ background: groundBg, transition: "background 0.3s ease", ["--rail-w" as string]: RAIL_W }}>
+      style={{ background: groundBg, transition: "background 0.3s ease",
+               ["--rail-w" as string]: RAIL_W, ["--header-min-h" as string]: HEADER_MIN_H }}>
       {/* Flat ground — warm cream in light, near-black in dark. No mesh, and
           no per-section tinting: one colour behind the whole site. */}
       <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, background: groundBg, transition: "background 0.3s ease" }} />
@@ -8665,8 +8672,8 @@ export default function App() {
           </div>
         )}
         {page === "workDetail" && detailKey && (
-          <div className="absolute inset-0 overflow-y-auto" onScroll={(e) => setDetailHeaderScrolled((e.target as HTMLElement).scrollTop > 24)}>
-            <WorkDetailPage cardKey={detailKey} onBack={navigateBackFromWork} onNavigate={navigateGeneral} headerScrolled={detailHeaderScrolled} compact={detailHeaderScrolled} />
+          <div className="absolute inset-0 overflow-y-auto" onScroll={(e) => { const el = e.currentTarget; setDetailHeaderFlags(prev => headerFlagsNext(el, prev)); }}>
+            <WorkDetailPage cardKey={detailKey} onBack={navigateBackFromWork} onNavigate={navigateGeneral} headerScrolled={detailHeaderFlags.frosted} compact={detailHeaderFlags.shrunk} />
           </div>
         )}
         {page === "testimonials" && (

@@ -359,3 +359,17 @@ html, body {
 h1 {
   letter-spacing: -0.02em;
 }
+
+/* The desktop identity rail's logomark sits on the page heading's baseline,
+   ending 129px down the screen, and the frosted band behind it is the page
+   header's own height mirrored across the rail. So a header that minimises
+   shorter than the mark leaves the mark hanging below its own divider —
+   Awards minimised to 121px and did. Every sticky page header is held open
+   far enough to clear it. The value comes from the rail constants in App.tsx
+   as --header-min-h, beside --rail-w; from lg only, since below that there
+   is no rail and nothing to clear. */
+@media (min-width: 1024px) {
+  [data-header-frost] {
+    min-height: var(--header-min-h);
+  }
+}
