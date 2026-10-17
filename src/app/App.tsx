@@ -6521,7 +6521,11 @@ function SpeakingEventRow({
           position: open ? "sticky" : "relative",
           top: open ? stickyTop : undefined,
           zIndex: open ? 15 : undefined,
-          background: open ? (isDark ? "rgba(40,40,40,0.82)" : "rgba(255,255,255,0.82)") : "transparent",
+          // The page's own surface, not white: on Awards' cream the white
+          // read as a panel laid on the page rather than as the page's own
+          // band, and directly under the header's frost — which is this
+          // cream — the two did not match.
+          background: open ? (isDark ? "rgba(40,40,40,0.82)" : "rgba(248,247,245,0.82)") : "transparent",
           backdropFilter: open ? "blur(16px)" : "none",
           WebkitBackdropFilter: open ? "blur(16px)" : "none",
           boxShadow: open ? (isDark ? "0 2px 16px rgba(0,0,0,0.2)" : "0 2px 16px rgba(0,0,0,0.06)") : "none",
