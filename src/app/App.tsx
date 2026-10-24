@@ -2397,7 +2397,7 @@ const EXPERTISE_CARDS = [
     description: "Designing and iterating AI-native workflows and infrastructure from the ground up.",
     // Newest to oldest, like every other card: the 2023 TNG work closes the list.
     bullets: [
-      "Cotton On Group: built the team's own card sorting tool rather than buying one, funded and in use",
+      "Cotton On Group: built our own card sorting tool, shaped around how we run global, multi-brand research, and in use",
       "Rebuilt personas as synthetic users from de-identified behavioural data, to pressure-test UX hypotheses before testing with real users",
       // Hidden until it ships. Restore at the TOP of this list (newest) once live:
       // "Connect: a multi-brand design system for the Shopify re-platform, in build",
