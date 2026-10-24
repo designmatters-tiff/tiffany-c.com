@@ -5930,6 +5930,19 @@ const TESTIMONIALS: {
     ],
   },
   {
+    key: "naren", group: "leadership",
+    name: "Naren", title: "UX Designer, Cotton On Group",
+    source: "Worked with Tiffany", date: null,
+    quote: [
+      "I worked with Tiff for over a year at Cotton On, and a lot of how I approach my work today comes from her.",
+      "Tiff was invested in growing the design team's capability and raising the bar for what we delivered. She encouraged us to explore AI and new ways of working, and gave us real room to experiment. One outcome was a card sorting tool we built in house for our navigation research.",
+      "She backed new ideas when it counted. When I wanted to bring AI into how we built and used our design system, she championed it with the leadership team and secured the time and support we needed to make it work.",
+      "She also brought real rigour to big pieces of work. When we relaunched one of our brand sites, she planned it meticulously so it could become a template for the rest of the group. Seeing how she approached that taught me a lot about designing for scale, not just for launch.",
+      "Throughout, she trusted me with ownership. She helped me frame problems around both the customer and the business, use data to guide decisions, and work through tricky stakeholder conversations without ever taking the work out of my hands.",
+      "Any team would be lucky to have her.",
+    ],
+  },
+  {
     key: "shin", group: "leadership",
     name: "Shin L.", title: "Lead UX Writer",
     source: "Reported to Tiffany", date: null,
