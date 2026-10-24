@@ -6140,12 +6140,14 @@ function TestimonialsPage({
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
-          // No bottom padding: the tab row is the last thing in this block, so
-          // its own underline then lands exactly on the bar's bottom edge and
-          // reads as a tab indicator against the divider rather than floating
-          // above it. The gap between the label and its underline is the tab
-          // button's own 10px padding.
-          paddingBottom: 0,
+          // The tab row is the last thing in this block, so with no bottom
+          // padding its underline landed exactly on the bar's own divider.
+          // That was meant to read as a tab indicator sitting on the line,
+          // and instead read as the divider changing colour under one tab:
+          // two coincident 1px lines, neither of them legible as the other's
+          // neighbour. The underline needs air beneath it to be its own mark.
+          // 12 against the tab button's own 10px above it.
+          paddingBottom: 12,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
           {!embedded && <HeaderLogo onNavigate={onNavigate} color={accent} />}
