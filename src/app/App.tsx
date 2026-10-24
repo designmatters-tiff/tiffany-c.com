@@ -5971,7 +5971,7 @@ const TESTIMONIALS: {
   },
   {
     key: "junhoe", group: "leadership",
-    name: "Junhoe W.", title: "Design Manager",
+    name: "Junhoe Wong", title: "Product Designer, Plus Xnergy",
     source: "Reported to Tiffany", date: null,
     quote: [
       "Few people have the opportunity to report to a manager who is also a coach and mentor but I did when I worked for Tiffany Chew. I had the pleasure of working with Tiffany for two years at Plus Solar Systems, collaborating on several project teams. Tiffany's ability to juggle multiple projects was unlike any I've seen before and made a dramatic difference in the productivity level of our team. As a team member, Tiffany earns my highest recommendation.",
