@@ -6140,14 +6140,18 @@ function TestimonialsPage({
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
-          // The tab row is the last thing in this block, so with no bottom
-          // padding its underline landed exactly on the bar's own divider.
-          // That was meant to read as a tab indicator sitting on the line,
-          // and instead read as the divider changing colour under one tab:
-          // two coincident 1px lines, neither of them legible as the other's
-          // neighbour. The underline needs air beneath it to be its own mark.
-          // 12 against the tab button's own 10px above it.
-          paddingBottom: 12,
+          // No bottom padding: the tab row is the last thing in this block,
+          // and its underline belongs on the bar's own divider rather than
+          // above it. See the row's -1px margin for the last pixel of that.
+          paddingBottom: 0,
+          // A column, so that when the minimised bar is held open to clear
+          // the rail's logomark (--header-min-h) the spare height collects
+          // above the tab row rather than below it. Left below it, those few
+          // pixels sat between the active tab's underline and the divider
+          // and broke the overlap on exactly the wide screens the floor
+          // applies to.
+          display: "flex",
+          flexDirection: "column",
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease",
         }}>
           {!embedded && <HeaderLogo onNavigate={onNavigate} color={accent} />}
@@ -6177,8 +6181,17 @@ function TestimonialsPage({
               reachable once the user is deep in a long column of quotes.
               The selected tab is marked by colour and the underline, not by
               weight. */}
+          {/* The row overhangs the bar's content box by the divider's own
+              1px, so the active tab's underline lands on that line instead of
+              one pixel above it. Stacked, the two read as a single thickened
+              rule of two colours; overlapping, the accent simply takes over
+              the divider for the width of the tab it belongs to. A child
+              paints over its parent's border, so the accent wins the pixel,
+              and the inactive tabs' transparent border leaves the divider
+              showing through. */}
           <div role="tablist" aria-label="Testimonial groups" className="flex gap-6"
-            style={{ marginTop: headerScrolled ? 14 : 32, transition: "margin-top 0.35s ease" }}>
+            style={{ marginTop: "auto", paddingTop: headerScrolled ? 14 : 32, marginBottom: -1,
+                     transition: "padding-top 0.35s ease" }}>
             {TESTIMONIAL_GROUPS.map(g => {
               const active = g.key === group;
               const count  = TESTIMONIALS.filter(t => t.group === g.key).length;
