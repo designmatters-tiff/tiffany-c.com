@@ -2399,7 +2399,8 @@ const EXPERTISE_CARDS = [
     bullets: [
       "Cotton On Group: built the team's own card sorting tool rather than buying one, funded and in use",
       "Rebuilt personas as synthetic users from de-identified behavioural data, to pressure-test UX hypotheses before testing with real users",
-      "Connect: a multi-brand design system for the Shopify re-platform, in build",
+      // Hidden until it ships. Restore at the TOP of this list (newest) once live:
+      // "Connect: a multi-brand design system for the Shopify re-platform, in build",
       "2023 TNG eWallet: reduced trilingual UX copy turnaround by 20% through AI tooling",
     ],
   },
