@@ -1272,14 +1272,20 @@ const RAIL_HEADING_BASELINE = 129;
 const RAIL_MARK = Math.round(RAIL_HEADING_SIZE / 1.4);
 const RAIL_MARK_TOP = RAIL_HEADING_BASELINE - RAIL_HEADING_SIZE;
 const RAIL_W = `${RAIL_GUTTER + RAIL_MARK}px`;
-// A minimised header must not end above the mark: the frosted band is the
+// A minimised header has to leave the mark room. The frosted band is the
 // header's own height mirrored across the rail, so a header shorter than the
-// mark leaves the mark hanging below its own divider. Awards minimised to
-// 121px and did exactly that. The case studies settle at 134 and look right,
-// so that clearance is the floor for all of them. Applied from lg in
-// theme.css, via the custom property set beside --rail-w — below lg there is
-// no rail and nothing to clear.
-const HEADER_MIN_H = `${RAIL_MARK_TOP + Math.round(RAIL_MARK * 1.4) + 5}px`;
+// mark leaves the mark hanging below its own divider — Awards minimised to
+// 121px and did exactly that — and one only just taller crowds it against
+// the line, which is what 5px of clearance looked like. The mark is a
+// graphic hanging below the text block rather than a line of type, so it
+// takes a margin of its own: 24, the site's step, and comfortably more than
+// the 16 the header gives its own last line. Every minimised header lands at
+// the same 153 as a result, so the mark sits identically on all of them.
+//
+// Applied from lg in theme.css, via the custom property set beside --rail-w.
+// Below lg there is no rail, and on the homepage the mark is over the hero
+// rather than in one, so neither gets the floor.
+const HEADER_MIN_H = `${RAIL_MARK_TOP + Math.round(RAIL_MARK * 1.4) + 24}px`;
 
 // ─── Header on scroll ─────────────────────────────────────────────
 // Every page with a sticky header asks the same two questions of its
@@ -8400,7 +8406,8 @@ export default function App() {
     <AccordionCtx.Provider value={{ openId: openAccordionId, setOpenId: setOpenAccordionId }}>
     <div className="relative w-screen h-dvh overflow-hidden"
       style={{ background: groundBg, transition: "background 0.3s ease",
-               ["--rail-w" as string]: RAIL_W, ["--header-min-h" as string]: HEADER_MIN_H }}>
+               ["--rail-w" as string]: RAIL_W,
+               ["--header-min-h" as string]: railInset ? HEADER_MIN_H : "0px" }}>
       {/* Flat ground — warm cream in light, near-black in dark. No mesh, and
           no per-section tinting: one colour behind the whole site. */}
       <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, background: groundBg, transition: "background 0.3s ease" }} />
