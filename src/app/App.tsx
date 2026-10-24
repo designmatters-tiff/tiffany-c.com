@@ -5915,7 +5915,7 @@ const TESTIMONIALS: {
   {
     key: "naren", group: "leadership",
     name: "Naren", title: "UX Designer, Cotton On Group",
-    source: "Reported to Tiffany", date: null,
+    source: "Reported to Tiffany", date: "24 Oct 2026",
     quote: [
       "I worked with Tiff for over a year at Cotton On, and a lot of how I approach my work today comes from her.",
       "Tiff was invested in growing the design team's capability and raising the bar for what we delivered. She encouraged us to explore AI and new ways of working, and gave us real room to experiment. One outcome was a card sorting tool we built in house for our navigation research.",
@@ -5945,7 +5945,7 @@ const TESTIMONIALS: {
   {
     key: "shin", group: "leadership",
     name: "Shin L.", title: "Lead UX Writer",
-    source: "Reported to Tiffany", date: null,
+    source: "Reported to Tiffany", date: "15 Dec 2024",
     quote: [
       "I had the privilege of working under Tiffany, and she stood out as an exceptional leader who masterfully combines strategic thinking with actionable execution. Tiffany showed me how to translate high-level organisational goals into actionable plans that deliver measurable impact.",
       "One of her key contributions was leveraging content strategy to improve brand perception. Under her leadership, our efforts contributed to a remarkable 14% increase in our brand perception score in 2024. Additionally, Tiffany and I collaborated to implement strategies that harnessed artificial intelligence to enhance team efficiency. These initiatives resulted in a 20% improvement in overall efficiency, setting a benchmark for innovation within the team.",
@@ -5971,8 +5971,8 @@ const TESTIMONIALS: {
   },
   {
     key: "junhoe", group: "leadership",
-    name: "Junhoe Wong", title: "Product Designer, Plus Xnergy",
-    source: "Reported to Tiffany", date: null,
+    name: "Junhoe Wong", title: "UI/UX Designer, Plus Xnergy",
+    source: "Reported to Tiffany", date: "24 Nov 2020",
     quote: [
       "Few people have the opportunity to report to a manager who is also a coach and mentor but I did when I worked for Tiffany Chew. I had the pleasure of working with Tiffany for two years at Plus Solar Systems, collaborating on several project teams. Tiffany's ability to juggle multiple projects was unlike any I've seen before and made a dramatic difference in the productivity level of our team. As a team member, Tiffany earns my highest recommendation.",
     ],
