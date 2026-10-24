@@ -5915,7 +5915,7 @@ const TESTIMONIALS: {
   {
     key: "naren", group: "leadership",
     name: "Naren", title: "UX Designer, Cotton On Group",
-    source: "Worked with Tiffany", date: null,
+    source: "Reported to Tiffany", date: null,
     quote: [
       "I worked with Tiff for over a year at Cotton On, and a lot of how I approach my work today comes from her.",
       "Tiff was invested in growing the design team's capability and raising the bar for what we delivered. She encouraged us to explore AI and new ways of working, and gave us real room to experiment. One outcome was a card sorting tool we built in house for our navigation research.",
