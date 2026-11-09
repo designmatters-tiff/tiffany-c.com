@@ -5853,9 +5853,18 @@ function ContactListPage({
           initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
           {title}
         </motion.h1>
+      </div>
 
+      {/* Takes up whatever is spare, pushing the list down the page. */}
+      <div className="flex-1" style={{ minHeight: "4vh" }} />
+
+      {/* Items */}
+      <div className="px-6 md:px-20">
+        {/* Sits on the list rather than under the title: it says something
+            about the service rows below it, and under the heading it read as
+            a second subtitle. */}
         {reach && (
-          <div style={{ marginTop: 20 }}>
+          <div style={{ marginBottom: 20 }}>
             <p className="font-['Nunito_Sans',sans-serif] text-small"
               style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>
               {reach.line(reach.countries.length)}
@@ -5871,13 +5880,6 @@ function ContactListPage({
             </div>
           </div>
         )}
-      </div>
-
-      {/* Takes up whatever is spare, pushing the list down the page. */}
-      <div className="flex-1" style={{ minHeight: "4vh" }} />
-
-      {/* Items */}
-      <div className="px-6 md:px-20">
         <div style={{ borderTop: `1px solid ${brd}` }}>
           {items.map(entry => {
             const row = asRow(entry);
@@ -5926,7 +5928,7 @@ function CoachingPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       accent="#9B5A88"
       headingColor={HEADING_COLOUR.coaching}
       reach={{
-        line: n => `Mentees across ${n} countries`,
+        line: n => `Mentees footprint ${n} countries`,
         countries: MENTEE_COUNTRIES,
       }}
       onNavigate={onNavigate}
