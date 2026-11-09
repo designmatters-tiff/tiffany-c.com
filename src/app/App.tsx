@@ -2483,10 +2483,83 @@ const EXPERTISE_CARDS = [
   },
 ];
 
+// ─── Case study tiles ─────────────────────────────────────────────
+// A case opens the way it did in the old portfolio: the artwork face-on,
+// filling the frame. On hover it tips back and recedes, and the tint and the
+// label come forward into the room it leaves. A touch screen has no hover, so
+// there the label simply rides on the tile and nothing moves.
+//
+// Keyed on the bullet's exact text, the same way BULLET_LINKS below is, so
+// the copy in EXPERTISE_CARDS stays the single place those words are
+// written; the bullet's own em dash splits the name from what it is. A case
+// without an entry here stays a text row, which is where the two without a
+// device render still are.
+//
+// The tints are drawn from the artwork rather than picked: SOURCE's teal and
+// KAI's orange, each taken down far enough for white to sit on.
+const CASE_TILES: Record<string, { img: string; tint: string }> = {
+  "KAI — Mobile app for IoT device control": { img: kaiHero, tint: "rgba(123,52,28,0.88)" },
+  "SOURCE — Energy performance management dashboard": { img: srcHero, tint: "rgba(29,56,54,0.9)" },
+};
+
+function CaseTile({ bullet, tile, onOpen }: { bullet: string; tile: { img: string; tint: string }; onOpen: () => void }) {
+  const [hot, setHot] = useState(false);
+  const isMobile = useIsMobile();
+  const reduceMotion = useReducedMotion();
+  // Hover is a desktop idea. On a phone the label is simply there, and the
+  // artwork stays where it is rather than animating at nothing.
+  const shown = isMobile || hot;
+  const [name, ...rest] = bullet.split(" — ");
+  const sub = rest.join(" — ");
+  const rule = { height: 1, background: "rgba(255,255,255,0.45)", width: "100%" };
+  return (
+    <button
+      onClick={onOpen}
+      onMouseEnter={() => setHot(true)}
+      onMouseLeave={() => setHot(false)}
+      onFocus={() => setHot(true)}
+      onBlur={() => setHot(false)}
+      className="relative w-full overflow-hidden text-left cursor-pointer"
+      // The tint is the tile's own ground as well as the wash over the
+      // artwork: as the artwork recedes it uncovers this, so the gap it
+      // leaves is the same colour rather than a hole in the page.
+      style={{ aspectRatio: "4 / 3", background: tile.tint, border: "none", padding: 0, perspective: 1200 }}>
+      <img src={tile.img} alt="" aria-hidden="true"
+        style={{
+          position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover",
+          transformOrigin: "50% 55%",
+          transform: reduceMotion || isMobile || !hot
+            ? "translateZ(0) translateY(0) rotateX(0deg) rotateY(0deg)"
+            : "translateZ(-220px) translateY(-14px) rotateX(6deg) rotateY(-10deg)",
+          boxShadow: !reduceMotion && hot ? "0 34px 70px rgba(0,0,0,0.42)" : "0 0 0 rgba(0,0,0,0)",
+          transition: "transform 0.55s cubic-bezier(0.22,0.61,0.36,1), box-shadow 0.55s ease",
+        }} />
+      <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: tile.tint,
+        opacity: shown ? 1 : 0, transition: "opacity 0.45s ease" }} />
+      {/* Still in the page when it is invisible, so the button keeps its name
+          for a screen reader whether or not a pointer has been near it. */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6"
+        style={{ color: "#fff", opacity: shown ? 1 : 0, transition: "opacity 0.45s ease 0.06s" }}>
+        <div style={{ ...rule, maxWidth: 420 }} />
+        <h2 className="font-['Museo',sans-serif] font-light"
+          style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.75rem)", lineHeight: 1.1, margin: "22px 0 10px" }}>
+          {name}
+        </h2>
+        <p className="font-['Nunito_Sans',sans-serif]" style={{ margin: "0 0 22px", maxWidth: 420 }}>{sub}</p>
+        <div style={{ ...rule, maxWidth: 420 }} />
+        <span className="font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.18em]"
+          style={{ marginTop: 26, padding: "12px 26px", border: "1px solid rgba(255,255,255,0.6)" }}>
+          View More
+        </span>
+      </div>
+    </button>
+  );
+}
+
 // Work-card bullets that are really links into a case study. Keyed on the
-// bullet's exact text, so the copy above stays the single place it is written.
-// The three passcode-gated pages are linked from here but stay out of the
-// sitemap — see the `index: false` entries in scripts/prerender.mjs.
+// bullet's exact text, so the copy above stays the single place it is
+// written. The three passcode-gated pages are linked from here but stay out
+// of the sitemap — see the `index: false` entries in scripts/prerender.mjs.
 const BULLET_LINKS: Record<string, Page> = {
   "eCommerce: Behavioural UX Design (passcode required)": "businessCase",
   "Brand Perception & UX Strategy — TNG eWallet (passcode required)": "brandPerceptionCase",
@@ -2548,6 +2621,10 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
   // colour; everything that isn't a link is body text.
   const linkColor = HEADING_COLOUR.work;
   const bodyText  = isDark ? "rgba(255,255,255,0.72)" : DIM;
+  // A case with artwork is shown rather than listed. The rest stay rows, so
+  // the two that have no device render are not made to look like a gap.
+  const tiled = card.bullets.filter(b => CASE_TILES[b]);
+  const listed = card.bullets.filter(b => !CASE_TILES[b]);
   return (
     <div className="relative w-full flex flex-col" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div data-header-frost className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
@@ -2575,7 +2652,10 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
         </motion.h1>
       </div>
 
-      <div className="px-6 md:px-20 flex-1 flex flex-col" style={{ maxWidth: 760 }}>
+      <div className="flex-1 flex flex-col">
+      {/* The copy keeps its measure; the tiles below take the whole column,
+          which is what gives the artwork somewhere to recede into. */}
+      <div className="px-6 md:px-20" style={{ maxWidth: 760 }}>
         <p className="font-['Nunito_Sans',sans-serif] leading-relaxed" style={{ color: bodyText }}>
           {card.description}
         </p>
@@ -2592,7 +2672,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
               </a>
             </li>
           ))}
-          {card.bullets.map(b => {
+          {listed.map(b => {
             // A bullet that names a case study is a link to it. This was four
             // hand-written branches with the same body; a fifth would have made
             // the shape harder to read than the data it encodes.
@@ -2618,6 +2698,22 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
             );
           })}
         </ul>
+      </div>
+
+      {tiled.length > 0 && (
+        <div className="px-6 md:px-20 mt-10">
+          {/* Two across only from lg, which is also where the label stops
+              riding on the tile and waits for a hover. At md the pair came
+              to 292px wide and the longer of the two subtitles had 18px of
+              room left under it. */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            {tiled.map(b => (
+              <CaseTile key={b} bullet={b} tile={CASE_TILES[b]}
+                onOpen={() => { const t = BULLET_LINKS[b]; if (t) onNavigate(t); }} />
+            ))}
+          </div>
+        </div>
+      )}
 
         {/* Plain credit: this is the category listing, not a case study. The
             permission and NDA clauses belong on the work itself. */}
