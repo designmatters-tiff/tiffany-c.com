@@ -86,6 +86,33 @@ import foggModel from "@/work/business/eCommerce/Fogg behavioural model.avif";
 import graphResult from "@/work/business/eCommerce/graph-result.avif";
 import interventionImg from "@/work/business/eCommerce/the intervention.avif";
 
+// Flags as SVGs from country-flag-icons, not emoji: Windows ships no flag
+// glyphs, so an emoji flag renders there as the two letters of its code.
+// One import per country rather than a glob over the package, which would
+// put all 267 of its flags into the build for the ten in use. The package
+// gives each one as SVG markup; a data URL turns that into something an
+// <img> can carry, which is where a screen reader looks for alt and the
+// browser for a tooltip.
+import flagMY from "country-flag-icons/string/3x2/MY";
+import flagSG from "country-flag-icons/string/3x2/SG";
+import flagID from "country-flag-icons/string/3x2/ID";
+import flagPH from "country-flag-icons/string/3x2/PH";
+import flagCN from "country-flag-icons/string/3x2/CN";
+import flagIN from "country-flag-icons/string/3x2/IN";
+import flagAE from "country-flag-icons/string/3x2/AE";
+import flagDE from "country-flag-icons/string/3x2/DE";
+import flagAU from "country-flag-icons/string/3x2/AU";
+import flagUS from "country-flag-icons/string/3x2/US";
+
+const flagUrl = (svg: string) => `data:image/svg+xml,${encodeURIComponent(svg)}`;
+
+const FLAG_SVG: Record<string, string> = {
+  MY: flagUrl(flagMY), SG: flagUrl(flagSG), ID: flagUrl(flagID),
+  PH: flagUrl(flagPH), CN: flagUrl(flagCN), IN: flagUrl(flagIN),
+  AE: flagUrl(flagAE), DE: flagUrl(flagDE), AU: flagUrl(flagAU),
+  US: flagUrl(flagUS),
+};
+
 // ─── Logo paths ───────────────────────────────────────────────────
 const T_PATH =
   "M15.0593 10.5439H26.1216V41.3947H43.6437V50.6304H26.1216V112H15.0593V50.6304H0V41.3947H15.0593V10.5439Z";
@@ -5785,6 +5812,7 @@ function ContactListPage({
   items,
   accent,
   headingColor,
+  reach,
   onNavigate,
 }: {
   eyebrow: string;
@@ -5794,6 +5822,14 @@ function ContactListPage({
   // Coaching and Connect share this shell but sit at different points along
   // the nav gradient, so the heading colour comes in per page.
   headingColor?: string;
+  // Optional: a line and a row of flags between the title and the list.
+  // Coaching says where its mentees are; Connect passes nothing and renders
+  // exactly as it did before. `line` takes the count rather than carrying
+  // it, so the sentence cannot drift from the list it describes.
+  reach?: {
+    line: (count: number) => string;
+    countries: readonly (readonly [string, string])[];
+  };
   onNavigate: (p: Page) => void;
 }) {
   const isDark = useContext(DarkModeCtx);
@@ -5817,6 +5853,24 @@ function ContactListPage({
           initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
           {title}
         </motion.h1>
+
+        {reach && (
+          <div style={{ marginTop: 20 }}>
+            <p className="font-['Nunito_Sans',sans-serif] text-small"
+              style={{ color: isDark ? "rgba(255,255,255,0.72)" : DIM }}>
+              {reach.line(reach.countries.length)}
+            </p>
+            {/* Wraps on a narrow screen rather than scrolling off it. The
+                hairline is the page's own rule colour, so a flag with white
+                in it still has an edge against the background. */}
+            <div className="flex flex-wrap" style={{ gap: 8, marginTop: 10 }}>
+              {reach.countries.map(([code, name]) => (
+                <img key={code} src={FLAG_SVG[code]} alt={name} title={name}
+                  style={{ display: "block", width: 20, height: "auto", borderRadius: 2, border: `1px solid ${brd}` }} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Takes up whatever is spare, pushing the list down the page. */}
@@ -5846,6 +5900,22 @@ function ContactListPage({
 // deck still showed the real one.
 const sectionOf = (key: string) => SECTIONS.find(s => s.key === key);
 
+// Where the mentees are. One array drives the sentence, the order of the
+// flags and the count in the line, so adding a country is a line here (and
+// its flag import at the top of the file).
+const MENTEE_COUNTRIES: readonly (readonly [string, string])[] = [
+  ["MY", "Malaysia"],
+  ["SG", "Singapore"],
+  ["ID", "Indonesia"],
+  ["PH", "Philippines"],
+  ["CN", "China"],
+  ["IN", "India"],
+  ["AE", "United Arab Emirates"],
+  ["DE", "Germany"],
+  ["AU", "Australia"],
+  ["US", "United States"],
+];
+
 function CoachingPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
   const section = sectionOf("coaching");
   return (
@@ -5855,6 +5925,10 @@ function CoachingPage({ onNavigate }: { onNavigate: (p: Page) => void }) {
       items={["1:1 Calls", "Priority DM", "Package (1-1 Coaching Service)"]}
       accent="#9B5A88"
       headingColor={HEADING_COLOUR.coaching}
+      reach={{
+        line: n => `Mentees across ${n} countries`,
+        countries: MENTEE_COUNTRIES,
+      }}
       onNavigate={onNavigate}
     />
   );
