@@ -5401,6 +5401,12 @@ function AppleHealthPage({ onBack, onNavigate }: { onBack: () => void; onNavigat
 // moves along it; the hero is index 0, so the indicator's proportions match
 // the deck's and the two read as one sequence rather than two.
 const SWIPE_PAGES: Page[] = ["home", "work", "awards", "testimonials", "coaching", "connect"];
+// How far a sideways wheel has to add up before it counts as a move between
+// sections, and how long one gesture owns the page afterwards — long enough
+// for a trackpad flick's momentum to run out without taking a second section
+// with it. Both match the homepage deck's own wheel handler.
+const SECTION_WHEEL_STEP = 90;
+const SECTION_WHEEL_COOLDOWN = 900;
 
 // The deck's carousel indicator, for the standalone section pages. Same
 // design deliberately: a gold bar covering what you have passed, small dots
@@ -8273,6 +8279,8 @@ export default function App() {
   const [page, setPage]           = useState<Page>(first.page);
   const [detailKey, setDetailKey] = useState<string | null>(first.detailKey);
   const [isDark, setIsDark]       = useState(false);
+  // A phone flicks; a desktop wheels. See onPageWheel.
+  const isMobile = useIsMobile();
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
 
@@ -8426,6 +8434,13 @@ export default function App() {
   // a deck slide would, and every page keeps its URL.
   const swipeIdx = SWIPE_PAGES.indexOf(page);
   const canSwipe = swipeIdx > 0;   // the hero has the deck's own gesture
+  const goSection = (step: 1 | -1) => {
+    const next = swipeIdx + step;
+    if (next < 0 || next >= SWIPE_PAGES.length) return;
+    const target = SWIPE_PAGES[next];
+    if (target === "home") { goHome(); return; }
+    setPage(target);
+  };
   const touchStart = useRef<{ x: number; y: number; t: number } | null>(null);
   const onPageTouchStart = (e: React.TouchEvent) => {
     const t = e.touches[0];
@@ -8446,11 +8461,42 @@ export default function App() {
     if (Math.abs(dx) < 60) return;
     if (Math.abs(dx) < Math.abs(dy) * 1.5) return;
     if (Date.now() - start.t > 600) return;
-    const next = swipeIdx + (dx < 0 ? 1 : -1);
-    if (next < 0 || next >= SWIPE_PAGES.length) return;
-    const target = SWIPE_PAGES[next];
-    if (target === "home") { goHome(); return; }
-    setPage(target);
+    goSection(dx < 0 ? 1 : -1);
+  };
+
+  // A desktop has no flick, and until now it had nothing in its place: the
+  // section indicator sat at the foot of every standalone section page
+  // promising more sections with no way to reach them, and landing on /work
+  // from a case study's breadcrumb left the reader stranded there. The
+  // homepage deck has read a wheel since it was built; this is the same move
+  // on the pages the deck's slides correspond to.
+  //
+  // Sideways only. A vertical scroll carries a little sideways drift on a
+  // trackpad, and reading that as a navigation would throw the page away
+  // mid-scroll — so the gesture has to be clearly horizontal, and has to add
+  // up to a deliberate push rather than a nudge. One gesture moves one
+  // section: the lock holds until the flick's own momentum has died, the way
+  // the deck's handler does it.
+  const wheelX = useRef(0);
+  const wheelLocked = useRef(false);
+  const wheelIdle = useRef<number | undefined>(undefined);
+  const onPageWheel = (e: React.WheelEvent) => {
+    if (!canSwipe || isMobile) return;
+    if (Math.abs(e.deltaX) < Math.abs(e.deltaY) * 1.5) { wheelX.current = 0; return; }
+    // Anything inside that scrolls sideways of its own keeps the gesture.
+    for (let el = e.target as HTMLElement | null; el && el !== e.currentTarget; el = el.parentElement) {
+      if (el.scrollWidth > el.clientWidth + 1 && /auto|scroll/.test(getComputedStyle(el).overflowX)) return;
+    }
+    if (wheelLocked.current) return;
+    wheelX.current += e.deltaX;
+    window.clearTimeout(wheelIdle.current);
+    wheelIdle.current = window.setTimeout(() => { wheelX.current = 0; }, 200);
+    if (Math.abs(wheelX.current) < SECTION_WHEEL_STEP) return;
+    const step = wheelX.current > 0 ? 1 : -1;
+    wheelX.current = 0;
+    wheelLocked.current = true;
+    window.setTimeout(() => { wheelLocked.current = false; }, SECTION_WHEEL_COOLDOWN);
+    goSection(step);
   };
   const toggleDark = useCallback(() => setIsDark(d => !d), []);
 
@@ -8534,6 +8580,7 @@ export default function App() {
       <motion.div key={motionKey} className={`absolute inset-0${railInset ? " lg:left-[var(--rail-w)]" : ""}`}
         onTouchStart={onPageTouchStart}
         onTouchEnd={onPageTouchEnd}
+        onWheel={onPageWheel}
         // Horizontal overscroll stays inside the page: without this a swipe
         // right hands the gesture to the browser's own back navigation, which
         // leaves the site rather than moving a section. The OS edge swipe is
