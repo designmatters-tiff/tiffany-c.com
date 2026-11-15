@@ -2508,15 +2508,20 @@ const CASE_TILES: Record<string, string> = {
   "SOURCE — Energy performance management dashboard": srcHero,
 };
 
-function CaseTile({ bullet, img, onOpen }: { bullet: string; img: string; onOpen: () => void }) {
+function CaseTile({ bullet, img, goal, onOpen }: { bullet: string; img: string; goal?: string; onOpen: () => void }) {
   const [hot, setHot] = useState(false);
   const isMobile = useIsMobile();
   const reduceMotion = useReducedMotion();
-  // Hover is a desktop idea. On a phone the label is simply there, and the
-  // artwork stays where it is rather than animating at nothing.
-  const shown = isMobile || hot;
+  // Hover is a desktop idea, and a phone gets none of it: the overlay stays
+  // off, the artwork stays where it is rather than animating at nothing, and
+  // the card is the image with its name along the bottom. The full label is
+  // still in the page at zero opacity, so the button keeps its name for a
+  // screen reader whether or not anything has been near it.
+  const shown = hot;
   const [name, ...rest] = bullet.split(" — ");
-  const sub = rest.join(" — ");
+  // What the case set out to do, rather than what it was. The bullet's own
+  // tail is the fallback for a case with no goal recorded.
+  const sub = goal ?? rest.join(" — ");
   const rule = { height: 1, background: "rgba(255,255,255,0.45)", width: "100%" };
   return (
     <button
@@ -2540,10 +2545,10 @@ function CaseTile({ bullet, img, onOpen }: { bullet: string; img: string; onOpen
           boxShadow: !reduceMotion && hot ? "0 34px 70px rgba(0,0,0,0.42)" : "0 0 0 rgba(0,0,0,0)",
           transition: "transform 0.55s cubic-bezier(0.22,0.61,0.36,1), box-shadow 0.55s ease",
         }} />
-      {/* At rest the name sits on the artwork, over a scrim so it reads on a
-          white one as well as a dark one, and gives way to the full label
-          when that comes forward. Below lg the full label is simply there,
-          so this never appears. */}
+      {/* The name sits on the artwork, over a scrim so it reads on a white
+          one as well as a dark one. On a desktop it gives way to the full
+          label when that comes forward; on a phone it is the whole caption,
+          because nothing comes forward there. */}
       <div aria-hidden="true" className="absolute inset-x-0 bottom-0 flex items-end"
         // Eased rather than a straight ramp: against the white of the Apple
         // Health artwork a linear gradient showed its own top edge and read
@@ -2592,6 +2597,22 @@ const BULLET_LINKS: Record<string, Page> = {
   "Cross-border QR payments — TNG eWallet": "crossBorderCase",
   "FinTech: Balancing user preference & business result (passcode required)": "finTechCase",
 };
+
+// Each case study's goal, in one place. The case page prints it in its META
+// grid and the Case Studies tile uses it as the card's description, so the
+// two cannot drift. Keyed by the page it belongs to, which is what a tile's
+// bullet resolves to through BULLET_LINKS above.
+const CASE_GOALS: Partial<Record<Page, string>> = {
+  kaiCase: "Monitor and manage energy use in real time",
+  sourceCase: "Make building energy and solar data visible to the people who own it",
+  visaCardCase: "Launch a physical prepaid card alongside the app's new financial services",
+  crossBorderCase: "Get users exploring cross-border payment before and during travel",
+  finTechCase: "Encourage users to enable auto-sweep",
+  appleHealthCase: "Drive daily active users",
+  businessCase: "Increase checkout completion rate",
+  brandPerceptionCase: "Shift perception beyond payments and tolls",
+};
+
 
 // Rows navigate to a full WorkDetailPage rather than expanding inline —
 // matches the same drill-in pattern as the Speaking Inquiry page.
@@ -2734,10 +2755,14 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
               to 292px wide and the longer of the two subtitles had 18px of
               room left under it. */}
           <div className="grid gap-6 lg:grid-cols-2">
-            {tiled.map(b => (
-              <CaseTile key={b} bullet={b} img={CASE_TILES[b]}
-                onOpen={() => { const t = BULLET_LINKS[b]; if (t) onNavigate(t); }} />
-            ))}
+            {tiled.map(b => {
+              const target = BULLET_LINKS[b];
+              return (
+                <CaseTile key={b} bullet={b} img={CASE_TILES[b]}
+                  goal={target ? CASE_GOALS[target] : undefined}
+                  onOpen={() => { if (target) onNavigate(target); }} />
+              );
+            })}
           </div>
         </div>
       )}
@@ -2939,7 +2964,7 @@ function KaiCaseContent() {
       <a href={PLUS_XNERGY_URL} target="_blank" rel="noopener noreferrer"
         className="link-underline" style={{ color: fg }}>Plus Xnergy</a>
     )],
-    ["Goal", "Monitor and manage energy use in real time"],
+    ["Goal", CASE_GOALS.kaiCase],
     ["Scope", "Design sprint facilitation, design strategy, UX & UI design"],
     ["Role", "Design Innovation Manager"],
     ["Team size", "2 designers"],
@@ -3467,7 +3492,7 @@ function SourceCaseContent() {
       <a href={PLUS_XNERGY_URL} target="_blank" rel="noopener noreferrer"
         style={{ color: GOLD }} className="link-underline">Plus Solar Systems</a>
     )],
-    ["Goal", "Make building energy and solar data visible to the people who own it"],
+    ["Goal", CASE_GOALS.sourceCase],
     ["Scope", "Design strategy, UX, UI design"],
     ["Role", "Design Innovation Manager"],
     ["Team size", "1 – 2 designers"],
@@ -3879,7 +3904,7 @@ function VisaCardContent() {
       <a href={TNG_DIGITAL_URL} target="_blank" rel="noopener noreferrer"
         className="link-underline" style={{ color: fg }}>Touch &apos;n Go eWallet</a>
     )],
-    ["Goal", "Launch a physical prepaid card alongside the app's new financial services"],
+    ["Goal", CASE_GOALS.visaCardCase],
     ["Scope", "Card design, artwork selection, user survey, welcome pack, print production"],
     ["Role", "Head of Product Design"],
   ];
@@ -4275,7 +4300,7 @@ function CrossBorderContent() {
       <a href={TNG_DIGITAL_URL} target="_blank" rel="noopener noreferrer"
         className="link-underline" style={{ color: fg }}>Touch &apos;n Go eWallet</a>
     )],
-    ["Goal", "Get users exploring cross-border payment before and during travel"],
+    ["Goal", CASE_GOALS.crossBorderCase],
     ["Scope", "Problem framing, design direction, review"],
     ["Role", "Head of Product Design"],
   ];
@@ -4690,7 +4715,7 @@ function FinTechContent() {
       <a href={TNG_DIGITAL_URL} target="_blank" rel="noopener noreferrer"
         className="link-underline" style={{ color: fg }}>TNG Digital (TNG eWallet)</a>
     )],
-    ["Goal", "Encourage users to enable auto-sweep"],
+    ["Goal", CASE_GOALS.finTechCase],
     ["Scope", "Concept and design validation"],
     ["Role", "Product Design Lead"],
     ["Launched", "20 Feb 2023"],
@@ -5181,7 +5206,7 @@ function AppleHealthContent() {
   const META: [string, React.ReactNode][] = [
     ["Year", "2021"],
     ["Duration", "5 working days"],
-    ["Goal", "Drive daily active users"],
+    ["Goal", CASE_GOALS.appleHealthCase],
     ["Scope", "Research, design strategy, UX, UI design"],
     ["Role", "End-to-end design process"],
   ];
@@ -7266,7 +7291,7 @@ function BusinessCaseContent() {
       <a href="https://cottonon.com" target="_blank" rel="noopener noreferrer"
         className="link-underline" style={{ color: fg }}>Cotton On Group</a>
     )],
-    ["Goal", "Increase checkout completion rate"],
+    ["Goal", CASE_GOALS.businessCase],
     ["Scope", "Design workshop facilitation, research analysis"],
     ["Role", "Product Design Lead"],
     ["Team size", "1"],
@@ -7477,7 +7502,7 @@ function BrandPerceptionContent() {
       <a href={TNG_DIGITAL_URL} target="_blank" rel="noopener noreferrer"
         className="link-underline" style={{ color: fg }}>TNG Digital (TNG eWallet)</a>
     )],
-    ["Goal", "Shift perception beyond payments and tolls"],
+    ["Goal", CASE_GOALS.brandPerceptionCase],
     ["Scope", "Brand perception framework, UX strategy, cross-functional roadmap, measurement design"],
     ["Role", "Head of Product Design & UX Research"],
   ];
