@@ -77,6 +77,7 @@ import bpOnboardAfter from "@/work/product/brandperception/onboarding-after.mp4"
 import vcTestCard from "@/work/case/visacsr/testcard.avif";
 import vcCardMailer from "@/work/case/visacsr/cardmailer.avif";
 import vcHero from "@/work/case/visacsr/herovisa.avif";
+import ahIcon from "@/work/case/applehealth/applehealth-icon.avif";
 import vcResearchWise from "@/work/case/visacsr/researchwise.avif";
 import vcResearchBigPay from "@/work/case/visacsr/researchbigpay.avif";
 import vcPressMingle from "@/work/case/visacsr/pressmingle.avif";
@@ -2495,14 +2496,19 @@ const EXPERTISE_CARDS = [
 // without an entry here stays a text row, which is where the two without a
 // device render still are.
 //
-// The tints are drawn from the artwork rather than picked: SOURCE's teal and
-// KAI's orange, each taken down far enough for white to sit on.
-const CASE_TILES: Record<string, { img: string; tint: string }> = {
-  "KAI — Mobile app for IoT device control": { img: kaiHero, tint: "rgba(123,52,28,0.88)" },
-  "SOURCE — Energy performance management dashboard": { img: srcHero, tint: "rgba(29,56,54,0.9)" },
+// One tint for all of them. They were drawn from each artwork at first,
+// KAI's orange against SOURCE's teal, and four cases in a row made the page
+// read as four brands rather than one body of work.
+const CASE_TINT = "rgba(29,56,54,0.9)";
+
+const CASE_TILES: Record<string, string> = {
+  "TNG eWallet Visa Card — Malaysia's first numberless card": vcHero,
+  "Apple Health — Design Challenge": ahIcon,
+  "KAI — Mobile app for IoT device control": kaiHero,
+  "SOURCE — Energy performance management dashboard": srcHero,
 };
 
-function CaseTile({ bullet, tile, onOpen }: { bullet: string; tile: { img: string; tint: string }; onOpen: () => void }) {
+function CaseTile({ bullet, img, onOpen }: { bullet: string; img: string; onOpen: () => void }) {
   const [hot, setHot] = useState(false);
   const isMobile = useIsMobile();
   const reduceMotion = useReducedMotion();
@@ -2523,8 +2529,8 @@ function CaseTile({ bullet, tile, onOpen }: { bullet: string; tile: { img: strin
       // The tint is the tile's own ground as well as the wash over the
       // artwork: as the artwork recedes it uncovers this, so the gap it
       // leaves is the same colour rather than a hole in the page.
-      style={{ aspectRatio: "4 / 3", background: tile.tint, border: "none", padding: 0, perspective: 1200 }}>
-      <img src={tile.img} alt="" aria-hidden="true"
+      style={{ aspectRatio: "4 / 3", background: CASE_TINT, border: "none", padding: 0, perspective: 1200 }}>
+      <img src={img} alt="" aria-hidden="true"
         style={{
           position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover",
           transformOrigin: "50% 55%",
@@ -2534,7 +2540,23 @@ function CaseTile({ bullet, tile, onOpen }: { bullet: string; tile: { img: strin
           boxShadow: !reduceMotion && hot ? "0 34px 70px rgba(0,0,0,0.42)" : "0 0 0 rgba(0,0,0,0)",
           transition: "transform 0.55s cubic-bezier(0.22,0.61,0.36,1), box-shadow 0.55s ease",
         }} />
-      <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: tile.tint,
+      {/* At rest the name sits on the artwork, over a scrim so it reads on a
+          white one as well as a dark one, and gives way to the full label
+          when that comes forward. Below lg the full label is simply there,
+          so this never appears. */}
+      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 flex items-end"
+        // Eased rather than a straight ramp: against the white of the Apple
+        // Health artwork a linear gradient showed its own top edge and read
+        // as a grey band laid on the image.
+        style={{ height: 160, padding: "0 20px 18px", pointerEvents: "none",
+                 background: "linear-gradient(to top, rgba(0,0,0,0.58) 0%, rgba(0,0,0,0.44) 18%, rgba(0,0,0,0.25) 42%, rgba(0,0,0,0.1) 68%, rgba(0,0,0,0.02) 87%, rgba(0,0,0,0) 100%)",
+                 opacity: shown ? 0 : 1, transition: "opacity 0.35s ease" }}>
+        <span className="font-['Museo',sans-serif] font-light"
+          style={{ color: "#fff", fontSize: "clamp(1.05rem, 1.5vw, 1.4rem)", lineHeight: 1.15 }}>
+          {name}
+        </span>
+      </div>
+      <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: CASE_TINT,
         opacity: shown ? 1 : 0, transition: "opacity 0.45s ease" }} />
       {/* Still in the page when it is invisible, so the button keeps its name
           for a screen reader whether or not a pointer has been near it. */}
@@ -2625,6 +2647,9 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
   // the two that have no device render are not made to look like a gap.
   const tiled = card.bullets.filter(b => CASE_TILES[b]);
   const listed = card.bullets.filter(b => !CASE_TILES[b]);
+  // Every bullet on Case Studies is a tile now, so the list below would be
+  // an empty <ul> carrying its own 24px of margin into the gap above them.
+  const resources = ("resources" in card ? (card as any).resources ?? [] : []).filter((r: any) => r.url);
   return (
     <div className="relative w-full flex flex-col" style={{ minHeight: "100dvh", background: "transparent" }}>
       <div data-header-frost className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
@@ -2659,11 +2684,12 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
         <p className="font-['Nunito_Sans',sans-serif] leading-relaxed" style={{ color: bodyText }}>
           {card.description}
         </p>
+        {(listed.length > 0 || resources.length > 0) && (
         <ul className="mt-6 space-y-2.5">
           {/* Colour marks what you can follow. A link takes the page heading's
               colour; a bullet that is just a statement reads as body text, so
               it sits in INK like the paragraph above it. */}
-          {"resources" in card && (card as any).resources?.filter((r: any) => r.url).map((r: any) => (
+          {resources.map((r: any) => (
             <li key={r.label} className="font-['Nunito_Sans',sans-serif] text-small flex items-start gap-2" style={{ color: bodyText }}>
               <span className="mt-0.5 flex-shrink-0">—</span>
               <a href={r.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1" style={{ color: linkColor }}>
@@ -2698,6 +2724,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
             );
           })}
         </ul>
+        )}
       </div>
 
       {tiled.length > 0 && (
@@ -2708,7 +2735,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
               room left under it. */}
           <div className="grid gap-6 lg:grid-cols-2">
             {tiled.map(b => (
-              <CaseTile key={b} bullet={b} tile={CASE_TILES[b]}
+              <CaseTile key={b} bullet={b} img={CASE_TILES[b]}
                 onOpen={() => { const t = BULLET_LINKS[b]; if (t) onNavigate(t); }} />
             ))}
           </div>
