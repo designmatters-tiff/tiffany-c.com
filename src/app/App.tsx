@@ -6458,6 +6458,7 @@ function TestimonialsPage({
 // ─── Awards & Speaking page ────────────────────────────────────────
 
 const SPEAKING_EVENTS = [
+  { key: "ux-camp-2026", year: "2026", role: "Speaker", event: "UX Camp Melbourne 2026",       location: "Melbourne, AU", region: "Australia", topic: "First-Principles Thinking for eCommerce UX",                        link: null,                                               img: null,          caption: null,             dark: false },
   { key: "rotterdam", year: "2026", role: "Speaker",  event: "UX Rotterdam",                  location: "Rotterdam, NL", region: "Europe",    topic: "The Human Cost of Human-Centred-Design",                           link: null,                                               img: awardsRotterdam, caption: "2026 @ Rotterdam, NL", dark: true },
   { key: "ux-camp",   year: "2025", role: "Speaker",  event: "UX Camp Melbourne",             location: "Melbourne, AU", region: "Australia", topic: "404: System Burnout — An error message to my UX career",            link: null, youtubeId: "hJIJB3di6T4",                                img: null,          caption: null,             dark: false },
   { key: "taipei",    year: "2025", role: "Panelist", event: "Ladies that UX Taipei",         location: "Taipei, TW",    region: "Taiwan",    topic: "Driving Organisational Change and Creating Meaningful Impact",     link: null,                                               img: awardsTaipei,  caption: "2025 @ Taipei, TW",  dark: false },
@@ -6543,19 +6544,24 @@ function SpeakingEventRow({
         onMouseEnter={e => expandable && !open && (e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)")}
         onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
       >
-        {expandable && (
-          <Plus
-            size={16}
-            strokeWidth={1}
-            style={{
-              color: GOLD,
-              flexShrink: 0,
-              marginTop: 6,
-              transform: open ? "rotate(45deg)" : "rotate(0deg)",
-              transition: "transform 0.3s ease",
-            }}
-          />
-        )}
+        {/* The icon's width is held whether or not there is an icon, so a
+            row with nothing to open yet — an event announced before its
+            photos exist — still starts its title on the same left edge as
+            the rows above and below it. */}
+        <span aria-hidden="true" style={{ width: 16, flexShrink: 0, marginTop: 6 }}>
+          {expandable && (
+            <Plus
+              size={16}
+              strokeWidth={1}
+              style={{
+                color: GOLD,
+                display: "block",
+                transform: open ? "rotate(45deg)" : "rotate(0deg)",
+                transition: "transform 0.3s ease",
+              }}
+            />
+          )}
+        </span>
         <div className="flex-1 flex flex-col md:flex-row md:items-start md:justify-between gap-1 md:gap-6 min-w-0">
           <div className="flex flex-col gap-1 min-w-0">
             <span className="md:hidden font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub }}>{ev.year} · {ev.region}</span>
@@ -8235,7 +8241,11 @@ function BrandPerceptionPage({ onBack, onNavigate }: { onBack: () => void; onNav
 // The deck on `/` is the homepage experience; a deep link opens the
 // standalone page for that section instead, which is the better landing.
 
-const EVENT_KEYS = new Set(SPEAKING_EVENTS.map(e => e.key));
+// Only the events that have a detail page behind them. An event listed on
+// /awards before its page exists — one announced ahead of the photos, say —
+// has no URL of its own yet, and /awards/<its key> falls back to the list
+// rather than resolving to a page that renders nothing.
+const EVENT_KEYS = new Set(SPEAKING_EVENTS.map(e => e.key).filter(k => k in SPEAKING_DETAIL));
 
 function pathOf(page: Page, detailKey?: string | null): string {
   switch (page) {
