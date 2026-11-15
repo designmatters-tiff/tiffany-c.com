@@ -4076,62 +4076,86 @@ function VisaCardContent() {
       {/* ── The choice ── */}
       <Section id="vc-choice">
         <H2>The Choice</H2>
-        <P top={0}>
-          Selecting from the artists&apos; work, I chose a painting by Damien Wong. Two reasons, at once: it
-          would still look right in five years, and its colours already sat inside our brand palette. A card
-          lives in a wallet for years and cannot be reissued on a whim, so ageing well was a requirement, not a
-          preference.
-        </P>
-        <P top={16}>
-          Blue, green and yellow, mostly splashes. Damien describes it as &ldquo;In my eyes, this is how the
-          world looks to me, a splash of colors.&rdquo;
-        </P>
-        <P top={16}>
-          The painting had been rejected by the client it was made for, because the canvas was an odd size, and
-          had sat unsold for years. The proceeds from its purchase went directly to him.
-        </P>
-        <Fig src={vcCardMailer}
-          alt="The card carrier, showing Damien Wong's painting and the activation steps in English and Malay"
-          caption="The card carrier, which tells Damien's story alongside the activation steps in English and Malay." />
+        {/* On a desktop the carrier stands on the left with the account of
+            choosing the painting beside it — a tall portrait under three
+            paragraphs left half the column empty beside it. The copy stays
+            first in the source, so a phone still reads the reasons before it
+            sees the result; md:order-first is what moves the picture left. */}
+        <SplitRow>
+          <div>
+            <P top={0}>
+              Selecting from the artists&apos; work, I chose a painting by Damien Wong. Two reasons, at once: it
+              would still look right in five years, and its colours already sat inside our brand palette. A card
+              lives in a wallet for years and cannot be reissued on a whim, so ageing well was a requirement, not a
+              preference.
+            </P>
+            <P top={16}>
+              Blue, green and yellow, mostly splashes. Damien describes it as &ldquo;In my eyes, this is how the
+              world looks to me, a splash of colors.&rdquo;
+            </P>
+            <P top={16}>
+              The painting had been rejected by the client it was made for, because the canvas was an odd size, and
+              had sat unsold for years. The proceeds from its purchase went directly to him.
+            </P>
+          </div>
+          <div className="md:order-first">
+            <Fig src={vcCardMailer} top={0}
+              alt="The card carrier, showing Damien Wong's painting and the activation steps in English and Malay"
+              caption="The card carrier, which tells Damien's story alongside the activation steps in English and Malay." />
+          </div>
+        </SplitRow>
       </Section>
 
       {/* ── What shipped ── */}
       <Section id="vc-shipped">
         <H2>What Shipped</H2>
-        {/* Capped at 400 alone, not by changing FIGURE_MAX. The source is
-            800px wide, so 400 CSS pixels is an exact 2x and stays crisp on a
-            retina screen; at the usual 760 it was being upscaled. */}
-        <Fig src={vcHero} top={0} max={400}
-          alt="The finished card carrying Damien Wong's painting, beside the eWallet app"
-          caption="The card, as it shipped." />
-        <P top={32}>
-          The card launched on <Figures>18 January 2023</Figures> as Malaysia&apos;s first CSR-linked Visa
-          prepaid card, and its first numberless one.
-        </P>
-        <P top={16}>
-          At a media session after the launch, Damien&apos;s mother spoke. She said she had never seen him
-          paint with the enthusiasm he brought to that canvas.
-        </P>
-        <P top={16}>
-          A year later, in January 2024, TNG Digital and Visa presented United Voice with
-          <Figures> RM1,000,000</Figures>, raised at <Figures>RM2</Figures> per card application. From October
-          2023 the funds went into United Voice&apos;s Skills Training for Employment programme and a Health
-          and Wellness programme.
-        </P>
-        <P top={16}>
-          The card has since been discontinued.
-        </P>
+        {/* The card on the left, what shipping it came to on the right. The
+            figure used to carry a 400px cap of its own so an 800px source was
+            never upscaled past 2x; the left column is narrower than that, so
+            the column does the capping now and the image is the width of
+            every other figure on the page when they stack. */}
+        <SplitRow>
+          <Fig src={vcHero} top={0}
+            alt="The finished card carrying Damien Wong's painting, beside the eWallet app"
+            caption="The card, as it shipped." />
+          <div>
+            <P top={0}>
+              The card launched on <Figures>18 January 2023</Figures> as Malaysia&apos;s first CSR-linked Visa
+              prepaid card, and its first numberless one.
+            </P>
+            <P top={16}>
+              At a media session after the launch, Damien&apos;s mother spoke. She said she had never seen him
+              paint with the enthusiasm he brought to that canvas.
+            </P>
+            <P top={16}>
+              A year later, in January 2024, TNG Digital and Visa presented United Voice with
+              <Figures> RM1,000,000</Figures>, raised at <Figures>RM2</Figures> per card application. From October
+              2023 the funds went into United Voice&apos;s Skills Training for Employment programme and a Health
+              and Wellness programme.
+            </P>
+            <P top={16}>
+              The card has been discontinued since mid 2026, as the company launched a new proposition for
+              Visa as a travel prepaid card.
+            </P>
+          </div>
+        </SplitRow>
         {/* The press-mingle photograph goes in uncropped. The slide behind the
             speaker names her; that is a press photograph of a public event and
             was published as one. The body copy above still does not name her —
             that is a choice about the writing, not about the picture. It is a
             media session after the launch, not the launch itself. */}
-        <Fig src={vcPressMingle}
-          alt="Damien's mother speaking at the media session, with his painting on an easel beside her"
-          caption="The media session after the launch." />
-        <Fig src={vcDonation}
-          alt="TNG Digital and Visa presenting United Voice with a cheque for RM1,000,000"
-          caption="RM1,000,000 presented to United Voice, January 2024." />
+        {/* Side by side from md, the way the print test and the sample pair
+            off in The Iterations. Alone at the full measure the press
+            photograph, a 3:4 portrait, stood 1013px tall on a desktop — more
+            than a screen of one picture. They still stack on a phone. */}
+        <div className="grid gap-8 md:grid-cols-2" style={{ alignItems: 'start', marginTop: 28 }}>
+          <Fig src={vcPressMingle} top={0}
+            alt="Damien's mother speaking at the media session, with his painting on an easel beside her"
+            caption="The media session after the launch." />
+          <Fig src={vcDonation} top={0}
+            alt="TNG Digital and Visa presenting United Voice with a cheque for RM1,000,000"
+            caption="RM1,000,000 presented to United Voice, January 2024." />
+        </div>
       </Section>
 
     </div>
