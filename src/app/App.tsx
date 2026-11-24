@@ -2658,6 +2658,13 @@ function ExpertiseCard({ card, onOpen }: { card: typeof EXPERTISE_CARDS[0]; onOp
 function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, compact = false }: { cardKey: string; onBack: () => void; onNavigate: (p: Page) => void; headerScrolled?: boolean; compact?: boolean }) {
   const isDark = useContext(DarkModeCtx);
   const isMobile = useIsMobile();
+  // The same white-on-dark switch the case pages have. This page was all text
+  // until the Case Studies tiles arrived, so nothing dark ever passed under
+  // its header; now KAI's black artwork does, and a gold heading over it
+  // read as nothing at all.
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const onDark = useOnDarkBackdrop(headerRef);
+  const headingColor = onDark ? "#ffffff" : GOLD;
   const card = EXPERTISE_CARDS.find(c => c.key === cardKey);
   if (!card) return null;
   // A work detail page sits under Work, so its links wear Work's heading
@@ -2673,26 +2680,33 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
   const resources = ("resources" in card ? (card as any).resources ?? [] : []).filter((r: any) => r.url);
   return (
     <div className="relative w-full flex flex-col" style={{ minHeight: "100dvh", background: "transparent" }}>
-      <div data-header-frost className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
+      <div data-header-frost ref={headerRef} className="sticky top-0 z-20 px-6 md:px-20 pt-10 md:pt-14 pb-8 md:pb-10"
         style={{
-          background: headerScrolled ? (isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)") : "transparent",
+          // A 20% black tint under the frost while the heading is white, as
+          // on the case pages, so the words sit on something steadier than
+          // whatever artwork happens to be passing beneath.
+          background: headerScrolled
+            ? (onDark
+                ? "linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), rgba(248,247,245,0.55)"
+                : isDark ? "rgba(40,40,40,0.55)" : "rgba(248,247,245,0.55)")
+            : "transparent",
           backdropFilter: headerScrolled ? "blur(8px)" : "none",
           WebkitBackdropFilter: headerScrolled ? "blur(8px)" : "none",
           borderBottom: `1px solid ${headerScrolled ? (isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)") : "transparent"}`,
           paddingBottom: compact ? 16 : undefined,
           transition: "background 0.3s ease, backdrop-filter 0.3s ease, border-color 0.3s ease, padding-bottom 0.3s ease",
         }}>
-          <HeaderLogo onNavigate={onNavigate} color={GOLD} />
+          <HeaderLogo onNavigate={onNavigate} color={headingColor} />
         <button onClick={onBack}
           className="flex items-center gap-1.5 font-['Nunito_Sans',sans-serif] text-label uppercase tracking-[0.2em] mb-4 cursor-pointer"
-          style={{ color: GOLD }}>
+          style={{ color: headingColor, transition: "color 0.3s ease" }}>
           <ChevronLeft size={12} strokeWidth={1.5} /> Work
         </button>
         {/* No mark beside the title here. The illustration identifies a row in
             the Work list, where it sits among three others; on the page itself
             there is nothing to tell apart, and it pushed the heading off the
             same left edge every other page's heading starts from. */}
-        <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg mb-2" style={{ fontSize: compact ? '1.5rem' : undefined, lineHeight: 1.05, color: GOLD, transition: 'font-size 0.35s ease' }}
+        <motion.h1 className="font-['Museo',sans-serif] font-light text-display md:text-display-lg mb-2" style={{ fontSize: compact ? '1.5rem' : undefined, lineHeight: 1.05, color: headingColor, transition: 'font-size 0.35s ease, color 0.3s ease' }}
           initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}>
           {card.title}
         </motion.h1>
