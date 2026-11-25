@@ -6511,13 +6511,20 @@ function TestimonialsPage({
               text would leave ragged dead space inside each column. The
               body-font class is here so `ch` resolves against the quote's own
               font, not the inherited default. */}
-          <div style={{ marginTop: 28, columnGap: 48, maxWidth: "calc(68ch * 2 + 48px)" }}
+          {/* Each card's hairline separates it from the one above. The card at
+              the top of a column has nothing above it but the tabs, so its
+              line only doubled the tab row. Every column starts flush with the
+              top of the track, so clipping that first pixel takes exactly
+              those lines and no others, in one column or two. */}
+          <div style={{ marginTop: 11, clipPath: "inset(1px -64px -64px -64px)" }}>
+          <div style={{ columnGap: 48, maxWidth: "calc(68ch * 2 + 48px)" }}
             className="font-['Nunito_Sans',sans-serif] [column-count:1] md:[column-count:2]">
             {shown.map(t => (
               <div key={t.key} style={{ breakInside: 'avoid', marginBottom: 44 }}>
                 <TestimonialCard t={t} accent={accent} />
               </div>
             ))}
+          </div>
           </div>
 
           <p className="font-['Nunito_Sans',sans-serif] text-small" style={{ color: sub, marginTop: 32 }}>
