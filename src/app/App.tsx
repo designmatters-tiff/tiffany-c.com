@@ -5630,7 +5630,7 @@ const NAV_LABELS: Partial<Record<Page, string>> = {
 
 const DEEP_PAGES = new Set<Page>(["businessCase", "kaiCase", "appleHealthCase", "brandPerceptionCase", "sourceCase", "finTechCase", "visaCardCase", "crossBorderCase"]);
 
-function StickyPageNav({ activePage, tint, onNavigate, isSubPage = false }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void; isSubPage?: boolean }) {
+function StickyPageNav({ activePage, tint, onNavigate, isSubPage = false, subLabel }: { activePage: Page; tint?: string; onNavigate: (p: Page) => void; isSubPage?: boolean; subLabel?: string }) {
   const isDark = useContext(DarkModeCtx);
   const [menuOpen, setMenuOpen] = useState(false);
   const goHome = useContext(GoHomeCtx);
@@ -5724,11 +5724,18 @@ function StickyPageNav({ activePage, tint, onNavigate, isSubPage = false }: { ac
           transition={{ duration: phoneShrunk ? 0.15 : 0.3, delay: phoneShrunk ? 0 : 0.12 }}>
           Tiffany C.
         </motion.span>
-        <motion.span className="ml-auto font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap"
+        {/* A second-level page names where it is under its section, the way a
+            breadcrumb would: "Work / Case Studies". The parent is quieter and
+            never gives way; if the pair runs out of room at 360 it is the
+            child that ellipsises, and the page heading says it in full. */}
+        <motion.span className="ml-auto flex items-center min-w-0 font-['Museo',sans-serif] font-light text-small text-white whitespace-nowrap"
           style={{ paddingLeft: 12, paddingRight: 20 }}
           animate={{ opacity: phoneShrunk ? 0 : 1 }}
           transition={{ duration: phoneShrunk ? 0.15 : 0.3, delay: phoneShrunk ? 0 : 0.12 }}>
-          {NAV_LABELS[activePage] ?? ""}
+          <span className="flex-shrink-0" style={{ opacity: subLabel ? 0.75 : 1 }}>
+            {NAV_LABELS[activePage] ?? ""}{subLabel ? "\u00a0/\u00a0" : ""}
+          </span>
+          {subLabel && <span className="min-w-0 overflow-hidden text-ellipsis">{subLabel}</span>}
         </motion.span>
       </motion.button>
       {/* Reachable from the pill on deep pages and from the bar everywhere
@@ -8848,7 +8855,10 @@ export default function App() {
       {navActive && (
         <StickyPageNav activePage={navActive} onNavigate={navigateGeneral}
           tint={page === "speakingInquiry" || page === "speaking" ? GOLD : undefined}
-          isSubPage={DEEP_PAGES.has(page)} />
+          isSubPage={DEEP_PAGES.has(page)}
+          subLabel={page === "workDetail" ? EXPERTISE_CARDS.find(c => c.key === detailKey)?.title
+            : page === "speakingInquiry" ? "Speaking Inquiry"
+            : undefined} />
       )}
       {/* Chrome, like the nav above it: one credit for the site rather than
           one per page, outside the layer pages slide through. */}
