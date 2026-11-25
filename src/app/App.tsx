@@ -2451,6 +2451,9 @@ const EXPERTISE_CARDS = [
   },
   {
     key: "people", slug: "people-process", title: "People & Process", accent: "#5070A0", Illustration: IllustrationPeople,
+    // Team sizes here are a headcount, not a result, so they stay at body
+    // weight rather than taking the heavy figure treatment.
+    plainFigures: true,
     description: "Built high-performing multidisciplinary teams and cross-unit prioritisation frameworks.",
     // Newest first, oldest last.
     bullets: [
@@ -2753,7 +2756,7 @@ function WorkDetailPage({ cardKey, onBack, onNavigate, headerScrolled = false, c
                     <span className="link-underline">{b}</span>
                   </button>
                 ) : (
-                  <span className="flex items-start gap-2"><span className="mt-0.5 flex-shrink-0">—</span><span><Figures>{b}</Figures></span></span>
+                  <span className="flex items-start gap-2"><span className="mt-0.5 flex-shrink-0">—</span><span>{"plainFigures" in card && card.plainFigures ? b : <Figures>{b}</Figures>}</span></span>
                 )}
               </li>
             );
